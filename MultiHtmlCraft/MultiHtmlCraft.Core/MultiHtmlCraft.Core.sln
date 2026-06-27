@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft.Core", "MultiHtmlCraft.Core.csproj", "{9306D9FE-5C96-9E74-C9F0-00138B405DFC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9306D9FE-5C96-9E74-C9F0-00138B405DFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9306D9FE-5C96-9E74-C9F0-00138B405DFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9306D9FE-5C96-9E74-C9F0-00138B405DFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9306D9FE-5C96-9E74-C9F0-00138B405DFC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {03F56DFF-3BD1-4464-BC1E-DEAAA798EBE4}
+	EndGlobalSection
+EndGlobal

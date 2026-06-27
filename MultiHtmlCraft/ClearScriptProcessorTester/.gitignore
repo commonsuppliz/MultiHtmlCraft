@@ -1,0 +1,20 @@
+﻿################################################################################
+# この .gitignore ファイルは Microsoft(R) Visual Studio によって自動的に作成されました。
+################################################################################
+
+/.vs/MultiversalRenderer/FileContentIndex
+/.vs/MultiversalRenderer/DesignTimeBuild
+/.vs/MultiversalRenderer/v17
+/.vs/MultiversalRenderer/copilot-chat/4ba8522f/sessions
+/.vs/MultiversalRenderer/CopilotIndices/17.12.53.23981
+/.vs/ProjectEvaluation
+/MultiversalRenerder/Interfaces/bin/Debug
+/MultiversalRenerder/Interfaces/bin/Release
+/MultiversalRenerder/Interfaces/obj/Debug
+/MultiversalRenerder/Interfaces/obj
+/MultiversalRenerder/MultiversalRenderer.Core/obj
+/MulversalRenderer.Core.Test/obj
+/MulversalRenderer.Core.Test/bin/Debug/net6.0
+/MultiversalRenerder/NilJsProcessor/obj
+/MultiversalRenerder/MultiversalRenderer.Core/bin/Debug/net6.0
+/MulversalRenderer.Core.Test/js/gradius_es6_src

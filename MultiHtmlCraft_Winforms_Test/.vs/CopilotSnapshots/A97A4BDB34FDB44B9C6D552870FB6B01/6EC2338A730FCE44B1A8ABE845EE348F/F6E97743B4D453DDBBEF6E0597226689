@@ -1,0 +1,1314 @@
+﻿using MultiHtmlCraft.Interfaces;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq.Expressions;
+using System.Net;
+using System.Net.Http;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace MultiHtmlCraft.Core
+{
+
+    public class CHtmlXMLHttpRequest : CHtmlNode, ICommonObjectInterface , IDisposable
+    {
+
+        private static readonly HttpClient ___httpClient = CHtmlMultiversalWindow.getHttpClient();
+
+        internal System.WeakReference ___MultiversalWindowWeakReference = null;
+
+        internal static Dictionary<string, int> CHtmlXMLHttpRequestProperties = getXhrProperties();
+        internal static Dictionary<string, int> CHtmlXMLHttpRequestMethods = getXhrMethods();
+
+        private static Dictionary<string, int> getXhrMethods()
+        {
+            return new Dictionary<string, int>
+    {
+        { "open", 1 },
+        { "send", 1 },
+        { "abort", 1 },
+        { "setRequestHeader", 1 },
+        { "getAllResponseHeaders", 1 },
+        { "getResponseHeader", 1 },
+        { "addEventListener", 1 },
+        { "removeEventListener", 1 },
+        { "dispatchEvent", 1 }
+    };
+        }
+
+        private static Dictionary<string, int> getXhrProperties()
+        {
+            return new Dictionary<string, int>
+    {
+        { "readyState", 1 },
+        { "status", 1 },
+        { "statusText", 1 },
+        { "responseText", 1 },
+        { "responseType", 1 },
+        { "responseXML", 1 },
+        { "response", 1 },
+        { "onprogress", 1 },
+        { "onabort", 1 },
+        { "ontimeout", 1 },
+        { "onerror", 1 },
+        { "onload", 1 },
+        { "onloadend", 1 },
+        { "onreadystatechange", 1 },
+        { "async", 1 }
+    };
+        }
+
+        bool ___isAsync = false;
+
+        string ___method = string.Empty;
+
+        internal string ___functionName = null;
+        internal Stream ___responseStream = null;
+        internal string ___responseText = string.Empty;
+        internal string ___Response_Content_Type = string.Empty; // content-type header full value
+        internal string ___ResponseTextCachedEncodingName = string.Empty; // detected encoding name
+
+        internal Dictionary<string, object> ___responseHeaders = new Dictionary<string, object>();
+
+        internal string ___baseThreadURL = null;
+        internal MultiHtmlCraft.Interfaces.IMultiversalScriptScope ___scope = null;
+        internal string ___sessionGUID = null;
+        public long OwnerHostHandle = 0;
+        internal object ___loadfunctionobject = null;
+        internal object ___loadstart_functionobject = null;
+        internal object ___loadend_functionobject = null;
+        internal object ___progressfunctionobject = null;
+        internal object ___readystatechagefunctionObject = null;
+        internal object ___abortfunctionobject = null;
+
+        internal object ___timeoutfunctionobject = null;
+
+        internal object ___onerror_function = null;
+
+        internal bool ___withCredencials = false;
+
+        internal string ___url = string.Empty;
+
+        public static event EventHandler? InstanceCreated;
+        public CHtmlXMLHttpRequest()
+        {
+            var window = this.___getMultiversalWindow();
+            base.___multiversalClassType = IMutilversalObjectType.XMLHttpRequest;
+
+            this.___baseThreadURL = "";
+            this.___functionName = "";
+            this.___sessionGUID = "";
+
+            // CHtmlXMLHttpRequest.InstanceCreated += CHtmlXMLHttpRequest.OnInstanceCreated;
+            if (InstanceCreated != null)
+            {
+                InstanceCreated?.Invoke(this, EventArgs.Empty);
+            }
+
+
+        }
+
+        public static void OnInstanceCreated(object? sender, EventArgs e)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("CHtmlXMLHttpRequest_InstanceCreated...");
+            }
+        }
+
+
+
+    public void overrideMimeType(object ___mimeTypeObject)
+        {
+      
+        }
+
+        ~CHtmlXMLHttpRequest()
+        {
+            this.CleanUp();
+        }
+        private void CleanUp()
+        {
+            try
+            {
+               
+            }
+            catch { }
+            
+
+            this.___scope = null;
+            this.___baseThreadURL = null;
+            ___loadfunctionobject = null;
+            this.___readystatechagefunctionObject = null;
+
+        }
+
+        public void Dispose()
+        {
+            this.CleanUp();
+        }
+        /*
+        private object ProcRequsest(string procName, bool IsGet, params object[] args)
+        {
+            if (this.___unicusXmlHttp == null)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel  >= 10)
+                {
+                   commonLog.LogEntry("Please init object first!");
+                }
+                return null;
+            }
+            if (XmlMethodList != null)
+            {
+                try
+                {
+                    switch (procName.ToLower())
+                    {
+                        case "open":
+                            procName = "open5";
+                            if (args == null || args.Length < 2)
+                            {
+                                return null;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    object o = XmlMethodList[procName];
+                    if (o != null)
+                    {
+                        if (args != null && args.Length > 0)
+                        {
+                            if (commonLog.LoggingEnabled &&commonLog.LogLevel  >= 10)
+                            {
+                               commonLog.LogEntry("ProcRequest Begin :{0} {1} : {2} {3}", procName, o, args.Length, args[0]);
+                            }
+                        }
+                        else
+                        {
+                            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                            {
+                               commonLog.LogEntry("ProcRequest Begin :{0} {1} ", procName, o);
+                            }
+                        }
+                        if (o is System.Reflection.MethodInfo)
+                        {
+                            MethodInfo methodInfo = o as MethodInfo;
+                            return methodInfo.Invoke(this.___unicusXmlHttp, args);
+                        }
+                        else if (o is System.Reflection.PropertyInfo)
+                        {
+                            PropertyInfo pInfo = o as PropertyInfo;
+                            if (IsGet)
+                            {
+                                return pInfo.GetValue(this.___unicusXmlHttp, null);
+
+                            }
+                            else
+                            {
+                                if (args.Length > 0)
+                                {
+                                    if (commonLog.LoggingEnabled &&commonLog.LogLevel  >= 10)
+                                    {
+                                       commonLog.LogEntry("ProcRequest :{0} {1} ", procName, args[0]);
+                                    }
+                                    pInfo.SetValue(this.___unicusXmlHttp, args[0], null);
+                                }
+                                else
+                                {
+                                    pInfo.SetValue(this.___unicusXmlHttp, null, null);
+                                }
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled &&commonLog.LogLevel  >= 10)
+                    {
+                       commonLog.LogEntry("ProcRequest error {0}", ex.Message);
+                    }
+                }
+            }
+            return null;
+        }
+         */
+
+        /*
+         public static void finishInit(Scriptable scope,
+                                 FunctionObject constructor,
+                                 Scriptable prototype)
+         {
+
+           
+               
+         }
+         */
+
+
+
+
+
+     
+        public void setRequestHeader(object headerName, object value)
+        {
+         
+        }
+
+        public string getAllResponseHeaders()
+        {
+            return String.Empty;
+        }
+        public void addEventListener(object ___nameObj, object ___objFunction, object ___objParam)
+        {
+            this.___addEventListener_inner(___nameObj, ___objFunction, ___objParam);
+        }
+        public void addEventListener(object ___nameObj, object ___objFunction)
+        {
+            this.___addEventListener_inner(___nameObj, ___objFunction, null);
+        }
+
+        public void removeEventListener(string ___otype,object ___olistener,object ___ouseCapture)
+        {
+            this.___removeEventListenerInner(___otype, ___olistener, ___ouseCapture);
+        }
+        public void removeEventListener(string ___otype, object ___olistener)
+        {
+            this.___removeEventListenerInner(___otype, ___olistener, null);
+        }
+
+        internal void ___removeEventListenerInner(string ___otype, object ___olistener, object ___ouseCapture)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("entering {0}.removeEventListener({1}, {2}, {3})", this, ___otype, ___olistener,  ___ouseCapture);
+            }
+            if(string.IsNullOrEmpty(___otype) == false)
+            {
+                switch(___otype)
+                {
+                    case "load":
+                        this.___loadfunctionobject = null;
+                        break;
+                    case "loadstart":
+                        this.___loadstart_functionobject = null;
+                        break;
+                    case "loadend":
+                        this.___loadend_functionobject = null;
+                        break;
+                    case "onerror":
+                    case "error":
+                        this.___onerror_function  = null;
+                        break;
+                    case "progress":
+                        this.___progressfunctionobject  = null;
+                        break;
+                    case "abort":
+                        this.___abortfunctionobject = null;
+                        break;
+                    case "timeout":
+                        this.___timeoutfunctionobject  = null;
+                        break;
+                    case "readystatechange":
+                        this.___readystatechagefunctionObject = null;
+                        break;
+                    default:
+                        if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                        {
+                           commonLog.LogEntry("TODO: {0}.removeEventListener({1}, {2}, {3})", this, ___otype, ___olistener, ___ouseCapture);
+                        }
+                        break;
+                }
+            }
+                
+        }
+        /// <summary>
+        /// Dispatches the specified event to the current element.
+        /// </summary>
+        /// <param name="___eventObject"></param>
+        /// <returns>Returns true if the EventEvent.preventDefault() was not called by any of the event listeners that handled the event. The Event.preventDefault() method prevents the default action for the event from occurring. Otherwise, returns false.</returns>
+        public bool dispatchEvent(object ___eventObject)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("TODO: {0}.dispatchEvent({1})", this, ___eventObject);
+            }
+            return false;
+        }
+        public bool dispatchEvent(object ___event1, object ___event2)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("TODO: {0}.dispatchEvent({1})", this, ___event1);
+            }
+            return false;
+        }
+        private void ___addEventListener_inner(object ___nameObj, object ___objFunction, object ___objParam)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("calling {0}.addEventListener({1}, {2}, {3})", this, ___nameObj, ___objFunction, ___objParam );
+            }
+            string ___strEventName = "";
+            ___strEventName = commonHTML.GetStringValue(___nameObj);
+            if (___strEventName.Length != 0)
+            {
+                switch (___strEventName)
+                {
+                    case "onload":
+                    case "load":
+                    case "Load":
+                    case "LOAD":
+                        this.onload = ___objFunction;
+                        return;
+                    case "progress":
+                        this.onprogress = ___objFunction;
+                        return;
+                    case "error":
+                        this.onerror = ___objFunction;
+                        return;
+                    case "onreadystatechange":
+                    case "readystatechange":
+                    case "ReadyStateChange":
+                    case "Readystatechange":
+                        this.onreadystatechange = ___objFunction;
+                        return;
+                    case "onloadend":
+                        this.onloadend = ___objFunction;
+                        return;
+
+                    default:
+                        if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                        {
+                           commonLog.LogEntry("{0}.addEventListener({1}, {2}, {3}) failed", this, ___nameObj, ___objFunction, ___objParam);
+                        }
+                        return;
+
+                }
+            }
+
+        }
+        public string getResponseHeader(object ___objectName)
+        {
+            return String.Empty;
+   
+        }
+        public void GetInstance()
+        {
+
+
+
+        }
+
+        public void open(object _method, object _url, object _async)
+        {
+            ___open_inner(new object[] { _method, _url, _async });
+        }
+        private async Task ___open_inner(params object[] args)
+        {
+
+    
+
+            try {
+                if (args != null)
+                {
+                    switch (args.Length)
+                    {
+                        case 0:
+                        case 1:
+                            throw new NotImplementedException("XMLHTTPRequest open error");
+                            break;
+                        case 2:
+                            ___method = commonHTML.GetStringValue(args[0]);
+                            ___url = commonHTML.GetStringValue(args[1]);
+                            break;
+                        case 3:
+                        case 4:
+                        case 5:
+                        case 6:
+                        case 7:
+
+                            ___method = commonHTML.GetStringValue(args[0]);
+                            ___url = commonHTML.GetStringValue(args[1]);
+                            ___isAsync = commonTypeConverter.convertObjectToBoolean(args[2], false);
+                            break;
+
+
+
+                        default:
+                            throw new NotImplementedException("XMLHTTPRequest open error");
+
+                    }
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("called {0} XMLHTTPRequest open({1}, {2}, {3})...", this, ___method, ___url, ___isAsync);
+                    }
+                    
+
+                    
+
+
+
+
+                }
+            }catch(Exception xhrOpenException)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("XMLHTTPRequest open()) exception ", xhrOpenException);
+                }
+            }
+            
+            
+  
+        }
+        public Stream GetContentSync(string url)
+        {
+            HttpResponseMessage response = ___httpClient.GetAsync(url).GetAwaiter().GetResult();
+            response.EnsureSuccessStatusCode();
+            ___status = (double)response.StatusCode;
+            ___responseHeaders.Clear();
+            foreach (var header in response.Headers)
+            {
+                ___responseHeaders[header.Key] = string.Join(", ", header.Value);
+            }
+            foreach (var header in response.Content.Headers)
+            {
+                ___responseHeaders[header.Key] = string.Join(", ", header.Value);
+            }
+            ___Response_Content_Type = response.Content.Headers.ContentType?.ToString() ?? string.Empty;
+            Stream stream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
+            return stream;
+        }
+
+        public async Task<Stream> GetContentAsync(string url)
+        {
+            HttpResponseMessage response = await ___httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            ___status = (double)response.StatusCode;
+            ___responseHeaders.Clear();
+            foreach (var header in response.Headers)
+            {
+                ___responseHeaders[header.Key] = string.Join(", ", header.Value);
+            }
+            foreach (var header in response.Content.Headers)
+            {
+                ___responseHeaders[header.Key] = string.Join(", ", header.Value);
+            }
+            ___Response_Content_Type = response.Content.Headers.ContentType?.ToString() ?? string.Empty;
+            Stream stream = await response.Content.ReadAsStreamAsync();
+            return stream;
+        }
+
+        public void send()
+        {
+            this.___send_inner(null);
+        }
+        public void Send(object o)
+        {
+            this.___send_inner(o);
+        }
+        private async void ___send_inner(object __oSend)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("entering XMLHttpRequest send()");
+            }
+            string xhrUrl = string.Empty;
+            try
+            {
+                if (___url.StartsWith("http://") == false || ___url.StartsWith("https://") == false )
+                {
+                    xhrUrl = commonHTML.GetAbsoluteUri(this.___baseThreadURL, this.___baseThreadURL, this.___url);
+                }
+                else
+                {
+                    xhrUrl = this.___url;
+                }
+                if (___progressfunctionobject != null)
+                {
+                    ___execFunctionObject("progress");
+                }
+                if (___isAsync == true)
+                {
+                    ___responseStream = await Task.Run(() => GetContentAsync(xhrUrl));
+                }
+                else
+                {
+                    ___responseStream = GetContentSync(xhrUrl);
+                }
+                // update text if plain text or caller asks later; we cache either way
+                ___updateResponseTextFromStream();
+                if(this.___loadfunctionobject !=null)
+                {
+                    ___execFunctionObject("load");
+                }
+                if(___loadend_functionobject != null)
+                {
+                    ___execFunctionObject("loadend");
+                }
+                if(___readystatechagefunctionObject!= null)
+                {
+                    ___execFunctionObject("readystatechange");
+                }
+            } catch (Exception xhrSendError)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry($"XMLHTTPRequest send() exception : {xhrUrl}", xhrSendError);
+                }
+            }
+        }
+
+        private void ___execFunctionObject(string _funcName)
+        {
+            object fncObject = null;
+            bool fncFound = false;
+            switch(_funcName)
+            {
+                case "load":
+                case  "onload":
+                    if (this.___loadfunctionobject != null)
+                    {
+                        fncObject = this.___loadfunctionobject;
+                        fncFound = true;
+                    }
+                    break;
+                case "onloadend":
+                case "loadend":
+                    if(this.___loadend_functionobject != null)
+                    {
+                        fncObject = this.___loadend_functionobject;
+                        fncFound = true;
+                    }
+                    break;
+                case "progress":
+                    if (___progressfunctionobject != null)
+                    {
+                        fncObject = this.___progressfunctionobject;
+                        fncFound = true;
+                    }
+                    break;
+                case "readystatechange":
+                    if(___readystatechagefunctionObject != null)
+                    {
+                        fncObject = this.___readystatechagefunctionObject;
+                        fncFound = true;
+                    }
+                    break;
+            }
+            if(fncFound && fncObject != null)
+            {
+                if(commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
+                {
+                    commonLog.LogEntry("CHtmlXTTPRequest has function {0} to execute {1}", _funcName, fncObject);
+                }
+                try
+                {
+                    if(this.___MultiversalWindowWeakReference != null)
+                    {
+                        CHtmlMultiversalWindow ___window = this.___MultiversalWindowWeakReference.Target as CHtmlMultiversalWindow;
+                        if (string.Equals(_funcName, "load", StringComparison.OrdinalIgnoreCase))
+                        {
+                            _ = this.responseText; // ensure cached
+                        }
+                        // Create a lightweight proxy as 'this' for JS handler
+                        var thisProxy = new CHtmlElement();
+                        try
+                        {
+                            thisProxy.SetDynamicMember("responseText", this.___responseText);
+                            thisProxy.SetDynamicMember("status", this.___status);
+                            thisProxy.SetDynamicMember("statusText", this.statusText);
+                            thisProxy.SetDynamicMember("readyState", this.readyState);
+                            thisProxy.SetDynamicMember("responseType", this.___responseType);
+                        }
+                        catch { }
+                        ___window.___executeEventFunction(_funcName, thisProxy, fncObject, new object[] { ___window.___event }, 1);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 1)
+                    {
+                        commonLog.LogEntry("CHtmlXTTPRequest function {0} invoke error: {1}", _funcName, ex);
+                    }
+                }
+            }
+            return;
+        }
+
+        public void abort()
+        {
+         
+        }
+
+        /**
+         * @return Returns the readyState.
+         */
+        public double readyState
+        {
+            get
+            {
+
+                    return -1;
+                
+
+
+            }
+        }
+        private double ___status = 0;
+        public double status
+        {
+            get
+            {
+                return ___status;
+            }
+        }
+        public string statusText
+        {
+            get
+            {
+                switch(___status)
+                {
+                    case 200:
+                        return "OK";
+                    case 0: // loading 
+                        return string.Empty;
+                    default:
+                        {
+                            return "NotFound";
+                        }
+                }
+                return String.Empty;
+            }
+        }
+        /**
+         * @return Returns the responseText.
+         */
+        public string responseText
+        {
+            get
+            {
+                return ___getResponseText();
+            }
+        }
+
+        /**
+         * @return Returns the responseXML as a DOM Document.
+         */
+        public object responseXML
+        {
+            get
+            {
+                throw new NotImplementedException("responseXML");
+            }
+        }
+        internal string ___responseType = string.Empty;
+        /// <summary>
+        /// Get response Type
+        /// </summary>
+        /// <returns></returns>
+        public string responseType
+        {
+            get{
+                return ___responseType;
+            }
+            set
+            {
+                this.___responseType = value;
+         
+            }
+        }
+
+
+        /// <summary>
+        /// May be returns response as desired type.
+        /// </summary>
+        /// <returns></returns>
+        public object response
+        {
+            get
+            {
+
+
+                return null;
+            }
+        }
+
+
+        /**
+         * @return Returns the http status text.
+         */
+
+        /*
+        * @param onreadystatechange The onreadystatechange to set.
+         */
+        //[org.mozilla.javascript.annotations.JSSetter]
+        public object onprogress
+        {
+            get { return this.___progressfunctionobject; }
+            set { this.___progressfunctionobject = value; }
+        }
+        public object onabort
+        {
+            get { return this.___abortfunctionobject; }
+            set { this.___abortfunctionobject = value; }
+        }
+        public object ontimeout
+        {
+            get { return this.___timeoutfunctionobject; }
+            set { this.___timeoutfunctionobject = value; }
+        }
+        public bool async
+        {
+            get { return false; }
+            set {; }
+        }
+
+        public object onerror
+        {
+            get
+            {
+                return this.___onerror_function;
+            }set
+            {
+                this.___onerror_function = value;
+            }
+        }
+        public bool withCredentials
+        {
+            get { return this.___withCredencials; }
+            set { this.___withCredencials = value; }
+        }
+        public object onload
+        {
+            set
+            {
+                ___set_load_functionchange(value);
+            }
+            get
+            {
+                return this.___loadfunctionobject;
+            }
+
+        }
+        internal void ___set_load_functionchange(object _value)
+        {
+            try
+            {
+                this.___functionName = "load";
+                this.___loadfunctionobject = _value;
+
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                {
+                   commonLog.LogEntry("ERROR onreadystatechange : " + ex.Message);
+                }
+            }
+
+        }
+        public object onloadend
+        {
+            set
+            {
+                try
+                {
+                    this.___functionName = "loadend";
+                    this.___loadend_functionobject = value;
+
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                    {
+                       commonLog.LogEntry("ERROR onreadystatechange : " + ex.Message);
+                    }
+                }
+            }
+            get
+            {
+                return this.___loadend_functionobject;
+            }
+
+        }
+        internal string ___getResponseText()
+        {
+            // Always refresh from stream if available
+            if (___responseStream != null)
+            {
+                ___updateResponseTextFromStream();
+            }
+            return ___responseText;
+        }
+        private void ___updateResponseTextFromStream()
+        {
+            if (___responseStream == null)
+            {
+                ___responseText = string.Empty;
+                return;
+            }
+            try
+            {
+                if (___responseStream.CanSeek)
+                {
+                    try { ___responseStream.Position = 0; } catch { }
+                }
+                using var ms = new MemoryStream();
+                ___responseStream.CopyTo(ms);
+                var rawBytes = ms.ToArray();
+                int bomSkip;
+                var enc = ___detectEncoding(rawBytes, ___Response_Content_Type, out bomSkip);
+                ___ResponseTextCachedEncodingName = enc.WebName;
+                ___responseText = (rawBytes.Length > bomSkip)
+                    ? enc.GetString(rawBytes, bomSkip, rawBytes.Length - bomSkip)
+                    : string.Empty;
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                {
+                    commonLog.LogEntry("___updateResponseTextFromStream error", ex);
+                }
+                ___responseText = string.Empty;
+            }
+        }
+        private static string ___getCharsetFromContentType(string contentType)
+        {
+            if (string.IsNullOrEmpty(contentType)) return null;
+            var idx = contentType.IndexOf("charset", StringComparison.OrdinalIgnoreCase);
+            if (idx < 0) return null;
+            var part = contentType.Substring(idx);
+            var eq = part.IndexOf('=');
+            if (eq < 0) return null;
+            var val = part.Substring(eq + 1).Trim().Trim('\'','"');
+            var semi = val.IndexOf(';');
+            if (semi >= 0) val = val.Substring(0, semi);
+            return val.Trim();
+        }
+        private static Encoding ___detectEncoding(byte[] bytes, string contentType, out int bomSkip)
+        {
+            bomSkip = 0;
+            if (bytes != null && bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
+            {
+                bomSkip = 3; return Encoding.UTF8;
+            }
+            if (bytes != null && bytes.Length >= 2)
+            {
+                if (bytes[0] == 0xFE && bytes[1] == 0xFF) { bomSkip = 2; return Encoding.BigEndianUnicode; }
+                if (bytes[0] == 0xFF && bytes[1] == 0xFE) { bomSkip = 2; return Encoding.Unicode; }
+            }
+            var charset = ___getCharsetFromContentType(contentType);
+            if (!string.IsNullOrEmpty(charset))
+            {
+                try { return Encoding.GetEncoding(charset); } catch { }
+            }
+            return Encoding.UTF8;
+        }
+
+        internal void ___set_onreadystatechange(object _val)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("setting {0}.onreadystatechange = {1} ", this, _val);
+            }
+            try
+            {
+                this.___functionName = "readystatechange";
+                this.___readystatechagefunctionObject = _val;
+
+            }
+            catch (Exception exFinal)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                {
+                   commonLog.LogEntry("ERROR onreadystatechange : ", exFinal);
+                }
+            }
+        }
+        internal void ___set_onloadchange(object _val)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("setting {0}.onload = {1} ", this, _val);
+            }
+            try
+            {
+                this.___functionName = "load";
+                this.___loadfunctionobject = _val;
+                
+
+                
+            }
+            catch (Exception exFinal)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                {
+                   commonLog.LogEntry("ERROR setting onload : ", exFinal);
+                }
+            }
+
+        }
+
+
+        public Object onreadystatechange
+        {
+            get
+            {
+                return this.___readystatechagefunctionObject;
+            }
+            set
+            {
+                this.___set_onreadystatechange(value);
+            }
+
+        }
+        internal void ___execute_onload_Inner(object sender, EventArgs args)
+        {
+
+            object ___function_object = this.___loadfunctionobject;
+            if (___function_object == null)
+            {
+                ___function_object = this.___loadend_functionobject;
+            }
+            this.___execute_function_inner("onload", ___function_object);
+        }
+
+
+        private void ___execute_onstatechange_Inner(object sender, EventArgs args)
+        {
+            object ___function_object = ___readystatechagefunctionObject;
+
+            if (___function_object != null)
+            {
+                this.___execute_function_inner("onstatechange", ___function_object);
+            }
+
+        }
+        internal void ___execute_function_inner(string statusName, object ___function_object)
+        {
+
+            CHtmlMultiversalWindow ___multiWindow = null;
+            IMultiversalScriptProcessor ___processor = null;
+            CHtmlScriptResult _scriptElement = null;
+    
+        }
+
+        private CHtmlMultiversalWindow ___getMultiversalWindow()
+        {
+            if (this.___MultiversalWindowWeakReference != null)
+            {
+                return this.___MultiversalWindowWeakReference.Target as CHtmlMultiversalWindow;
+            }
+            return null;
+        }
+
+#region IPropertBox メンバ
+
+
+
+        public virtual object ___getPropertyByName(string ___name)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
+            {
+               commonLog.LogEntry("GetPropertyValue for {0} {1} ", this, ___name);
+            }
+            switch (___name)
+            {
+                case "onprogress":
+                    return ___progressfunctionobject;
+                case "onload":
+                    return this.___loadfunctionobject;
+                case "onreadystatechange":
+                    return this.___readystatechagefunctionObject;
+                case "onerror":
+                    return this.onerror;
+                case "responseText":
+                case "responsetext":
+                    return this.responseText;
+                case "responseXML":
+                case "responseXml":
+                case "responsexml":
+                    return this.responseXML;
+                case "status":
+                    return this.___status;
+                case "statusText":
+                case "statustext":
+                    return this.statusText;
+                case "readyState":
+                case "readystate":
+                    return this.readyState;
+                case "async":
+                    return false;
+                case "ontimeout":
+                    return this.ontimeout;
+                case "response":
+                    return null;
+                case "withCredentials":
+                    return this.___withCredencials;
+                case "onloadend":
+                    return this.___loadend_functionobject;
+                case "length":
+                    return 0;
+                case "responseType":
+                case "responsetype":
+                    return this.___responseType;
+                default:
+                    break;
+            }
+            object ___propValue;
+            if (this.___properties.TryGetValue(___name, out ___propValue))
+            {
+                return ___propValue;
+            }
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
+            {
+               commonLog.LogEntry("getPropertyValue for {0} {1} failed", this, ___name);
+            }
+            return null;
+        }
+
+        public virtual  void ___setPropertyByName(string ___name, object ___val)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
+            {
+               commonLog.LogEntry("entring setPropertyValue for {0} : {1} = {2} ...", this, ___name, ___val);
+            }
+            switch (___name)
+            {
+                case "onload":
+                case "onLoad":
+                    this.___loadend_functionobject = ___val; // NOTE: original code used loadend
+                    break;
+                case "onloadend":
+                    this.___loadend_functionobject = ___val;
+                    break;
+                case "onprogress":
+                     ___progressfunctionobject = ___val;
+                    break;
+                case "onreadystatechange":
+                    this.___readystatechagefunctionObject = ___val;
+                    break;
+                case "timeout":
+
+                    break;
+                case "responsetype":
+                case "responseType":
+                    this.___responseType = commonHTML.GetStringValue(___val);
+                    break;
+                case "abort":
+                case "onabort":
+                    this.onabort = ___val;
+                    break;
+                case "onerror":
+                    this.onerror = ___val;
+                    break;
+                case "ontimeout":
+                    this.ontimeout  = ___val;
+                    break;
+                case "async":
+                case "Async":
+                    this.async = commonData.convertObjectToBoolean(___val);
+                    break;
+                case "withCredentials":
+                    this.___withCredencials = commonData.convertObjectToBoolean(___val);
+                    break;
+                default:
+                    if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
+                    {
+                       commonLog.LogEntry("SetPropertyValue for {0} {1}  {2} = {3} failed", this.GetType(), this, ___name, ___val);
+                    }
+                    this.___properties[___name] = ___val;
+                    break;
+            }
+        }
+        public virtual  void ___setPropertyByIndex(int ___index, object val)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
+            {
+               commonLog.LogEntry("SetPropertyValueIndex for {0} {1}  {2} = {3} failed", this.GetType(), this, ___index, val);
+            }
+        }
+        public virtual object ___getPropertyByIndex(int ___index)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
+            {
+               commonLog.LogEntry("GetPropertyValueInex for {0} {1} {2} failed", this.GetType(), this, ___index);
+            }
+            return null;
+        }
+
+        public virtual  bool ___hasPropertyByName(string ___name)
+        {
+
+            return false;
+        }
+        public virtual bool ___hasPropertyByIndex(int ___index)
+        {
+            return true;
+        }
+        public virtual object ___common_object_clone()
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("x__Clone {0} {1} called", this.GetType(), this);
+            }
+            return this;
+        }
+        public virtual  void ___deleteByIndex(int ___index)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("___deleteByIndex {0} {1} called : {2}", this.GetType(), this, ___index);
+            }
+        }
+        public virtual  void ___deleteByName(string ___name)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("___deleteByName {0} {1} called : {2}", this.GetType(), this, ___name);
+            }
+
+        }
+        public virtual  object[] ___getByIds()
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("___getByIds() {0} {1} called", this.GetType(), this);
+            }
+            return null;
+
+        }
+        public virtual  string ___getClassName()
+        {
+            return "XMLHttpRequest";
+        }
+        public virtual  object ___getDefaultValue()
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("___getDefaultValue {0} {1} called", this.GetType(), this);
+            }
+            return null;
+        }
+        public virtual object ___getParentScope()
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("___getParentScope {0} {1} called", this.GetType(), this);
+            }
+            return null;
+        }
+        public virtual  void ___setParentScope(object ___object)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("___setParentScope {0} {1} called : {2}", this.GetType(), this, ___object);
+            }
+        }
+        public virtual  object ___getProtoType()
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("___getProtoType {0} {1} called", this.GetType(), this);
+            }
+            return null;
+        }
+        public virtual bool ___hasInstance(object ___object)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("___hasInstance {0} {1} called : {2}", this.GetType(), this, ___object);
+            }
+            return false;
+        }
+        public virtual bool ___instanceEquals(object ___object)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("___instanceEquals {0} {1} called : {2}", this.GetType(), this, ___object);
+            }
+            return object.ReferenceEquals(this, ___object);
+        }
+        public virtual void ___setProtoType(object ___object)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+            {
+               commonLog.LogEntry("___setProtoType {0} {1} called : {2}", this.GetType(), this, ___object);
+            }
+        }
+        public new IMutilversalObjectType multiversalClassType
+        {
+            get
+            {
+                return IMutilversalObjectType.XMLHttpRequest;
+            }
+        }
+
+#endregion
+        public bool isPrototypeOf(object ___protoObject)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
+            {
+               commonLog.LogEntry("calling {0}.isPrototpyeOf('{1}') ", this, ___protoObject);
+            }
+
+            return true;
+        }
+        #region IDyamicMetaObjectProvider support to get and set properties
+        public DynamicMetaObject GetMetaObject(Expression parameter)
+        {
+            return new CHtmlClearScriptDynamicMetaObject<CHtmlXMLHttpRequest>(parameter, this);
+        }
+        public object GetDynamicMember(string name)
+        {
+            object objValue = null;
+            if(CHtmlXMLHttpRequestProperties.ContainsKey(name))
+            {
+                return this.___getPropertyByName(name);
+            }
+
+            this.___properties.TryGetValue(name, out objValue);
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("{0}.GetDynamicMember({1} returns : {2}", this, name, objValue);
+            }
+            return objValue;
+        }
+        public void SetDynamicMember(string name, object value)
+        {
+            if(CHtmlXMLHttpRequestProperties.ContainsKey(name))
+            {
+                this.___setPropertyByName(name, value);
+                return;
+            }
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("{0}.SettDynamicMember({1} is called value: {2}", this, name, value);
+            }
+            this.___properties[name] = value;
+        }
+        public IEnumerable<string> GetDynamicMemberNames()
+        {
+            List<string> members = new List<string>();
+            members.AddRange(CHtmlXMLHttpRequestProperties.Keys);
+            members.AddRange(CHtmlXMLHttpRequestMethods.Keys);
+
+            if (this.___properties.Count > 0)
+            {
+                members.AddRange(this.___properties.Keys);
+            }
+            return members;
+        }
+        #endregion
+    }
+
+}

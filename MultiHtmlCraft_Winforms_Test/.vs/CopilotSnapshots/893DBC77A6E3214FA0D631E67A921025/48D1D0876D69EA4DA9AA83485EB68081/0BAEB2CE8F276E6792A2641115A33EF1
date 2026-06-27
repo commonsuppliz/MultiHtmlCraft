@@ -1,0 +1,521 @@
+﻿using Microsoft.ClearScript;
+using Microsoft.ClearScript.V8;
+using MultiHtmlCraft.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+
+
+
+namespace ClearScriptProcessor
+{
+    public class ClearScriptProcessor : IMultiversalScriptProcessor, IDisposable
+    {
+        private IMultiversalScriptScope? _scope = null;
+        private V8ScriptEngine? _v8ScriptEngine = null;
+        private bool _isDisposed = false;
+
+
+
+
+        public IMultiversalScriptScope multiversalscope
+        {
+            get
+            {
+                return _scope;
+            }
+            set
+            {
+                _scope = value;
+            }
+        }
+        public V8ScriptEngine clearscriptengine
+        {
+            get
+            {
+                return _v8ScriptEngine;
+
+            }
+            set
+            {
+                _v8ScriptEngine = value;
+            }
+        }
+
+        public IMultiversalWindow Window { get; }
+        public ICHtmlDocumentInterface Document { get; set; } = null;
+
+
+
+        public object callfunction(object functionobject, object scope, object thisObj, object[] args)
+        {
+            return CallFunctionInternal(functionobject, args);
+        }
+
+        public object callfunction(object functionobject, object[] args)
+        {
+            return CallFunctionInternal(functionobject, args);
+        }
+
+        public object callfunction(object functionobject)
+        {
+            return CallFunctionInternal(functionobject, null);
+        }
+        private static bool IsSafeCallableFV8unctionObject(object o)
+        {
+            if (o == null) return false;
+            var t = o.GetType().FullName;
+
+            if (t != null && t.IndexOf("V8Function", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            } else if (t != null && t.IndexOf("V8ScriptFunction", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            } else if (t != null && t.IndexOf("V8ScriptObject", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            } else if (t != null && t.IndexOf("ScriptFunctionProxy", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            } else if (t != null && t.IndexOf("SplitProxy", StringComparison.OrdinalIgnoreCase) >= 0)
+            {                
+                return false;
+            }
+            return false;
+        }
+        private bool IsHandleLike(object o)
+        {
+            if (o == null) return false;
+            var t = o.GetType();
+            if (t.FullName != null && (t.FullName.Contains("+Handle") || t.FullName.IndexOf("Handle", StringComparison.OrdinalIgnoreCase) >= 0))
+                return true;
+            // guts: IntPtr を持つ型もハンドルと見なす
+            try
+            {
+                var f = t.GetField("guts", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (f != null && f.FieldType == typeof(IntPtr)) return true;
+            }
+            catch { }
+            return false;
+        }
+
+        private void EnsureUniversalApplyFunction(V8ScriptEngine engine)
+        {
+            // グローバルに ___universalApply がなければ注入する
+            try
+            {
+                bool exists = true;
+                try
+                {
+                    // dynamic 経由で存在チェック（例外が出れば未定義）
+                    var tmp = engine.Script.___universalApply;
+                }
+                catch
+                {
+                    exists = false;
+                }
+
+                if (!exists)
+                {
+                    // 引数は配列（args）で受け、apply で呼び出すヘルパーを作る
+                    engine.Execute("function ___universalApply(f, args){ if(typeof f === 'function'){ return f.apply(null, args || []); } throw new Error('Target is not a function'); }");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"EnsureUniversalApplyFunction Error: {ex.Message}");
+                // 失敗しても処理を続ける（フォールバック呼び出しで対応）
+            }
+        }
+
+        private object CallFunctionInternal(object functionobject, object[] args)
+        {
+            if (functionobject == null) return null;
+
+            // ClearScript の Undefined を早期に無視する
+            if (functionobject is Microsoft.ClearScript.Undefined)
+            {
+                Debug.WriteLine("CallFunctionInternal: functionobject is ClearScript.Undefined - skipping invocation.");
+                return null;
+            }
+
+            int ___callfunctionStage = -1;
+            try
+            {
+                Debug.WriteLine($"CallFunctionInternal: functionobject type = {functionobject.GetType().FullName} Thread ID :{System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+                // 1. ScriptObject へのキャスト（最も標準的）
+                if (functionobject is Microsoft.ClearScript.ScriptObject scriptObject)
+                {
+                    ___callfunctionStage = 1;
+                    try
+                    {
+                        return scriptObject.InvokeAsFunction(args ?? Array.Empty<object>());
+#if DEBUG
+
+                        Debug.WriteLine("CallFunctionInternal: Detected ScriptObject, invoking directly.");
+#endif
+                    }
+                    catch { }
+
+                }
+
+                // 非 ScriptObject の場合、詳細情報を出力して分析を容易にする
+                ___callfunctionStage = 2;
+                DumpProxyInfo(functionobject);
+
+                // 2. V8ObjectImpl などの内部オブジェクトの場合
+                dynamic dynFunc = functionobject;
+
+                var engine = this._v8ScriptEngine;
+
+                // --- 追加: まずこのオブジェクトが JS の "function" か判定する ---
+                bool isFunction = false;
+                try
+                {
+                    var tcheck = functionobject.GetType();
+                    var okProp = tcheck.GetProperty("ObjectKind", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (okProp != null)
+                    {
+                        var okVal = okProp.GetValue(functionobject);
+                        if (okVal != null)
+                        {
+                            if (okVal.ToString().IndexOf("Function", StringComparison.OrdinalIgnoreCase) >= 0)
+                                isFunction = true;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"CallFunctionInternal: ObjectKind check failed: {ex.Message}");
+                }
+
+                // --- 重要: 非公開の内部実装を直接リフレクションで呼ぶのは危険なので Public メソッドのみ選ぶ ---
+                try
+                {
+                    var t = functionobject.GetType();
+                    // 非公開メソッドも含めて探索していたが、内部ネイティブ呼び出しでアクセス違反が発生するケースがあるため
+                    // ここでは明示的に公開メソッド（IsPublic）に限定する。
+                    var methods = t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+                    var directInvoke = methods.FirstOrDefault(m =>
+                    {
+                        var ps = m.GetParameters();
+                        // 変更点: m.IsPublic を追加して、ClearScript の内部ネイティブ呼び出しを誤って直接呼ばないようにする
+                        return m.Name == "Invoke"
+                            && m.IsPublic
+                            && ps.Length == 2
+                            && ps[0].ParameterType == typeof(bool)
+                            && (ps[1].ParameterType == typeof(object[]) || ps[1].ParameterType == typeof(System.Array));
+                    });
+
+                    if (directInvoke != null)
+                    {
+                        try
+                        {
+                            var invokeArgs = args ?? Array.Empty<object>();
+                            var param0 = isFunction; // asFunction フラグは事前判定を使う
+                            var param1 = invokeArgs.Length == 0 ? null : (object)invokeArgs;
+                            return directInvoke.Invoke(functionobject, new object[] { param0, param1 });
+                        }
+                        catch (TargetInvocationException tie)
+                        {
+                            Debug.WriteLine($"CallFunctionInternal directInvoke TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
+                            // fallthrough -> 次の手段へ
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"CallFunctionInternal directInvoke failed: {ex.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"CallFunctionInternal: direct Invoke(bool,object[]) check failed: {ex.Message}");
+                }
+
+                // engine.Invoke を使うのは最終手段にする（ネイティブで例外を起こす危険があるため））
+                if (engine != null)
+                {
+                    if (isFunction)
+                    {
+                        EnsureUniversalApplyFunction(engine);
+
+                        try
+                        {
+                            // 第二引数に args 配列を渡す（JS 側で配列として受け取る）
+                            return engine.Invoke("___universalApply", functionobject, args ?? Array.Empty<object>());
+                        }
+                        catch (Microsoft.ClearScript.ScriptEngineException sex)
+                        {
+                            Debug.WriteLine($"CallFunctionInternal ScriptEngineException: {sex.ErrorDetails ?? sex.Message}");
+                            // fallthrough -> 下のフォールバックを試す
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"CallFunctionInternal Critical (engine.Invoke): {ex.Message}");
+                            // fallthrough -> 下のフォールバックを試す
+                        }
+                    }
+                    else
+                    {
+                        Debug.WriteLine("CallFunctionInternal: target is not a JS function according to ObjectKind - skip engine.Invoke to avoid ClearScript errors.");
+                    }
+                }
+
+                // --- 追加の安全対策 ---
+                // ClearScript の内部プロキシ型が渡っている可能性がある場合は、リフレクションで非公開メソッドを呼ばないよう
+                // public メソッド限定のフォールバック、かつエンジン側の universalApply を先に試す。
+
+                if (engine != null)
+                {
+                    try
+                    {
+                        var typeName = functionobject.GetType().FullName ?? string.Empty;
+                        if ((typeName.IndexOf("V8", StringComparison.OrdinalIgnoreCase) >= 0 || typeName.IndexOf("SplitProxy", StringComparison.OrdinalIgnoreCase) >= 0))
+                        {
+                            EnsureUniversalApplyFunction(engine);
+                            try
+                            {
+                                return engine.Invoke("___universalApply", functionobject, args ?? Array.Empty<object>());
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"CallFunctionInternal engine.Invoke fallback failed: {ex.Message}");
+                                // fallthrough -> reflection fallback
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"CallFunctionInternal: engine proxy check failed: {ex.Message}");
+                    }
+                }
+
+                // ここから従来の reflection / dynamic フォールバック処理
+                try
+                {
+                    var invokeArgs = args ?? Array.Empty<object>();
+
+                    var t = functionobject.GetType();
+                    // 変更: public メソッドのみ対象にする（内部ネイティブの非公開 Invoke を呼ばないように）
+                    var invokeMethods = t.GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                                         .Where(m => string.Equals(m.Name, "Invoke", StringComparison.Ordinal))
+                                         .ToArray();
+
+                    foreach (var mi in invokeMethods)
+                    {
+                        var pars = mi.GetParameters();
+                        try
+                        {
+                            if (pars.Length == 1
+                                && (pars[0].ParameterType == typeof(object[]) || pars[0].ParameterType == typeof(System.Array)))
+                            {
+                                var param0 = invokeArgs.Length == 0 ? null : (object)invokeArgs;
+                                return mi.Invoke(functionobject, new object[] { param0 });
+                            }
+
+                            if (pars.Length == 0)
+                            {
+                                return mi.Invoke(functionobject, null);
+                            }
+                        }
+                        catch (TargetParameterCountException)
+                        {
+                            Debug.WriteLine($"CallFunctionInternal reflection overload parameter mismatch for {mi}.");
+                        }
+                        catch (TargetInvocationException tie)
+                        {
+                            Debug.WriteLine($"CallFunctionInternal reflection target invocation exception: {tie.InnerException?.Message ?? tie.Message}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+                        }
+                    }
+
+                    // シンプルに公開メソッドを探す
+                    var miSimple = functionobject.GetType().GetMethod("Invoke", BindingFlags.Instance | BindingFlags.Public);
+                    if (miSimple != null)
+                    {
+                        try
+                        {
+                            return miSimple.Invoke(functionobject, invokeArgs.Length == 0 ? null : new object[] { invokeArgs });
+                        }
+                        catch (TargetParameterCountException)
+                        {
+                            try
+                            {
+                                return miSimple.Invoke(functionobject, invokeArgs);
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+                        }
+                    }
+
+                    if (invokeArgs == null || invokeArgs.Length == 0)
+                    {
+                        try
+                        {
+                            return dynFunc();
+                        }
+
+                        catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException rbex)
+                        {
+                            Debug.WriteLine($"CallFunctionInternal dynamic no-arg call binder error: {rbex.Message}");
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            return dynFunc.apply(null, invokeArgs);
+                        }
+                        catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
+                        {
+                            try
+                            {
+                                return dynFunc(invokeArgs);
+                            }
+                            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException rbex)
+                            {
+                                Debug.WriteLine($"CallFunctionInternal dynamic call binder error: {rbex.Message}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"CallFunctionInternal dynamic apply failed: {ex.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"CallFunctionInternal fallback failed: {ex.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CallFunctionInternal Critical: {ex.Message}");
+            }
+            return null;
+        }
+
+        // プロキシを再帰的にアンラップして実体を返す。深さ制限あり。
+
+
+        // デバッグ用：プロキシの型、メソッド、フィールド、プロパティを出力する
+        private void DumpProxyInfo(object obj)
+        {
+            if (obj == null) return;
+            try
+            {
+                Type t = obj.GetType();
+                Debug.WriteLine($"DumpProxyInfo: Type = {t.FullName}");
+
+                var methods = t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                Debug.WriteLine($"DumpProxyInfo: Methods ({methods.Length})");
+                foreach (var m in methods)
+                {
+                    Debug.WriteLine($"  M: {m.Name} ({string.Join(", ", m.GetParameters().Select(p => p.ParameterType.Name))})");
+                }
+
+                var fields = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                Debug.WriteLine($"DumpProxyInfo: Fields ({fields.Length})");
+                foreach (var f in fields)
+                {
+                    Debug.WriteLine($"  F: {f.Name} : {f.FieldType.FullName}");
+                }
+
+                var props = t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                Debug.WriteLine($"DumpProxyInfo: Properties ({props.Length})");
+                foreach (var p in props)
+                {
+                    Debug.WriteLine($"  P: {p.Name} : {p.PropertyType.FullName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"DumpProxyInfo Error: {ex.Message}");
+            }
+        }
+
+        public object compile(string script)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object execute(string script)
+        {
+            if (_v8ScriptEngine == null)
+            {
+                throw new InvalidOperationException("Script engine is not initialized.");
+            }
+
+            var scriptToExecute = WrapIfCommonJs(script, "");
+            if (_scope != null && _scope.EnableScriptLogging)
+            {
+                Debug.WriteLine("Executing Javascript script:");
+                Debug.WriteLine("========================= Start Script ===================================");
+                Debug.WriteLine(scriptToExecute);
+                Debug.WriteLine("========================= End Script   ===================================");
+            }
+
+            _v8ScriptEngine.Execute(scriptToExecute);
+
+            return null;
+        }
+
+        public object get(string name)
+        {
+            if (_v8ScriptEngine == null)
+                throw new InvalidOperationException("Script engine is not initialized.");
+            return _v8ScriptEngine.Global[name];
+        }
+
+        public void put(string name, object val)
+        {
+            if (_v8ScriptEngine == null)
+                throw new InvalidOperationException("Script engine is not initialized.");
+            _v8ScriptEngine.Global[name] = val;
+        }
+
+        void IDisposable.Dispose()
+        {
+            if (_isDisposed)
+                return;
+            _isDisposed = true;
+            try
+            {
+                _v8ScriptEngine?.Dispose();
+            }
+            catch { }
+            _v8ScriptEngine = null;
+            _scope = null;
+        }
+        private string WrapIfCommonJs(string script, string scriptUrl)
+        {
+            // 簡易判定: module.exports または exports. が含まれる場合だけラップ
+            if (script.Contains("module.exports") || script.Contains("exports."))
+            {
+                var wrapperStart = "(function(){var module = { exports: {} }; var exports = module.exports; try {";
+                var wrapperEnd = "} finally { try { for (var k in module.exports) { if (Object.prototype.hasOwnProperty.call(module.exports,k) && typeof globalThis[k] === 'undefined') { globalThis[k] = module.exports[k]; } } } catch(e) { /* swallow */ } }})();";
+                return wrapperStart + script + wrapperEnd;
+            }
+            return script;
+        }
+
+
+    }
+}

@@ -1,0 +1,95 @@
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using System.Linq.Expressions;
+using System.Reflection.PortableExecutable;
+
+using NiL.JS.Expressions;
+using System.Threading;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Net;
+using System.Text.RegularExpressions;
+
+namespace MultiHtmlCraft.Core
+{
+
+    public static class CHmlMultiversalWebCache
+
+    {
+        internal static object WebCacheLock = new object();
+        internal static string MultiversalDataStoreFolder = "MultiversalDataStore";
+        internal static string CachedData = "Cachedata.json";
+        internal static string TrustedWenAuthorityData = "TrustedWenAuthority.json";
+        public static List<string> TrustedWebAuthority = new List<string>();
+        public static string StoregePath
+        {
+            get
+            ; set;
+        }
+        internal static Dictionary<string, CHtmlMultivalContentData> CacheData = new Dictionary<string, CHtmlMultivalContentData>();
+        internal static void initHTMLDataStorePath()
+        {
+
+            StoregePath = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + System.IO.Path.DirectorySeparatorChar + MultiversalDataStoreFolder;
+            if (System.IO.Directory.Exists(StoregePath) == false)
+            {
+                System.IO.Directory.CreateDirectory(StoregePath);
+            }
+            if (System.IO.File.Exists(StoregePath + System.IO.Path.DirectorySeparatorChar + CachedData) == true)
+            {
+                string _cachedData = System.IO.File.ReadAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + CachedData);
+                CacheData = JsonSerializer.Deserialize<Dictionary<string, CHtmlMultivalContentData>>(_cachedData);
+            }
+            if (System.IO.File.Exists(StoregePath + System.IO.Path.DirectorySeparatorChar + TrustedWenAuthorityData) == true)
+            {
+                string _trustedWenAuthorityData = System.IO.File.ReadAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + TrustedWenAuthorityData);
+                TrustedWebAuthority = JsonSerializer.Deserialize<List<string>>(_trustedWenAuthorityData);
+            }
+        }
+        static CHmlMultiversalWebCache()
+        {
+            initHTMLDataStorePath();
+        }
+        public static void SaveCacheData()
+        {
+            string _cachedData = JsonSerializer.Serialize(CacheData);
+            System.IO.File.WriteAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + CachedData, _cachedData);
+
+        }
+        public static void SaveTrustedWebAuthority()
+        {
+            string _trustedWenAuthorityData = JsonSerializer.Serialize(TrustedWebAuthority);
+            System.IO.File.WriteAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + TrustedWenAuthorityData, _trustedWenAuthorityData);
+        }
+
+        // URLを正規化する（大文字小文字・末尾スラッシュ・不要な部分を統一）
+        private static string NormalizeUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return url;
+            try
+            {
+                var uri = new Uri(url);
+                var builder = new UriBuilder(uri)
+                {
+                    Scheme = uri.Scheme.ToLowerInvariant(),
+                    Host = uri.Host.ToLowerInvariant(),
+                    Path = uri.AbsolutePath.TrimEnd('/'),
+                    Query = uri.Query
+                };
+                // 末尾スラッシュを除去し、標準化
+                return builder.Uri.GetLeftPart(UriPartial.Path).TrimEnd('/').ToLowerInvariant() + builder.Uri.Query;
+            }
+            catch
+            {
+                return url.Trim().ToLowerInvariant();
+            }
+        }
+
+    }
+}

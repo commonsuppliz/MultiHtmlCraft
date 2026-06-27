@@ -1,0 +1,9 @@
+﻿using System;
+namespace MultiHtmlCraft.Core
+{
+    // Corrected placeholder. This partial allows future extensions specific to mutation observer bridging.
+    public partial class CHtmlMutationObserver
+    {
+        // Additional members can be added here if needed.
+    }
+}

@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net9.0;net9.0-windows</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Skia" Version="11.3.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClearScriptProcessor\ClearScriptProcessor.csproj" />
+    <ProjectReference Include="..\Interfaces\MultiHtmlCraft.Interfaces.csproj" />
+    <ProjectReference Include="..\MultiHtmlCraft.Core\MultiHtmlCraft.Core.csproj" />
+    <ProjectReference Include="..\NilJsProcessor\NilJsProcessor.csproj" />
+    <ProjectReference Include="..\PythonProssesor\PythonProcessor.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Core14.profile.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+	<PropertyGroup>
+		<NoWarn>$(NoWarn);SYSLIB0013;CS8618;CS8602;CS8604;CS8600;CS8601;CS8603;CS8605;CS8606;CS8607;CS8608;CS8609;CS06128; CS8225;CS0618;CS0162;CS0219;CS0618;CS0219;CS8625;CS0168</NoWarn>
+	</PropertyGroup>
+
+</Project>

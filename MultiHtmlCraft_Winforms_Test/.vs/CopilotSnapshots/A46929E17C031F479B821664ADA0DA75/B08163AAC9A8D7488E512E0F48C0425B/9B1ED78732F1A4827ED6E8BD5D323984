@@ -1,0 +1,4331 @@
+﻿using MultiHtmlCraft.Interfaces;
+using NiL.JS.Expressions;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Dynamic;
+using System.IO;
+using System.Linq.Expressions;
+using System.Runtime.InteropServices;
+using System.Xml;
+using System.Xml.Linq;
+
+
+namespace MultiHtmlCraft.Core
+{
+
+    [ComVisible(true)]
+    
+    public sealed class CHtmlCSSStyleSheet : ICommonObjectInterface, ICHtmlCSSStyleDeclaration, IDynamicMetaObjectProvider
+    {
+        internal static readonly Dictionary<string, int> CHtmlCSSStyleSheetProperties = InitializeCHtmlCSSStyleSheetProperties();
+        internal static readonly Dictionary<string, int> CHtmlCSSStyleSheetMethods = InitializeCHtmlCSSStyleSheetMethods();
+
+        private static Dictionary<string, int> InitializeCHtmlCSSStyleSheetMethods()
+        {
+            Dictionary<string, int> chtmlCSSStyleSheetMethods = new Dictionary<string, int>();
+            chtmlCSSStyleSheetMethods.Add("getPropertyValue", 0);
+            chtmlCSSStyleSheetMethods.Add("setProperty", 1);
+            chtmlCSSStyleSheetMethods.Add("getPropertyCSSValue", 2);
+            return chtmlCSSStyleSheetMethods;
+        }
+
+        private static Dictionary<string, int> InitializeCHtmlCSSStyleSheetProperties()
+        {
+ 
+            Dictionary<string, int> chtmlCSSStyleSheetProperties = new Dictionary<string, int>
+        {
+            { "ownerElement", 0 },
+            { "SelectorID", 1 },
+            { "disabled", 2 },
+            { "Disabled", 3 },
+            { "title", 4 },
+            { "Title", 5 },
+            { "media", 6 },
+            { "Media", 7 },
+            { "Align", 8 },
+            { "align", 9 },
+            { "AlignItems", 10 },
+            { "alignitems", 11 },
+            { "alignItems", 12 },
+            { "appearance", 13 },
+            { "Appearance", 14 },
+            { "mozAppearance", 15 },
+            { "MozAppearance", 16 },
+            { "webkitAppearance", 17 },
+            { "WebkitAppearance", 18 },
+            { "msAppearance", 19 },
+            { "oAppearance", 20 },
+            { "FrameBorder", 21 },
+            { "frameBorder", 22 },
+            { "fullscreen", 23 },
+            { "mozfullscreen", 24 },
+            { "webkitfullscreen", 25 },
+            { "msfullscreen", 26 },
+            { "ofullscreen", 27 },
+            { "frameborder", 28 },
+            { "FontSpec", 29 },
+            { "font", 30 },
+            { "FontSize", 31 },
+            { "fontsize", 32 },
+            { "fontSize", 33 },
+            { "FontStyle", 34 },
+            { "fontstyle", 35 },
+            { "FontColor", 36 },
+            { "fontcolor", 37 },
+            { "fontKerning", 38 },
+            { "FontKerning", 39 },
+            { "FontFamily", 40 },
+            { "fontfamily", 41 },
+            { "fontFamily", 42 },
+            { "FontWeight", 43 },
+            { "fontweight", 44 },
+            { "fontWeight", 45 },
+            { "FontVariant", 46 },
+            { "fontvariant", 47 },
+            { "fontVariant", 48 },
+            { "fontfeaturesettings", 49 },
+            { "fontFeatureSettings", 50 },
+            { "fontfeatureSettings", 51 },
+            { "fontSmoothing", 52 },
+            { "FontSmoothing", 53 },
+            { "FontSizeAdjust", 54 },
+            { "fontSizeAdjust", 55 },
+            { "fontsizeadjust", 56 },
+            { "GridColumns", 57 },
+            { "gridColumns", 58 },
+            { "gridcolumns", 59 },
+            { "GridColumn", 60 },
+            { "gridColumn", 61 },
+            { "gridcolumn", 62 },
+            { "GridColumnAlign", 63 },
+            { "gridcolumnalign", 64 },
+            { "gridColumnAlign", 65 },
+            { "GridColumnSpan", 66 },
+            { "gridcolumnspan", 67 },
+            { "gridColumnSpan", 68 },
+            { "GridRows", 69 },
+            { "gridrows", 70 },
+            { "GridRow", 71 },
+            { "gridrow", 72 },
+            { "GridRowAlign", 73 },
+            { "gridrowalign", 74 },
+            { "GridRowSpan", 75 },
+            { "gridrowspan", 76 },
+            { "tapHighlightColor", 77 },
+            { "TapHighlightColor", 78 },
+            { "taphighlightcolor", 79 },
+            { "TabStops", 80 },
+            { "tabStops", 81 },
+            { "tabstops", 82 },
+            { "TextJustify", 83 },
+            { "textJustify", 84 },
+            { "textjustify", 85 },
+            { "TextSizeAdjust", 86 },
+            { "textSizeAdjust", 87 },
+            { "textsizeadjust", 88 },
+            { "TextUnderLine", 89 },
+            { "textUnderLine", 90 },
+            { "textunderLine", 91 },
+            { "Page", 92 },
+            { "page", 93 },
+            { "PageBreakAfter", 94 },
+            { "pageBreakAfter", 95 },
+            { "PageBreakBefore", 96 },
+            { "pageBreakBefore", 97 },
+            { "PageBreakInside", 98 },
+            { "pageBreakInside", 99 },
+            { "pagebreakinside", 100 },
+            {"transform-3d", 101 },
+            {"transform3d", 102 },
+            {"webkittransform3d", 103 },
+            {"kthmltransform3d", 104 },
+            {"transforms", 105 }
+
+
+        };
+            return chtmlCSSStyleSheetProperties;
+        }
+
+        internal SortedList<string, object> ___properties = new SortedList<string, object>();
+        public CSSStyleConditionType ___styleConditionType;
+        public CHtmlFontInfo ___StyleFontInfo = null;
+        public int ___style_unique_id = 0;
+
+        public bool ___isApplyElemenetStyleSheetsForElementDone = false;
+
+
+        /// <summary>
+        /// This Flag is true if tail key is 
+        /// TRUE : "*", "*:after", "*:before"
+        /// FALSE : *[name="hogehoge]"
+        /// </summary>
+        public bool ___isFinalStyleKeyWildCardOnly = false;
+        /// <summary>
+        /// CHtmlCSSStyleSheet is created dynamically by script
+        /// </summary>
+        public bool ___IsDynamicElement = false;
+        /// <summary>
+        /// Dynamic CHtmlCSSStyleSheet Process Done  Calcuate etc
+        /// </summary>
+        public bool ___IsDynamicProcessDone = false;
+
+        /// <summary>
+        /// After SortedList Field ___hasInner copyed to each property this is set to be true.
+        /// </summary>
+        public bool IsSortedListFieldsHasCopiedToProperty = false;
+
+        /// <summary>
+        /// How many times this css values are relaclated
+        /// </summary>
+        public uint ___cssReclacationCount = 0;
+
+        /// <summary>
+        /// ID ex. .cheetan_sql_log {} #archives{}
+        /// </summary>
+        internal System.WeakReference ___ownerElementWeakReference = null;
+
+        /// <summary>
+        /// Ad hoc ownerDocument
+        /// </summary>
+        internal System.WeakReference ___documentWeakReference = null;
+
+        internal CHtmlCollection ___cssRules = null;
+        /// <summary>
+        /// Holds Important Key
+        /// </summary>
+        internal System.Collections.Generic.Dictionary<CSSAttributeType, sbyte> ___StyleImportantKeyList = null;
+        public CHtmlCSSStyleSheet(CHtmlElementStyleType targetType)
+        {
+            this.___StyleType = targetType;
+            this.___styleAttributeList = new System.Collections.Generic.List<CHtmlStyleAttribute?>();
+
+            if (targetType != CHtmlElementStyleType.None)
+            {
+                this.___StyleImportantKeyList = new System.Collections.Generic.Dictionary<CSSAttributeType, sbyte>();
+                this.___multipleBackgroundImageDataSet = new System.Collections.Generic.List<CHtmlStyleElementMultpleImageData>();
+                this.___cssRules = new CHtmlCollection();
+                this.___cssRules.___CollectionType = CHtmlHTMLCollectionType.CSSRuleList;
+                this.___cssRules.___createObjectIDTable();
+            }
+
+        }
+        internal CHtmlSizeModeType ___styleSizeMode = CHtmlSizeModeType.Undefined;
+
+        internal List<CHtmlCSSRule> ___styleCHtmlCollection = null;
+
+        internal bool ___IsOwnerElementAssigned()
+        {
+            if (this.___ownerElementWeakReference != null && this.___ownerElementWeakReference.IsAlive == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public string getPropertyValue(string _arg)
+        {
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+               commonLog.LogEntry("entering {0}.ggetPropertyValue(\'{1}\')", this, _arg);
+            }
+            string _strProperty = commonHTML.GetStringValue(_arg);
+            if (string.IsNullOrEmpty(_strProperty) == false)
+            {
+                return commonHTML.GetStringValue(this.___getPropertyByName(_strProperty));
+            }
+            return "";
+        }
+        internal bool ___IsDocumentAssigned()
+        {
+            if (this.___documentWeakReference != null && this.___documentWeakReference.IsAlive == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        /// <summary>
+        /// Size of Rem Size of HTML Element
+        /// default : -1
+        /// </summary>
+        internal double ___HTMLTagRemUnitSize = -1;
+
+        /// <summary>
+        /// Flags indicates this object is prototypoe mather.
+        /// </summary>
+        public bool ___IsPrototype = false;
+
+
+   
+
+
+        public CHtmlElement ownerElement
+        {
+            get
+            {
+                if (this.___ownerElementWeakReference != null)
+                {
+                    return this.___ownerElementWeakReference.Target as CHtmlElement;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+        public CHtmlMediaQueryNode ___MediaQueryNodeInstance = null;
+        public System.WeakReference ___MediaQueryNodeWeakReference = null;
+        public CHtmlPseudoClassType ___PseudoClassType = CHtmlPseudoClassType.None;
+
+        /// <summary>
+        /// Sets or retrieves the media type. 
+        /// ex. screen, all, print
+        /// Keep This Feild As Public
+        /// </summary>
+        public string ___media = null;
+        internal System.Text.StringBuilder ___StyleCommentBuilder = null;
+
+        internal bool ___disabled = false;
+
+        //internal CHtmlWebGradation ___WebGradation = null;
+
+
+
+        internal CHtmlElementStyleType ___StyleType = CHtmlElementStyleType.None;
+        // keep this field as internal
+        internal string ___SelectorID = null;
+        /// <summary>
+        /// Sort Key Which is used for Ground Sort. LEAVE AS 'Field'
+        /// </summary>
+        public string ___GroundSortKey = null;
+
+        /// <summary>
+        /// Working Selector Sorting Key
+        /// </summary>
+        public string ___WorkingKey = null;
+        /// <summary>
+        /// Working Selector Sorting Key
+        /// </summary>
+        public char ___WorkingKeyCombinatorChar = '\0';
+
+        public CHtmlDomTokenList ___WorkingKeyClassList = null;
+
+        public System.Collections.Generic.Dictionary<CHtmlPseudoClassType, CHtmlStyleElementPseudoClassValue?> ___WorkingKeyPseudoTitleList = null;
+
+        public System.Collections.Generic.Dictionary<string, CHtmlStyleElementSelectorKeyAttributeClass?> ___WorkingKeyAttributeKeyList = null;
+
+
+        /// <summary>
+        /// List of Multiple BackgroundImage List for CSS3 support.
+        /// </summary>
+        internal System.Collections.Generic.List<CHtmlStyleElementMultpleImageData> ___multipleBackgroundImageDataSet = null;
+        public CHtmlStyleKey ___WorkingSelectorClassKey = null;
+        /// <summary>
+        /// Length of WorkingSelectorList Items When ___ReCreateWorkingKey() ___hasInner run last Time.
+        /// </summary>
+   
+        public int ___LastReCreateWorkingKeyCompleteListLength = 0;
+
+        internal bool ___IsCssTopValueDefined = false;
+        internal bool ___IsCssRightValueDefined = false;
+        internal bool ___IsCssLeftValueDefined = false;
+        internal bool ___IsCssBottomValueDefined = false;
+        /// <summary>
+        /// CSS Import usage only
+        /// </summary>
+        internal System.WeakReference ___srcElementReference = null;
+
+        /// <summary>
+        /// Property Populated Count through  ___applyElemenetStyleSheets(CHtmlElement htmlElement, bool _ForceReset, bool SkipTagAttributes, bool SkipStylesheet) methods
+        /// </summary>
+
+        /// <summary>
+        /// Foreground Color (System.Color)
+        /// </summary>
+        public ColorSpec ___ForegroundSysColor = new ColorSpec(0, 0, 0);
+        public bool ___IsForegroundSysColorSpecified = false;
+
+        /// <summary>
+        /// Background Color (System.Color)
+        /// </summary>
+        public ColorSpec ___BackgroundSysColor = new ColorSpec(0, 0, 0, 255);
+
+
+        public bool ___IsBackgroundColorSpecified = false;
+        /// <summary>
+        /// How many style information ___hasInner been moved to properties
+        /// </summary>
+        public int ___PropertyMeargedCount = 0;
+
+        /// <summary>
+        /// How many font related properties ___hasInner been set (except for color)
+        /// </summary>
+        internal int ___FontRelatedCount = 0;
+        /// <summary>
+        /// Original Selector Text
+        /// </summary>
+        public string ___SelectorTextOriginal = null;
+
+
+        public int ___MaximumOfWorkingSelectorList = 0;
+
+        /// <summary>
+        /// Indicates ElementStyle Has Combinator
+        /// </summary>
+   
+        public bool ___HasCombinatorChar = false;
+        /// <summary>
+        /// Selector Ranking indicates how important this style is.
+        /// ID -----)) CLASS ----)) TAG
+        /// </summary>
+   
+        public int ___SelectorRanking = 0;
+
+   
+        public double ___SelectorMediaQueryRanking = STYLE_MEDIA_RANKING_LOWEST;
+        public static double STYLE_MEDIA_RANKING_LOWEST = -99999;
+
+   
+        public int ___SelectorConmaCount = 0;
+
+        /// <summary>
+        /// Character postion where this value appears on css.
+        /// </summary>
+   
+        public int ___CSSPosition = int.MaxValue;
+
+
+
+
+
+
+
+
+        public void SetSelectorIDDirect(string val)
+        {
+            this.___SelectorID = val;
+
+        }
+
+
+        /// <summary>
+        /// Just For Debugger GUI Readablitiy
+        /// </summary>
+        public string ___AAA
+        {
+            get { return this.___SelectorID; }
+        }
+        public string SelectorID
+        {
+            get { return this.___SelectorID; }
+            set
+            {
+                this.___SelectorID = value;
+            }
+        }
+        /*
+        public double addRule(object ___selector, object ___style, object ___id)
+        {
+            return this.___addRuleInner(___selector, ___style, ___id);
+        }
+        public double addRule(object ___selector, object ___style)
+        {
+            return this.___addRuleInner(___selector, ___style, null);
+        }
+         * 
+        /// <summary>
+        /// Add Rules to document
+        /// </summary>
+        /// <param name="___selectorObject">SelectorKey</param>
+        /// <param name="___styleObject">styleData</param>
+        /// <param name="___idObject">Position (ignored)</param>
+        /// <returns>always -1</returns>
+        private double ___addRuleInner(object ___selectorObject, object ___styleObject, object ___idObject)
+        {
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel > 10)
+            {
+               commonLog.LogEntry("entering {0}.addRuleInner(\'{1}\', \'{2}\', \'{3}\')", this, ___selectorObject, ___styleObject, ___idObject);
+            }
+            System.Text.StringBuilder sbNewStyle = new System.Text.StringBuilder();
+            bool HasCuryBrucket = false;
+            string selectorValue = commonHTML.GetStringValue(___selectorObject);
+            if (string.IsNullOrEmpty(selectorValue) == false)
+            {
+                // ==============================================================
+                // Some Selector Key may be "DD_belatedPNG\\:shape, DD_belatedPNG\\:fill"
+                // 
+                if (selectorValue.IndexOf('\\') > -1)
+                {
+                    selectorValue = selectorValue.Replace("\\", "");
+                }
+            }
+            string styleValue = commonHTML.GetStringValue(___styleObject);
+            if (string.IsNullOrEmpty(styleValue) == false)
+            {
+                if (styleValue[0] == '{')
+                {
+                    HasCuryBrucket = true;
+                }
+
+            }
+            sbNewStyle.Append(selectorValue);
+
+            sbNewStyle.Append(' ');
+            if (HasCuryBrucket == false)
+            {
+                sbNewStyle.Append('{');
+            }
+            sbNewStyle.Append(styleValue);
+            if (HasCuryBrucket == false)
+            {
+                sbNewStyle.Append('}');
+            }
+            this.cssTextSetter(sbNewStyle.ToString());
+
+            return -1;
+
+        }
+         */
+        /// <summary>
+        /// false if the style sheet is applied to the document. true if it is not. Modifying this attribute may cause a new resolution of style for the document. A stylesheet only applies if both an appropriate medium definition is present and the disabled attribute is false. So, if the media doesn't apply to the current user agent, the disabled attribute is ignored.
+        /// </summary>
+        public bool disabled
+        {
+            set { this.___disabled = value; }
+            get { return this.___disabled; }
+        }
+        public bool Disabled
+        {
+            set { this.___disabled = value; }
+            get { return this.___disabled; }
+        }
+
+
+   
+        public void setAttribute(string sName, string sValue)
+        {
+            this.setAttributeInner(sName, sValue, true, false);
+        }
+   
+        public void setAttribute(string sName, string sValue, bool bOverWrite)
+        {
+            this.setAttributeInner(sName, sValue, bOverWrite, false);
+
+        }
+   
+        public void setAttribute(string sName, string sValue, double ___casesensitive)
+        {
+            this.setAttributeInner(sName, sValue, true, false);
+
+        }
+        /// <summary>
+        /// Just Merge CHtmlStyleAttribute into StyleLists.
+        /// </summary>
+        /// <param name="attribute"></param>
+   
+        internal void ___AddCHtmlStyleAttributeIntoStyleLists(CHtmlStyleAttribute attribute)
+        {
+            this.___styleAttributeList.Add(attribute);
+        }
+   
+        internal void setAttributeInner(string sName, string sValue, bool bOverWrite, bool CaseSensitiveValue)
+        {
+            try
+            {
+                if (this.___HasStyleListSorted == false)
+                {
+                    this.___StyleListSort();
+                }
+                string sLow = "";
+                if (sName != null)
+                {
+                    sLow = commonHTML.FasterTrimAndToLower(sName);
+                }
+                string sValueLow = "";
+                if (CaseSensitiveValue == false)
+                {
+                    sValueLow = commonHTML.FasterToLower(sValue);
+                }
+                else
+                {
+                    sValueLow = sValue;
+                }
+                CHtmlStyleAttribute attrValue = new CHtmlStyleAttribute();
+                attrValue.Name = sLow;
+                attrValue.value = sValueLow;
+                int pos = this.___styleAttributeList.BinarySearch(attrValue, new CHtmlStyleAttributeComparer());
+                if (pos >= 0)
+                {
+                    if (bOverWrite)
+                    {
+                        this.___styleAttributeList[pos] = attrValue;
+                    }
+                }
+                else
+                {
+                    pos = ~pos;
+                    this.___styleAttributeList.Insert(pos, attrValue);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel > 5)
+                {
+                   commonLog.LogEntry("CHtmlCSSStyleSheet setAttributeInner({0}) Error : {1}", sName, ex.Message);
+                }
+            }
+        }
+   
+        public void removeAttribute(string sName, long flag)
+        {
+            try
+            {
+                if (this.___HasStyleListSorted == false)
+                {
+                    this.___StyleListSort();
+                }
+                string sLow = "";
+                if (sName != null)
+                {
+                    sLow = commonHTML.FasterTrimAndToLower(sName);
+                }
+                CHtmlStyleAttribute? attr = null;
+                CHtmlStyleAttribute attrVal = (CHtmlStyleAttribute)attr;
+                attrVal.Name = sLow;
+                int pos = this.___styleAttributeList.BinarySearch(attr, new CHtmlStyleAttributeComparer());
+                if (pos > -1)
+                {
+                    this.___styleAttributeList.RemoveAt(pos);
+
+                }
+                // There may be propery ___hasInner been moved to fields. use 	this.___setPropertyByIndex() to clear fields.
+                if (this.___IsOwnerElementAssigned() == true)
+                {
+                    if (this.ownerElement.___isApplyElemenetStyleSheetCalled == true)
+                    {
+                        this.___setPropertyByName(sName, "");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel > 5)
+                {
+                   commonLog.LogEntry("CHtmlCSSStyleSheet removeAttribute({0}) Error : {1}", sName, ex.Message);
+                }
+            }
+        }
+        /// <summary>
+        /// Reset stylesheet values prior to css recaluculations.
+        /// </summary>
+        internal void ___clearCriticalStyleAttributesBeforeRecalulations()
+        {
+            this.___cssReclacationCount++;
+            //this.___Display = null;
+            // do not clear cssFloat values...now
+            //this.___cssDisplayComputedValueType = CSSDisplayType.UNKNOWN;
+            //this.___cssClearType = CSSElelemntFloatClearType.NotSet;
+            //this.___styleSizeMode = CHtmlSizeModeType.Undefined;
+            //this.___Visibility = null;
+            //this.___cssVisibilityComputedValueType = CSSVisibilityType.visible;
+        }
+   
+        public void removeAttribute(string sName)
+        {
+            this.removeAttribute(sName, 0);
+        }
+   
+        public string getAttribute(string sName, long flag)
+        {
+            try
+            {
+                if (this.___HasStyleListSorted == false)
+                {
+                    this.___StyleListSort();
+                }
+                string sLow = "";
+                if (sName != null)
+                {
+                    sLow = commonHTML.FasterTrimAndToLower(sName);
+                }
+                CHtmlStyleAttribute? attr = null;
+                CHtmlStyleAttribute attrVal = (CHtmlStyleAttribute)attr;
+                attrVal.Name = sLow;
+                int pos = this.___styleAttributeList.BinarySearch(attr, new CHtmlStyleAttributeComparer());
+                if (pos > -1)
+                {
+                    CHtmlStyleAttribute? xattr = this.___styleAttributeList[pos];
+                    if (xattr != null)
+                    {
+                        CHtmlStyleAttribute styleAttribute = (CHtmlStyleAttribute)xattr;
+                        return styleAttribute.value;
+                    }
+                    else
+                    {
+                        return "";
+                    }
+
+                }
+                else
+                {
+                    return "";
+
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel > 5)
+                {
+                   commonLog.LogEntry("CHtmlCSSStyleSheet getAttribute({0}) Error : {1}", sName, ex.Message);
+                }
+            }
+            return "";
+
+        }
+        internal bool ___HasStyleListSorted = false;
+        /// <summary>
+        /// Sort StyleLists Elements by name
+        /// As Default StyleLists are not sorted.
+        /// It is sorted when jscript access with special methods.
+        /// </summary>
+        internal void ___StyleListSort()
+        {
+            try
+            {
+
+                this.___styleAttributeList.Sort(new CHtmlStyleAttributeComparer());
+                this.___HasStyleListSorted = true;
+
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel > 3)
+                {
+                   commonLog.LogEntry("StyleListSort Exception", ex);
+                }
+            }
+        }
+        public CHtmlStyleAttribute? getStyleElemenetAttributeClassByName(string _name)
+        {
+            try
+            {
+                if (this.___HasStyleListSorted == false)
+                {
+                    this.___StyleListSort();
+                }
+                CHtmlStyleAttribute? attr = null;
+                CHtmlStyleAttribute attrVal = (CHtmlStyleAttribute)attr;
+                attrVal.Name = _name;
+                int pos = this.___styleAttributeList.BinarySearch(attr, new CHtmlStyleAttributeComparer());
+                if (pos > -1)
+                {
+                    return this.___styleAttributeList[pos];
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel > 5)
+                {
+                   commonLog.LogEntry("CHtmlCSSStyleSheet getStyleElemenetAttributeClassByName({0}) Error : {1}", _name, ex.Message);
+                }
+            }
+            return null;
+        }
+        
+        /// <summary>
+        /// Create CHtmlCSSStylesheet instance for this node as ".___sheet".
+        /// it can be access as element.sheet by script.
+        /// This methods can be called multiple times for dynamic elements.
+        /// </summary>
+        internal static void ___createCHtmlCSSStylesheetForElement(CHtmlElement ___elem)
+        {
+            if (___elem.___elementTagType  == CHtmlElementType.STYLE || ___elem.___elementTagType  == CHtmlElementType.LINK)
+            {
+
+                if (___elem.___sheet == null)
+                {
+                    ___elem.___sheet = new CHtmlCSSStyleSheet(CHtmlElementStyleType.Element);
+                }
+
+
+                ___elem.___sheet.___disabled = ___elem.disabled;
+
+
+                if (string.IsNullOrEmpty(___elem.___type) == false)
+                {
+                    ___elem.___sheet.___type = string.Copy(___elem.___type);
+                }
+                if (___elem.___attributes.ContainsKey("media") == true)
+                {
+                    ___elem.___sheet.___media = string.Copy(commonHTML.GetElementAttributeInString(___elem, "media"));
+                }
+            }
+        }
+        
+
+   
+
+   
+        public void setProperty(object _nameObject, object __oValue)
+        {
+            this.___setPropertyInner(_nameObject, __oValue, null);
+        }
+   
+        public void setProperty(object _nameObject, object __oValue, object __oPriority)
+        {
+            this.___setPropertyInner(_nameObject, __oValue, __oPriority);
+        }
+   
+        private void ___setPropertyInner(object _nameObject, object __oValue, object __oPriority)
+        {
+            try
+            {
+                // style.setProperty() can use 'background-color', not 'backgroundColor'
+                // we remove '-' to set.
+                string sName = commonHTML.GetStringValue(_nameObject);
+                if (sName.IndexOf('-') > -1)
+                {
+                    sName = sName.Replace("-", "");
+                }
+                this.___setPropertyByName(sName, __oValue);
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel > 5)
+                {
+                   commonLog.LogEntry("CHtmlCSSStyleSheet setProperty({0}) Error : {1}", _nameObject, ex.Message);
+                }
+            }
+
+        }
+   
+        public object getPropertyCSSValue(object _nameObject)
+        {
+            try
+            {
+                return this.___getPropertyByName(commonHTML.GetStringValue(_nameObject));
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel > 5)
+                {
+                   commonLog.LogEntry("CHtmlCSSStyleSheet getPropertyCSSValue({0}) Error : {1}", _nameObject, ex.Message);
+                }
+            }
+            return "";
+        }
+        public string title
+        {
+            set
+            {
+                this.___SelectorID = value;
+            }
+            get
+            {
+                return this.___SelectorID;
+            }
+        }
+        public string Title
+        {
+            set
+            {
+                this.___SelectorID = value;
+            }
+            get
+            {
+                return this.___SelectorID;
+            }
+        }
+
+        internal string ___baseUrl = null;
+
+        internal string ___ImageUrlHint = null;
+
+
+        public string media
+        {
+            set { this.___media = value; }
+            get { return this.___media; }
+        }
+        public string Media
+        {
+            set { this.___media = value; }
+            get { return this.___media; }
+        }
+        internal string ___Align = null;
+        public string Align
+        {
+            set { this.___Align = value; }
+            get { return this.___Align; }
+        }
+        public string align
+        {
+            set { this.___Align = value; }
+            get { return this.___Align; }
+        }
+        internal string ___AlignItems = null;
+        /// <summary>
+        /// Flex Related Parameter
+        /// </summary>
+        public string AlignItems
+        {
+            get { return this.___AlignItems; }
+            set { this.___AlignItems = value; }
+        }
+        /// <summary>
+        /// Flex Related Parameter
+        /// </summary>
+        public string alignitems
+        {
+            get { return this.___AlignItems; }
+            set { this.___AlignItems = value; }
+        }
+        /// <summary>
+        /// Flex Related Parameter
+        /// </summary>
+        public string alignItems
+        {
+            get { return this.___AlignItems; }
+            set { this.___AlignItems = value; }
+        }
+        internal string ___Appearance = null;
+        public string appearance
+        {
+            set { this.___Appearance = value; }
+            get { return this.___Appearance; }
+        }
+        public string Appearance
+        {
+            set { this.___Appearance = value; }
+            get { return this.___Appearance; }
+        }
+        public string mozAppearance
+        {
+            set { this.___Appearance = value; }
+            get { return this.___Appearance; }
+        }
+        public string MozAppearance
+        {
+            set { this.___Appearance = value; }
+            get { return this.___Appearance; }
+        }
+        public string webkitAppearance
+        {
+            set { this.___Appearance = value; }
+            get { return this.___Appearance; }
+        }
+        public string WebkitAppearance
+        {
+            set { this.___Appearance = value; }
+            get { return this.___Appearance; }
+        }
+        public string msAppearance
+        {
+            set { this.___Appearance = value; }
+            get { return this.___Appearance; }
+        }
+        public string oAppearance
+        {
+            set { this.___Appearance = value; }
+            get { return this.___Appearance; }
+        }
+        internal string ___FrameBorder = null;
+        public string FrameBorder
+        {
+            get { return this.___FrameBorder; }
+            set { this.___FrameBorder = value; }
+        }
+        public string frameBorder
+        {
+            get { return this.___FrameBorder; }
+            set { this.___FrameBorder = value; }
+        }
+        private string ___fullscreen = null;
+        /// <summary>
+        /// fullscreen. possible values are like . 'width: 100%; height: 100%'
+        /// </summary>
+        public string fullscreen
+        {
+            get { return this.___fullscreen; }
+            set { this.___fullscreen = value; }
+        }
+        /// <summary>
+        /// fullscreen. possible values are like . 'width: 100%; height: 100%'
+        /// </summary>
+        public string mozfullscreen
+        {
+            get { return this.___fullscreen; }
+            set { this.___fullscreen = value; }
+        }
+        /// <summary>
+        /// fullscreen. possible values are like . 'width: 100%; height: 100%'
+        /// </summary>
+        public string webkitfullscreen
+        {
+            get { return ___convertNullToEmpty(this.___fullscreen); }
+            set { this.___fullscreen = value; }
+        }
+        /// <summary>
+        /// fullscreen. possible values are like . 'width: 100%; height: 100%'
+        /// </summary>
+        public string msfullscreen
+        {
+            get { return ___convertNullToEmpty(this.___fullscreen); }
+            set { this.___fullscreen = value; }
+        }
+        /// <summary>
+        /// fullscreen. possible values are like . 'width: 100%; height: 100%'
+        /// </summary>
+        public string ofullscreen
+        {
+            get { return ___convertNullToEmpty(this.___fullscreen); }
+            set { this.___fullscreen = value; }
+        }
+        public string frameborder
+        {
+            get { return ___convertNullToEmpty(this.___FrameBorder); }
+            set { this.___FrameBorder = value; }
+        }
+
+        private string ___Font = null;
+        public string Font
+        {
+            set
+            {
+                this.___Font = value;
+                this.___FontRelatedCount++;
+            }
+            get { return ___convertNullToEmpty(this.___Font); }
+        }
+        public string font
+        {
+            set
+            {
+                this.___Font = value;
+                this.___FontRelatedCount++;
+            }
+            get { return ___convertNullToEmpty(this.___Font); }
+        }
+        private string ___FontSize = null;
+
+        public string FontSize
+        {
+            set
+            {
+                this.___FontSize = value;
+                this.___FontRelatedCount++;
+            }
+            get { return ___convertNullToEmpty(this.___FontSize); }
+        }
+        public string fontsize
+        {
+            set
+            {
+                this.___FontSize = value;
+                this.___FontRelatedCount++;
+            }
+            get { return ___convertNullToEmpty(this.___FontSize); }
+        }
+        public string fontSize
+        {
+            set
+            {
+                this.___FontSize = value;
+                this.___FontRelatedCount++;
+            }
+            get { return ___convertNullToEmpty(this.___FontSize); }
+        }
+
+
+        private string ___FontStyle = null;
+        internal CSSFontStyleType ___FontStyleComputedValueType = CSSFontStyleType.normal;
+        private void ___GetFontStyleType()
+        {
+            switch (this.___FontStyle)
+            {
+                case "normal":
+                    this.___FontStyleComputedValueType = CSSFontStyleType.normal;
+                    break;
+                case "italic":
+                    this.___FontStyleComputedValueType = CSSFontStyleType.italic;
+                    break;
+                case "oblique":
+                    this.___FontStyleComputedValueType = CSSFontStyleType.oblique;
+                    break;
+            }
+        }
+        public string FontStyle
+        {
+            set
+            {
+                this.___FontStyle = value;
+                this.___GetFontStyleType();
+                this.___FontRelatedCount++;
+            }
+            get { return ___convertNullToEmpty(this.___FontStyle); }
+        }
+        public string fontstyle
+        {
+            set
+            {
+                this.___FontStyle = value;
+                this.___GetFontStyleType();
+                this.___FontRelatedCount++;
+            }
+            get { return ___convertNullToEmpty(this.___FontStyle); }
+        }
+        /// <summary>
+        /// Obsolute Use FontSpec Color Use 'Color' 
+        /// </summary>
+
+        private string ___FontColor = null;
+
+        public string FontColor
+        {
+            set { this.___FontColor = value; }
+            get { return ___convertNullToEmpty(this.___FontColor); }
+        }
+        public string fontcolor
+        {
+            set { this.___FontColor = value; }
+            get { return ___convertNullToEmpty(this.___FontColor); }
+        }
+
+        internal string ___FontFamilyComputedStringValue = null;
+        internal string ___FontKerning = null;
+        public string fontKerning
+        {
+            set { this.___FontKerning = value; }
+            get { return ___convertNullToEmpty(this.___FontKerning); }
+        }
+        public string FontKerning
+        {
+            set { this.___FontKerning = value; }
+            get { return ___convertNullToEmpty(this.___FontKerning); }
+        }
+        internal string ___FontFamily = null;
+
+        public string FontFamily
+        {
+            set
+            {
+                this.___FontFamily = value;
+                this.___FontRelatedCount++;
+            }
+            get { return ___convertNullToEmpty(this.___FontFamily); }
+        }
+        public string fontfamily
+        {
+            set
+            {
+                this.___FontFamily = value;
+                this.___FontRelatedCount++;
+            }
+            get { return ___convertNullToEmpty(this.___FontFamily); }
+        }
+        public string fontFamily
+        {
+            set
+            {
+                this.___FontFamily = value;
+                this.___FontRelatedCount++;
+            }
+            get { return ___convertNullToEmpty(this.___FontFamily); }
+        }
+
+        private string ___FontWeight = null;
+        internal CSSFontWeightType ___FontWeightComputedValueType = CSSFontWeightType.normal;
+        private void ___GetFontWeightType()
+        {
+            switch (this.___FontWeight)
+            {
+                case null:
+                case "none":
+                case "":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.normal;
+                    break;
+                case "bold":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.bold;
+                    break;
+                case "bolder":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.bolder;
+                    break;
+                case "light":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.light;
+                    break;
+                case "lighter":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.lighter;
+                    break;
+                case "100":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.n100;
+                    break;
+                case "200":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.n200;
+                    break;
+                case "300":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.n300;
+                    break;
+                case "400":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.n400;
+                    break;
+                case "500":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.n500;
+                    break;
+                case "600":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.n600;
+                    break;
+                case "700":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.n700;
+                    break;
+                case "800":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.n800;
+                    break;
+                case "900":
+                    this.___FontWeightComputedValueType = CSSFontWeightType.n900;
+                    break;
+
+            }
+        }
+        public string FontWeight
+        {
+            set
+            {
+                this.___FontWeight = value;
+                ___GetFontWeightType();
+                this.___FontRelatedCount++;
+            }
+            get { return this.___FontWeight; }
+        }
+        public string fontweight
+        {
+            set
+            {
+                this.___FontWeight = value;
+                ___GetFontWeightType();
+                this.___FontRelatedCount++;
+            }
+            get { return this.___FontWeight; }
+        }
+        public string fontWeight
+        {
+            set
+            {
+                this.___FontWeight = value;
+                ___GetFontWeightType();
+                this.___FontRelatedCount++;
+            }
+            get { return this.___FontWeight; }
+        }
+        private string ___FontVariant = null;
+        public string FontVariant
+        {
+            set { this.___FontVariant = value; }
+            get { return ___convertNullToEmpty(this.___FontVariant); }
+        }
+        public string fontvariant
+        {
+            set { this.___FontVariant = value; }
+            get { return this.___FontVariant; }
+        }
+        public string fontVariant
+        {
+            set { this.___FontVariant = value; }
+            get { return this.___FontVariant; }
+        }
+        private string ___FontFeatureSettings = null;
+        public string fontfeaturesettings
+        {
+            set { this.___FontFeatureSettings = value; }
+            get { return this.___FontFeatureSettings; }
+        }
+        public string fontFeatureSettings
+        {
+            set { this.___FontFeatureSettings = value; }
+            get { return this.___FontFeatureSettings; }
+        }
+        public string fontfeatureSettings
+        {
+            set { this.___FontFeatureSettings = value; }
+            get { return this.___FontFeatureSettings; }
+        }
+        internal string ___FontSmoothing = null;
+        public string fontSmoothing
+        {
+            set { this.___FontSmoothing = value; }
+            get { return ___convertNullToEmpty(this.___FontSmoothing); }
+        }
+        public string FontSmoothing
+        {
+            set { this.___FontSmoothing = value; }
+            get { return ___convertNullToEmpty(this.___FontSmoothing); }
+        }
+
+        internal string ___FontSizeAdjust = null;
+        public string FontSizeAdjust
+        {
+            set { this.___FontSizeAdjust = value; }
+            get { return ___convertNullToEmpty(this.___FontSizeAdjust); }
+        }
+        public string fontSizeAdjust
+        {
+            set { this.___FontSizeAdjust = value; }
+            get { return this.___FontSizeAdjust; }
+        }
+        public string fontsizeadjust
+        {
+            set { this.___FontSizeAdjust = value; }
+            get { return this.___FontSizeAdjust; }
+        }
+        internal string ___GridColumns = null;
+        /// <summary>
+        /// Do not confuse with GridColumn
+        /// </summary>
+        public string GridColumns
+        {
+            get { return this.___GridColumns; }
+            set { this.___GridColumns = value; }
+        }
+        /// <summary>
+        /// Do not confuse with GridColumn
+        /// </summary>
+        public string gridColumns
+        {
+            get { return this.___GridColumns; }
+            set { this.___GridColumns = value; }
+        }
+        /// <summary>
+        /// Do not confuse with GridColumn
+        /// </summary>
+        public string gridcolumns
+        {
+            get { return this.___GridColumns; }
+            set { this.___GridColumns = value; }
+        }
+        internal string ___GridColumn = null;
+        /// <summary>
+        /// Do not confuse with GridColumns
+        /// </summary>
+        public string GridColumn
+        {
+            get { return this.___GridColumn; }
+            set { this.___GridColumn = value; }
+        }
+        /// <summary>
+        /// Do not confuse with GridColumns
+        /// </summary>
+        public string gridColumn
+        {
+            get { return this.___GridColumn; }
+            set { this.___GridColumn = value; }
+        }
+        /// <summary>
+        /// Do not confuse with GridColumns
+        /// </summary>
+        public string gridcolumn
+        {
+            get { return this.___GridColumn; }
+            set { this.___GridColumn = value; }
+        }
+        internal string ___GridColumnAlign = null;
+        public string GridColumnAlign
+        {
+            get { return this.___GridColumnAlign; }
+            set { this.___GridColumnAlign = value; }
+        }
+        public string gridcolumnalign
+        {
+            get { return this.___GridColumnAlign; }
+            set { this.___GridColumnAlign = value; }
+        }
+        public string gridColumnAlign
+        {
+            get { return this.___GridColumnAlign; }
+            set { this.___GridColumnAlign = value; }
+        }
+        internal string ___GridColumnSpan = null;
+        public string GridColumnSpan
+        {
+            set { this.___GridColumnSpan = value; }
+            get { return this.___GridColumnSpan; }
+        }
+        public string gridcolumnspan
+        {
+            set { this.___GridColumnSpan = value; }
+            get { return this.___GridColumnSpan; }
+        }
+        public string gridColumnSpan
+        {
+            set { this.___GridColumnSpan = value; }
+            get { return this.___GridColumnSpan; }
+        }
+        internal string ___GridRows = null;
+        /// <summary>
+        /// Dont Confuse with GridRow
+        /// </summary>
+        public string GridRows
+        {
+            get { return this.___GridRows; }
+            set { this.___GridRows = value; }
+        }
+        /// <summary>
+        /// Dont Confuse with GridRow
+        /// </summary>
+        public string gridrows
+        {
+            get { return this.___GridRows; }
+            set { this.___GridRows = value; }
+        }
+
+        internal string ___GridRow = null;
+        public string GridRow
+        {
+            get { return this.___GridRow; }
+            set { this.___GridRow = value; }
+        }
+        public string gridrow
+        {
+            get { return this.___GridRow; }
+            set { this.___GridRow = value; }
+        }
+        internal string ___GridRowAlign = null;
+        public string GridRowAlign
+        {
+            get { return this.___GridRowAlign; }
+            set { this.___GridRowAlign = value; }
+        }
+        public string gridrowalign
+        {
+            get { return this.___GridRowAlign; }
+            set { this.___GridRowAlign = value; }
+        }
+        internal string ___GridRowSpan = null;
+        public string GridRowSpan
+        {
+            get { return this.___GridRowSpan; }
+            set { this.___GridRowSpan = value; }
+        }
+        public string gridrowspan
+        {
+            get { return this.___GridRowSpan; }
+            set { this.___GridRowSpan = value; }
+        }
+
+        internal string ___tapHighlightColor = null;
+        public string tapHighlightColor
+        {
+            set { this.___tapHighlightColor = value; }
+            get { return this.___tapHighlightColor; }
+        }
+        public string TapHighlightColor
+        {
+            set { this.___tapHighlightColor = value; }
+            get { return this.___tapHighlightColor; }
+        }
+        public string taphighlightcolor
+        {
+            set { this.___tapHighlightColor = value; }
+            get { return this.___tapHighlightColor; }
+        }
+        internal string ___TabStops = null;
+        public string TabStops
+        {
+            set { this.___TabStops = value; }
+            get { return this.___TabStops; }
+        }
+        public string tabStops
+        {
+            set { this.___TabStops = value; }
+            get { return this.___TabStops; }
+        }
+        public string tabstops
+        {
+            set { this.___TabStops = value; }
+            get { return this.___TabStops; }
+        }
+        internal string ___TextJustify = null;
+        public string TextJustify
+        {
+            set { this.___TextJustify = value; }
+            get { return this.___TextJustify; }
+        }
+        public string textJustify
+        {
+            set { this.___TextJustify = value; }
+            get { return this.___TextJustify; }
+        }
+        public string textjustify
+        {
+            set { this.___TextJustify = value; }
+            get { return this.___TextJustify; }
+        }
+        internal string ___TextSizeAdjust = null;
+        public string TextSizeAdjust
+        {
+            set { this.___TextSizeAdjust = value; }
+            get { return this.___TextSizeAdjust; }
+        }
+        public string textSizeAdjust
+        {
+            set { this.___TextSizeAdjust = value; }
+            get { return this.___TextSizeAdjust; }
+        }
+        public string textsizeadjust
+        {
+            set { this.___TextSizeAdjust = value; }
+            get { return this.___TextSizeAdjust; }
+        }
+
+        internal string ___TextUnderLine = null;
+        public string TextUnderLine
+        {
+            set { this.___TextUnderLine = value; }
+            get { return this.___TextUnderLine; }
+        }
+        public string textUnderLine
+        {
+            set { this.___TextUnderLine = value; }
+            get { return this.___TextUnderLine; }
+        }
+        public string textunderLine
+        {
+            set { this.___TextUnderLine = value; }
+            get { return this.___TextUnderLine; }
+        }
+
+        internal string ___Page = null;
+        public string Page
+        {
+            set { this.___Page = value; }
+            get { return this.___Page; }
+        }
+        public string page
+        {
+            set { this.___Page = value; }
+            get { return this.___Page; }
+        }
+        internal string ___PageBreakAfter = null;
+        public string PageBreakAfter
+        {
+            set { this.___PageBreakAfter = value; }
+            get { return this.___PageBreakAfter; }
+        }
+        public string pageBreakAfter
+        {
+            set { this.___PageBreakAfter = value; }
+            get { return this.___PageBreakAfter; }
+        }
+        internal string ___PageBreakBefore = null;
+        public string PageBreakBefore
+        {
+            set { this.___PageBreakBefore = value; }
+            get { return this.___PageBreakBefore; }
+        }
+        public string pageBreakBefore
+        {
+            set { this.___PageBreakBefore = value; }
+            get { return this.___PageBreakBefore; }
+        }
+        internal string ___PageBreakInside = null;
+        public string PageBreakInside
+        {
+            get { return this.___PageBreakInside; }
+            set { this.___PageBreakInside = value; }
+        }
+        public string pageBreakInside
+        {
+            get { return this.___PageBreakInside; }
+            set { this.___PageBreakInside = value; }
+        }
+        public string pagebreakinside
+        {
+            get { return this.___PageBreakInside; }
+            set { this.___PageBreakInside = value; }
+        }
+        internal string ___Perspective = null;
+        public string Perspective
+        {
+            get { return this.___Perspective; }
+            set { this.___Perspective = value; }
+        }
+        public string perspective
+        {
+            get { return this.___Perspective; }
+            set { this.___Perspective = value; }
+        }
+        public string msPerspective
+        {
+            get { return this.___Perspective; }
+            set { this.___Perspective = value; }
+        }
+        public string mozPerspective
+        {
+            get { return this.___Perspective; }
+            set { this.___Perspective = value; }
+        }
+        public string webkitPerspective
+        {
+            get { return this.___Perspective; }
+            set { this.___Perspective = value; }
+        }
+        internal string ___PerspectiveOrigin = null;
+        public string PerspectiveOrigin
+        {
+            get { return this.___PerspectiveOrigin; }
+            set { this.___PerspectiveOrigin = value; }
+        }
+        public string perspectiveOrigin
+        {
+            get { return this.___PerspectiveOrigin; }
+            set { this.___PerspectiveOrigin = value; }
+        }
+        public string perspectiveorigin
+        {
+            get { return this.___PerspectiveOrigin; }
+            set { this.___PerspectiveOrigin = value; }
+        }
+        internal string ___TransformStyle = null;
+        public string TransformStyle
+        {
+            get { return this.___TransformStyle; }
+            set { this.___TransformStyle = value; }
+        }
+        internal string ___LineHeight = null;
+        internal double ___LineHeightComputedValue = -1;
+        public string LineHeight
+        {
+            set { this.___LineHeight = value; }
+            get { return this.___LineHeight; }
+        }
+        public string lineHeight
+        {
+            set { this.___LineHeight = value; }
+            get { return this.___LineHeight; }
+        }
+        public string lineheight
+        {
+            set { this.___LineHeight = value; }
+            get { return this.___LineHeight; }
+        }
+
+        internal string ___LineBreak = null;
+        public string LineBreak
+        {
+            set { this.___LineBreak = value; }
+            get { return this.___LineBreak; }
+        }
+        public string lineBreak
+        {
+            set { this.___LineBreak = value; }
+            get { return this.___LineBreak; }
+        }
+        public string linebreak
+        {
+            set { this.___LineBreak = value; }
+            get { return this.___LineBreak; }
+        }
+        internal string ___Clear = null;
+        internal CSSElelemntFloatClearType ___cssClearType = CSSElelemntFloatClearType.NotSet;
+        public string clear
+        {
+            set
+            {
+                this.___Clear = value;
+                ___CheckCSSClear();
+            }
+            get { return ___convertNullToEmpty(this.___Clear); }
+        }
+        public string Clear
+        {
+            set
+            {
+                this.___Clear = value;
+                ___CheckCSSClear();
+            }
+            get { return ___convertNullToEmpty(this.___Clear); }
+        }
+        private void ___CheckCSSClear()
+        {
+            if (string.IsNullOrEmpty(this.___Clear) == true)
+            {
+                this.___cssClearType = CSSElelemntFloatClearType.NotSet;
+            }
+            else if (string.Equals(this.___Clear, "left", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                this.___cssClearType = CSSElelemntFloatClearType.Left;
+            }
+            else if (string.Equals(this.___Clear, "right", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                this.___cssClearType = CSSElelemntFloatClearType.Right;
+            }
+            else if (string.Equals(this.___Clear, "both", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                this.___cssClearType = CSSElelemntFloatClearType.Both;
+            }
+            else
+            {
+                this.___cssClearType = CSSElelemntFloatClearType.NotSet;
+            }
+        }
+
+        internal CSSDisplayType ___cssDisplayComputedValueType = CSSDisplayType.UNKNOWN;
+        /// <summary>
+        /// Node Style Display is critcal for layout. Use Properties Always.
+        /// </summary>
+        internal string ___Display = null;
+        public string Display
+        {
+            set
+            {
+                this.___Display = value;
+                ___GetDisplayType();
+            }
+            get { return ___convertNullToEmpty(this.___Display); }
+        }
+        public string display
+        {
+            set
+            {
+                this.___Display = value;
+
+                ___GetDisplayType();
+            }
+            get { return ___convertNullToEmpty(this.___Display); }
+        }
+        private static string ___convertNullToEmpty(string ___value)
+        {
+            if (___value == null)
+                return "";
+            return ___value;
+        }
+        internal void ___GetDisplayType()
+        {
+            switch (this.___Display)
+            {
+                case null:
+                case "":
+                case " ":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Block;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+
+                    return;
+                case "relative": // bug but handle as block
+
+                    ___cssDisplayComputedValueType = CSSDisplayType.Block;
+                    return;
+                case "none":
+                    ___cssDisplayComputedValueType = CSSDisplayType.None;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(true, false);
+                    }
+                    return;
+                case "inline":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Inline;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(true, true);
+                    }
+                    return;
+                case "block":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Block;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(true, true);
+                    }
+                    return;
+                case "inline-block":
+                case "inlne-block":
+                case "inlineblock":
+                    ___cssDisplayComputedValueType = CSSDisplayType.InlineBlock;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "inline-stack":
+                case "inlinestack":
+                    ___cssDisplayComputedValueType = CSSDisplayType.InlineStack;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "inline-box":
+                    ___cssDisplayComputedValueType = CSSDisplayType.InlineBox;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "box":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Box;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "flex":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Flex;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "flex-box":
+                case "flexbox":
+                    ___cssDisplayComputedValueType = CSSDisplayType.FlexBox;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "compact":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Compact;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "grid":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Grid;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "inlinegrid":
+                case "inline-grid":
+                    ___cssDisplayComputedValueType = CSSDisplayType.InlineGrid;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "list-item":
+                    ___cssDisplayComputedValueType = CSSDisplayType.ListItem;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "run-in":
+                    ___cssDisplayComputedValueType = CSSDisplayType.RunIn;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "marker":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Marker;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "inline-table":
+                    ___cssDisplayComputedValueType = CSSDisplayType.InlineTable;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "table":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Table;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "table-cell":
+                    ___cssDisplayComputedValueType = CSSDisplayType.TableCell;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "table-row":
+                    ___cssDisplayComputedValueType = CSSDisplayType.TableRow;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "table-caption":
+                    ___cssDisplayComputedValueType = CSSDisplayType.TableCaption;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "table-header-group":
+                    ___cssDisplayComputedValueType = CSSDisplayType.TableHeaderGroup;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "table-column-group":
+                    ___cssDisplayComputedValueType = CSSDisplayType.TableColumnGroup;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "table-footer-group":
+                    ___cssDisplayComputedValueType = CSSDisplayType.TableFooterGroup;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "ruby":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Ruby;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "ruby-text":
+                    ___cssDisplayComputedValueType = CSSDisplayType.RubyText;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "ruby-text-group":
+                    ___cssDisplayComputedValueType = CSSDisplayType.RubyTextGroup;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "ruby-base-group":
+                    ___cssDisplayComputedValueType = CSSDisplayType.RubyBaseGroup;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+                case "inherit":
+                    ___cssDisplayComputedValueType = CSSDisplayType.Inherit;
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ____switchOwnerElementVisibilityByDisplayType(false, true);
+                    }
+                    return;
+
+            }
+            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 5)
+            {
+               commonLog.LogEntry("Unknown Style Display Type : " + this.___Display);
+            }
+            this.___cssDisplayComputedValueType = CSSDisplayType.Block;
+        }
+        private void ____switchOwnerElementVisibilityByDisplayType(bool ___originalVisible, bool ___targetVisible)
+        {
+            if (this.___StyleType == CHtmlElementStyleType.Element && this.___IsOwnerElementAssigned() == true)
+            {
+                CHtmlElement ___owner = this.ownerElement;
+                if (___owner != null)
+                {
+                    if (___owner.___IsElementVisible == ___originalVisible && ___owner.___isApplyElemenetStyleSheetCalled == true)
+                    {
+                        if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                        {
+                           commonLog.LogEntry("Style Display ___hasInner switched to '{0}' for {1}. Element Visibility switch {2} -> {3}", this.___Display, ___owner, ___originalVisible, ___targetVisible);
+                        }
+                        ___cssDisplayComputedValueType = CSSDisplayType.Block;
+                        ___owner.___IsElementVisible = ___targetVisible;
+                    }
+                    ___owner.___IsElementVisible = ___targetVisible;
+                }
+            }
+        }
+        internal string ___Orphans;
+        public string orphans
+        {
+            get { return ___convertNullToEmpty(this.___Orphans); }
+            set { this.___Orphans = value; }
+        }
+        public string Orphans
+        {
+            get { return ___convertNullToEmpty(this.___Orphans); }
+            set { this.___Orphans = value; }
+        }
+        internal string ___MarginStart = null;
+        public string MarginStart
+        {
+            get { return ___convertNullToEmpty(this.___MarginStart); }
+            set { this.___MarginStart = value; }
+        }
+        public string marginstart
+        {
+            get { return ___convertNullToEmpty(this.___MarginStart); }
+            set { this.___MarginStart = value; }
+        }
+        internal string ___MarginEnd = null;
+        public string MarginEnd
+        {
+            get { return ___convertNullToEmpty(this.___MarginEnd); }
+            set { this.___MarginEnd = value; }
+        }
+        public string marginEnd
+        {
+            get { return ___convertNullToEmpty(this.___MarginEnd); }
+            set { this.___MarginEnd = value; }
+        }
+        public string marginend
+        {
+            get { return ___convertNullToEmpty(this.___MarginEnd); }
+            set { this.___MarginEnd = value; }
+        }
+
+        internal string ___Width = null;
+        internal double ___WidthComputedValue = 0;
+        internal bool ___isWidthValueSet = false;
+        internal bool ___isWidthValuePercent = false;
+        internal bool ___isWidthDynamicCalculationRequired = false;
+        public double posWidth
+        {
+            set
+            {
+                this.___Width = value.ToString();
+            }
+            get
+            {
+                return commonHTML.GetDoubleValueFromString(this.___Width, 0, this.___HTMLTagRemUnitSize);
+            }
+        }
+        internal string ___Widows = null;
+        /// <summary>
+        /// The widows property sets or returns the minimum number of lines for an element that must be visible at the top of a page (for printing or print preview).		The widows property only affects block-level elements.		Tip: widows:5 means that at least 5 lines must be visible below the page break.
+        ///Tip: See the orphans property to set or return the minimum number of lines for an element that must be visible at the bottom of a page.
+        /// </summary>
+        public string widows
+        {
+            get { return this.___Widows; }
+            set { this.___Widows = value; }
+        }
+        /// <summary>
+        /// The widows property sets or returns the minimum number of lines for an element that must be visible at the top of a page (for printing or print preview).		The widows property only affects block-level elements.		Tip: widows:5 means that at least 5 lines must be visible below the page break.
+        ///Tip: See the orphans property to set or return the minimum number of lines for an element that must be visible at the bottom of a page.
+        /// </summary>
+        public string Widows
+        {
+            get { return this.___Widows; }
+            set { this.___Widows = value; }
+        }
+        public double poswidth
+        {
+            set
+            {
+                this.posWidth = value;
+
+            }
+            get
+            {
+                return this.posWidth;
+            }
+        }
+        public double pixelWidth
+        {
+            set { this.posWidth = value; }
+            get { return this.posWidth; }
+        }
+
+        public string width
+        {
+            get { return this.___Width; }
+            set
+            {
+                this.___Width = value;
+                ___checkStringValue(this.___Width, ref this.___WidthComputedValue, ref  this.___isWidthValueSet, ref this.___isWidthValuePercent, true, false);
+                if (this.___isWidthValueSet == true)
+                {
+                    this.___setStyleSizingMode(CHtmlSizeModeType.Width);
+                }
+                if (this.___isApplyElemenetStyleSheetsForElementDone == true)
+                {
+                    GetRecaluclateWidth();
+                }
+            }
+        }
+        public string Width
+        {
+            get { return this.___Width; }
+            set
+            {
+                this.___Width = value;
+                ___checkStringValue(this.___Width, ref this.___WidthComputedValue, ref  this.___isWidthValueSet, ref this.___isWidthValuePercent, true, false);
+                if (this.___isWidthValueSet == true && this.___isWidthValuePercent == false)
+                {
+                    this.___setStyleSizingMode(CHtmlSizeModeType.Width);
+                }
+                if (this.___isApplyElemenetStyleSheetsForElementDone == true)
+                {
+                    GetRecaluclateWidth();
+                }
+            }
+        }
+
+
+        internal void GetRecaluclateWidth()
+        {
+            if (this.___IsOwnerElementAssigned() == true)
+            {
+                CHtmlElement ___owner = this.ownerElement;
+                if (___owner != null && ___owner.___isApplyElemenetStyleSheetCalled == true)
+                {
+                    if (this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        if (___owner.___parentWeakRef != null && ___owner.___parentWeakRef.Target is CHtmlElement)
+                        {
+                            ___owner.___offsetWidth = commonHTML.GetDoubleValueFromString(this.___Width, ___owner.___getParentElement().___availWidth, this.___HTMLTagRemUnitSize);
+                        }
+                        else
+                        {
+                            ___owner.___offsetWidth = commonHTML.GetDoubleValueFromString(this.___Width, ___owner.___availWidth, this.___HTMLTagRemUnitSize);
+
+                        }
+                    }
+                }
+            }
+        }
+        internal void GetRecaluclateHeight()
+        {
+            try
+            {
+                if (this.___IsOwnerElementAssigned() == true)
+                {
+                    CHtmlElement ___owner = this.ownerElement;
+                    if (___owner != null && ___owner.___isApplyElemenetStyleSheetCalled == true)
+                    {
+                        if (this.___StyleType == CHtmlElementStyleType.Element)
+                        {
+
+
+                            CHtmlElement ___parentElement = ___owner.___getParentElement();
+                            if (___parentElement != null)
+                            {
+                                ___owner.___offsetHeight = commonHTML.GetDoubleValueFromString(this.___Height, ___parentElement.___availHeight, this.___HTMLTagRemUnitSize);
+                            }
+                            else
+                            {
+                                ___owner.___offsetHeight = commonHTML.GetDoubleValueFromString(this.___Height, ___owner.___availHeight, this.___HTMLTagRemUnitSize);
+                            }
+
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
+                {
+                   commonLog.LogEntry("CHtmlCSSStyleSheet GetRecalculateHeight()", ex);
+                }
+            }
+        }
+        internal string ___Height = null;
+        internal double ___HeightComputedValue = 0;
+        internal bool ___isHeightValueSet = false;
+        internal bool ___isHeightValuePercent = false;
+        internal bool ___isHeightDynamicCalculationRequired = false;
+        public double posHeight
+        {
+            set
+            {
+                this.___Height = value.ToString();
+            }
+            get
+            {
+                return commonHTML.GetDoubleValueFromString(this.___Height, 0, this.___HTMLTagRemUnitSize);
+            }
+        }
+        public double posheight
+        {
+            set
+            {
+                this.posHeight = value;
+            }
+            get
+            {
+                return this.posHeight;
+            }
+        }
+
+        public string height
+        {
+            get { return ___convertNullToEmpty(this.___Height); }
+            set
+            {
+                this.___Height = value;
+                ___checkStringValue(this.___Height, ref this.___HeightComputedValue, ref  this.___isHeightValueSet, ref this.___isHeightValuePercent, true, false);
+                if (this.___isHeightValueSet == true && this.___isHeightValuePercent == false)
+                {
+                    this.___setStyleSizingMode(CHtmlSizeModeType.Height);
+                }
+                if (this.___isApplyElemenetStyleSheetsForElementDone == true)
+                {
+                    GetRecaluclateHeight();
+                }
+            }
+        }
+        internal void ___setStyleSizingMode(CHtmlSizeModeType ___targetSize)
+        {
+            if (___targetSize == CHtmlSizeModeType.Height)
+            {
+                if (this.___styleSizeMode == CHtmlSizeModeType.Undefined)
+                {
+                    this.___styleSizeMode = CHtmlSizeModeType.Height;
+                }
+                else if (this.___styleSizeMode == CHtmlSizeModeType.Width)
+                {
+                    this.___styleSizeMode = CHtmlSizeModeType.Both;
+                }
+            }
+            else if (___targetSize == CHtmlSizeModeType.Width)
+            {
+                if (this.___styleSizeMode == CHtmlSizeModeType.Undefined)
+                {
+                    this.___styleSizeMode = CHtmlSizeModeType.Width;
+                }
+                else if (this.___styleSizeMode == CHtmlSizeModeType.Height)
+                {
+                    this.___styleSizeMode = CHtmlSizeModeType.Both;
+                }
+            }
+        }
+        public string Height
+        {
+            get { return ___convertNullToEmpty(this.___Height); }
+            set
+            {
+                this.___Height = value;
+                ___checkStringValue(this.___Height, ref this.___HeightComputedValue, ref  this.___isHeightValueSet, ref this.___isHeightValuePercent, true, false);
+                if (this.___isHeightValueSet == true && this.___isHeightValuePercent == false)
+                {
+                    this.___setStyleSizingMode(CHtmlSizeModeType.Height);
+                }
+                if (this.___isApplyElemenetStyleSheetsForElementDone == true)
+                {
+                    GetRecaluclateHeight();
+                }
+            }
+        }
+
+        internal string ___HoverColor = null;
+        public string HoverColor
+        {
+            set { this.___HoverColor = value; }
+            get { return this.___HoverColor; }
+        }
+        public string hoverColor
+        {
+            set { this.___HoverColor = value; }
+            get { return this.___HoverColor; }
+        }
+        public string hovercolor
+        {
+            set { this.___HoverColor = value; }
+            get { return this.___HoverColor; }
+        }
+        internal string ___Hyphens = null;
+        public string hyphens
+        {
+            set { this.___Hyphens = value; }
+            get { return this.___Hyphens; }
+        }
+        public string Hyphens
+        {
+            set { this.___Hyphens = value; }
+            get { return this.___Hyphens; }
+        }
+        public string ___HyphenateLines = null;
+        public string HyphenateLines
+        {
+            get { return this.___HyphenateLines; }
+            set { this.___HyphenateLines = value; }
+        }
+        public string hyphenatelines
+        {
+            get { return this.___HyphenateLines; }
+            set { this.___HyphenateLines = value; }
+        }
+        public string hyphenateLines
+        {
+            get { return this.___HyphenateLines; }
+            set { this.___HyphenateLines = value; }
+        }
+        internal string ___HyphenateLimitLines = null;
+        public string hyphenatelimitlines
+        {
+            get { return this.___HyphenateLimitLines; }
+            set { this.___HyphenateLimitLines = value; }
+        }
+        public string HyphenateLimitLines
+        {
+            get { return this.___HyphenateLimitLines; }
+            set { this.___HyphenateLimitLines = value; }
+        }
+        public string hyphenateLimitLines
+        {
+            get { return this.___HyphenateLimitLines; }
+            set { this.___HyphenateLimitLines = value; }
+        }
+        internal string ___HyphenateLimitZone = null;
+        public string HyphenateLimitZone
+        {
+            get { return this.___HyphenateLimitZone; }
+            set { this.___HyphenateLimitZone = value; }
+        }
+        public string hyphenateLimitZone
+        {
+            get { return this.___HyphenateLimitZone; }
+            set { this.___HyphenateLimitZone = value; }
+        }
+        public string hyphenatelimitzone
+        {
+            get { return this.___HyphenateLimitZone; }
+            set { this.___HyphenateLimitZone = value; }
+        }
+
+        internal string ___MsoList = null;
+        public string MsoList
+        {
+            get { return this.___MsoList; }
+            set { this.___MsoList = value; }
+        }
+        public string msolist
+        {
+            get { return this.___MsoList; }
+            set { this.___MsoList = value; }
+        }
+
+
+        internal string ___Scrolling = null;
+        public string Scrolling
+        {
+            get { return ___convertNullToEmpty(this.___Scrolling); }
+            set { this.___Scrolling = value; }
+        }
+        public string scrolling
+        {
+            get { return ___convertNullToEmpty(this.___Scrolling); }
+            set { this.___Scrolling = value; }
+        }
+        internal string ___ScrollBarArrowColor = null;
+        public string ScrollBarArrowColor
+        {
+            set { this.___ScrollBarArrowColor = value; }
+            get { return this.___ScrollBarArrowColor; }
+        }
+        public string scrollBarArrowColor
+        {
+            set { this.___ScrollBarArrowColor = value; }
+            get { return this.___ScrollBarArrowColor; }
+        }
+        public string scrollbararrowcolor
+        {
+            set { this.___ScrollBarArrowColor = value; }
+            get { return this.___ScrollBarArrowColor; }
+        }
+        internal string ___ScrollBarTrackColor = null;
+        public string ScrollBarTrackColor
+        {
+            set { this.___ScrollBarTrackColor = value; }
+            get { return this.___ScrollBarTrackColor; }
+        }
+        public string scrollBarTrackColor
+        {
+            set { this.___ScrollBarTrackColor = value; }
+            get { return this.___ScrollBarTrackColor; }
+        }
+        public string scrollbartrackcolor
+        {
+            set { this.___ScrollBarTrackColor = value; }
+            get { return this.___ScrollBarTrackColor; }
+        }
+        internal string ___ScrollBarDarkShadowColor = null;
+        public string ScrollBarDarkShadowColor
+        {
+            set { this.___ScrollBarDarkShadowColor = value; }
+            get { return this.___ScrollBarDarkShadowColor; }
+        }
+        public string scrollBarDarkShadowColor
+        {
+            set { this.___ScrollBarDarkShadowColor = value; }
+            get { return this.___ScrollBarDarkShadowColor; }
+        }
+        public string scrollbardarkshadowcolor
+        {
+            set { this.___ScrollBarDarkShadowColor = value; }
+            get { return this.___ScrollBarDarkShadowColor; }
+        }
+        internal string ___ScrollBarShadowColor = null;
+        public string scrollbarShdowColor
+        {
+            get { return this.___ScrollBarShadowColor; }
+            set { this.___ScrollBarShadowColor = value; }
+        }
+        internal string ___ScrollBarHighLightColor = null;
+        public string ScrollBarHighLightColor
+        {
+            set { this.___ScrollBarHighLightColor = value; }
+            get { return this.___ScrollBarHighLightColor; }
+        }
+        public string scrollBarHighLightColor
+        {
+            set { this.___ScrollBarHighLightColor = value; }
+            get { return this.___ScrollBarHighLightColor; }
+        }
+        public string scrollbarhighlightcolor
+        {
+            set { this.___ScrollBarHighLightColor = value; }
+            get { return this.___ScrollBarHighLightColor; }
+        }
+        internal string ___ScrollBar3DLightColor = null;
+        public string ScrollBar3DLightColor
+        {
+            set { this.___ScrollBar3DLightColor = value; }
+            get { return this.___ScrollBar3DLightColor; }
+        }
+        public string scrollBar3DLightColor
+        {
+            set { this.___ScrollBar3DLightColor = value; }
+            get { return this.___ScrollBar3DLightColor; }
+        }
+        public string scrollbar3dlightcolor
+        {
+            set { this.___ScrollBar3DLightColor = value; }
+            get { return this.___ScrollBar3DLightColor; }
+        }
+        internal string ___ScrollBarBaseColor = null;
+        public string ScrollBarBaseColor
+        {
+            get { return this.___ScrollBarBaseColor; }
+            set { this.___ScrollBarBaseColor = value; }
+        }
+        public string scrollBarBaseColor
+        {
+            get { return this.___ScrollBarBaseColor; }
+            set { this.___ScrollBarBaseColor = value; }
+        }
+        public string scrollbarbasecolor
+        {
+            get { return this.___ScrollBarBaseColor; }
+            set { this.___ScrollBarBaseColor = value; }
+        }
+
+        internal string ___ScrollBarFaceColor = null;
+        public string ScrollBarFaceColor
+        {
+            set { this.___ScrollBarFaceColor = value; }
+            get { return this.___ScrollBarFaceColor; }
+        }
+        public string scrollBarFaceColor
+        {
+            set { this.___ScrollBarFaceColor = value; }
+            get { return this.___ScrollBarFaceColor; }
+        }
+        public string scrollbarfacecolor
+        {
+            set { this.___ScrollBarFaceColor = value; }
+            get { return this.___ScrollBarFaceColor; }
+        }
+        internal string ___Margin = null;
+
+        public string Margin
+        {
+            get { return this.___Margin; }
+            set { this.___Margin = value; }
+        }
+        public string margin
+        {
+            get { return this.___Margin; }
+            set { this.___Margin = value; }
+        }
+
+        internal string ___MarginAfter = null;
+        public string MarginAfter
+        {
+            set { this.___MarginAfter = value; }
+            get { return this.___MarginAfter; }
+        }
+        public string marginAfter
+        {
+            set { this.___MarginAfter = value; }
+            get { return this.___MarginAfter; }
+        }
+        public string marginafter
+        {
+            set { this.___MarginAfter = value; }
+            get { return this.___MarginAfter; }
+        }
+        internal string ___MarginBefore = null;
+        public string MarginBefore
+        {
+            get { return this.___MarginBefore; }
+            set { this.___MarginBefore = value; }
+        }
+        public string marginBefore
+        {
+            get { return this.___MarginBefore; }
+            set { this.___MarginBefore = value; }
+        }
+        public string marginbefore
+        {
+            get { return this.___MarginBefore; }
+            set { this.___MarginBefore = value; }
+        }
+        private string ___MarginLeft = null;
+        internal double ___MarginLeftComputedValue = 0;
+        public string MarginLeft
+        {
+            get { return this.___MarginLeft; }
+            set
+            {
+                this.___MarginLeft = value;
+                this.___GetMarginLeftComputedValue();
+            }
+        }
+        public string marginleft
+        {
+            get { return this.___MarginLeft; }
+            set
+            {
+                this.___MarginLeft = value;
+                this.___GetMarginLeftComputedValue();
+            }
+        }
+        public string marginLeft
+        {
+            get { return this.___MarginLeft; }
+            set
+            {
+                this.___MarginLeft = value;
+                this.___GetMarginLeftComputedValue();
+            }
+        }
+        private string ___MarginRight = null;
+        internal double ___MarginRightComputedValue = 0;
+        public string MarginRight
+        {
+            get { return this.___MarginRight; }
+            set
+            {
+                this.___MarginRight = value;
+                this.___GetMarginRightComputedValue();
+            }
+        }
+        public string marginRight
+        {
+            get { return this.___MarginRight; }
+            set
+            {
+                this.___MarginRight = value;
+                this.___GetMarginRightComputedValue();
+            }
+        }
+
+        public string marginright
+        {
+            get { return this.___MarginRight; }
+            set
+            {
+                this.___MarginRight = value;
+                this.___GetMarginRightComputedValue();
+            }
+        }
+        private string ___MarginTop = null;
+        internal double ___MarginTopComputedValue = 0;
+        public string MarginTop
+        {
+            get { return this.___MarginTop; }
+            set
+            {
+                this.___MarginTop = value;
+                this.___GetMarginTopComputedValue();
+            }
+        }
+        private void ___GetMarginTopComputedValue()
+        {
+            try
+            {
+                if (commonHTML.IsStringAutoOrInheritOrZeroOrNone(this.___MarginTop))
+                {
+                    this.___MarginTopComputedValue = 0;
+                }
+                else
+                {
+                    double.TryParse(this.___MarginTop, out this.___MarginTopComputedValue);
+                }
+            }
+            catch { }
+        }
+        private void ___GetMarginLeftComputedValue()
+        {
+            try
+            {
+                if (commonHTML.IsStringAutoOrInheritOrZeroOrNone(this.___MarginLeft))
+                {
+                    this.___MarginLeftComputedValue = 0;
+                }
+                else
+                {
+                    double.TryParse(this.___MarginLeft, out this.___MarginLeftComputedValue);
+                }
+            }
+            catch { }
+        }
+        private void ___GetMarginRightComputedValue()
+        {
+            try
+            {
+                if (commonHTML.IsStringAutoOrInheritOrZeroOrNone(this.___MarginRight))
+                {
+                    this.___MarginRightComputedValue = 0;
+                }
+                else
+                {
+                    double.TryParse(this.___MarginRight, out this.___MarginRightComputedValue);
+                }
+            }
+            catch { }
+        }
+        private void ___GetMarginBottomComputedValue()
+        {
+            try
+            {
+                if (commonHTML.IsStringAutoOrInheritOrZeroOrNone(this.___MarginBottom))
+                {
+                    this.___MarginBottomComputedValue = 0;
+                }
+                else
+                {
+                    double.TryParse(this.___MarginBottom, out this.___MarginBottomComputedValue);
+                }
+            }
+            catch { }
+        }
+        public string marginTop
+        {
+            get { return this.___MarginTop; }
+            set
+            {
+                this.___MarginTop = value;
+                this.___GetMarginTopComputedValue();
+            }
+        }
+        public string margintop
+        {
+            get { return this.___MarginTop; }
+            set
+            {
+                this.___MarginTop = value;
+                this.___GetMarginTopComputedValue();
+
+            }
+        }
+        internal string ___MarginWidth = null;
+        public string MarginWidth
+        {
+            set { this.___MarginWidth = value; }
+            get { return this.___MarginWidth; }
+        }
+        public string marginWidth
+        {
+            set { this.___MarginWidth = value; }
+            get { return this.___MarginWidth; }
+        }
+        public string marginwidth
+        {
+            set { this.___MarginWidth = value; }
+            get { return this.___MarginWidth; }
+        }
+        internal string ___MarginHeight = null;
+        public string MarginHeight
+        {
+            get { return this.___MarginHeight; }
+            set { this.___MarginHeight = value; }
+        }
+        public string marginHeight
+        {
+            get { return this.___MarginHeight; }
+            set { this.___MarginHeight = value; }
+        }
+        public string marginheight
+        {
+            get { return this.___MarginHeight; }
+            set { this.___MarginHeight = value; }
+        }
+
+
+        private string ___MarginBottom = null;
+        internal double ___MarginBottomComputedValue = 0;
+        public string MarginBottom
+        {
+            get { return this.___MarginBottom; }
+            set
+            {
+                this.___MarginBottom = value;
+                this.___GetMarginBottomComputedValue();
+            }
+        }
+        public string marginBottom
+        {
+            get { return this.___MarginBottom; }
+            set
+            {
+                this.___MarginBottom = value;
+                this.___GetMarginBottomComputedValue();
+            }
+        }
+        public string marginbottom
+        {
+            get { return this.___MarginBottom; }
+            set
+            {
+                this.___MarginBottom = value;
+                this.___GetMarginBottomComputedValue();
+            }
+        }
+        internal string ___Padding = null;
+        public string Padding
+        {
+            get { return this.___Padding; }
+            set { this.___Padding = value; }
+        }
+        public string padding
+        {
+            get { return this.___Padding; }
+            set { this.___Padding = value; }
+        }
+
+        internal string ___PaddingStart = null;
+        public string PaddingStart
+        {
+            get { return this.___PaddingStart; }
+            set { this.___PaddingStart = value; }
+        }
+        public string paddingStart
+        {
+            get { return this.___PaddingStart; }
+            set { this.___PaddingStart = value; }
+        }
+        public string paddingstart
+        {
+            get { return this.___PaddingStart; }
+            set { this.___PaddingStart = value; }
+        }
+
+        internal string ___PaddingEnd = null;
+        public string PaddingEnd
+        {
+            get { return this.___PaddingEnd; }
+            set { this.___PaddingEnd = value; }
+        }
+        public string paddingEnd
+        {
+            get { return this.___PaddingEnd; }
+            set { this.___PaddingEnd = value; }
+        }
+        public string paddingend
+        {
+            get { return this.___PaddingEnd; }
+            set { this.___PaddingEnd = value; }
+        }
+
+
+
+        internal string ___PaddingLeft = null;
+        public string PaddingLeft
+        {
+            get { return this.___PaddingLeft; }
+            set { this.___PaddingLeft = value; }
+        }
+        public string paddingLeft
+        {
+            get { return this.___PaddingLeft; }
+            set { this.___PaddingLeft = value; }
+        }
+        public string paddingleft
+        {
+            get { return this.___PaddingLeft; }
+            set { this.___PaddingLeft = value; }
+        }
+        internal string ___PaddingRight = null;
+        public string PaddingRight
+        {
+            get { return this.___PaddingRight; }
+            set { this.___PaddingRight = value; }
+        }
+        public string paddingRight
+        {
+            get { return this.___PaddingRight; }
+            set { this.___PaddingRight = value; }
+        }
+        public string paddingright
+        {
+            get { return this.___PaddingRight; }
+            set { this.___PaddingRight = value; }
+        }
+
+        internal string ___PaddingTop = null;
+        public string PaddingTop
+        {
+            get { return this.___PaddingTop; }
+            set
+            {
+                this.___PaddingTop = value;
+
+            }
+        }
+        public string paddingTop
+        {
+            get { return this.___PaddingTop; }
+            set
+            {
+                this.___PaddingTop = value;
+            }
+        }
+        public string paddingtop
+        {
+            get { return this.___PaddingTop; }
+            set
+            {
+                this.___PaddingTop = value;
+
+            }
+        }
+        internal string ___PaddingBottom = null;
+        public string PaddingBottom
+        {
+            get { return this.___PaddingBottom; }
+            set { this.___PaddingBottom = value; }
+        }
+        public string paddingBottom
+        {
+            get { return this.___PaddingBottom; }
+            set { this.___PaddingBottom = value; }
+        }
+        public string paddingbottom
+        {
+            get { return this.___PaddingBottom; }
+            set { this.___PaddingBottom = value; }
+        }
+        internal string ___Pitch = null;
+        public string Pitch
+        {
+            get { return this.___Pitch; }
+            set { this.___Pitch = value; }
+        }
+        public string pitch
+        {
+            get { return this.___Pitch; }
+            set { this.___Pitch = value; }
+        }
+        internal string ___PitchRange = null;
+        public string PitchRange
+        {
+            get { return this.___PitchRange; }
+            set { this.___PitchRange = value; }
+        }
+        internal string ___Richness = null;
+        public string Richness
+        {
+            get { return this.___Richness; }
+            set { this.___Richness = value; }
+        }
+        public string richness
+        {
+            get { return this.___Richness; }
+            set { this.___Richness = value; }
+        }
+        internal string ___Stress = null;
+        public string Stress
+        {
+            get { return this.___Stress; }
+            set { this.___Stress = value; }
+        }
+        public string stress
+        {
+            get { return this.___Stress; }
+            set { this.___Stress = value; }
+        }
+        internal string ___Border = null;
+        public string Border
+        {
+            get { return this.___Border; }
+            set { this.___Border = value; }
+        }
+        public string border
+        {
+            get { return this.___Border; }
+            set { this.___Border = value; }
+        }
+        internal string ___BorderStyle = null;
+        public string BorderStyle
+        {
+            get { return this.___BorderStyle; }
+            set { this.___BorderStyle = value; }
+        }
+        public string borderstyle
+        {
+            get { return this.___BorderStyle; }
+            set { this.___BorderStyle = value; }
+        }
+        public string borderStyle
+        {
+            get { return this.___BorderStyle; }
+            set { this.___BorderStyle = value; }
+        }
+        internal string ___BorderSpacing = null;
+        public string BorderSpacing
+        {
+            get { return this.___BorderSpacing; }
+            set { this.___BorderSpacing = value; }
+        }
+        public string borderspacing
+        {
+            get { return this.___BorderSpacing; }
+            set { this.___BorderSpacing = value; }
+        }
+        public string borderSpacing
+        {
+            get { return this.___BorderSpacing; }
+            set { this.___BorderSpacing = value; }
+        }
+        internal string ___BorderWidth = null;
+        public string BorderWidth
+        {
+            get { return this.___BorderWidth; }
+            set { this.___BorderWidth = value; }
+        }
+        public string borderwidth
+        {
+            get { return this.___BorderWidth; }
+            set { this.___BorderWidth = value; }
+        }
+        public string borderWidth
+        {
+            get { return this.___BorderWidth; }
+            set { this.___BorderWidth = value; }
+        }
+        internal string ___BorderCollapse = null;
+        public string BorderCollapse
+        {
+            set { this.___BorderCollapse = value; }
+            get { return this.___BorderCollapse; }
+        }
+        public string borderCollapse
+        {
+            set { this.___BorderCollapse = value; }
+            get { return this.___BorderCollapse; }
+        }
+        public string bordercollapse
+        {
+            set { this.___BorderCollapse = value; }
+            get { return this.___BorderCollapse; }
+        }
+        internal string ___BorderTop = null;
+        internal double ___BorderTopWidthComputedValue = 0;
+        internal CSSBorderStyleType ___BorderTopStyleComputedValue = CSSBorderStyleType.unknown;
+        internal System.Drawing.Color ___BorderTopColorComputedValue = System.Drawing.Color.Transparent;
+        internal bool ___BorderTopColorComputedValueSpecified = false;
+        public string BorderTop
+        {
+            set { this.___BorderTop = value; }
+            get { return this.___BorderTop; }
+        }
+        public string borderTop
+        {
+            set { this.___BorderTop = value; }
+            get { return this.___BorderTop; }
+        }
+        public string bordertop
+        {
+            set { this.___BorderTop = value; }
+            get { return this.___BorderTop; }
+        }
+        internal string ___BorderTopColor = null;
+        public string BorderTopColor
+        {
+            set { this.___BorderTopColor = value; }
+            get { return this.___BorderTopColor; }
+        }
+        public string borderTopColor
+        {
+            set { this.___BorderTopColor = value; }
+            get { return this.___BorderTopColor; }
+        }
+        public string bordertopcolor
+        {
+            set { this.___BorderTopColor = value; }
+            get { return this.___BorderTopColor; }
+        }
+        internal string ___BorderTopColors = null;
+        public string BorderTopColors
+        {
+            set { this.___BorderTopColors = value; }
+            get { return this.___BorderTopColors; }
+        }
+        public string borderTopColors
+        {
+            set { this.___BorderTopColors = value; }
+            get { return this.___BorderTopColors; }
+        }
+        public string bordertopcolors
+        {
+            set { this.___BorderTopColors = value; }
+            get { return this.___BorderTopColors; }
+        }
+        internal string ___BorderBottomColors = null;
+        public string BorderBottomColors
+        {
+            set { this.___BorderBottomColors = value; }
+            get { return this.___BorderBottomColors; }
+        }
+        public string borderBottomColors
+        {
+            set { this.___BorderBottomColors = value; }
+            get { return this.___BorderBottomColors; }
+        }
+        public string borderbottombcolors
+        {
+            set { this.___BorderBottomColors = value; }
+            get { return this.___BorderBottomColors; }
+        }
+        internal string ___BorderLeftColors = null;
+        public string BorderLeftColors
+        {
+            get { return this.___BorderLeftColors; }
+            set { this.___BorderLeftColors = value; }
+        }
+        public string borderLeftColors
+        {
+            get { return this.___BorderLeftColors; }
+            set { this.___BorderLeftColors = value; }
+        }
+        public string borderleftcolors
+        {
+            get { return this.___BorderLeftColors; }
+            set { this.___BorderLeftColors = value; }
+        }
+        internal string ___BorderRightColors = null;
+        public string BorderRightColors
+        {
+            set { this.___BorderRightColors = value; }
+            get { return this.___BorderRightColors; }
+        }
+        public string borderRightColors
+        {
+            set { this.___BorderRightColors = value; }
+            get { return this.___BorderRightColors; }
+        }
+        public string borderrightcolors
+        {
+            set { this.___BorderRightColors = value; }
+            get { return this.___BorderRightColors; }
+        }
+
+        internal string ___BorderTopStyle = null;
+        public string BorderTopStyle
+        {
+            set { this.___BorderTopStyle = value; }
+            get { return this.___BorderTopStyle; }
+        }
+        public string bordertopstyle
+        {
+            set { this.___BorderTopStyle = value; }
+            get { return this.___BorderTopStyle; }
+        }
+        internal string ___BorderTopWidth = null;
+        public string BorderTopWidth
+        {
+            set { this.___BorderTopWidth = value; }
+            get { return this.___BorderTopWidth; }
+        }
+        public string borderTopWidth
+        {
+            set { this.___BorderTopWidth = value; }
+            get { return this.___BorderTopWidth; }
+        }
+        public string bordertopwidth
+        {
+            set { this.___BorderTopWidth = value; }
+            get { return this.___BorderTopWidth; }
+        }
+        internal string ___BorderLeft = null;
+        internal double ___BorderLeftWidthComputedValue = 0;
+        internal CSSBorderStyleType ___BorderLeftStyleComputedValue = CSSBorderStyleType.unknown;
+        internal System.Drawing.Color ___BorderLeftColorComputedValue = System.Drawing.Color.Transparent;
+        internal bool ___BorderLeftColorComputedValueSpecified = false;
+        public string BorderLeft
+        {
+            set { this.___BorderLeft = value; }
+            get { return this.___BorderLeft; }
+        }
+        public string borderLeft
+        {
+            set { this.___BorderLeft = value; }
+            get { return this.___BorderLeft; }
+        }
+        public string borderleft
+        {
+            set { this.___BorderLeft = value; }
+            get { return this.___BorderLeft; }
+        }
+        internal string ___BorderLeftColor = null;
+        public string BorderLeftColor
+        {
+            set { this.___BorderLeftColor = value; }
+            get { return this.___BorderLeftColor; }
+        }
+        public string borderLeftColor
+        {
+            set { this.___BorderLeftColor = value; }
+            get { return this.___BorderLeftColor; }
+        }
+        public string borderleftcolor
+        {
+            set { this.___BorderLeftColor = value; }
+            get { return this.___BorderLeftColor; }
+        }
+        internal string ___BorderLeftStyle = null;
+        public string BorderLeftStyle
+        {
+            set { this.___BorderLeftStyle = value; }
+            get { return this.___BorderLeftStyle; }
+        }
+        public string borderLeftStyle
+        {
+            set { this.___BorderLeftStyle = value; }
+            get { return this.___BorderLeftStyle; }
+        }
+        internal string ___BorderLeftWidth = null;
+        public string BorderLeftWidth
+        {
+            set { this.___BorderLeftWidth = value; }
+            get { return this.___BorderLeftWidth; }
+        }
+        public string borderLeftWidth
+        {
+            set { this.___BorderLeftWidth = value; }
+            get { return this.___BorderLeftWidth; }
+        }
+        public string borderleftwidth
+        {
+            set { this.___BorderLeftWidth = value; }
+            get { return this.___BorderLeftWidth; }
+        }
+        internal string ___BorderRight = null;
+        internal double ___BorderRightWidthComputedValue = 0;
+        internal CSSBorderStyleType ___BorderRightStyleComputedValue = CSSBorderStyleType.unknown;
+        internal System.Drawing.Color ___BorderRightColorComputedValue = System.Drawing.Color.Transparent;
+        internal bool ___BorderRightColorComputedValueSpecified = false;
+        public string BorderRight
+        {
+            set { this.___BorderRight = value; }
+            get { return this.___BorderRight; }
+        }
+        public string borderRight
+        {
+            set { this.___BorderRight = value; }
+            get { return this.___BorderRight; }
+        }
+        public string borderright
+        {
+            set { this.___BorderRight = value; }
+            get { return this.___BorderRight; }
+        }
+        internal string ___BorderRightColor = null;
+        public string BorderRightColor
+        {
+            set { this.___BorderRightColor = value; }
+            get { return this.___BorderRightColor; }
+        }
+        public string borderRightColor
+        {
+            set { this.___BorderRightColor = value; }
+            get { return this.___BorderRightColor; }
+        }
+        public string borderrightcolor
+        {
+            set { this.___BorderRightColor = value; }
+            get { return this.___BorderRightColor; }
+        }
+        internal string ___BorderRightStyle = null;
+        public string BorderRightStyle
+        {
+            set { this.___BorderRightStyle = value; }
+            get { return this.___BorderRightStyle; }
+        }
+        public string borderRightStyle
+        {
+            set { this.___BorderRightStyle = value; }
+            get { return this.___BorderRightStyle; }
+        }
+        public string borderrightstyle
+        {
+            set { this.___BorderRightStyle = value; }
+            get { return this.___BorderRightStyle; }
+        }
+        internal string ___BorderBottom = null;
+        internal double ___BorderBottomWidthComputedValue = 0;
+        internal CSSBorderStyleType ___BorderBottomStyleComputedValue = CSSBorderStyleType.unknown;
+        internal System.Drawing.Color ___BorderBottomColorComputedValue = System.Drawing.Color.Transparent;
+        internal bool ___BorderBottomColorComputedValueSpecified = false;
+        public string BorderBottom
+        {
+            set { this.___BorderBottom = value; }
+            get { return this.___BorderBottom; }
+        }
+        public string borderBottom
+        {
+            set { this.___BorderBottom = value; }
+            get { return this.___BorderBottom; }
+        }
+        public string borderbottom
+        {
+            set { this.___BorderBottom = value; }
+            get { return this.___BorderBottom; }
+        }
+        internal string ___BorderBottomColor = null;
+        public string BorderBottomColor
+        {
+            set { this.___BorderBottomColor = value; }
+            get { return this.___BorderBottomColor; }
+        }
+        public string borderBottomColor
+        {
+            set { this.___BorderBottomColor = value; }
+            get { return this.___BorderBottomColor; }
+        }
+        public string borderbottomcolor
+        {
+            set { this.___BorderBottomColor = value; }
+            get { return this.___BorderBottomColor; }
+        }
+        internal string ___BorderBottomStyle = null;
+        public string BorderBottomStyle
+        {
+            set { this.___BorderBottomStyle = value; }
+            get { return this.___BorderBottomStyle; }
+        }
+        public string borderBottomStyle
+        {
+            set { this.___BorderBottomStyle = value; }
+            get { return this.___BorderBottomStyle; }
+        }
+        public string borderbottomstyle
+        {
+            set { this.___BorderBottomStyle = value; }
+            get { return this.___BorderBottomStyle; }
+        }
+        internal string ___BorderBottomWidth = null;
+        public string BorderBottomWidth
+        {
+            set { this.___BorderBottomWidth = value; }
+            get { return this.___BorderBottomWidth; }
+        }
+        public string borderBottomWidth
+        {
+            set { this.___BorderBottomWidth = value; }
+            get { return this.___BorderBottomWidth; }
+        }
+        public string borderbottomwidth
+        {
+            set { this.___BorderBottomWidth = value; }
+            get { return this.___BorderBottomWidth; }
+        }
+        internal string ___BorderColor = null;
+        public string BorderColor
+        {
+            set { this.___BorderColor = value; }
+            get { return this.___BorderColor; }
+        }
+        public string bordercolor
+        {
+            set { this.___BorderColor = value; }
+            get { return this.___BorderColor; }
+        }
+        public string borderColor
+        {
+            set { this.___BorderColor = value; }
+            get { return this.___BorderColor; }
+        }
+        internal string ___BorderImage = null;
+        public string borderImage
+        {
+            set { this.___BorderImage = value; }
+            get { return this.___BorderImage; }
+        }
+        public string borderimage
+        {
+            set { this.___BorderImage = value; }
+            get { return this.___BorderImage; }
+        }
+        public string BorderImage
+        {
+            set { this.___BorderImage = value; }
+            get { return this.___BorderImage; }
+        }
+
+        /* ================================================
+         * Background Image is moveto MultipleImageDataList Do cnot use
+         * ================================================
+         */
+        /// <summary>
+        /// BackgroundImageFullUrl (Keep this as public)
+        /// </summary>
+        //public  string ___BackgroundImage_FullURL = null;
+
+        //internal System.WeakReference ___BackgroundImage_ImageWeakReference = null;
+
+
+
+
+        internal string ___BorderLightColor = null;
+        public string BorderLightColor
+        {
+            set { this.___BorderLightColor = value; }
+            get { return this.___BorderLightColor; }
+        }
+        public string borderLightColor
+        {
+            set { this.___BorderLightColor = value; }
+            get { return this.___BorderLightColor; }
+        }
+        public string borderlightcolor
+        {
+            set { this.___BorderLightColor = value; }
+            get { return this.___BorderLightColor; }
+        }
+        public string borderlightColor
+        {
+            set { this.___BorderLightColor = value; }
+            get { return this.___BorderLightColor; }
+        }
+        internal string ___BorderDarkColor = null;
+        public string BorderDarkColor
+        {
+            set { this.___BorderDarkColor = value; }
+            get { return this.___BorderDarkColor; }
+        }
+        public string borderDarkColor
+        {
+            set { this.___BorderDarkColor = value; }
+            get { return this.___BorderDarkColor; }
+        }
+        public string borderdarkcolor
+        {
+            set { this.___BorderDarkColor = value; }
+            get { return this.___BorderDarkColor; }
+        }
+
+
+
+        /// <summary>
+        /// Border Radius
+        /// </summary>
+        internal string ___BorderBottomLeftRadius = null;
+        internal double ___BorderBottomLeftRadiusHorizontalComputedValue = 0;
+        internal double ___BorderBottomLeftRadiusVerticalComputedValue = 0;
+        public string BorderBottomLeftRadius
+        {
+            set { this.___BorderBottomLeftRadius = value; }
+            get { return this.___BorderBottomLeftRadius; }
+        }
+        public string borderBottomLeftRadius
+        {
+            set { this.___BorderBottomLeftRadius = value; }
+            get { return this.___BorderBottomLeftRadius; }
+        }
+
+        public string borderbottomleftradius
+        {
+            set { this.___BorderBottomLeftRadius = value; }
+            get { return this.___BorderBottomLeftRadius; }
+        }
+        internal string ___BorderBottomRightRadius = null;
+        internal double ___BorderBottomRightRadiusHorizontalComputedValue = 0;
+        internal double ___BorderBottomRightRadiusVerticalComputedValue = 0;
+        public string BorderBottomRightRadius
+        {
+            set { this.___BorderBottomRightRadius = value; }
+            get { return this.___BorderBottomRightRadius; }
+        }
+        public string borderBottomRightRadius
+        {
+            set { this.___BorderBottomRightRadius = value; }
+            get { return this.___BorderBottomRightRadius; }
+        }
+
+        public string borderbottomrightradius
+        {
+            set { this.___BorderBottomRightRadius = value; }
+            get { return this.___BorderBottomRightRadius; }
+        }
+        internal string ___BorderTopLeftRadius = null;
+        internal double ___BorderTopLeftRadiusHorizontalComputedValue = 0;
+        internal double ___BorderTopLeftRadiusVerticalComputedValue = 0;
+
+        public string BorderTopLeftRadius
+        {
+            set { this.___BorderTopLeftRadius = value; }
+            get { return this.___BorderTopLeftRadius; }
+        }
+        public string borderTopLeftRadius
+        {
+            set { this.___BorderTopLeftRadius = value; }
+            get { return this.___BorderTopLeftRadius; }
+        }
+
+        internal string ___BorderTopRightRadius = null;
+        internal double ___BorderTopRightRadiusHorizontalComputedValue = 0;
+        internal double ___BorderTopRightRadiusVerticalComputedValue = 0;
+        public string BorderTopRightRadius
+        {
+            set { this.___BorderTopRightRadius = value; }
+            get { return this.___BorderTopRightRadius; }
+        }
+        public string borderTopRightRadius
+        {
+            set { this.___BorderTopRightRadius = value; }
+            get { return this.___BorderTopRightRadius; }
+        }
+        internal string ___BackgroundColor = null;
+        public string BackgroundColor
+        {
+            set
+            {
+                this.___BackgroundColor = value;
+
+                SetElementBackgroundColor();
+
+            }
+            get { return ___convertNullToEmpty(this.___BackgroundColor); }
+        }
+   
+     
+        public string fill
+        {
+            set { this.___BackgroundColor = value;
+                SetElementBackgroundColor();
+            }
+
+            get { return this.backgroundColor; }
+        }
+        public string backgroundColor
+        {
+            set
+            {
+                this.___BackgroundColor = value;
+
+
+                SetElementBackgroundColor();
+
+            }
+            get { return ___convertNullToEmpty(this.___BackgroundColor); }
+        }
+        public string backgroundcolor
+        {
+            set
+            {
+                this.___BackgroundColor = value;
+
+                SetElementBackgroundColor();
+
+            }
+            get { return ___convertNullToEmpty(this.___BackgroundColor); }
+        }
+   
+        public bool hasOwnProperty(object _oname)
+        {
+            string sName = _oname as string;
+            if (string.IsNullOrEmpty(sName) == true)
+                return false;
+            return this.___hasPropertyByName(sName);
+        }
+        internal void SetElementBackgroundColor()
+        {
+            if (string.IsNullOrEmpty(this.___BackgroundColor) == false)
+            {
+                if(this.___BackgroundColor.StartsWith("url(", StringComparison.Ordinal) == true)
+                {
+                    this.___IsBackgroundColorSpecified = false;
+                    return;
+                }
+                    
+                this.___BackgroundSysColor = commonHTML.GetColorSpecFromHTMLColorExtend(this.___BackgroundColor);
+                this.___IsBackgroundColorSpecified = true;
+                switch (this.___StyleType)
+                {
+                    case CHtmlElementStyleType.Element:
+                    case CHtmlElementStyleType.Active:
+                    case CHtmlElementStyleType.Hover:
+                        if (this.___multipleBackgroundImageDataSet.Count == 0)
+                        {
+                            CHtmlStyleElementMultpleImageData __multiData = new CHtmlStyleElementMultpleImageData();
+                            this.___multipleBackgroundImageDataSet.Add(__multiData);
+                            __multiData.backgroundColorString = string.Copy(___BackgroundColor);
+                            __multiData.backgroundColorComputedValue = this.___BackgroundSysColor;
+                        }
+                        else
+                        {
+                            this.___multipleBackgroundImageDataSet[0].backgroundColorComputedValue = this.___BackgroundSysColor;
+                        }
+                        break;
+                }
+                if (this.___StyleType == CHtmlElementStyleType.Element && this.___IsOwnerElementAssigned() == true)
+                {
+                    CHtmlElement ___owner = this.ownerElement;
+                    if (___owner != null && ___owner.___isApplyElemenetStyleSheetCalled == true || this.___StyleType == CHtmlElementStyleType.Element)
+                    {
+                        ___owner.___BackgroundSysColor = this.___BackgroundSysColor;
+                        ___owner.___IsBackgroundColorSpecified = true;
+                        if (___owner.___elementTagType == CHtmlElementType.HTML)
+                        {
+                            /*
+                            if (commonHTML.IsEqualColor(___owner.___BackgroundSysColor, System.Drawing.Color.Transparent))
+                            {
+                                ___owner.___BackgroundSysColor = System.Drawing.Color.White;
+                            }
+                            */
+                        }
+                    }
+                }
+            }
+            else
+            {
+                this.___IsBackgroundColorSpecified = false;
+            }
+        }
+        internal string ___BackgroundSize = null;
+
+        public string BackgroundSize
+        {
+            set
+            {
+                this.___BackgroundSize = value;
+            }
+            get { return this.___BackgroundSize; }
+        }
+        public string backgroundSize
+        {
+            set
+            {
+                this.___BackgroundSize = value;
+
+            }
+            get { return this.___BackgroundSize; }
+        }
+        public string backgroundsize
+        {
+            set
+            {
+                this.___BackgroundSize = value;
+
+            }
+            get { return this.___BackgroundSize; }
+        }
+
+
+
+        internal string ___BackgroundClip = null;
+        public string BackgroundClip
+        {
+            set { this.___BackgroundClip = value; }
+            get { return this.___BackgroundClip; }
+        }
+        public string backgroundclip
+        {
+            set { this.___BackgroundClip = value; }
+            get { return this.___BackgroundClip; }
+        }
+        public string backgroundClip
+        {
+            set { this.___BackgroundClip = value; }
+            get { return this.___BackgroundClip; }
+        }
+
+        internal string ___BackgroundInlinePolicy = null;
+        public string BackgroundInlinePolicy
+        {
+            set { this.___BackgroundInlinePolicy = value; }
+            get { return this.___BackgroundInlinePolicy; }
+        }
+        public string backgroundInlinePolicy
+        {
+            set { this.___BackgroundInlinePolicy = value; }
+            get { return this.___BackgroundInlinePolicy; }
+        }
+        public string backgroundinlinepolicy
+        {
+            set { this.___BackgroundInlinePolicy = value; }
+            get { return this.___BackgroundInlinePolicy; }
+        }
+
+        internal string ___BackgroundOrigin = null;
+        public string BackgroundOrigin
+        {
+            set { this.___BackgroundOrigin = value; }
+            get { return this.___BackgroundOrigin; }
+        }
+        public string backgroundorigin
+        {
+            set { this.___BackgroundOrigin = value; }
+            get { return this.___BackgroundOrigin; }
+        }
+        internal string ___Clip = null;
+        /// <summary>
+        /// If Clip Value is specified or not.
+        /// </summary>
+        internal bool ___IsClipSpedified = false;
+        internal System.Drawing.Rectangle ___ClipComputedValue = System.Drawing.Rectangle.Empty;
+        public string Clip
+        {
+            set { this.___Clip = value; }
+            get { return this.___Clip; }
+        }
+        public string clip
+        {
+            set { this.___Clip = value; }
+            get { return this.___Clip; }
+        }
+        internal string ___PointerEvents = null;
+        public string PointerEvents
+        {
+            set { this.___PointerEvents = value; }
+            get { return this.___PointerEvents; }
+        }
+        public string pointerEvents
+        {
+            set { this.___PointerEvents = value; }
+            get { return this.___PointerEvents; }
+        }
+        public string pointerevents
+        {
+            set { this.___PointerEvents = value; }
+            get { return this.___PointerEvents; }
+        }
+        internal string ___MarkerOffset = null;
+        public string MarkerOffset
+        {
+            set { this.___MarkerOffset = value; }
+            get { return this.___MarkerOffset; }
+        }
+        public string markerOffset
+        {
+            set { this.___MarkerOffset = value; }
+            get { return this.___MarkerOffset; }
+        }
+        public string markeroffset
+        {
+            set { this.___MarkerOffset = value; }
+            get { return this.___MarkerOffset; }
+        }
+
+        internal string ___BackgroundImage = null;
+
+        public string BackgroundImage
+        {
+            set
+            {
+                this.___BackgroundImage = value;
+                if (this.___StyleType == CHtmlElementStyleType.Element)
+                {
+                    ___checkBackgroundImageStringForElement();
+                }
+            }
+            get { return this.___BackgroundImage; }
+        }
+        public string backgroundImage
+        {
+            set
+            {
+                this.___BackgroundImage = value;
+                if (this.___StyleType == CHtmlElementStyleType.Element)
+                {
+                    ___checkBackgroundImageStringForElement();
+                }
+            }
+            get { return ___convertNullToEmpty(this.___BackgroundImage); }
+        }
+        public string backgroundimage
+        {
+            set
+            {
+                this.___BackgroundImage = value;
+                if (this.___StyleType == CHtmlElementStyleType.Element)
+                {
+                    ___checkBackgroundImageStringForElement();
+                }
+            }
+            get { return ___convertNullToEmpty(this.___BackgroundImage); }
+        }
+        /*
+		internal string ___BackgroundGradation = null;
+        public string x_BackgroundGradation
+		{
+			___getInner{return this.___BackgroundGradation;}
+			set
+			{
+				this.___BackgroundGradation = value;
+				if (string.IsNullOrEmpty(this.___BackgroundGradation) == false)
+				{
+					this.___WebGradation = commonCreateGradationData(this.___BackgroundGradation, this.___HTMLTagRemUnitSize);
+				}
+				else
+				{
+					this.___WebGradation = null;
+				}
+			}
+		}
+         */
+        /// <summary>
+        /// StyleElement.nodeType is undefined, but some script searches this object.
+        /// </summary>
+        internal object ___nodeTypeDummy
+        {
+            get { return null; }
+        }
+
+        internal string ___BackfaceVisibility = null;
+        public string BackfaceVisibility
+        {
+            get { return this.___BackfaceVisibility; }
+            set { this.___BackfaceVisibility = value; }
+        }
+        public string backfaceVisibility
+        {
+            get { return this.___BackfaceVisibility; }
+            set { this.___BackfaceVisibility = value; }
+        }
+        public string backfacevisibility
+        {
+            get { return this.___BackfaceVisibility; }
+            set { this.___BackfaceVisibility = value; }
+        }
+
+        internal string ___Background = null;
+
+        public string Background
+        {
+            set
+            {
+                this.___Background = value;
+                if (this.___StyleType == CHtmlElementStyleType.Element)
+                {
+                    ___checkBackgroundStringForElement();
+                }
+            }
+            get { return ___convertNullToEmpty(this.___Background); }
+        }
+        public string background
+        {
+            set
+            {
+                this.___Background = value;
+                if (this.___StyleType == CHtmlElementStyleType.Element)
+                {
+                    ___checkBackgroundStringForElement();
+                }
+            }
+            get { return ___convertNullToEmpty(this.___Background); }
+        }
+        internal void ___checkBackgroundStringForElement()
+        {
+            if (string.IsNullOrEmpty(this.___Background) == false)
+            {
+                if (this.___StyleType == CHtmlElementStyleType.Element)
+                {
+                    commonHTML.parseCSSBackgroundString(this.___Background, this);
+                    if (this.___isApplyElemenetStyleSheetsForElementDone == true)
+                    {
+                      
+                        if (this.___multipleBackgroundImageDataSet != null && this.___multipleBackgroundImageDataSet.Count > 0)
+                        {
+                            ___confirmMultipleBackgrondImagesHasBeenCachedIntoDocument();
+                        }
+                    }
+                }
+            }
+        }
+        internal void ___checkBackgroundImageStringForElement()
+        {
+            if (string.IsNullOrEmpty(this.___BackgroundImage) == false)
+            {
+                if (this.___StyleType == CHtmlElementStyleType.Element)
+                {
+                    if (this.___isApplyElemenetStyleSheetsForElementDone == true)
+                    {
+                        commonHTML.parseCSSBackgroundImageIntoMultipleImageData(this, 0);
+                        if (this.___multipleBackgroundImageDataSet != null && this.___multipleBackgroundImageDataSet.Count > 0)
+                        {
+                            ___confirmMultipleBackgrondImagesHasBeenCachedIntoDocument();
+                        }
+                    }
+                }
+            }
+        }
+        internal void ___confirmMultipleBackgrondImagesHasBeenCachedIntoDocument()
+        {
+            CHtmlDocument ___currentDocument = null;
+            if (this.___ownerElementWeakReference != null)
+            {
+                CHtmlElement __elem = this.___ownerElementWeakReference.Target as CHtmlElement;
+                if (__elem.___documentWeakRef != null)
+                {
+                    ___currentDocument = __elem.___getDocument();
+                }
+            }
+            if (___currentDocument == null)
+            {
+                return;
+            }
+            try
+            {
+                int __iCount = this.___multipleBackgroundImageDataSet.Count;
+                for (int i = 0; i < __iCount; i++)
+                {
+                    CHtmlStyleElementMultpleImageData multiData = this.___multipleBackgroundImageDataSet[i];
+                    if (multiData != null && multiData.ImageType == CSSMultipleImageDataType.Image)
+                    {
+                        if (string.IsNullOrEmpty(multiData.background_image_origin) == false)
+                        {
+                            if (string.IsNullOrEmpty(multiData.background_image_fullUrl) == false)
+                            {
+                                if (___currentDocument.___images.ContainsKey(multiData.background_image_fullUrl) == false)
+                                {
+                                    if (___currentDocument.___PageRequestedUrlList.ContainsKey(multiData.background_image_fullUrl) == false)
+                                    {
+                                        if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 5)
+                                        {
+                                           commonLog.LogEntry("___confirmMultipleBackgrondImagesHasBeenCachedIntoDocument() detected url needs to be requeststed {0}. pool it now..." + multiData.background_image_fullUrl);
+                                        }
+                                        /*
+                                        ___currentDocument.___downloadviaQueue(multiData.background_image_fullUrl, "Image", null, null, ___currentDocument.___URL, null,CHtmlThreadPoolQueueObjectType.UrlImage, null, null, 0, CHtmlUrlSourceType.BackgroundImage_of_DefaultStyle, true);
+                                        */
+
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 5)
+                                {
+                                   commonLog.LogEntry("TODO: ___confirmMultipleBackgrondImagesHasBeenCachedIntoDocument() detected partical url needs to be requeststed." + multiData.background_image_origin);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 5)
+                {
+                   commonLog.LogEntry("___confirmMultipleBackgrondImagesHasBeenCachedIntoDocument() ___hasInner exception. ", ex);
+                }
+            }
+        }
+
+
+        #region ICloneable メンバ
+
+        public CHtmlCSSStyleSheet CloneCHtmlStyleElement()
+        {
+            CHtmlCSSStyleSheet sNew = new CHtmlCSSStyleSheet(this.___StyleType);
+            try
+            {
+                if (this.___styleAttributeList != null && this.___styleAttributeList.Count > 0)
+                {
+
+                    sNew.___styleAttributeList.AddRange(this.___styleAttributeList);
+                }
+                // Checking Value is good!
+                if (string.IsNullOrEmpty(this.___baseUrl) == false)
+                {
+                    sNew.___baseUrl = string.Copy(this.___baseUrl);
+                }
+                if (string.IsNullOrEmpty(this.___ImageUrlHint) == false)
+                {
+                    sNew.___ImageUrlHint = string.Copy(this.___ImageUrlHint);
+                }
+                if (string.IsNullOrEmpty(this.___SelectorID) == false)
+                {
+                    sNew.___SelectorID = string.Copy(this.___SelectorID);
+                }
+
+                sNew.___HasCombinatorChar = this.___HasCombinatorChar;
+
+                if (this.___MediaQueryNodeInstance != null)
+                {
+                    sNew.___MediaQueryNodeWeakReference = new WeakReference(this.___MediaQueryNodeInstance, false);
+                }
+                if (this.___MediaQueryNodeWeakReference != null)
+                {
+                    sNew.___MediaQueryNodeWeakReference = this.___MediaQueryNodeWeakReference;
+                }
+
+
+                /*
+                if(this.___styleKeyWorkingList.Count > 0)
+                {
+		
+                    sNew.___styleKeyWorkingList = this.___styleKeyWorkingList.Clone() as System.Collections.ArrayList;
+                }
+                if(this.___styleKeyOrignalList.Count > 0)
+                {
+                    sNew.___styleKeyOrignalList = null;
+                    sNew.___styleKeyOrignalList = this.___styleKeyOrignalList.Clone() as System.Collections.ArrayList;
+                }
+                */
+                
+
+                sNew.___isCSSRuleForThisNode = this.___isCSSRuleForThisNode;
+                // ==========================================================
+                if (this.IsSortedListFieldsHasCopiedToProperty == true)
+                {
+                    if (this.___StyleType != CHtmlElementStyleType.None && this.___StyleType != CHtmlElementStyleType.Prototype)
+                    {
+                        this.___copyStyleElementFields(sNew, false, false);
+                    }
+                    sNew.IsSortedListFieldsHasCopiedToProperty = this.IsSortedListFieldsHasCopiedToProperty;
+                }
+                if (this.___StyleCommentBuilder != null)
+                {
+                    sNew.StyleCommentAdd(this.___StyleCommentBuilder.ToString());
+                }
+
+                sNew.___style_unique_id = ___style_unique_id;
+
+                sNew.___SelectorRanking = this.___SelectorRanking;
+                if (string.IsNullOrEmpty(this.___WorkingKey) == false)
+                {
+                    sNew.___WorkingKey = string.Copy(this.___WorkingKey);
+                }
+                if (string.IsNullOrEmpty(this.___GroundSortKey) == false)
+                {
+                    sNew.___GroundSortKey = string.Copy(this.___GroundSortKey);
+                }
+                sNew.___StyleType = this.___StyleType;
+
+
+
+                sNew.___WorkingKeyCombinatorChar = this.___WorkingKeyCombinatorChar;
+                sNew.___WorkingKeyClassList = this.___WorkingKeyClassList;
+                sNew.___WorkingKeyPseudoTitleList = this.___WorkingKeyPseudoTitleList;
+                sNew.___WorkingKeyAttributeKeyList = this.___WorkingKeyAttributeKeyList;
+                sNew.___WorkingSelectorClassKey = this.___WorkingSelectorClassKey;
+                sNew.___LastReCreateWorkingKeyCompleteListLength = this.___LastReCreateWorkingKeyCompleteListLength;
+                sNew.___CSSPosition = this.___CSSPosition;
+                sNew.___PseudoClassType = this.___PseudoClassType;
+                sNew.___FontRelatedCount = this.___FontRelatedCount;
+                sNew.___isFinalStyleKeyWildCardOnly = this.___isFinalStyleKeyWildCardOnly;
+
+                if (string.IsNullOrEmpty(this.___SelectorTextOriginal) == false)
+                {
+                    sNew.___SelectorTextOriginal = string.Copy(this.___SelectorTextOriginal);
+                }
+                sNew.___SelectorRanking = this.___SelectorRanking;
+                sNew.___SelectorMediaQueryRanking = this.___SelectorMediaQueryRanking;
+                sNew.___SelectorConmaCount = this.___SelectorConmaCount;
+            }
+            catch (Exception exStyleCopy)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel > 8)
+                {
+                   commonLog.LogEntry("CLoneCHtmlStyleElement Exception", exStyleCopy);
+                }
+            }
+            return sNew;
+        }
+
+
+
+        public string csstext
+        {
+            set
+            {
+                this.cssTextSetter(value);
+            }
+            get
+            {
+                return this.cssTextGetter();
+            }
+        }
+
+        public string cssText
+        {
+            set
+            {
+                this.cssTextSetter(value);
+            }
+            get
+            {
+                return this.cssTextGetter();
+            }
+        }
+
+        public string cssTextGetter()
+        {
+            // assuming all in lists
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            try
+            {
+                foreach (CHtmlStyleAttribute st in this.___styleAttributeList)
+                {
+                    sb.Append(st.Name);
+                    sb.Append(": ");
+                    sb.Append(st.value);
+                    sb.Append(" ");
+                    sb.Append(";");
+                }
+            }
+            catch
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                {
+                   commonLog.LogEntry("Error During creating cssText");
+                }
+            }
+            return sb.ToString();
+
+        }
+        private string ___getPossibleBaseURLString()
+        {
+            if (string.IsNullOrEmpty(this.___baseUrl) == false)
+            {
+                return this.___baseUrl;
+            }
+            if (this.___ownerElementWeakReference != null)
+            {
+                CHtmlElement __parentElement = this.___ownerElementWeakReference.Target as CHtmlElement;
+                if (__parentElement != null)
+                {
+                    if (__parentElement.___documentWeakRef != null)
+                    {
+                        return string.Copy(__parentElement.___getDocument().___URL);
+                    }
+                    if (__parentElement.___locationBase != null)
+                    {
+                        if (string.IsNullOrEmpty(__parentElement.___locationBase.href) == false)
+                        {
+                            return string.Copy(__parentElement.___locationBase.href);
+                        }
+                    }
+                }
+            }
+            return "";
+        }
+   
+        internal void cssTextSetter(string ___Text)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+            {
+                commonLog.LogEntry("enter cssText  '{0}'  '{1}'", this, ___Text);
+            }
+            
+            System.Collections.Generic.List<CHtmlCSSRule> ___styleRulesList = null;
+            CHtmlStopWatch __stopWatch = null;
+            bool ___IsStyleMerged = false;
+            System.Collections.Generic.List<CHtmlStyleAttribute?> styleAttributeList = new List<CHtmlStyleAttribute?>();
+            try
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 7)
+                {
+                    __stopWatch = new CHtmlStopWatch();
+                }
+                if (___Text != null && ___Text.Length > 0)
+                {
+                    bool ___IsCSssTextContainsTitle = false;
+
+                    if (___Text.IndexOf('{') == -1)
+                    {
+                        if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 7)
+                        {
+                           commonLog.LogEntry("set cssText is about to processing with GetProcessStyleSheetStringIntoCHtmlCollection() '{0}'  '{1}'", this, ___Text);
+                        }
+                        //___styleRulesList = commonGetProcessStyleSheetStringIntoCHtmlCollection(___Text);
+                        styleAttributeList .AddRange(commonHTML.GetProcessStyleSheetStringIntoCHtmlCollection(___Text));
+                        if (___styleRulesList == null)
+                        {
+                            ___styleRulesList = new System.Collections.Generic.List<CHtmlCSSRule>();
+                        }
+                        if (commonHTML.isObjectNullOrUndefined(styleAttributeList) == false)
+                        {
+                            // TODO: Implement Proper converstion later.
+                            //___styleRulesList.AddRange((System.Collections.Generic.IEnumerable<CHtmlCSSRule>)styleAttributeList);
+                        }
+                    }
+                    else
+                    {
+                        ___IsCSssTextContainsTitle = true;
+                        if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 7)
+                        {
+                           commonLog.LogEntry("set cssText is about to processing with CreateCSSRuleCollectionFromStyleSheetString() '{0}'  '{1}'", this, ___Text);
+                        }
+                        ___styleRulesList = commonHTML.CreateCSSRuleCollectionFromStyleSheetString(___Text, this.___getPossibleBaseURLString(), null);
+                    }
+                    if (___styleRulesList != null && ___styleRulesList.Count > 0)
+                    {
+                        if (___IsCSssTextContainsTitle == false && this.___IsOwnerElementAssigned() == true)
+                        {
+                            string ___baseUrl = null;
+                            CHtmlElement ___owner = this.ownerElement;
+                            if (___owner != null && ___owner.___documentWeakRef != null)
+                            {
+                                if (string.IsNullOrEmpty(___owner.___getDocument().___URL) == false)
+                                {
+                                    ___baseUrl = string.Copy(___owner.___getDocument().___URL);
+                                    goto SetPhase1;
+                                }
+                            }
+                            if (this.___StyleType == CHtmlElementStyleType.Element && ___owner != null && ___owner.___locationBase != null)
+                            {
+                                ___baseUrl = ___owner.___locationBase.href;
+                            }
+                        SetPhase1:
+
+                            commonHTML.SetValuesInCHtmlStyleElement(this, null, styleAttributeList, false, ___baseUrl);
+                            if (this.___StyleType == CHtmlElementStyleType.Element && ___owner != null && ___owner.___documentWeakRef != null && ___owner.___isApplyElemenetStyleSheetCalled == true)
+                            {
+                                ___owner.___getDocument().___applyElemenetStyleSheets(___owner, false, true, false);
+                            }
+                            if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 7)
+                            {
+                               commonLog.LogEntry("style for '{0}' cssText '{1}' completed {2} items {3}", ___owner, ___Text, ___styleRulesList.Count, __stopWatch);
+                            }
+                            ___IsStyleMerged = true;
+                        }
+                        else
+                        {
+                            if (___IsCSssTextContainsTitle == true && this.___IsDocumentAssigned() == true)
+                            {
+                                CHtmlDocument ___Document = this.___documentWeakReference.Target as CHtmlDocument;
+                                if (___Document != null && ___Document.___Disposing == false && ___Document.___documentDomType == CHtmlDomModeType.HTMLDOM)
+                                {
+                                    this.___MergeCHtmlStyleElementListIntoDocument(___styleRulesList, ___Document);
+                                    ___IsStyleMerged = true;
+                                    if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 7)
+                                    {
+                                       commonLog.LogEntry("set cssText  merged to document '{0}' items: {1} {2}", this, ___styleRulesList.Count, __stopWatch);
+                                    }
+
+                                }
+                                else
+                                {
+                                    CHtmlElement ___owner = this.ownerElement;
+                                    if (___owner != null && ___owner.___Document != null && ___owner.___Document.___documentDomType == CHtmlDomModeType.HTMLDOM && ___owner.___Document.___Disposing == false)
+                                    {
+                                        this.___MergeCHtmlStyleElementListIntoDocument(___styleRulesList, ___owner.___Document);
+                                        ___IsStyleMerged = true;
+                                    }
+
+                                    if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 7)
+                                    {
+                                       commonLog.LogEntry("set cssText is about to merge dynamic style, bot document referece not found, do it latter on. '{0}' items: {1}", this, ___styleRulesList.Count);
+                                       commonLog.LogEntry("=== Set CssText Analysis ===");
+                                       commonLog.LogEntry("IsDynamicStyle : {0}", this.___IsDynamicElement);
+                                       commonLog.LogEntry("ownerElement   : {0}", ___owner);
+                                        if (___owner != null)
+                                        {
+                                           commonLog.LogEntry("ownerElement Dynamic: {0}", ___owner.___IsDynamicElement);
+                                           commonLog.LogEntry("ownerElement CalcBounds: {0}", ___owner.___isCalculateElementBoundsCalled);
+                                        }
+
+                                       commonLog.LogEntry("==========================");
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 7)
+                                {
+                                   commonLog.LogEntry("set cssText is about to merge dynamic style, but no title keys '{0}' items: {1}", this, ___styleRulesList.Count);
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                {
+                   commonLog.LogEntry("cssTextInner error: " + ___Text, ex);
+                }
+            }
+            if (___IsStyleMerged == true)
+            {
+                if (___styleRulesList != null)
+                {
+
+                    ___styleRulesList = null;
+                }
+            }
+        }
+
+        internal void ___MergeCHtmlStyleElementListIntoDocument(List<CHtmlCSSRule>  ___documentRootCssRuleList, CHtmlDocument ___targetDocument)
+        {
+            if (___targetDocument == null || ___documentRootCssRuleList == null)
+            {
+                return;
+            }
+            if (___targetDocument.___Disposing)
+            {
+                return;
+            }
+            int arStyleListsCount = ___documentRootCssRuleList.Count;
+            for (int i = 0; i < arStyleListsCount; i++)
+            {
+                CHtmlCSSRule ___sPart = ___documentRootCssRuleList[i] as CHtmlCSSRule;
+                if (___sPart == null)
+                    continue;
+
+                if (___sPart.___ruleType  == CHtmlCSSRule.CSSRuleType.Import_Rule && string.IsNullOrEmpty(___sPart.___baseUrl) == false)
+                {
+                    /*
+                    bool __IsEnqueued = ___targetDocument.___downloadviaQueue(___sPart.___baseUrl, "StyleSheet", null, null, null, ___targetDocument.___charset, Unicus.CHtmlThreadPoolQueueObjectType.UrlStyleSheet, ___sPart.___baseUrl, null, 0, CHtmlUrlSourceType.Unknown, false);
+                    */
+                    bool __IsEnqueued = false;
+                    if (__IsEnqueued)
+                    {
+                        /*
+                        System.Threading.Interlocked.Increment(ref this.StyleSheetOnlyFileDownloadPendingCount);
+										
+                        System.Threading.Interlocked.Increment(ref this.StyleScriptFileDownloadRequestedTotalCount);
+                        */
+                    }
+                    continue;
+                }
+                if (___sPart.___NonSearchableStyleSheet == true)
+                {
+                    continue;
+                }
+                ___targetDocument.___mergeCHtmlStyleElementIntoDocumentStyleSheet(___sPart);
+            }
+        }
+
+
+
+        #endregion
+
+        public object this[object ___nameObject]
+        {
+            get
+            {
+                string ___name = commonHTML.GetStringValue(___nameObject);
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                {
+                   commonLog.LogEntry("CHtmlCSSStyleSheet {0} this['{1}'] getter", this, ___name);
+                }
+                try
+                {
+                    return this.___getPropertyByName(___name);
+                }
+                catch
+                {
+
+                }
+                //commonLog.LogEntry("CHtmlSortedList this[{0}] failed", s);
+                return "";
+
+            }
+            set
+            {
+                string ___name = commonHTML.GetStringValue(___nameObject);
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                {
+                   commonLog.LogEntry("CHtmlCSSStyleSheet {0} this['{1}'] = '{2}' setter", this, ___name, value);
+                }
+                try
+                {
+                    this.___setPropertyByName(___name, value);
+                }
+                catch { }
+            }
+        }
+        #region IDyamicMetaObjectProvider support to get and set properties
+        public DynamicMetaObject GetMetaObject(Expression parameter)
+        {
+            return new CHtmlClearScriptDynamicMetaObject<CHtmlCSSStyleSheet>(parameter, this);
+        }
+        public object GetDynamicMember(string name)
+        {
+            object objValue = null;
+
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("{0}.GetDynamicMember({1} returns : {2}", this, name, objValue);
+            }
+            return objValue;
+        }
+        public void SetDynamicMember(string name, object value)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("{0}.SettDynamicMember({1} is called value: {2}", this, name, value);
+            }
+            this.___setPropertyByName(name, value);
+
+        }
+        public IEnumerable<string> GetDynamicMemberNames()
+        {
+            List<string> members = new List<string>();
+            members.AddRange(CHtmlCSSStyleSheetProperties.Keys);
+            if (this.___properties.Count > 0)
+            {
+                members.AddRange(this.___properties.Keys);
+            }
+            return members;
+        }
+
+
+
+        public void setProperty(string name, string? value)
+        {
+            try
+            {
+                this.___setPropertyByName(name, value ?? string.Empty);
+            }
+            catch { }
+        }
+
+        public void removeProperty(string name)
+        {
+            try
+            {
+                // clear the property value
+                this.___setPropertyByName(name, string.Empty);
+            }
+            catch { }
+        }
+
+        public IEnumerable<string> getPropertyNames()
+        {
+            try
+            {
+                return GetDynamicMemberNames();
+            }
+            catch { return System.Array.Empty<string>(); }
+        }
+
+        // Note: The explicit duplicate GetMetaObject(System.Linq.Expressions.Expression) was removed because the above implementation is sufficient.
+        #endregion
+    }
+}
+

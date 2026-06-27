@@ -1,0 +1,189 @@
+﻿using MultiHtmlCraft.Core;
+using MultiHtmlCraft.Interfaces;
+
+namespace MultiversalRendererWinFormsTest
+{
+    partial class FormMain
+    {
+        
+        /// <summary>
+        ///  Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        ///  Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        ///  Required method for Designer support - do not modify
+        ///  the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
+            panelUrl = new Panel();
+            splitterText = new Splitter();
+            btnCSS = new Button();
+            btnScripts = new Button();
+            btnDOM = new Button();
+            btnNavigate = new Button();
+            txtUrl = new TextBox();
+            multiHtmlCraftControl = new MultiHtmlCraft.WinFormsControl.CHtmlMultiHtmlCraft_WinControl();
+            panelUrl.SuspendLayout();
+            SuspendLayout();
+            // 
+            // panelUrl
+            // 
+            panelUrl.Controls.Add(splitterText);
+            panelUrl.Controls.Add(btnCSS);
+            panelUrl.Controls.Add(btnScripts);
+            panelUrl.Controls.Add(btnDOM);
+            panelUrl.Controls.Add(btnNavigate);
+            panelUrl.Controls.Add(txtUrl);
+            panelUrl.Dock = DockStyle.Top;
+            panelUrl.Location = new Point(0, 0);
+            panelUrl.Margin = new Padding(3, 2, 3, 2);
+            panelUrl.Name = "panelUrl";
+            panelUrl.Size = new Size(966, 23);
+            panelUrl.TabIndex = 0;
+            // 
+            // splitterText
+            // 
+            splitterText.Location = new Point(837, 0);
+            splitterText.Margin = new Padding(3, 2, 3, 2);
+            splitterText.Name = "splitterText";
+            splitterText.Size = new Size(3, 23);
+            splitterText.TabIndex = 0;
+            splitterText.TabStop = false;
+            // 
+            // btnCSS
+            // 
+            btnCSS.Dock = DockStyle.Left;
+            btnCSS.FlatStyle = FlatStyle.Flat;
+            btnCSS.Location = new Point(810, 0);
+            btnCSS.Margin = new Padding(3, 2, 3, 2);
+            btnCSS.Name = "btnCSS";
+            btnCSS.Size = new Size(27, 23);
+            btnCSS.TabIndex = 5;
+            btnCSS.UseVisualStyleBackColor = true;
+            // 
+            // btnScripts
+            // 
+            btnScripts.Dock = DockStyle.Left;
+            btnScripts.FlatStyle = FlatStyle.Flat;
+            btnScripts.Location = new Point(783, 0);
+            btnScripts.Margin = new Padding(3, 2, 3, 2);
+            btnScripts.Name = "btnScripts";
+            btnScripts.Size = new Size(27, 23);
+            btnScripts.TabIndex = 4;
+            btnScripts.UseVisualStyleBackColor = true;
+            // 
+            // btnDOM
+            // 
+            btnDOM.Dock = DockStyle.Left;
+            btnDOM.FlatStyle = FlatStyle.Flat;
+            btnDOM.Location = new Point(756, 0);
+            btnDOM.Margin = new Padding(3, 2, 3, 2);
+            btnDOM.Name = "btnDOM";
+            btnDOM.Size = new Size(27, 23);
+            btnDOM.TabIndex = 3;
+            btnDOM.UseVisualStyleBackColor = true;
+            btnDOM.Click += btnDOM_Click;
+            // 
+            // btnNavigate
+            // 
+            btnNavigate.Dock = DockStyle.Left;
+            btnNavigate.FlatStyle = FlatStyle.Flat;
+            btnNavigate.Location = new Point(729, 0);
+            btnNavigate.Margin = new Padding(3, 2, 3, 2);
+            btnNavigate.Name = "btnNavigate";
+            btnNavigate.Size = new Size(27, 23);
+            btnNavigate.TabIndex = 2;
+            btnNavigate.UseVisualStyleBackColor = true;
+            btnNavigate.Click += BtnNavigate_Click;
+            // 
+            // txtUrl
+            // 
+            txtUrl.BorderStyle = BorderStyle.FixedSingle;
+            txtUrl.Dock = DockStyle.Left;
+            txtUrl.Location = new Point(0, 0);
+            txtUrl.Margin = new Padding(3, 2, 3, 2);
+            txtUrl.Name = "txtUrl";
+            txtUrl.Size = new Size(729, 23);
+            txtUrl.TabIndex = 0;
+            txtUrl.Text = "https://www.cpubenchmark.net/laptop.html";
+            txtUrl.KeyDown += TxtUrl_KeyDown;
+            // 
+            // multiHtmlCraftControl
+            // 
+            multiHtmlCraftControl.Dock = DockStyle.Fill;
+            multiHtmlCraftControl.Location = new Point(0, 23);
+            multiHtmlCraftControl.Name = "multiHtmlCraftControl";
+            multiHtmlCraftControl.Size = new Size(966, 431);
+            multiHtmlCraftControl.TabIndex = 1;
+            // 
+            // FormMain
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(966, 454);
+            Controls.Add(multiHtmlCraftControl);
+            Controls.Add(panelUrl);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(3, 2, 3, 2);
+            Name = "FormMain";
+            Text = "MultiHtmlCraft WinformsTest App";
+            panelUrl.ResumeLayout(false);
+            panelUrl.PerformLayout();
+            ResumeLayout(false);
+            // txtUrlへのTab移動や自動フォーカスを防ぐ
+            this.txtUrl.TabStop = false;
+            this.txtUrl.CausesValidation = false;
+        }
+
+
+
+
+
+        private void TxtUrl_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                this.ActiveControl = null;
+                navigateUrl_Inner();
+                e.SuppressKeyPress = true;
+            }
+    
+        }
+
+        private void BtnNavigate_Click(object sender, EventArgs e)
+        {
+            this.ActiveControl = null;
+            navigateUrl_Inner();
+        }
+
+        #endregion
+
+        private Panel panelUrl;
+        private Button btnDOM;
+        private Button btnNavigate;
+        private Splitter splitterText;
+        private TextBox txtUrl;
+        private Button btnScripts;
+        private Button btnCSS;
+        private MultiHtmlCraft.WinFormsControl.CHtmlMultiHtmlCraft_WinControl multiHtmlCraftControl;
+   
+    }
+}

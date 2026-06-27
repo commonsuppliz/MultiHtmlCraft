@@ -1,0 +1,68 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using MultiHtmlCraft.Interfaces;
+
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// Minimal CSSStyleDeclaration-like class for getComputedStyle results.
+    /// - Provides getPropertyValue(name) and setProperty(name, value)
+    /// - Supports string indexer: style["border-top-width"]
+    /// - Provides toString() via CLR ToString(), ClearScript binder will expose a callable delegate.
+    /// - Stores values case-insensitively.
+    /// </summary>
+    public class CHtmlCSSStyleDeclaration : ICHtmlCSSStyleDeclaration 
+    {
+        private readonly Dictionary<string, string> _props = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        public CHtmlCSSStyleDeclaration() { }
+
+        public CHtmlCSSStyleDeclaration(IDictionary<string, string> initial)
+        {
+            if (initial != null)
+            {
+                foreach (var kv in initial)
+                {
+                    _props[kv.Key] = kv.Value ?? string.Empty;
+                }
+            }
+        }
+
+        public string this[string name]
+        {
+            get => getPropertyValue(name) ?? string.Empty;
+            set => setProperty(name, value);
+        }
+
+        public string? getPropertyValue(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return string.Empty;
+            return _props.TryGetValue(name, out var v) ? v : string.Empty;
+        }
+
+        public void setProperty(string name, string? value)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+            _props[name] = value ?? string.Empty;
+        }
+
+        public void removeProperty(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+            _props.Remove(name);
+        }
+
+        public IEnumerable<string> getPropertyNames()
+        {
+            return _props.Keys.ToArray();
+        }
+
+        public override string ToString()
+        {
+            // Simple serialization like: "prop: value; prop2: value2;"
+            if (_props.Count == 0) return string.Empty;
+            return string.Join("; ", _props.Select(kv => $"{kv.Key}: {kv.Value}")) + ";";
+        }
+    }
+}

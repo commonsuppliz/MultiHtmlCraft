@@ -1,0 +1,81 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace MultiHtmlCraft.Interfaces
+{
+    /// <summary>
+    /// Represents a W3C Fetch API Request interface.
+    /// </summary>
+    public interface ICHtmlRequestInterface
+    {
+        /// <summary>
+        /// Gets the HTTP request method (GET, POST, etc).
+        /// </summary>
+        string Method { get; }
+
+        /// <summary>
+        /// Gets the request URL.
+        /// </summary>
+        Uri Url { get; }
+
+        /// <summary>
+        /// Gets the request headers.
+        /// </summary>
+        IDictionary<string, string> Headers { get; }
+
+        /// <summary>
+        /// Gets the request body (if any).
+        /// </summary>
+        object? Body { get; }
+
+        /// <summary>
+        /// Gets the request mode (e.g., cors, no-cors, same-origin).
+        /// </summary>
+        string? Mode { get; }
+
+        /// <summary>
+        /// Gets the credentials mode (e.g., omit, same-origin, include).
+        /// </summary>
+        string? Credentials { get; }
+
+        /// <summary>
+        /// Gets the cache mode (e.g., default, no-store, reload, no-cache, force-cache, only-if-cached).
+        /// </summary>
+        string? Cache { get; }
+
+        /// <summary>
+        /// Gets the redirect mode (e.g., follow, error, manual).
+        /// </summary>
+        string? Redirect { get; }
+
+        /// <summary>
+        /// Gets the referrer.
+        /// </summary>
+        string? Referrer { get; }
+
+        /// <summary>
+        /// Gets the referrer policy.
+        /// </summary>
+        string? ReferrerPolicy { get; }
+
+        /// <summary>
+        /// Gets the subresource integrity value.
+        /// </summary>
+        string? Integrity { get; }
+
+        /// <summary>
+        /// Gets the destination (e.g., script, image, etc).
+        /// </summary>
+        string? Destination { get; }
+
+        /// <summary>
+        /// Gets whether keepalive is enabled.
+        /// </summary>
+        bool? Keepalive { get; }
+
+        /// <summary>
+        /// Gets the signal for aborting the request (if any).
+        /// </summary>
+        object? Signal { get; }
+    }
+}

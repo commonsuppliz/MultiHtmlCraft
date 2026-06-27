@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft.AvaloniaControl_Test", "MultiHtmlCraft.AvaloniaControl_Test.csproj", "{8FE269C2-C6EC-53A1-FAD2-72361DF5F904}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft.AvaroniaControl", "..\MultiHtmlCraft\MultiHtmlCraft.AvaroniaControl\MultiHtmlCraft.AvaroniaControl.csproj", "{5CA2EE9F-D07E-0FD5-EC68-933978DEAD55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClearScriptProcessor", "..\MultiHtmlCraft\ClearScriptProcessor\ClearScriptProcessor.csproj", "{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NilJsProcessor", "..\MultiHtmlCraft\NilJsProcessor\NilJsProcessor.csproj", "{BBC2E3F1-3B57-846E-CE67-ECA00A000808}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PythonProcessor", "..\MultiHtmlCraft\PythonProssesor\PythonProcessor.csproj", "{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft.Interfaces", "..\MultiHtmlCraft\Interfaces\MultiHtmlCraft.Interfaces.csproj", "{47CF743F-957F-A14F-01A1-B672DBF482CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft.Core", "..\MultiHtmlCraft\MultiHtmlCraft.Core\MultiHtmlCraft.Core.csproj", "{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8FE269C2-C6EC-53A1-FAD2-72361DF5F904}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FE269C2-C6EC-53A1-FAD2-72361DF5F904}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FE269C2-C6EC-53A1-FAD2-72361DF5F904}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FE269C2-C6EC-53A1-FAD2-72361DF5F904}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CA2EE9F-D07E-0FD5-EC68-933978DEAD55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CA2EE9F-D07E-0FD5-EC68-933978DEAD55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CA2EE9F-D07E-0FD5-EC68-933978DEAD55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CA2EE9F-D07E-0FD5-EC68-933978DEAD55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBC2E3F1-3B57-846E-CE67-ECA00A000808}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBC2E3F1-3B57-846E-CE67-ECA00A000808}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBC2E3F1-3B57-846E-CE67-ECA00A000808}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBC2E3F1-3B57-846E-CE67-ECA00A000808}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47CF743F-957F-A14F-01A1-B672DBF482CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47CF743F-957F-A14F-01A1-B672DBF482CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47CF743F-957F-A14F-01A1-B672DBF482CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47CF743F-957F-A14F-01A1-B672DBF482CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C73CCFF-8695-4744-B72F-61BB1F9B058A}
+	EndGlobalSection
+EndGlobal

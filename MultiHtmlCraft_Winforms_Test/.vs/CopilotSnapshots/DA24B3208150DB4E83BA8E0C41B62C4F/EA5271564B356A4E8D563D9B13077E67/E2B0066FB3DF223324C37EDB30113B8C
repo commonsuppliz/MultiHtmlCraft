@@ -1,0 +1,176 @@
+﻿using System;
+using System.Linq;
+using System.Reflection;
+
+namespace MultiHtmlCraft.Core
+{
+    // Lightweight proxy to expose stable CLR methods to ClearScript (avoid dynamic binding paths)
+    public class CHtmlClearScriptCanvasContextHostProxy
+    {
+        private readonly CHtmlCanvasContext2D _canvas;
+
+        public CHtmlClearScriptCanvasContextHostProxy(CHtmlCanvasContext2D canvas)
+        {
+            _canvas = canvas ?? throw new ArgumentNullException(nameof(canvas));
+        }
+
+        private static object? Unwrap(object? v)
+        {
+            if (v == null) return null;
+            try
+            {
+                // Common wrapper properties
+                var t = v.GetType();
+                var prop = t.GetProperty("Value", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (prop != null)
+                {
+                    var val = prop.GetValue(v);
+                    if (val != null) return val;
+                }
+                prop = t.GetProperty("Target", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (prop != null)
+                {
+                    var val = prop.GetValue(v);
+                    if (val != null) return val;
+                }
+            }
+            catch { }
+            return v;
+        }
+
+        private static bool TryToDouble(object? v, out double result)
+        {
+            result = 0.0;
+            if (v == null) return false;
+            var u = Unwrap(v) ?? v;
+            try
+            {
+                if (u is double d) { result = d; return true; }
+                if (u is float f) { result = f; return true; }
+                if (u is int i) { result = i; return true; }
+                if (u is long l) { result = l; return true; }
+                if (u is short s) { result = s; return true; }
+                if (u is string str && double.TryParse(str, out var p)) { result = p; return true; }
+                result = Convert.ToDouble(u);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        // Exposed methods with object parameters to keep CLR signature stable for ClearScript
+        public void moveTo(object x, object y)
+        {
+            try
+            {
+                if (!TryToDouble(x, out var dx)) dx = 0.0;
+                if (!TryToDouble(y, out var dy)) dy = 0.0;
+                _canvas.moveTo(dx, dy);
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("CHtmlClearScriptCanvasContextHostProxy.moveTo error: {0}", ex.Message); } catch { }
+            }
+        }
+
+        public void lineTo(object x, object y)
+        {
+            try
+            {
+                if (!TryToDouble(x, out var dx)) dx = 0.0;
+                if (!TryToDouble(y, out var dy)) dy = 0.0;
+                _canvas.lineTo(dx, dy);
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("CHtmlClearScriptCanvasContextHostProxy.lineTo error: {0}", ex.Message); } catch { }
+            }
+        }
+
+        public void stroke()
+        {
+            try { _canvas.stroke(); } catch { }
+        }
+        public void beginPath()
+        {
+            try { _canvas.beginPath(); } catch { }
+        }
+        public void closePath()
+        {
+            try { _canvas.closePath(); } catch { }
+        }
+
+        public void fill()
+        {
+            try { _canvas.fill(); } catch { }
+        }
+
+        public void translate(object x, object y)
+        {
+            try
+            {
+                if (!TryToDouble(x, out var dx)) dx = 0.0;
+                if (!TryToDouble(y, out var dy)) dy = 0.0;
+                _canvas.translate(dx, dy);
+            }
+            catch { }
+        }
+
+        public void rotate(object angle)
+        {
+            try
+            {
+                if (!TryToDouble(angle, out var a)) a = 0.0;
+                _canvas.rotate(a);
+            }
+            catch { }
+        }
+
+        public void fillRect(object x, object y, object w, object h)
+        {
+            try
+            {
+                if (!TryToDouble(x, out var dx)) dx = 0.0;
+                if (!TryToDouble(y, out var dy)) dy = 0.0;
+                if (!TryToDouble(w, out var dw)) dw = 0.0;
+                if (!TryToDouble(h, out var dh)) dh = 0.0;
+                _canvas.fillRect(dx, dy, dw, dh);
+            }
+            catch { }
+        }
+
+        public void strokeRect(object x, object y, object w, object h)
+        {
+            try
+            {
+                if (!TryToDouble(x, out var dx)) dx = 0.0;
+                if (!TryToDouble(y, out var dy)) dy = 0.0;
+                if (!TryToDouble(w, out var dw)) dw = 0.0;
+                if (!TryToDouble(h, out var dh)) dh = 0.0;
+                _canvas.strokeRect(dx, dy, dw, dh);
+            }
+            catch { }
+        }
+
+        public void arc(object x, object y, object radius, object startAngle, object endAngle, object anticlockwise = null)
+        {
+            try
+            {
+                if (!TryToDouble(x, out var dx)) dx = 0.0;
+                if (!TryToDouble(y, out var dy)) dy = 0.0;
+                if (!TryToDouble(radius, out var dr)) dr = 0.0;
+                if (!TryToDouble(startAngle, out var sa)) sa = 0.0;
+                if (!TryToDouble(endAngle, out var ea)) ea = 0.0;
+                bool acw = false;
+                if (anticlockwise != null)
+                {
+                    var un = Unwrap(anticlockwise);
+                    if (un is bool b) acw = b;
+                    else if (TryToDouble(un, out var dbl)) acw = dbl != 0.0;
+                }
+                _canvas.arc(dx, dy, dr, sa, ea, acw);
+            }
+            catch { }
+        }
+
+    }
+}

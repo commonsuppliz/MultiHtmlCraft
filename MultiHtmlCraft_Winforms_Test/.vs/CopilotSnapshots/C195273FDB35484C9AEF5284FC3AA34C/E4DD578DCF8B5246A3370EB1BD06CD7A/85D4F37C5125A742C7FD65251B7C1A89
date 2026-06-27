@@ -1,0 +1,1722 @@
+﻿using MultiHtmlCraft.Interfaces;
+using NiL.JS.BaseLibrary;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Net.WebSockets;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using MultiHtmlCraft.Core;
+using NiL.JS.Statements;
+
+
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// This class is to support script engines which use DynamicObject. Since it is difficult to support DynamicObject in this project, DynamicMetaObject is used instead.
+    /// Defensive: avoid throwing exceptions back into ClearScript by returning safe fallbacks.
+    /// </summary>
+    public class CHtmlClearScriptDynamicMetaObject<T> : DynamicMetaObject
+    {
+        private static readonly ConcurrentDictionary<(Type, string, Type[] parameterTypes), MethodInfo> ClearScriptMetaObjectMethodCache = new();
+        private static readonly ConcurrentDictionary<(Type, string), PropertyInfo> ClearScriptMetaObjectPropertyCache = new();
+
+        // Method to get MethodInfo from cache or add it if not present
+        private static MethodInfo? GetCachedMethod(Type type, string methodName, Type[] parameterTypes)
+        {
+            var key = (type, methodName, parameterTypes);
+            return ClearScriptMetaObjectMethodCache.GetOrAdd(key, _ => type.GetMethod(methodName, parameterTypes));
+        }
+
+        // Return nullable PropertyInfo to avoid throwing when property is not found
+        private static PropertyInfo? GetCachedProperty(Type type, string propertyName)
+        {
+            var key = (type, propertyName);
+            return ClearScriptMetaObjectPropertyCache.GetOrAdd(key, _ => GetPropertyIgnoreCaseSafe(type, propertyName));
+        }
+
+        public CHtmlClearScriptDynamicMetaObject(System.Linq.Expressions.Expression expression, object value)
+            : base(expression, BindingRestrictions.Empty, value)
+        {
+        }
+
+        // Safe case-insensitive property lookup to avoid AmbiguousMatchException from Type.GetProperty
+        private static PropertyInfo? GetPropertyIgnoreCaseSafe(Type t, string name)
+        {
+            try
+            {
+                // Try standard lookup first
+                var p = t.GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
+                if (p != null) return p;
+            }
+            catch (AmbiguousMatchException)
+            {
+                // fall through to manual resolution
+            }
+
+            try
+            {
+                return t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .FirstOrDefault(pi => string.Equals(pi.Name, name, StringComparison.OrdinalIgnoreCase));
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        // Safe method lookup to avoid AmbiguousMatchException from Type.GetMethod
+        private static MethodInfo? GetMethodIgnoreAmbiguous(Type t, string name, BindingFlags flags, int? paramCount = null)
+        {
+            try
+            {
+                var m = t.GetMethod(name, flags);
+                if (m != null) return m;
+            }
+            catch (AmbiguousMatchException)
+            {
+                // fall through
+            }
+
+            try
+            {
+                return t.GetMethods(flags)
+                    .Where(mi => string.Equals(mi.Name, name, StringComparison.OrdinalIgnoreCase)
+                        && (!paramCount.HasValue || mi.GetParameters().Length == paramCount.Value))
+                    .FirstOrDefault();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        // Helper: safely unwrap DynamicMetaObject wrappers or common script wrappers, return original if nothing to unwrap
+        private static object? UnwrapValue(object? v)
+        {
+            if (v is null) return null;
+
+            object? current = v;
+            for (int i = 0; i < 6 && current != null; i++)
+            {
+                // Unwrap ClearScript/DynamicMetaObject wrapper
+                if (current is DynamicMetaObject dmo)
+                {
+                    try { current = dmo.Value; continue; } catch { break; }
+                }
+
+                var t = current.GetType();
+
+                // Try common wrapper property names (use safe lookup to avoid AmbiguousMatch)
+                var tryProps = new[] { "Target", "UnderlyingObject", "Value", "WrappedObject", "Underlying" };
+                bool unwrapped = false;
+                foreach (var pn in tryProps)
+                {
+                    try
+                    {
+                        var p = GetPropertyIgnoreCaseSafe(t, pn);
+                        if (p != null)
+                        {
+                            try
+                            {
+                                var extracted = p.GetValue(current);
+                                if (extracted != null)
+                                {
+                                    current = extracted;
+                                    unwrapped = true;
+                                    break;
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                    catch { }
+                }
+                if (unwrapped) continue;
+
+                // Special-case NiL.JS or ClearScript wrapper types: try common unwrapping methods/properties
+                if (t.FullName != null && (t.FullName.StartsWith("NiL.JS") || t.FullName.Contains("ClearScript") || t.FullName.Contains("ScriptObject")))
+                {
+                    // common methods to extract host object
+                    var tryMethodNames = new[] { "ToObject", "ToHostObject", "Unwrap", "GetUnderlyingObject", "GetHostObject", "GetHostItem" };
+                    foreach (var mn in tryMethodNames)
+                    {
+                        try
+                        {
+                            var mm = GetMethodIgnoreAmbiguous(t, mn, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, 0);
+                            if (mm != null)
+                            {
+                                try { var res = mm.Invoke(current, null); if (res != null) { current = res; goto CONTINUE_UNWRAP; } } catch { }
+                            }
+                        }
+                        catch { }
+                    }
+
+                    // try properties
+                    var tryPropNames = new[] { "value", "Value", "Underlying", "UnderlyingObject", "Target", "HostObject", "HostTarget", "WrappedObject" };
+                    foreach (var pn in tryPropNames)
+                    {
+                        try
+                        {
+                            var p = GetPropertyIgnoreCaseSafe(t, pn);
+                            if (p != null)
+                            {
+                                try { var ex = p.GetValue(current); if (ex != null) { current = ex; goto CONTINUE_UNWRAP; } } catch { }
+                            }
+                        }
+                        catch { }
+                    }
+
+                    // try indexer/property "GetProperty" or "Get"
+                    try
+                    {
+                        var getProp = GetMethodIgnoreAmbiguous(t, "GetProperty", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, 1);
+                        if (getProp != null)
+                        {
+                            try { var ex = getProp.Invoke(current, new object[] { "value" }); if (ex != null) { current = ex; goto CONTINUE_UNWRAP; } } catch { }
+                        }
+                    }
+                    catch { }
+                }
+
+            CONTINUE_UNWRAP:;
+
+                break; // nothing more to unwrap
+            }
+
+            return current;
+        }
+
+        public override DynamicMetaObject BindInvokeMember(InvokeMemberBinder binder, DynamicMetaObject[] args)
+        {
+            try
+            {
+                // Directly handle document.createElement/getElementById invocations to avoid ClearScript treating members as non-callable
+                if (this.Value is CHtmlDocument docTarget && (string.Equals(binder.Name, "getElementById", StringComparison.OrdinalIgnoreCase) || string.Equals(binder.Name, "createElement", StringComparison.OrdinalIgnoreCase)))
+                {
+                    try
+                    {
+                        var arg0 = args != null && args.Length > 0 ? UnwrapValue(args[0].Value) ?? args[0].Value : null;
+                        var s = arg0?.ToString();
+                        if (string.IsNullOrEmpty(s)) return new DynamicMetaObject(Expression.Constant(null, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                        object result = null!;
+                        if (string.Equals(binder.Name, "getElementById", StringComparison.OrdinalIgnoreCase)) result = docTarget.getElementById(s);
+                        else result = docTarget.createElement(s);
+                        return new DynamicMetaObject(Expression.Constant(result, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+                    catch { return new DynamicMetaObject(Expression.Constant(null, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)); }
+                }
+
+                // Also handle direct invocation of document.addEventListener/removeEventListener (InvokeMember path)
+                if (this.Value is CHtmlDocument docInvoke && (string.Equals(binder.Name, "addEventListener", StringComparison.OrdinalIgnoreCase) || string.Equals(binder.Name, "removeEventListener", StringComparison.OrdinalIgnoreCase)))
+                {
+                    try
+                    {
+                        var unwrappedArgs = args?.Select(a => UnwrapValue(a?.Value) ?? a?.Value).ToArray() ?? System.Array.Empty<object?>();
+                        var name = unwrappedArgs.Length > 0 ? unwrappedArgs[0]?.ToString() ?? string.Empty : string.Empty;
+                        var handler = unwrappedArgs.Length > 1 ? unwrappedArgs[1] : null;
+                        var options = unwrappedArgs.Length > 2 ? unwrappedArgs[2] : null;
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            if (string.Equals(binder.Name, "addEventListener", StringComparison.OrdinalIgnoreCase))
+                            {
+                                try { docInvoke.addEventListener(name, handler, options); } catch { }
+                            }
+                            else
+                            {
+                                try { docInvoke.removeEventListener(name, handler, options); } catch { }
+                            }
+                        }
+                        return new DynamicMetaObject(Expression.Constant(null, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+                    catch { return new DynamicMetaObject(Expression.Constant(null, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)); }
+                }
+
+                // Handle window.getComputedStyle
+                if (this.Value is CHtmlMultiversalWindow window && string.Equals(binder.Name, "getComputedStyle", StringComparison.OrdinalIgnoreCase))
+                {
+                    Func<object, object, object> del = (elementArg, pseudoArg) =>
+                    {
+                        try
+                        {
+                            var el = UnwrapValue(elementArg) as CHtmlElement;
+                            var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            if (el != null)
+                            {
+                                try { var rect = el.getBoundingClientRect(); } catch { }
+                                var disp = el.GetDynamicMember("display")?.ToString();
+                                dict["display"] = string.IsNullOrEmpty(disp) ? "block" : disp!;
+                                var pos = el.GetDynamicMember("position")?.ToString();
+                                dict["position"] = string.IsNullOrEmpty(pos) ? "static" : pos!;
+                                var color = el.GetDynamicMember("color")?.ToString(); if (!string.IsNullOrEmpty(color)) dict["color"] = color!;
+                                var bg = el.GetDynamicMember("backgroundColor")?.ToString(); if (!string.IsNullOrEmpty(bg)) dict["background-color"] = bg!;
+                                dict["border-top-width"] = "0px";
+                                dict["border-right-width"] = "0px";
+                                dict["border-bottom-width"] = "0px";
+                                dict["border-left-width"] = "0px";
+                                dict["width"] = dict.ContainsKey("width") ? dict["width"] : "auto";
+                                dict["height"] = dict.ContainsKey("height") ? dict["height"] : "auto";
+                            }
+
+                            dynamic expando = new System.Dynamic.ExpandoObject();
+                            var bag = (IDictionary<string, object?>)expando;
+                            bag["getPropertyValue"] = new Func<object, object>((name) =>
+                            {
+                                var key = name?.ToString() ?? string.Empty;
+                                if (string.IsNullOrEmpty(key)) return string.Empty;
+                                return dict.TryGetValue(key, out var v) ? (object)v : string.Empty;
+                            });
+                            bag["setProperty"] = new Action<object, object>((name, value) =>
+                            {
+                                var key = name?.ToString() ?? string.Empty;
+                                var val = value?.ToString() ?? string.Empty;
+                                if (!string.IsNullOrEmpty(key)) dict[key] = val;
+                            });
+                            bag["removeProperty"] = new Action<object>((name) =>
+                            {
+                                var key = name?.ToString() ?? string.Empty;
+                                if (!string.IsNullOrEmpty(key)) dict.Remove(key);
+                            });
+                            bag["toString"] = new Func<string>(() =>
+                            {
+                                if (dict.Count == 0) return string.Empty;
+                                return string.Join("; ", dict.Select(kv => $"{kv.Key}: {kv.Value}")) + ";";
+                            });
+                            foreach (var kv in dict) bag[kv.Key] = kv.Value;
+                            return expando;
+                        }
+                        catch { return new System.Dynamic.ExpandoObject(); }
+                    };
+                    return new DynamicMetaObject(Expression.Constant(del, typeof(Func<object, object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                }
+
+                // Handle document.getComputedStyle
+                if (this.Value is CHtmlDocument doc && string.Equals(binder.Name, "getComputedStyle", StringComparison.OrdinalIgnoreCase))
+                {
+                    Func<object, object, object> del = (elementArg, pseudoArg) =>
+                    {
+                        try
+                        {
+                            var el = UnwrapValue(elementArg) as CHtmlElement;
+                            var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                            if (el != null)
+                            {
+                                var disp = el.GetDynamicMember("display")?.ToString();
+                                dict["display"] = string.IsNullOrEmpty(disp) ? "block" : disp!;
+                                var pos = el.GetDynamicMember("position")?.ToString();
+                                dict["position"] = string.IsNullOrEmpty(pos) ? "static" : pos!;
+                                var color = el.GetDynamicMember("color")?.ToString(); if (!string.IsNullOrEmpty(color)) dict["color"] = color!;
+                                var bg = el.GetDynamicMember("backgroundColor")?.ToString(); if (!string.IsNullOrEmpty(bg)) dict["background-color"] = bg!;
+                                dict["width"] = dict.ContainsKey("width") ? dict["width"] : "auto";
+                                dict["height"] = dict.ContainsKey("height") ? dict["height"] : "auto";
+                            }
+
+                            dynamic expando = new System.Dynamic.ExpandoObject();
+                            var bag = (IDictionary<string, object?>)expando;
+                            bag["getPropertyValue"] = new Func<object, object>((name) =>
+                            {
+                                var key = name?.ToString() ?? string.Empty;
+                                if (string.IsNullOrEmpty(key)) return string.Empty;
+                                return dict.TryGetValue(key, out var v) ? (object)v : string.Empty;
+                            });
+                            bag["setProperty"] = new Action<object, object>((name, value) =>
+                            {
+                                var key = name?.ToString() ?? string.Empty;
+                                var val = value?.ToString() ?? string.Empty;
+                                if (!string.IsNullOrEmpty(key)) dict[key] = val;
+                            });
+                            bag["removeProperty"] = new Action<object>((name) =>
+                            {
+                                var key = name?.ToString() ?? string.Empty;
+                                if (!string.IsNullOrEmpty(key)) dict.Remove(key);
+                            });
+                            bag["toString"] = new Func<string>(() =>
+                            {
+                                if (dict.Count == 0) return string.Empty;
+                                return string.Join("; ", dict.Select(kv => $"{kv.Key}: {kv.Value}")) + ";";
+                            });
+                            foreach (var kv in dict) bag[kv.Key] = kv.Value;
+                            return expando;
+                        }
+                        catch { return new System.Dynamic.ExpandoObject(); }
+                    };
+                    return new DynamicMetaObject(Expression.Constant(del, typeof(Func<object, object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                }
+
+                // Handle CHtmlDocument method invocations directly
+                if (this.Value is CHtmlDocument document)
+                {
+                    var self = this.Value as CHtmlDocument;
+                    switch (binder.Name)
+                    {
+                        /*
+                        case "GetDynamicMemberNames":
+                            return (DynamicMetaObject)this.GetDynamicMemberNames();
+                        */
+
+                        case "createElement":
+                            {
+                                var tagName = args.Length > 0 ? UnwrapValue(args[0].Value)?.ToString() ?? args[0].Value?.ToString() : null;
+                                if (!string.IsNullOrEmpty(tagName))
+                                {
+                                    var result = document.createElement(tagName);
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(result, typeof(object)),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                                return new DynamicMetaObject(
+                                    Expression.Constant(null, typeof(object)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                        case "getElementById":
+                            {
+                                var id = args.Length > 0 ? UnwrapValue(args[0].Value)?.ToString() ?? args[0].Value?.ToString() : null;
+                                if (!string.IsNullOrEmpty(id))
+                                {
+                                    var result = document.getElementById(id);
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(result, typeof(object)),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                                return new DynamicMetaObject(
+                                    Expression.Constant(null, typeof(object)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                        case "getElementsByTagName":
+                            {
+                                var tagName = args.Length > 0 ? UnwrapValue(args[0].Value)?.ToString() : null;
+                                if (!string.IsNullOrEmpty(tagName))
+                                {
+                                    var result = document.getElementsByTagName(tagName);
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(result, typeof(object)),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                                return new DynamicMetaObject(
+                                    Expression.Constant(null, typeof(object)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                        case "addEventListener":
+                            {
+                                // 明示的に呼び出し可能な CLR デリゲートを返す（ClearScript が関数として扱える）
+                                Action<object, object, object> addEvt = (nameArg, handlerArg, optionsArg) =>
+                                {
+                                    try
+                                    {
+                                        var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+                                        var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                        // optionsArg はそのまま渡す（null 可）
+                                        if (!string.IsNullOrEmpty(nameStr))
+                                        {
+                                            try { self.addEventListener(nameStr, handler, optionsArg); } catch { }
+                                        }
+                                    }
+                                    catch { }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(addEvt, typeof(Action<object, object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                        case "removeEventListener":
+                            {
+                                Action<object, object, object> remEvt = (nameArg, handlerArg, optionsArg) =>
+                                {
+                                    try
+                                    {
+                                        var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+                                        var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                        if (!string.IsNullOrEmpty(nameStr))
+                                        {
+                                            try { self.removeEventListener(nameStr, handler, optionsArg); } catch { }
+                                        }
+                                    }
+                                    catch { }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(remEvt, typeof(Action<object, object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                        case "createEvent":
+                            {
+                                var methodCreateEvent = typeof(CHtmlDocument).GetMethod("createEvent", new Type[] { typeof(string) });
+                                if (methodCreateEvent != null)
+                                {
+                                    Func<object, object> delCreateEvent = (eventType) =>
+                                    {
+                                        try
+                                        {
+                                            var unwrapped = UnwrapValue(eventType);
+                                            var strValue = unwrapped?.ToString() ?? eventType?.ToString();
+                                            if (!string.IsNullOrEmpty(strValue))
+                                            {
+                                                return methodCreateEvent.Invoke(self, new object[] { strValue });
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            try { if (commonLog.LoggingEnabled) commonLog.LogEntry("createEvent delegate exception: {0}", ex.Message); } catch { }
+                                        }
+                                        return null;
+                                    };
+                                    return new DynamicMetaObject(Expression.Constant(delCreateEvent), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                // Intercept getContext calls to dynamically wrap results in a proxy for ClearScript
+                if (binder.Name == "getContext" && this.Value is CHtmlElement element)
+                {
+                    // Call the original getContext method
+                    var result = element.getContext(args.Select(a => a.Value).ToArray());
+
+                    // If the resultString is a canvas context, wrap it in a proxy
+                    if (result is CHtmlCanvasContext2D canvas)
+                    {
+                        var proxy = new CHtmlClearScriptCanvasContextHostProxy(canvas);
+                        return new DynamicMetaObject(
+                            Expression.Constant(proxy),
+                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                        );
+                    }
+
+                    // Return the original resultString if it's not a canvas context
+                    return new DynamicMetaObject(
+                        Expression.Constant(result),
+                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                    );
+                }
+
+                // Default behavior for other methods
+                return base.BindInvokeMember(binder, args);
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    // Always log binder and target type to locate ambiguous member, regardless of log level
+                    commonLog.LogEntry("BindInvokeMember exception. Binder={0}, TargetType={1}, Message={2}", binder?.Name ?? "(null)", this.Value?.GetType().FullName ?? "(null)", ex.Message);
+                }
+                catch { }
+                try
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        var argsInfo = args?.Select(a => a?.LimitType?.FullName ?? "<null>").Aggregate((x, y) => x + ", " + y) ?? "<null>";
+                        commonLog.LogEntry("BindInvokeMember error: {0}\nBinder: {1}\nArgs: {2}\nTargetValueType: {3}\nStack:\n{4}",
+                            ex.Message,
+                            binder?.Name ?? "(null)",
+                            argsInfo,
+                            this.Value?.GetType().FullName ?? "(null)",
+                            ex.ToString());
+                    }
+                }
+                catch { }
+            }
+
+            // Return safe fallback (null) instead of letting the runtime attempt default bind which can throw ClearScript dynamic exceptions
+            return new DynamicMetaObject(Expression.Constant(null, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+        }
+
+        public override IEnumerable<string> GetDynamicMemberNames()
+        {
+            try
+            {
+                switch (this.Value)
+                {
+                    case CHtmlElement element:
+                        // Return both property and method names (match CHtmlElement.GetDynamicMemberNames)
+                        return CHtmlElement.CHtmlElementProperties.Keys.Concat(CHtmlElement.CHtmlElementMethods.Keys);
+                    case CHtmlDocument document:
+                        // Return both property and method names (match CHtmlDocument.GetDynamicMemberNames)
+                        return CHtmlDocument.CHtmlDocumentProperties.Keys.Concat(CHtmlDocument.CHtmlDocumentMethods.Keys);
+                    case CHtmlCanvasContext2D canvas:
+                        // Return both property and method names (match CHtmlCanvasContext2D.GetDynamicMemberNames)
+                        return CHtmlCanvasContext2D.CHtmlCanvasContext2Dproperties.Keys.Concat(CHtmlCanvasContext2D.CHtmlCanvasContext2Dmethods.Keys);
+
+                    case CHtmlConsole console:
+                        return CHtmlConsole.CHtmlConsoleMethods.Keys;
+
+
+                    case object obj:
+                        try { return ((dynamic)obj).GetDynamicMemberNames() as IEnumerable<string> ?? System.Array.Empty<string>(); } catch { }
+                        break;
+                }
+            }
+            catch { }
+
+            return System.Array.Empty<string>();
+        }
+
+        public override DynamicMetaObject BindGetMember(GetMemberBinder binder)
+        {
+            try
+            {
+                switch (this.Value)
+                {
+                    case CHtmlElement element:
+                        {
+                            var self = element;
+                            // Special handling for className
+                            if (binder.Name == "className" || binder.Name == "classname" || binder.Name == "class")
+                            {
+                                var classNameValue = self.className ?? string.Empty;
+                                return new DynamicMetaObject(
+                                    Expression.Constant(classNameValue, typeof(string)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                            if (CHtmlElement.CHtmlElementProperties.ContainsKey(binder.Name))
+                            {
+                                var propertyInfo = GetCachedProperty(typeof(CHtmlElement), binder.Name) ?? GetCachedProperty(typeof(CHtmlNode), binder.Name);
+                                if (propertyInfo != null)
+                                {
+                                    return new DynamicMetaObject(
+                                        Expression.Property(Expression.Constant(self), propertyInfo),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                            }
+                            MethodInfo? methodInfo = null;
+                            if (CHtmlElement.CHtmlElementMethods.ContainsKey(binder.Name) == true)
+                            {
+                                switch (binder.Name)
+                                {
+                                    case "setAttribute":
+                                        // Return a delegate that takes two arguments (name, value)
+                                        Func<object, object, object> setAttrDel = (nameArg, valueArg) =>
+                                        {
+                                            try
+                                            {
+                                                var nameUnwrapped = UnwrapValue(nameArg) ?? nameArg;
+                                                var valueUnwrapped = UnwrapValue(valueArg) ?? valueArg;
+                                                var nameStr = nameUnwrapped?.ToString() ?? string.Empty;
+                                                var valueStr = valueUnwrapped?.ToString() ?? string.Empty;
+                                                if (!string.IsNullOrEmpty(nameStr))
+                                                {
+                                                    self.setAttribute(nameStr, valueStr);
+                                                }
+                                            }
+                                            catch { }
+                                            return null!;
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(setAttrDel, typeof(Func<object, object, object>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    case "getAttribute":
+                                        // Return a delegate that takes one argument (name)
+                                        Func<object, object> getAttrDel = (nameArg) =>
+                                        {
+                                            try
+                                            {
+                                                var nameUnwrapped = UnwrapValue(nameArg) ?? nameArg;
+                                                var nameStr = nameUnwrapped?.ToString() ?? string.Empty;
+                                                if (!string.IsNullOrEmpty(nameStr))
+                                                {
+                                                    return self.getAttribute(nameStr) ?? string.Empty;
+                                                }
+                                            }
+                                            catch { }
+                                            return null!;
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(getAttrDel, typeof(Func<object, object>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    case "hasAttribute":
+                                        // Return a delegate that takes one argument (name)
+                                        Func<object, bool> hasAttrDel = (nameArg) =>
+                                        {
+                                            try
+                                            {
+                                                var nameUnwrapped = UnwrapValue(nameArg) ?? nameArg;
+                                                var nameStr = nameUnwrapped?.ToString() ?? string.Empty;
+                                                if (!string.IsNullOrEmpty(nameStr))
+                                                {
+                                                    return self.hasAttribute(nameStr);
+                                                }
+                                            }
+                                            catch { }
+                                            return false;
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(hasAttrDel, typeof(Func<object, bool>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    case "removeAttribute":
+                                        // Return a delegate that takes one argument (name)
+                                        Func<object, object> removeAttrDel = (nameArg) =>
+                                        {
+                                            try
+                                            {
+                                                var nameUnwrapped = UnwrapValue(nameArg) ?? nameArg;
+                                                var nameStr = nameUnwrapped?.ToString() ?? string.Empty;
+                                                if (!string.IsNullOrEmpty(nameStr))
+                                                {
+                                                    self.removeAttribute(nameStr);
+                                                }
+                                            }
+                                            catch { }
+                                            return null!;
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(removeAttrDel, typeof(Func<object, object>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    case "removeChild":
+                                        // Return a delegate that takes one argument (child)
+                                        Func<object, object> removeChildDel = (childArg) =>
+                                        {
+                                            try
+                                            {
+                                                var childUnwrapped = UnwrapValue(childArg) ?? childArg;
+                                                if (childUnwrapped is CHtmlElement childEl)
+                                                {
+                                                    return self.removeChild(childEl);
+                                                }
+                                                if (childUnwrapped is ICHtmlNodeInterface node)
+                                                {
+                                                    return self.removeChild((CHtmlElement)node);
+                                                }
+                                                return SafeInvoke(self, "removeChild", new object[] { childUnwrapped ?? childArg });
+                                            }
+                                            catch { }
+                                            return null!;
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(removeChildDel, typeof(Func<object, object>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    case "insertBefore":
+                                        Func<object, object> insertBeforeDel = (object arg) =>
+                                        {
+                                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 9)
+                                            {
+                                                commonLog.LogEntry($"BindGetMember: preparing insertBefore delegate for CHtmlElement : {commonHTML.GetStringValue(arg)}");
+                                            }
+                                            try
+                                            {
+                                                // 受け取った arg が object[] の場合、そのまま使う。IList の場合は配列に変換する。
+                                                object[] argsArray = null!;
+                                                if (arg is object[] oa)
+                                                {
+                                                    argsArray = oa;
+                                                }
+                                                else if (arg is System.Collections.IList il)
+                                                {
+                                                    argsArray = new object[il.Count];
+                                                    il.CopyTo(argsArray, 0);
+                                                }
+                                                else
+                                                {
+                                                    // ClearScript のラッパーや単一オブジェクトの場合は UnwrapValue を試した上で単一要素配列にする
+                                                    var maybeUnwrapped = UnwrapValue(arg) ?? arg;
+                                                    // 特殊ケース: ClearScript が arguments オブジェクトを渡す場合、それを配列に展開できるか試みる
+                                                    try
+                                                    {
+                                                        // try: treat as enumerable of objects
+                                                        if (maybeUnwrapped is System.Collections.IEnumerable enumObj && !(maybeUnwrapped is string))
+                                                        {
+                                                            var list = new List<object?>();
+                                                            foreach (var x in enumObj) list.Add(x);
+                                                            argsArray = list.ToArray()!;
+                                                        }
+                                                    }
+                                                    catch { /* swallow */ }
+
+                                                    if (argsArray == null)
+                                                    {
+                                                        argsArray = new object[] { arg };
+                                                    }
+                                                }
+
+                                                // 安全にアンラップして実引数を決定
+                                                var argNew = argsArray.Length > 0 ? (UnwrapValue(argsArray[0]) ?? argsArray[0]) : null;
+                                                var argRef = argsArray.Length > 1 ? (UnwrapValue(argsArray[1]) ?? argsArray[1]) : null;
+
+                                                // debug ログ（必要なら有効に）
+                                                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 9) commonLog.LogEntry("insertBeforeDel called. argNewType={0}, argRefType={1}", argNew?.GetType().FullName ?? "<null>", argRef?.GetType().FullName ?? "<null>"); } catch { }
+
+                                                // 既にネイティブの CHtmlElement なら直接呼ぶ（最速）
+                                                if (argNew is CHtmlElement newEl)
+                                                {
+                                                    if (argRef is CHtmlElement refEl)
+                                                    {
+                                                        return self.insertBefore(newEl, refEl);
+                                                    }
+                                                    if (argRef == null)
+                                                    {
+                                                        return self.insertBefore(newEl, null);
+                                                    }
+                                                }
+
+                                                // ICHtmlNodeInterface を受け取れるケース
+                                                if (argNew is ICHtmlNodeInterface nodeNew)
+                                                {
+                                                    return SafeInvoke(self, "insertBefore", new object[] { nodeNew, argRef });
+                                                }
+
+                                                // 汎用フォールバック：型変換・オーバーロード解決を SafeInvoke に任せる
+                                                return SafeInvoke(self, "insertBefore", new object[] { argNew, argRef });
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("insertBeforeDel exception: {0}", ex.ToString()); } catch { }
+                                                return null;
+                                            }
+                                        };
+
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(insertBeforeDel, typeof(Func<object, object>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                        break;
+
+                                    case "addEventListener":
+                                        {
+                                            Action<object, object, object> addEl = (nameArg, handlerArg, optionsArg) =>
+                                            {
+                                                try
+                                                {
+                                                    var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+                                                    var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                                    if (!string.IsNullOrEmpty(nameStr))
+                                                    {
+                                                        try { self.addEventListener(nameStr, handler, optionsArg); } catch { }
+                                                    }
+                                                }
+                                                catch { }
+                                            };
+                                            return new DynamicMetaObject(Expression.Constant(addEl, typeof(Action<object, object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                        }
+                                    case "removeEventListener":
+                                        {
+                                            Action<object, object, object> remEl = (nameArg, handlerArg, optionsArg) =>
+                                            {
+                                                try
+                                                {
+                                                    var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+                                                    var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                                    if (!string.IsNullOrEmpty(nameStr))
+                                                    {
+                                                        try { self.removeEventListener(nameStr, handler, optionsArg); } catch { }
+                                                    }
+                                                }
+                                                catch { }
+                                            };
+                                            return new DynamicMetaObject(Expression.Constant(remEl, typeof(Action<object, object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                        }
+                                    case "attachEvent":
+                                        {
+                                            Action<object, object> attachEl = (nameArg, handlerArg) =>
+                                            {
+                                                try
+                                                {
+                                                    var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+                                                    var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                                    if (!string.IsNullOrEmpty(nameStr))
+                                                    {
+                                                        try { self.attachEvent(nameStr, handler); } catch { }
+                                                    }
+                                                }
+                                                catch { }
+                                            };
+                                            return new DynamicMetaObject(Expression.Constant(attachEl, typeof(Action<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                        }
+                                    case "detachEvent":
+                                        {
+                                            Action<object, object> detachEl = (nameArg, handlerArg) =>
+                                            {
+                                                try
+                                                {
+                                                    var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+                                                    var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                                    if (!string.IsNullOrEmpty(nameStr))
+                                                    {
+                                                        try { self.detachEvent(nameStr, handler); } catch { }
+                                                    }
+                                                }
+                                                catch { }
+                                            };
+                                            return new DynamicMetaObject(Expression.Constant(detachEl, typeof(Action<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                        }
+-
+                                     case "getElementsByTagName":
+                                   
+                                     case "cloneNode":
+                                     case "addEventListener":
+                                     case "attachEvent":
+                                     case "detachEvent":
+                                     case "removeEventListener":
+
+                                        return base.BindGetMember(binder);
+                                    case "getContext":
+                                        // Return a stable CLR delegate that calls element.getContext and returns a ClearScript-friendly proxy when applicable
+                                        Func<object, object> ctxDel = (object arg) =>
+                                        {
+                                            try
+                                            {
+                                                object[] a;
+                                                if (arg == null) a = System.Array.Empty<object>();
+                                                else if (arg is object[] oa) a = oa;
+                                                else a = new object[] { arg };
+                                                var res = self.getContext(a);
+                                                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("getContext delegate: raw resultString type = {0}", res?.GetType().FullName ?? "<null>"); } catch { }
+                                                if (res is CHtmlCanvasContext2D canvas)
+                                                {
+                                                    var proxy = canvas.GetClearScriptHostProxy();
+                                                    try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("getContext delegate: returning proxy type = {0}", proxy?.GetType().FullName ?? "<null>"); } catch { }
+                                                    return proxy;
+                                                }
+                                                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("getContext delegate: returning raw resultString (non-canvas)"); } catch { }
+                                                return res;
+                                            }
+                                            catch { return null; }
+                                        };
+                                        return new DynamicMetaObject(Expression.Constant(ctxDel), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    case "toString":
+                                        Func<string> toStringFunc = () => element.ToString();
+                                        return new DynamicMetaObject(Expression.Constant(toStringFunc), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    case "appendChild":
+                                        // Return a callable delegate so ClearScript treats appendChild as a function.
+                                        Func<object, object> appendDel = (objArg) =>
+                                        {
+                                            try
+                                            {
+                                                var unwrapped = UnwrapValue(objArg) ?? objArg;
+                                                if (unwrapped is CHtmlElement childEl)
+                                                {
+                                                    try { return self.appendChild(childEl); } catch { return null; }
+                                                }
+                                                if (unwrapped is ICHtmlNodeInterface node)
+                                                {
+                                                    try { return self.appendChild((CHtmlElement)node); } catch { }
+                                                }
+                                                try { return SafeInvoke(self, "appendChild", new object[] { unwrapped ?? objArg }); } catch { }
+                                            }
+                                            catch { }
+                                            return null;
+                                        };
+                                        return new DynamicMetaObject(Expression.Constant(appendDel, typeof(Func<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    case "compareDocumentPosition":
+                                        var methodcompareDocumentPosition = GetCachedMethod(typeof(CHtmlElement), "compareDocumentPosition", new Type[] { typeof(ICHtmlNodeInterface) });
+                                        if (methodcompareDocumentPosition != null)
+                                        {
+                                            Func<object, double> delcompareDocumentPosition = (other) =>
+                                            {
+                                                if (other is ICHtmlNodeInterface node)
+                                                    return (double)methodcompareDocumentPosition.Invoke(self, new object[] { node });
+                                                throw new ArgumentException("Argument must be ICHtmlNodeInterface");
+                                            };
+                                            return new DynamicMetaObject(Expression.Constant(delcompareDocumentPosition), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                        }
+                                        break;
+                                }
+                                methodInfo = GetCachedMethod(typeof(CHtmlElement), binder.Name, Type.EmptyTypes);
+                                if (methodInfo != null)
+                                {
+                                    var del = Delegate.CreateDelegate(Expression.GetDelegateType(methodInfo.GetParameters().Select(p => p.ParameterType).Concat(new[] { methodInfo.ReturnType }).ToArray()), self, methodInfo);
+                                    return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                }
+                            }
+                            var result = self.GetDynamicMember(binder.Name);
+                            return new DynamicMetaObject(Expression.Constant(result, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                        }
+                    case CHtmlDocument _document:
+                        {
+                            var self = _document;
+                            switch (binder.Name)
+                            {
+                                case "createElement":
+                                case "getElementById":
+
+                                    {
+                                        // Expose a callable delegate so ClearScript treats the member as a function.
+                                        Func<object, object> del = (arg) =>
+                                        {
+                                            try
+                                            {
+                                                var unwrapped = UnwrapValue(arg) ?? arg;
+                                                // Prefer calling the specific CLR method to avoid ambiguity
+                                                if (string.Equals(binder.Name, "createElement", StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    var s = unwrapped?.ToString();
+                                                    if (!string.IsNullOrEmpty(s)) return _document.createElement(s);
+                                                    return null;
+                                                }
+                                                else if (string.Equals(binder.Name, "getElementById", StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    var s = unwrapped?.ToString();
+                                                    if (!string.IsNullOrEmpty(s)) return _document.getElementById(s);
+                                                    return null;
+                                                }
+                                            }
+                                            catch { }
+                                            return null;
+                                        };
+                                        try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("BindGetMember: returning delegate for {0} type={1}", binder.Name, (del as object)?.GetType().FullName ?? "<null>"); } catch { }
+                                        return new DynamicMetaObject(Expression.Constant(del, typeof(Func<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    }
+                                case "addEventListener":
+                                    {
+                                        // Expose a CLR delegate so ClearScript treats addEventListener as a callable function
+                                        Action<object, object> del = (nameArg, handlerArg) =>
+                                        {
+                                            try
+                                            {
+                                                var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+                                                var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("addEventListener delegate invoked for document: name={0}, handlerType={1}", nameStr, handler?.GetType().FullName ?? "<null>"); } catch { }
+                                                if (!string.IsNullOrEmpty(nameStr)) self.addEventListener(nameStr, handler, null);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("addEventListener delegate exception: {0}", ex.Message); } catch { }
+                                            }
+                                        };
+                                        try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("BindGetMember: returning delegate for addEventListener on document"); } catch { }
+                                        return new DynamicMetaObject(Expression.Constant(del, typeof(Action<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    }
+                                case "removeEventListener":
+                                    {
+                                        Action<object, object> delRem = (nameArg, handlerArg) =>
+                                        {
+                                            try
+                                            {
+                                                var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+                                                var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                                if (!string.IsNullOrEmpty(nameStr)) self.removeEventListener(nameStr, handler, null);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("removeEventListener delegate exception: {0}", ex.Message); } catch { }
+                                            }
+                                        };
+                                        return new DynamicMetaObject(Expression.Constant(delRem, typeof(Action<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    }
+                                case "createEvent":
+                                    {
+                                        var methodCreateEvent = typeof(CHtmlDocument).GetMethod("createEvent", new Type[] { typeof(string) });
+                                        if (methodCreateEvent != null)
+                                        {
+                                            Func<object, object> delCreateEvent = (eventType) =>
+                                            {
+                                                try
+                                                {
+                                                    var unwrapped = UnwrapValue(eventType);
+                                                    var strValue = unwrapped?.ToString() ?? eventType?.ToString();
+                                                    if (!string.IsNullOrEmpty(strValue))
+                                                    {
+                                                        return methodCreateEvent.Invoke(self, new object[] { strValue });
+                                                    }
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    try { if (commonLog.LoggingEnabled) commonLog.LogEntry("createEvent delegate exception: {0}", ex.Message); } catch { }
+                                                }
+                                                return null;
+                                            };
+                                            return new DynamicMetaObject(Expression.Constant(delCreateEvent), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                        }
+                                        break;
+                                    }
+                            }
+
+                            // If requested member is a known method, expose a callable delegate to script to avoid "not a function" errors
+                            try
+                            {
+                                if (CHtmlDocument.CHtmlDocumentMethods.ContainsKey(binder.Name))
+                                {
+                                    Func<object[], object> methodInvoker = (object[] a) =>
+                                    {
+                                        try { return SafeInvoke(self, binder.Name, a ?? System.Array.Empty<object>()); } catch { return null; }
+                                    };
+                                    return new DynamicMetaObject(Expression.Constant(methodInvoker), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                }
+                            }
+                            catch { }
+
+                            var res = self.GetDynamicMember(binder.Name);
+                            return new DynamicMetaObject(Expression.Constant(res, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                        }
+
+                    // Explicitly handle CHtmlCollection so properties like length are returned as CLR primitives
+                    case CHtmlCollection collection:
+                        {
+                            var selfCol = collection;
+                            if (string.Equals(binder.Name, "length", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return new DynamicMetaObject(
+                                    Expression.Constant(selfCol.length, typeof(int)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+
+                            if (string.Equals(binder.Name, "toArray", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(binder.Name, "toDataArray", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Func<object[]> del = () =>
+                                {
+                                    try { return selfCol.toArray(); } catch { return System.Array.Empty<object>(); }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            if (string.Equals(binder.Name, "toString", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Func<string> delToString = () => selfCol.ToString();
+                                return new DynamicMetaObject(Expression.Constant(delToString), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            try
+                            {
+                                var dyn = selfCol.GetDynamicMember(binder.Name);
+                                return new DynamicMetaObject(Expression.Constant(dyn, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            catch { }
+
+                            return base.BindGetMember(binder);
+                        }
+                    case CHtmlClearScriptCanvasContextHostProxy proxyContext:
+                        {
+                            // If property exists on proxy, return property expression
+                            var propProxy = GetPropertyIgnoreCaseSafe(typeof(CHtmlClearScriptCanvasContextHostProxy), binder.Name);
+                            if (propProxy != null)
+                            {
+                                return new DynamicMetaObject(Expression.Property(Expression.Constant(proxyContext), propProxy), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            // Provide concrete delegates for common canvas methods to avoid ClearScript dynamic binder issues
+                            var name = binder.Name;
+                            if (string.Equals(name, "moveTo", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action<object, object> del = (a, b) =>
+                                {
+                                    try
+                                    {
+                                        var xa = UnwrapValue(a);
+                                        var xb = UnwrapValue(b);
+
+                                        double dx = commonHTML.GetDoubleFromObject(xa, 0);
+
+                                        double dy = commonHTML.GetDoubleFromObject(xb, 0);
+                                        proxyContext.moveTo(dx, dy);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        try { if (commonLog.LoggingEnabled) commonLog.LogEntry("moveTo delegate exception: {0}", ex.Message); } catch { }
+                                    }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "lineTo", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action<object, object> del = (a, b) =>
+                                {
+                                    try
+                                    {
+                                        var xa = UnwrapValue(a);
+                                        var xb = UnwrapValue(b);
+                                        double dx = commonHTML.GetDoubleFromObject(xa, 0);
+                                        double dy = commonHTML.GetDoubleFromObject(xb, 0);
+
+                                        proxyContext.lineTo(dx, dy);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        try { if (commonLog.LoggingEnabled) commonLog.LogEntry("lineTo delegate exception: {0}", ex.Message); } catch { }
+                                    }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "stroke", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(name, "beginPath", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(name, "closePath", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action del0 = () =>
+                                {
+                                    try
+                                    {
+                                        if (string.Equals(name, "stroke", StringComparison.OrdinalIgnoreCase)) proxyContext.stroke();
+                                        else if (string.Equals(name, "beginPath", StringComparison.OrdinalIgnoreCase)) proxyContext.beginPath();
+                                        else if (string.Equals(name, "closePath", StringComparison.OrdinalIgnoreCase)) proxyContext.closePath();
+                                    }
+                                    catch { }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(del0), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            // Fallback: safe invoker for other methods
+                            Func<object[], object> invoker = (object[] a) =>
+                            {
+                                try
+                                {
+                                    return SafeInvoke(proxyContext, name, a ?? System.Array.Empty<object>());
+                                }
+                                catch { return null; }
+                            };
+
+                            return new DynamicMetaObject(Expression.Constant(invoker), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                        }
+                    case CHtmlConsole console:
+                        {
+                            // Allow ClearScript to bind to CLR methods directly.
+                            return base.BindGetMember(binder);
+                        }
+
+                    case CHtmlCSSStyleSheet cssStyleSheet:
+                        {
+                            var self = cssStyleSheet;
+                            var resultString = self.___getPropertyByName(binder.Name);
+
+                            return new DynamicMetaObject(Expression.Constant(resultString, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                        }
+                    case ICHtmlCSSStyleDeclaration iCSssSyleDeclaration:
+                        {
+                            var self = iCSssSyleDeclaration;
+
+                            // Provide toString as callable function
+                            if (string.Equals(binder.Name, "toString", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Func<string> delToString = () => { try { return self.ToString() ?? "[object CSSStyleDeclaration]"; } catch { return "[object CSSStyleDeclaration]"; } };
+                                return new DynamicMetaObject(Expression.Constant(delToString), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            // Expose getPropertyValue(name) as a delegate
+                            if (string.Equals(binder.Name, "getPropertyValue", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Func<object, object> delGetPropertyValue = (object name) =>
+                                {
+                                    try { return (object)(self.getPropertyValue(name?.ToString() ?? string.Empty) ?? string.Empty); } catch { return string.Empty; }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(delGetPropertyValue), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            // Expose setProperty(name, value) as a delegate
+                            if (string.Equals(binder.Name, "setProperty", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action<object, object> delSetProperty = (object name, object value) =>
+                                {
+                                    try { self.setProperty(name?.ToString() ?? string.Empty, value?.ToString()); } catch { }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(delSetProperty), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            // Expose removeProperty(name) as a delegate
+                            if (string.Equals(binder.Name, "removeProperty", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action<object> delRemoveProperty = (object name) =>
+                                {
+                                    try { self.removeProperty(name?.ToString() ?? string.Empty); } catch { }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(delRemoveProperty), Binding Restrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            // For any other property name, map to getPropertyValue(binder.Name)
+                            try
+                            {
+                                var value = self.getPropertyValue(binder.Name) ?? string.Empty;
+                                return new DynamicMetaObject(
+                                    Expression.Constant(value, typeof(object)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                            catch
+                            {
+                                return new DynamicMetaObject(
+                                    Expression.Constant(string.Empty, typeof(object)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    // Always log binder and target type to locate ambiguous member, regardless of log level
+                    commonLog.LogEntry("BindGetMember exception. Binder={0}, TargetType={1}, Message={2}", binder?.Name ?? "(null)", this.Value?.GetType().FullName ?? "(null)", ex.Message);
+                }
+                catch { }
+                try
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("BindGetMember error: {0}\nBinder: {1}\nTargetValueType: {2}\nStack:\n{3}", ex.Message, binder?.Name ?? "(null)", this.Value?.GetType().FullName ?? "(null)", ex.ToString());
+                    }
+                }
+                catch { }
+            }
+
+            return new DynamicMetaObject(Expression.Constant(null, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+        }
+
+        public override DynamicMetaObject BindConvert(ConvertBinder binder)
+        {
+            if (binder.Type == typeof(string))
+            {
+                var self = this.Value;
+                var toStringMethod = self.GetType().GetMethod("ToString", Type.EmptyTypes);
+                var callToString = Expression.Call(Expression.Constant(self), toStringMethod);
+                return new DynamicMetaObject(callToString, BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+            }
+            return base.BindConvert(binder);
+        }
+
+        public override DynamicMetaObject BindSetMember(SetMemberBinder binder, DynamicMetaObject value)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("BindSetMember is called with value {0}", value);
+            }
+
+            // Conservative extraction: handle DynamicMetaObject specially then try UnwrapValue for common wrappers.
+            object? actual = null;
+            try
+            {
+                if (value is DynamicMetaObject dmoParam)
+                {
+                    actual = UnwrapValue(dmoParam.Value) ?? dmoParam.Value;
+                }
+                else
+                {
+                    actual = UnwrapValue(value?.Value) ?? UnwrapValue(value) ?? value?.Value;
+                }
+            }
+            catch
+            {
+                // fallback to best-effort raw value
+                try { actual = value?.Value; } catch { actual = null; }
+            }
+
+            // If target is core DOM types, avoid CLR property reflection entirely (prevents AmbiguousMatch for method names)
+            bool _isTypeSwitchFound = false;
+
+                try
+                {
+                    switch (this.Value)
+                    {
+                        case CHtmlDocument doc:
+                            _isTypeSwitchFound = true;
+                            try { doc.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Document.SetDynamicMember: {0}", ex.Message); }
+                            break;
+                        case CHtmlElement el:
+                            _isTypeSwitchFound = true;
+                            try { el.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Element.SetDynamicMember: {0}", ex.Message); }
+                            break;
+                        case CHtmlDomTokenList dom:
+                            _isTypeSwitchFound = true;
+                            try { dom.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("DomTokenList.SetDynamicMember: {0}", ex.Message); }
+                            break;
+                        case CHtmlMultiversalWindow w:
+                            _isTypeSwitchFound = true;
+                            try { w.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Window.SetDynamicMember: {0}", ex.Message); }
+                            break;
+                    case CHtmlCSSStyleSheet _sheet:
+                            _isTypeSwitchFound = true;
+                            try { _sheet.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("CSS.SetDynamicMember: {0}", ex.Message); }
+                            break;
+                }
+                }
+                catch { }
+                var fb = actual ?? value?.Value;
+                if (_isTypeSwitchFound)
+                {
+                    return new DynamicMetaObject(Expression.Constant(fb, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                }
+
+
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"BindSetMember: target type = {binder.Name}, {this.Value} {this.Value?.GetType().FullName ?? "(null)"} isTypeSwitchFound{{_isTypeSwitchFound");
+            }
+            // If target has a CLR property matching binder.Name, prefer setting it via reflection to avoid dynamic wrapper issues.
+            try
+            {
+                var target = this.Value;
+                if (target != null)
+                {
+                    var t = target.GetType();
+                    var prop = GetPropertyIgnoreCaseSafe(t, binder.Name);
+                    if (prop != null && prop.CanWrite)
+                    {
+                        try
+                        {
+                            object? toAssign = actual;
+                            if (toAssign != null && !prop.PropertyType.IsAssignableFrom(toAssign.GetType()))
+                            {
+                                try { toAssign = Convert.ChangeType(toAssign, prop.PropertyType); } catch { /* leave as-is */ }
+                            }
+                            prop.SetValue(target, toAssign);
+                            var assignedFallback = toAssign ?? value?.Value;
+                            return new DynamicMetaObject(Expression.Constant(assignedFallback, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                        }
+                        catch (Exception ex)
+                        {
+                            try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5) commonLog.LogEntry("BindSetMember: failed to set CLR property {0} on {1}: {2}", binder.Name, t.FullName, ex.Message); } catch { }
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            try
+            {
+                switch (this.Value)
+                {
+                    case CHtmlInputElement input:
+                        try { input.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Input.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlElement el:
+                        try { el.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Element.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlDomTokenList dom:
+                        try { dom.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("DomTokenList.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlDocument doc:
+                        try { doc.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Document.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlMultiversalWindow w:
+                        try { w.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Window.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlCanvasContext2D ctx:
+                        try
+                        {
+                            // ensure we do not pass DynamicMetaObject wrappers into the target API
+                            var clean = UnwrapValue(actual) ?? actual;
+                            ctx.___setPropertyByName(binder.Name, clean);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (commonLog.LoggingEnabled) commonLog.LogEntry("Canvas.___setPropertyByName: {0}", ex.Message);
+                        }
+                        break;
+                    case CHtmlCSSStyleSheet sheet:
+                        try { sheet.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("CSS.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlXMLHttpRequest xhr:
+                        try { xhr.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("XHR.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    default:
+                        // If target exposes a SetDynamicMember via reflection, try calling it with unwrapped value
+                        try
+                        {
+                            var setMethod = GetMethodIgnoreAmbiguous(this.Value?.GetType(), "SetDynamicMember", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, 2);
+                            if (setMethod != null && this.Value != null)
+                            {
+                                try { setMethod.Invoke(this.Value, new object[] { binder.Name, UnwrapValue(actual) ?? actual }); }
+                                catch { }
+                            }
+                        }
+                        catch { }
+                        // 不明なターゲットは無視（例外を投げない）
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        var valType = value?.Value?.GetType()?.FullName ?? "(null)";
+                        commonLog.LogEntry("BindSetMember handler exception: {0}\nBinder: {1}\nValueType: {2}\nTargetValueType: {3}\nStack:\n{4}",
+                            ex.Message,
+                            binder?.Name ?? "(null)",
+                            valType,
+                            this.Value?.GetType().FullName ?? "(null)",
+                            ex.ToString());
+                    }
+                }
+                catch { }
+            }
+
+            var fallback = actual ?? value?.Value;
+            return new DynamicMetaObject(Expression.Constant(fallback, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+        }
+
+        public override DynamicMetaObject BindGetIndex(GetIndexBinder binder, DynamicMetaObject[] indexes)
+        {
+            try
+            {
+                if (indexes == null || indexes.Length == 0)
+                {
+                    return base.BindGetIndex(binder, indexes);
+                }
+
+                // Resolve first index into either int or string using helper (handles DynamicMetaObject and wrappers)
+                if (!TryResolveIndex(indexes[0], out int? intIndex, out string? strIndex))
+                {
+                    // best-effort unwrap fallback
+                    var raw = UnwrapValue(indexes[0].Value) ?? indexes[0].Value;
+                    if (raw is string s) strIndex = s;
+                    else
+                    {
+                        try { intIndex = Convert.ToInt32(raw); } catch { strIndex = raw?.ToString(); }
+                    }
+                }
+
+                // Handle specific known targets
+                switch (this.Value)
+                {
+                    case CHtmlCSSStyleSheet cssSheet:
+                        {
+                            if (!string.IsNullOrEmpty(strIndex))
+                            {
+                                var result = cssSheet.getPropertyValue(strIndex);
+                                return new DynamicMetaObject(
+                                    Expression.Constant(result ?? string.Empty, typeof(object)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                            break;
+                        }
+
+                    case CHtmlCollection collection:
+                        {
+                            if (intIndex.HasValue)
+                            {
+                                var result = collection[intIndex.Value];
+                                return new DynamicMetaObject(
+                                    Expression.Constant(result, typeof(object)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            if (!string.IsNullOrEmpty(strIndex))
+                            {
+                                // Try named/indexer access via reflection (get_Item or indexer property)
+                                try
+                                {
+                                    var mi = GetMethodIgnoreAmbiguous(collection.GetType(), "get_Item", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, 1);
+                                    if (mi != null)
+                                    {
+                                        var res = mi.Invoke(collection, new object[] { strIndex });
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(res, typeof(object)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                }
+                                catch { /* swallow */ }
+                            }
+
+                            // If nothing matched, let base try to produce binding expression
+                            return base.BindGetIndex(binder, indexes);
+                        }
+
+                    default:
+                        {
+                            // Fallback: try to invoke indexer via reflection on default members
+                            var target = this.Value;
+                            if (target != null)
+                            {
+                                var t = target.GetType();
+                                var defaultMembers = t.GetDefaultMembers();
+                                foreach (var member in defaultMembers)
+                                {
+                                    if (member is PropertyInfo pi)
+                                    {
+                                        var indexParams = pi.GetIndexParameters();
+                                        if (indexParams.Length == indexes.Length)
+                                        {
+                                            try
+                                            {
+                                                var args = new object[indexes.Length];
+                                                for (int i = 0; i < indexes.Length; i++)
+                                                {
+                                                    args[i] = UnwrapValue(indexes[i].Value) ?? indexes[i].Value;
+                                                }
+                                                var result = pi.GetValue(target, args);
+                                                return new DynamicMetaObject(
+                                                    Expression.Constant(result, typeof(object)),
+                                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                                );
+                                            }
+                                            catch { /* swallow */ }
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("BindGetIndex exception {0}", ex.ToString());
+                    }
+                }
+                catch { }
+            }
+
+            // 必ず有効な DynamicMetaObject を返す（base にフォールバック）
+            return base.BindGetIndex(binder, indexes);
+        }
+
+        // Helper invoked by bound call sites to safely invoke methods on target via reflection without causing binding exceptions
+        private static object? SafeInvoke(object target, string methodName, object[] args)
+        {
+            if (target == null || string.IsNullOrEmpty(methodName)) return null;
+            try
+            {
+                var methods = target.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .Where(m => string.Equals(m.Name, methodName, StringComparison.OrdinalIgnoreCase)).ToArray();
+                if (methods.Length == 0) return null;
+
+                // Unwrap all args first
+                var unwrapped = args?.Select(a => UnwrapValue(a) ?? a).ToArray() ?? System.Array.Empty<object?>();
+
+                // try exact param count match with conversions
+                foreach (var m in methods)
+                {
+                    var ps = m.GetParameters();
+                    if (ps.Length != unwrapped.Length) continue;
+                    var converted = new object?[ps.Length];
+                    var ok = true;
+                    for (int i = 0; i < ps.Length; i++)
+                    {
+                        try
+                        {
+                            var v = unwrapped[i];
+                            object? cv;
+                            if (v == null)
+                            {
+                                cv = ps[i].ParameterType.IsValueType ? Activator.CreateInstance(ps[i].ParameterType) : null;
+                            }
+                            else if (ps[i].ParameterType.IsInstanceOfType(v))
+                            {
+                                cv = v;
+                            }
+                            else
+                            {
+                                cv = Convert.ChangeType(v, ps[i].ParameterType);
+                            }
+                            converted[i] = cv;
+                        }
+                        catch { ok = false; break; }
+                    }
+                    if (!ok) continue;
+                    return m.Invoke(target, converted);
+                }
+
+                // try object[] overload
+                var arrayMethod = methods.FirstOrDefault(m => m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(object[]));
+                if (arrayMethod != null)
+                {
+                    try { return arrayMethod.Invoke(target, new object[] { unwrapped }); } catch (TargetInvocationException tex) { throw tex; }
+                }
+
+                // fallback: first method, best-effort conversion
+                var candidate = methods.First();
+                var cparams = candidate.GetParameters();
+                var cargs = new object[cparams.Length];
+                for (int i = 0; i < cparams.Length; i++)
+                {
+                    if (i < unwrapped.Length)
+                    {
+                        try { cargs[i] = Convert.ChangeType(unwrapped[i], cparams[i].ParameterType); }
+                        catch { cargs[i] = cparams[i].HasDefaultValue ? cparams[i].DefaultValue : (cparams[i].ParameterType.IsValueType ? Activator.CreateInstance(cparams[i].ParameterType) : null); }
+                    }
+                    else
+                    {
+                        cargs[i] = cparams[i].HasDefaultValue ? cparams[i].DefaultValue : (cparams[i].ParameterType.IsValueType ? Activator.CreateInstance(cparams[i].ParameterType) : null);
+                    }
+                }
+                return candidate.Invoke(target, cargs);
+            }
+            catch (TargetInvocationException tex)
+            {
+                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5) commonLog.LogEntry("SafeInvoke TargetInvocationException: {0}\nMethod: {1}\nTargetType: {2}", tex.InnerException?.ToString() ?? tex.ToString(), methodName, target?.GetType().FullName ?? "(null)"); } catch { }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5) commonLog.LogEntry("SafeInvoke exception: {0}\nMethod: {1}\nTargetType: {2}", ex.ToString(), methodName, target?.GetType().FullName ?? "(null)"); } catch { }
+                return null;
+            }
+        }
+
+        // BindGetIndex 内の先頭付近（既存の UnwrapValue を使える位置に挿入）
+        private bool TryResolveIndex(DynamicMetaObject indexObj, out int? intIndex, out string? strIndex)
+        {
+            intIndex = null;
+            strIndex = null;
+
+            try
+            {
+                var raw = UnwrapValue(indexObj?.Value) ?? indexObj?.Value;
+                if (raw == null) return false;
+
+                switch (raw)
+                {
+                    case int i:
+                        intIndex = i;
+                        return true;
+                    case long l:
+                        intIndex = (int)l;
+                        return true;
+                    case short s:
+                        intIndex = s;
+                        return true;
+                    case double d:
+                        intIndex = Convert.ToInt32(d);
+                        return true;
+                    case float f:
+                        intIndex = Convert.ToInt32(f);
+                        return true;
+                    case decimal m:
+                        intIndex = Convert.ToInt32(m);
+                        return true;
+                    case string sraw:
+                        // "3" => index 3, "name" => named lookup
+                        if (int.TryParse(sraw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var p))
+                        {
+                            intIndex = p;
+                        }
+                        else
+                        {
+                            strIndex = sraw;
+                        }
+                        return true;
+                    default:
+                        // best-effort: try Convert.ToInt32 on arbitrary object (handles boxed numbers)
+                        try
+                        {
+                            intIndex = Convert.ToInt32(raw);
+                            return true;
+                        }
+                        catch
+                        {
+                            // fallback to string key if ToString is meaningful
+                            var s = raw.ToString();
+                            if (!string.IsNullOrEmpty(s))
+                            {
+                                strIndex = s;
+                                return true;
+                            }
+                        }
+                        break;
+                }
+            }
+            catch { /* swallow */ }
+
+            return false;
+        }
+    }
+}

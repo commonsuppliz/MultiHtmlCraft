@@ -1,0 +1,86 @@
+﻿using System;
+using System.Collections.Generic;
+using MultiHtmlCraft.Interfaces;
+
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// Fetch Standard Request 相当の C# 実装
+    /// </summary>
+    public class CHtmlFetch : ICHtmlFetchRequestInterface
+    {
+        public string Method { get; set; }
+        public Uri Url { get; set; }
+        public IDictionary<string, string> Headers { get; set; }
+        public object? Body { get; set; }
+        public string? Mode { get; set; }
+        public string? Credentials { get; set; }
+        public string? Cache { get; set; }
+        public string? Redirect { get; set; }
+        public string? Referrer { get; set; }
+        public string? ReferrerPolicy { get; set; }
+        public string? Integrity { get; set; }
+        public string? Destination { get; set; }
+        public bool? Keepalive { get; set; }
+        public object? Signal { get; set; }
+
+        public CHtmlFetch()
+        {
+            Method = "GET";
+            Url = new Uri("about:blank");
+            Headers = new Dictionary<string, string>();
+        }
+
+        public CHtmlFetch(
+            string method,
+            Uri url,
+            IDictionary<string, string>? headers = null,
+            object? body = null,
+            string? mode = null,
+            string? credentials = null,
+            string? cache = null,
+            string? redirect = null,
+            string? referrer = null,
+            string? referrerPolicy = null,
+            string? integrity = null,
+            string? destination = null,
+            bool? keepalive = null,
+            object? signal = null)
+        {
+            Method = method;
+            Url = url;
+            Headers = headers ?? new Dictionary<string, string>();
+            Body = body;
+            Mode = mode;
+            Credentials = credentials;
+            Cache = cache;
+            Redirect = redirect;
+            Referrer = referrer;
+            ReferrerPolicy = referrerPolicy;
+            Integrity = integrity;
+            Destination = destination;
+            Keepalive = keepalive;
+            Signal = signal;
+        }
+
+        public ICHtmlFetchRequestInterface Clone()
+        {
+            return new CHtmlFetch(
+                Method,
+                new Uri(Url.ToString()),
+                new Dictionary<string, string>(Headers),
+                Body,
+                Mode,
+                Credentials,
+                Cache,
+                Redirect,
+                Referrer,
+                ReferrerPolicy,
+                Integrity,
+                Destination,
+                Keepalive,
+                Signal
+            );
+        }
+    }
+}

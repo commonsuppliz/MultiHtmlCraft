@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+		<ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
+		<ApplicationIcon>pelican.ico</ApplicationIcon>
+		
+	</PropertyGroup>
+	<PropertyGroup>
+		<NoWarn>$(NoWarn);CS0618;SYSLIB8660;SYSLIB8060;CS8600;CS8604;CS8618;CS8601;CS4014;CS0414;CS8602;CS8629;CS8625;CS0164;IDE0090; IDE0017;IDE0300; IDE0020;IDE0019;IDE0220;IDE0059;IDE0079;IDE1006;IDE0028;IDE0031;IDE0044;IDE0018; CA2211; CA1840;CA1860;CA1806;CA1416;CS8622;CS8603;</NoWarn>
+
+	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Assets\Gear.png" />
+	  <None Remove="Assets\Pallet.png" />
+	  <None Remove="Assets\Rocket.png" />
+	  <None Remove="Assets\Tree.png" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="Assets\Gear.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\Pallet.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="Assets\Rocket.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="Assets\Tree.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\MultiHtmlCraft\Interfaces\MultiHtmlCraft.Interfaces.csproj" />
+	  <ProjectReference Include="..\MultiHtmlCraft\MultiHtmlCraft.Core\MultiHtmlCraft.Core.csproj" />
+	  <ProjectReference Include="..\MultiHtmlCraft\MultiHtmlCraft.WinformsControl\MultiHtmlCraft.WinformsControl.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Properties\Settings.Designer.cs">
+	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Settings.settings</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+	<ItemGroup>
+	  <None Update="Properties\Settings.settings">
+	    <Generator>SettingsSingleFileGenerator</Generator>
+	    <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+	  </None>
+	</ItemGroup>
+
+</Project>

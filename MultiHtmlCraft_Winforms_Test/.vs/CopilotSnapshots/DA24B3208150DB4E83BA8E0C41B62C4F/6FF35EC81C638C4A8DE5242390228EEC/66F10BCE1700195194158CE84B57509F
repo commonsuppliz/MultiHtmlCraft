@@ -1,0 +1,705 @@
+﻿using MultiHtmlCraft.Interfaces;
+using NiL.JS.BaseLibrary;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Net.WebSockets;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using MultiHtmlCraft.Core;
+
+
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// This class is to support script engines which use DynamicObject. Since it is difficult to support DynamicObject in this project, DynamicMetaObject is used instead.
+    /// Defensive: avoid throwing exceptions back into ClearScript by returning safe fallbacks.
+    /// </summary>
+    public class CHtmlClearScriptDynamicMetaObject<T> : DynamicMetaObject
+    {
+        private static readonly ConcurrentDictionary<(Type, string, Type[] parameterTypes), MethodInfo> ClearScriptMetaObjectMethodCache = new();
+        private static readonly ConcurrentDictionary<(Type, string), PropertyInfo> ClearScriptMetaObjectPropertyCache = new();
+
+        // Method to get MethodInfo from cache or add it if not present
+        private static MethodInfo? GetCachedMethod(Type type, string methodName, Type[] parameterTypes)
+        {
+            var key = (type, methodName, parameterTypes);
+            return ClearScriptMetaObjectMethodCache.GetOrAdd(key, _ => type.GetMethod(methodName, parameterTypes));
+        }
+
+        // Return nullable PropertyInfo to avoid throwing when property is not found
+        private static PropertyInfo? GetCachedProperty(Type type, string propertyName)
+        {
+            var key = (type, propertyName);
+            return ClearScriptMetaObjectPropertyCache.GetOrAdd(key, _ => type.GetProperty(propertyName));
+        }
+
+        public CHtmlClearScriptDynamicMetaObject(System.Linq.Expressions.Expression expression, object value)
+            : base(expression, BindingRestrictions.Empty, value)
+        {
+        }
+
+        // Helper: safely unwrap DynamicMetaObject wrappers or common script wrappers, return original if nothing to unwrap
+        private static object? UnwrapValue(object? v)
+        {
+            if (v is null) return null;
+
+            object? current = v;
+            for (int i = 0; i < 6 && current != null; i++)
+            {
+                // Unwrap ClearScript/DynamicMetaObject wrapper
+                if (current is DynamicMetaObject dmo)
+                {
+                    try { current = dmo.Value; continue; } catch { break; }
+                }
+
+                var t = current.GetType();
+
+                // Try common wrapper property names
+                var tryProps = new[] { "Target", "UnderlyingObject", "Value", "WrappedObject", "Underlying" };
+                bool unwrapped = false;
+                foreach (var pn in tryProps)
+                {
+                    var p = t.GetProperty(pn, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (p != null)
+                    {
+                        try
+                        {
+                            var extracted = p.GetValue(current);
+                            if (extracted != null)
+                            {
+                                current = extracted;
+                                unwrapped = true;
+                                break;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+                if (unwrapped) continue;
+
+                // Special-case NiL.JS or ClearScript wrapper types: try ToObject(), value or Value
+                if (t.FullName != null && (t.FullName.StartsWith("NiL.JS") || t.FullName.Contains("ClearScript")))
+                {
+                    var m = t.GetMethod("ToObject", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+                    if (m != null)
+                    {
+                        try { current = m.Invoke(current, null); continue; } catch { }
+                    }
+
+                    var p2 = t.GetProperty("value", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) ?? t.GetProperty("Value", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (p2 != null)
+                    {
+                        try { var ex = p2.GetValue(current); if (ex != null) { current = ex; continue; } } catch { }
+                    }
+                }
+
+                break; // nothing more to unwrap
+            }
+
+            return current;
+        }
+
+        public override DynamicMetaObject BindInvokeMember(InvokeMemberBinder binder, DynamicMetaObject[] args)
+        {
+            try
+            {
+                switch (this.Value)
+                {
+                    case CHtmlDocument self:
+                        {
+                            var methodInfo = GetCachedMethod(typeof(CHtmlDocument), binder.Name, args.Select(a => a.LimitType).ToArray());
+                            if (methodInfo != null)
+                            {
+                                var parameters = methodInfo.GetParameters();
+                                var callArgs = new Expression[parameters.Length];
+                                for (int i = 0; i < parameters.Length; i++)
+                                {
+                                    callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                }
+                                return new DynamicMetaObject(
+                                    Expression.Call(Expression.Constant(self), methodInfo, callArgs),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                            break;
+                        }
+
+                    case CHtmlElement _celement:
+                        {
+                            switch (binder.Name)
+                            {
+                                case "compareDocumentPosition":
+                                    {
+                                        var method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(ICHtmlNodeInterface) });
+                                        if (method != null)
+                                        {
+                                            var parameters = method.GetParameters();
+                                            var callArgs = new Expression[parameters.Length];
+                                            for (int i = 0; i < parameters.Length; i++)
+                                            {
+                                                callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                            }
+                                            return new DynamicMetaObject(
+                                                Expression.Call(Expression.Constant(_celement), method, callArgs),
+                                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            );
+                                        }
+                                        break;
+                                    }
+                                case "insertBefore":
+                                case "appendChild":
+                                case "removeChild":
+                                    {
+                                        var method = args.Length == 2
+                                            ? GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(CHtmlElement), typeof(CHtmlElement) })
+                                            : GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(CHtmlElement) });
+                                        if (method != null)
+                                        {
+                                            var parameters = method.GetParameters();
+                                            var callArgs = new Expression[parameters.Length];
+                                            for (int i = 0; i < parameters.Length; i++)
+                                            {
+                                                callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                            }
+                                            return new DynamicMetaObject(
+                                                Expression.Call(Expression.Constant(_celement), method, callArgs),
+                                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            );
+                                        }
+                                        break;
+                                    }
+                                case "getElementById":
+                                case "getElementsByClassName":
+                                case "getElementsByTagNameNS":
+                                case "getElementsByTagName":
+                                case "getAttribute":
+                                case "createElement":
+                                    {
+                                        var methodgetgetElements = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(string) });
+                                        if (methodgetgetElements != null)
+                                        {
+                                            var parametersGetElementByTagName = methodgetgetElements.GetParameters();
+                                            var callArgsGetElementByTagName = new Expression[parametersGetElementByTagName.Length];
+                                            for (int i = 0; i < parametersGetElementByTagName.Length; i++)
+                                            {
+                                                callArgsGetElementByTagName[i] = Expression.Convert(args[i].Expression, parametersGetElementByTagName[i].ParameterType);
+                                            }
+                                            return new DynamicMetaObject(
+                                                Expression.Call(Expression.Constant(_celement), methodgetgetElements, callArgsGetElementByTagName),
+                                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            );
+                                        }
+                                        break;
+                                    }
+                                case "setAttribute":
+                                    {
+                                        if (args == null) break;
+                                        MethodInfo? method = null;
+                                        if (args.Length >= 3)
+                                            method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(string), typeof(object), typeof(object) });
+                                        else if (args.Length == 2)
+                                            method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(string), typeof(object) });
+                                        else if (args.Length == 1 || args.Length == 0) break;
+
+                                        if (method != null)
+                                        {
+                                            var parameters = method.GetParameters();
+                                            var callArgs = new Expression[parameters.Length];
+                                            for (int i = 0; i < parameters.Length; i++)
+                                            {
+                                                callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                            }
+                                            return new DynamicMetaObject(
+                                                Expression.Call(Expression.Constant(_celement), method, callArgs),
+                                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            );
+                                        }
+                                        break;
+                                    }
+                                case "cloneNode":
+                                    {
+                                        var method = args.Length >= 1
+                                            ? GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(object) })
+                                            : GetCachedMethod(_celement.GetType(), binder.Name, Type.EmptyTypes);
+                                        if (method != null)
+                                        {
+                                            var parameters = method.GetParameters();
+                                            var callArgs = new Expression[parameters.Length];
+                                            for (int i = 0; i < parameters.Length; i++)
+                                            {
+                                                callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                            }
+                                            return new DynamicMetaObject(
+                                                Expression.Call(Expression.Constant(_celement), method, callArgs),
+                                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            );
+                                        }
+                                        break;
+                                    }
+                                case "getContext":
+                                    {
+                                        if (args.Length >= 1)
+                                        {
+                                            var method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(object[]) });
+                                            if (method != null)
+                                            {
+                                                var arrayExpr = Expression.NewArrayInit(typeof(object), args.Select(a => Expression.Convert(a.Expression, typeof(object))));
+                                                return new DynamicMetaObject(
+                                                    Expression.Call(Expression.Constant(_celement), method, arrayExpr),
+                                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                                );
+                                            }
+                                        }
+                                        break;
+                                    }
+                                case "addEventListener":
+                                    {
+                                        if (args.Length >= 1)
+                                        {
+                                            var method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(string), typeof(object) });
+                                            if (method != null)
+                                            {
+                                                var parameters = method.GetParameters();
+                                                var callArgs = new Expression[parameters.Length];
+                                                for (int i = 0; i < parameters.Length; i++)
+                                                {
+                                                    callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                                }
+                                                return new DynamicMetaObject(
+                                                    Expression.Call(Expression.Constant(_celement), method, callArgs),
+                                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                                );
+                                            }
+                                        }
+                                        break;
+                                    }
+                            }
+                        }
+                        break;
+
+                    case CHtmlCanvasContext2D cHtmlCanvasContext2D:
+                        {
+                            // Always use SafeInvoke expression to avoid compile-time conversions that ClearScript can't satisfy.
+                            var safeInvokeMethod = typeof(CHtmlClearScriptDynamicMetaObject<T>).GetMethod(nameof(SafeInvoke), BindingFlags.Static | BindingFlags.NonPublic);
+                            if (safeInvokeMethod != null)
+                            {
+                                var arrayExpr = Expression.NewArrayInit(typeof(object), args.Select(a => Expression.Convert(a.Expression, typeof(object))));
+                                var call = Expression.Call(safeInvokeMethod, Expression.Constant(cHtmlCanvasContext2D), Expression.Constant(binder.Name), arrayExpr);
+                                return new DynamicMetaObject(call, BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if ( commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        var argsInfo = args?.Select(a => a?.LimitType?.FullName ?? "<null>").Aggregate((x, y) => x + ", " + y) ?? "<null>";
+                        commonLog.LogEntry("BindInvokeMember error: {0}\nBinder: {1}\nArgs: {2}\nTargetValueType: {3}\nStack:\n{4}",
+                            ex.Message,
+                            binder?.Name ?? "(null)",
+                            argsInfo,
+                            this.Value?.GetType().FullName ?? "(null)",
+                            ex.ToString());
+                    }
+                }
+                catch { }
+            }
+
+            return base.BindInvokeMember(binder, args);
+        }
+
+        public override IEnumerable<string> GetDynamicMemberNames()
+        {
+            try
+            {
+                switch (this.Value)
+                {
+                    case object obj:
+                        try { return ((dynamic)obj).GetDynamicMemberNames() as IEnumerable<string> ?? System.Array.Empty<string>(); } catch { }
+                        break;
+                }
+            }
+            catch { }
+
+            return System.Array.Empty<string>();
+        }
+
+        public override DynamicMetaObject BindGetMember(GetMemberBinder binder)
+        {
+            try
+            {
+                switch (this.Value)
+                {
+                    case CHtmlElement element:
+                        {
+                            var self = element;
+                            if (CHtmlElement.CHtmlElementProperties.ContainsKey(binder.Name))
+                            {
+                                var propertyInfo = GetCachedProperty(typeof(CHtmlElement), binder.Name) ?? GetCachedProperty(typeof(CHtmlNode), binder.Name);
+                                if (propertyInfo != null)
+                                {
+                                    return new DynamicMetaObject(
+                                        Expression.Property(Expression.Constant(self), propertyInfo),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                            }
+
+                            MethodInfo? methodInfo = null;
+                            if (CHtmlElement.CHtmlElementMethods.ContainsKey(binder.Name) == true)
+                            {
+                                switch (binder.Name)
+                                {
+                                    case "insertBefore":
+                                    case "getContext":
+                                    case "removeChild":
+                                    case "getElementsByTagName":
+                                    case "setAttribute":
+                                    case "cloneNode":
+                                    case "addEventListener":
+                                    case "getAttribute":
+                                        return base.BindGetMember(binder);
+                                    case "toString":
+                                        Func<string> toStringFunc = () => element.ToString();
+                                        return new DynamicMetaObject(Expression.Constant(toStringFunc), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    case "appendChild":
+                                        methodInfo = GetCachedMethod(typeof(CHtmlElement), "appendChild", new[] { typeof(CHtmlElement) });
+                                        if (methodInfo != null)
+                                        {
+                                            var del = Delegate.CreateDelegate(Expression.GetDelegateType(methodInfo.GetParameters().Select(p => p.ParameterType).Concat(new[] { methodInfo.ReturnType }).ToArray()), self, methodInfo);
+                                            return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                        }
+                                        break;
+                                    case "compareDocumentPosition":
+                                        var methodcompareDocumentPosition = GetCachedMethod(typeof(CHtmlElement), "compareDocumentPosition", new Type[] { typeof(ICHtmlNodeInterface) });
+                                        if (methodcompareDocumentPosition != null)
+                                        {
+                                            Func<object, double> delcompareDocumentPosition = (other) =>
+                                            {
+                                                if (other is ICHtmlNodeInterface node)
+                                                    return (double)methodcompareDocumentPosition.Invoke(self, new object[] { node });
+                                                throw new ArgumentException("Argument must be ICHtmlNodeInterface");
+                                            };
+                                            return new DynamicMetaObject(Expression.Constant(delcompareDocumentPosition), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                        }
+                                        break;
+                                }
+
+                                methodInfo = GetCachedMethod(typeof(CHtmlElement), binder.Name, Type.EmptyTypes);
+                                if (methodInfo != null)
+                                {
+                                    var del = Delegate.CreateDelegate(Expression.GetDelegateType(methodInfo.GetParameters().Select(p => p.ParameterType).Concat(new[] { methodInfo.ReturnType }).ToArray()), self, methodInfo);
+                                    return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                }
+                            }
+
+                            var result = self.GetDynamicMember(binder.Name);
+                            return new DynamicMetaObject(Expression.Constant(result, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                        }
+                    case CHtmlDocument _document:
+                        {
+                            var self = _document;
+                            switch (binder.Name)
+                            {
+                                case "createElement":
+                                case "getElementById":
+                                    {
+                                        var methodWithOneString = typeof(CHtmlDocument).GetMethod(binder.Name, new Type[] { typeof(string) });
+                                        if (methodWithOneString != null)
+                                        {
+                                            Func<object, CHtmlElement> delCreateElement = (strElemName) =>
+                                            {
+                                                if (strElemName is string)
+                                                {
+                                                    return (CHtmlElement)methodWithOneString.Invoke(self, new object[] { strElemName });
+                                                }
+                                                throw new ArgumentException("Argument must be string");
+                                            };
+                                            return new DynamicMetaObject(Expression.Constant(delCreateElement), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                        }
+                                        break;
+                                    }
+                            }
+
+                            if (CHtmlDocument.CHtmlDocumentProperties.ContainsKey(binder.Name))
+                            {
+                                var propertyInfo = typeof(CHtmlDocument).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                                    .FirstOrDefault(p => p.Name == binder.Name && p.DeclaringType == typeof(CHtmlDocument))
+                                    ?? typeof(CHtmlNode).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                                    .FirstOrDefault(p => p.Name == binder.Name && p.DeclaringType == typeof(CHtmlNode));
+                                if (propertyInfo != null)
+                                {
+                                    return new DynamicMetaObject(Expression.Property(Expression.Constant(self), propertyInfo), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                }
+                            }
+
+                            var methodInfo = typeof(CHtmlDocument).GetMethod(binder.Name);
+                            if (methodInfo != null)
+                            {
+                                var del = Delegate.CreateDelegate(Expression.GetDelegateType(methodInfo.GetParameters().Select(p => p.ParameterType).Concat(new[] { methodInfo.ReturnType }).ToArray()), self, methodInfo);
+                                return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            var res = self.GetDynamicMember(binder.Name);
+                            return new DynamicMetaObject(Expression.Constant(res, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                        }
+                    case CHtmlCanvasContext2D canvasContext:
+                        {
+                            // If property exists in known properties, return property expression
+                            if (CHtmlCanvasContext2D.CHtmlCanvasContext2Dproperties.ContainsKey(binder.Name))
+                            {
+                                var prop = typeof(CHtmlCanvasContext2D).GetProperty(binder.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
+                                if (prop != null)
+                                {
+                                    return new DynamicMetaObject(Expression.Property(Expression.Constant(canvasContext), prop), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                }
+                            }
+
+                            // Provide concrete delegates for common canvas methods to avoid ClearScript dynamic binder issues
+                            var name = binder.Name;
+                            if (string.Equals(name, "moveTo", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action<object, object> del = (a, b) =>
+                                {
+                                    try
+                                    {
+                                        var xa = UnwrapValue(a) ?? a;
+                                        var xb = UnwrapValue(b) ?? b;
+                                        double dx = Convert.ToDouble(xa);
+                                        double dy = Convert.ToDouble(xb);
+                                        canvasContext.moveTo(dx, dy);
+                                    }
+                                    catch { }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "lineTo", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action<object, object> del = (a, b) =>
+                                {
+                                    try
+                                    {
+                                        var xa = UnwrapValue(a) ?? a;
+                                        var xb = UnwrapValue(b) ?? b;
+                                        double dx = Convert.ToDouble(xa);
+                                        double dy = Convert.ToDouble(xb);
+                                        canvasContext.lineTo(dx, dy);
+                                    }
+                                    catch { }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "stroke", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(name, "beginPath", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(name, "closePath", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action del0 = () =>
+                                {
+                                    try
+                                    {
+                                        if (string.Equals(name, "stroke", StringComparison.OrdinalIgnoreCase)) canvasContext.stroke();
+                                        else if (string.Equals(name, "beginPath", StringComparison.OrdinalIgnoreCase)) canvasContext.beginPath();
+                                        else if (string.Equals(name, "closePath", StringComparison.OrdinalIgnoreCase)) canvasContext.closePath();
+                                    }
+                                    catch { }
+                                };
+                                return new DynamicMetaObject(Expression.Constant(del0), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            // Fallback: safe invoker for other methods
+                            Func<object[], object> invoker = (object[] a) =>
+                            {
+                                try
+                                {
+                                    return SafeInvoke(canvasContext, name, a ?? System.Array.Empty<object>());
+                                }
+                                catch { return null; }
+                            };
+
+                            return new DynamicMetaObject(Expression.Constant(invoker, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("BindGetMember error: {0}\nBinder: {1}\nTargetValueType: {2}\nStack:\n{3}", ex.Message, binder?.Name ?? "(null)", this.Value?.GetType().FullName ?? "(null)", ex.ToString());
+                    }
+                }
+                catch { }
+            }
+
+            // safe fallback instead of throwing
+            return new DynamicMetaObject(Expression.Constant(null, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+        }
+
+        public override DynamicMetaObject BindConvert(ConvertBinder binder)
+        {
+            if (binder.Type == typeof(string))
+            {
+                var self = this.Value;
+                var toStringMethod = self.GetType().GetMethod("ToString", Type.EmptyTypes);
+                var callToString = Expression.Call(Expression.Constant(self), toStringMethod);
+                return new DynamicMetaObject(callToString, BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+            }
+            return base.BindConvert(binder);
+        }
+
+        public override DynamicMetaObject BindSetMember(SetMemberBinder binder, DynamicMetaObject value)
+        {
+            if ( commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("BindSetMember is called with value {0}", value);
+            }
+
+            object? actual = UnwrapValue(value?.Value) ?? UnwrapValue(value) ?? value?.Value;
+            try
+            {
+                switch (this.Value)
+                {
+                    case CHtmlInputElement input:
+                        try { input.SetDynamicMember(binder.Name, actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Input.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlElement el:
+                        try { el.SetDynamicMember(binder.Name, actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Element.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlDomTokenList dom:
+                        try { dom.SetDynamicMember(binder.Name, actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("DomTokenList.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlDocument doc:
+                        try { doc.SetDynamicMember(binder.Name, actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Document.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlMultiversalWindow w:
+                        try { w.SetDynamicMember(binder.Name, actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Window.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlCanvasContext2D ctx:
+                        try { ctx.___setPropertyByName(binder.Name, actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("Canvas.___setPropertyByName: {0}", ex.Message); }
+                        break;
+                    case CHtmlCSSStyleSheet sheet:
+                        try { sheet.SetDynamicMember(binder.Name, actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("CSS.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    case CHtmlXMLHttpRequest xhr:
+                        try { xhr.SetDynamicMember(binder.Name, actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("XHR.SetDynamicMember: {0}", ex.Message); }
+                        break;
+                    default:
+                        // 不明なターゲットは無視（例外を投げない）
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        var valType = value?.Value?.GetType()?.FullName ?? "(null)";
+                        commonLog.LogEntry("BindSetMember handler exception: {0}\nBinder: {1}\nValueType: {2}\nTargetValueType: {3}\nStack:\n{4}",
+                            ex.Message,
+                            binder?.Name ?? "(null)",
+                            valType,
+                            this.Value?.GetType().FullName ?? "(null)",
+                            ex.ToString());
+                    }
+                }
+                catch { }
+            }
+
+            var fallback = actual ?? value?.Value;
+            return new DynamicMetaObject(Expression.Constant(fallback, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+        }
+
+        public override DynamicMetaObject BindGetIndex(GetIndexBinder binder, DynamicMetaObject[] indexes)
+        {
+            try
+            {
+                if (this.Value is CHtmlCollection)
+                {
+                    var indexExpr = Expression.Convert(indexes[0].Expression, typeof(int));
+                    var selfExpr = Expression.Convert(this.Expression, typeof(MultiHtmlCraft.Core.CHtmlCollection));
+                    var indexer = typeof(MultiHtmlCraft.Core.CHtmlCollection).GetProperty("Item", new[] { typeof(int) });
+                    var call = Expression.Property(selfExpr, indexer, indexExpr);
+                    return new DynamicMetaObject(call, BindingRestrictions.GetTypeRestriction(this.Expression, typeof(MultiHtmlCraft.Core.CHtmlCollection)));
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if (  commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        var idxInfo = indexes?.Select(i => i?.LimitType?.FullName ?? "<null>").Aggregate((x, y) => x + ", " + y) ?? "<null>";
+                        commonLog.LogEntry("BindGetIndex exception: {0}\nBinder:{1}\nIndexes:{2}\nTargetValueType:{3}\nStack:\n{4}", ex.Message, binder?.ToString() ?? "(null)", idxInfo, this.Value?.GetType().FullName ?? "(null)", ex.ToString());
+                    }
+                }
+                catch { }
+            }
+
+            return base.BindGetIndex(binder, indexes);
+        }
+
+        // Helper invoked by bound call sites to safely invoke methods on target via reflection without causing binding exceptions
+        private static object? SafeInvoke(object target, string methodName, object[] args)
+        {
+            if (target == null || methodName == null) return null;
+            try
+            {
+                var methods = target.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                    .Where(m => string.Equals(m.Name, methodName, StringComparison.OrdinalIgnoreCase)).ToArray();
+                if (methods.Length == 0) return null;
+
+                // try exact param count match
+                foreach (var m in methods)
+                {
+                    var ps = m.GetParameters();
+                    if (ps.Length == args.Length)
+                    {
+                        var parameters = new object[ps.Length];
+                        for (int i = 0; i < ps.Length; i++)
+                        {
+                            try { parameters[i] = args[i] == null ? null : Convert.ChangeType(args[i], ps[i].ParameterType); } catch { parameters[i] = args[i]; }
+                        }
+                        return m.Invoke(target, parameters);
+                    }
+                }
+
+                // try object[] overload
+                var arrayMethod = methods.FirstOrDefault(m => m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == typeof(object[]));
+                if (arrayMethod != null)
+                {
+                    return arrayMethod.Invoke(target, new object[] { args });
+                }
+
+                // fallback to first overload
+                var first = methods[0];
+                var pfirst = first.GetParameters();
+                var pars = new object[pfirst.Length];
+                for (int i = 0; i < pfirst.Length && i < args.Length; i++) pars[i] = args[i];
+                return first.Invoke(target, pars);
+            }
+            catch (TargetInvocationException tex)
+            {
+                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5) commonLog.LogEntry("SafeInvoke TargetInvocationException: {0}", tex.InnerException?.Message ?? tex.Message); } catch { }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5) commonLog.LogEntry("SafeInvoke exception: {0}", ex.Message); } catch { }
+                return null;
+            }
+        }
+    }
+}

@@ -1,0 +1,267 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E8F74E23-F4D8-54F1-E004-8A476E72B691}|..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\MultiversalRenderer.Core.csproj|c:\\users\\user\\source\\repos\\multiversalrenderer\\multiversalrenerder\\multiversalrenderer.core\\chtmlxmlhttprequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E8F74E23-F4D8-54F1-E004-8A476E72B691}|..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\MultiversalRenderer.Core.csproj|c:\\users\\user\\source\\repos\\multiversalrenderer\\multiversalrenerder\\multiversalrenderer.core\\commonhtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|c:\\users\\user\\source\\repos\\multiversalrendererwinformstest\\formmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|solutionrelative:formmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\formmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|solutionrelative:formmain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E8F74E23-F4D8-54F1-E004-8A476E72B691}|..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\MultiversalRenderer.Core.csproj|c:\\users\\user\\source\\repos\\multiversalrenderer\\multiversalrenerder\\multiversalrenderer.core\\chtmldocument.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|c:\\users\\user\\source\\repos\\multiversalrendererwinformstest\\formmain.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|solutionrelative:formmain.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E8F74E23-F4D8-54F1-E004-8A476E72B691}|..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\MultiversalRenderer.Core.csproj|c:\\users\\user\\source\\repos\\multiversalrenderer\\multiversalrenerder\\multiversalrenderer.core\\chtmldocumentprogress.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E8F74E23-F4D8-54F1-E004-8A476E72B691}|..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\MultiversalRenderer.Core.csproj|c:\\users\\user\\source\\repos\\multiversalrenderer\\multiversalrenerder\\multiversalrenderer.core\\graphiccontainer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|c:\\users\\user\\source\\repos\\multiversalrendererwinformstest\\multiversalrenderer_winformstest.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|solutionrelative:multiversalrenderer_winformstest.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E8F74E23-F4D8-54F1-E004-8A476E72B691}|..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\MultiversalRenderer.Core.csproj|c:\\users\\user\\source\\repos\\multiversalrenderer\\multiversalrenerder\\multiversalrenderer.core\\commonutils.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|c:\\users\\user\\source\\repos\\multiversalrendererwinformstest\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|c:\\users\\user\\source\\repos\\multiversalrendererwinformstest\\formmain.resx||{81828910-B8B3-4D2B-99A3-067027C180C1}",
+      "RelativeMoniker": "D:0:0:{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}|MultiversalRenderer_WinFormsTest.csproj|solutionrelative:formmain.resx||{81828910-B8B3-4D2B-99A3-067027C180C1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\USER\\AppData\\Local\\SourceServer\\5c00ee77e39287bc74e95367beacdac59468ba5e93777254395a4cb20a26e09b\\src\\System.Windows.Forms\\src\\System\\Windows\\Forms\\Control.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E8F74E23-F4D8-54F1-E004-8A476E72B691}|..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\MultiversalRenderer.Core.csproj|c:\\users\\user\\source\\repos\\multiversalrenderer\\multiversalrenerder\\multiversalrenderer.core\\chtmlelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CHtmlXMLHttpRequest.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlXMLHttpRequest.cs",
+              "RelativeDocumentMoniker": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlXMLHttpRequest.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlXMLHttpRequest.cs",
+              "RelativeToolTip": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlXMLHttpRequest.cs",
+              "ViewState": "AgIAACwCAAAAAAAAAAAEwB8CAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-30T14:12:25.933Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "GraphicContainer.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\GraphicContainer.cs",
+              "RelativeDocumentMoniker": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\GraphicContainer.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\GraphicContainer.cs",
+              "RelativeToolTip": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\GraphicContainer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-30T13:32:25.315Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "FormMain.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\FormMain.cs",
+              "RelativeDocumentMoniker": "FormMain.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\FormMain.cs",
+              "RelativeToolTip": "FormMain.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAAAEwBgAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-30T13:31:02.977Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Control.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\AppData\\Local\\SourceServer\\5c00ee77e39287bc74e95367beacdac59468ba5e93777254395a4cb20a26e09b\\src\\System.Windows.Forms\\src\\System\\Windows\\Forms\\Control.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\SourceServer\\5c00ee77e39287bc74e95367beacdac59468ba5e93777254395a4cb20a26e09b\\src\\System.Windows.Forms\\src\\System\\Windows\\Forms\\Control.cs",
+              "ToolTip": "C:\\Users\\USER\\AppData\\Local\\SourceServer\\5c00ee77e39287bc74e95367beacdac59468ba5e93777254395a4cb20a26e09b\\src\\System.Windows.Forms\\src\\System\\Windows\\Forms\\Control.cs",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\SourceServer\\5c00ee77e39287bc74e95367beacdac59468ba5e93777254395a4cb20a26e09b\\src\\System.Windows.Forms\\src\\System\\Windows\\Forms\\Control.cs",
+              "ViewState": "AgIAACQjAAAAAAAAAAAhwEAjAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-29T12:11:41.247Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "commonUtils.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\commonUtils.cs",
+              "RelativeDocumentMoniker": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\commonUtils.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\commonUtils.cs",
+              "RelativeToolTip": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\commonUtils.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAkwB8AAAC0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-29T11:32:50.394Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "CHtmlElement.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlElement.cs",
+              "RelativeDocumentMoniker": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlElement.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlElement.cs",
+              "RelativeToolTip": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlElement.cs",
+              "ViewState": "AgIAACQgAAAAAAAAAAAhwDogAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-28T10:57:00.119Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "commonHTML.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\commonHTML.cs",
+              "RelativeDocumentMoniker": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\commonHTML.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\commonHTML.cs",
+              "RelativeToolTip": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\commonHTML.cs",
+              "ViewState": "AgIAAHAfAAAAAAAAAAAYwFUfAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-28T07:36:39.392Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CHtmlDocumentProgress.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlDocumentProgress.cs",
+              "RelativeDocumentMoniker": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlDocumentProgress.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlDocumentProgress.cs",
+              "RelativeToolTip": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlDocumentProgress.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-27T15:55:36.579Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CHtmlDocument.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlDocument.cs",
+              "RelativeDocumentMoniker": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlDocument.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlDocument.cs",
+              "RelativeToolTip": "..\\MultiversalRenderer\\MultiversalRenerder\\MultiversalRenderer.Core\\CHtmlDocument.cs",
+              "ViewState": "AgIAAH1iAAAAAAAAAAAEwI1iAAB1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-27T15:41:51.17Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "FormMain.resx",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\FormMain.resx",
+              "RelativeDocumentMoniker": "FormMain.resx",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\FormMain.resx",
+              "RelativeToolTip": "FormMain.resx",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001005|",
+              "WhenOpened": "2025-05-27T15:33:36.46Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "FormMain.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\FormMain.Designer.cs",
+              "RelativeDocumentMoniker": "FormMain.Designer.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\FormMain.Designer.cs",
+              "RelativeToolTip": "FormMain.Designer.cs",
+              "ViewState": "AgIAAKMAAAAAAAAAAAAUwLsAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-27T15:06:38.327Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FormMain.cs [\u30C7\u30B6\u30A4\u30F3]",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\FormMain.cs",
+              "RelativeDocumentMoniker": "FormMain.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\FormMain.cs [\u30C7\u30B6\u30A4\u30F3]",
+              "RelativeToolTip": "FormMain.cs [\u30C7\u30B6\u30A4\u30F3]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-27T14:25:07.963Z",
+              "EditorCaption": " [\u30C7\u30B6\u30A4\u30F3]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-27T14:25:04.332Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "MultiversalRenderer_WinFormsTest.csproj",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\MultiversalRenderer_WinFormsTest.csproj",
+              "RelativeDocumentMoniker": "MultiversalRenderer_WinFormsTest.csproj",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiversalRendererWinFormsTest\\MultiversalRenderer_WinFormsTest.csproj",
+              "RelativeToolTip": "MultiversalRenderer_WinFormsTest.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAACFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-05-27T14:20:43.681Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 67,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

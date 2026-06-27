@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MultiHtmlCraft_WinFormsTest": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

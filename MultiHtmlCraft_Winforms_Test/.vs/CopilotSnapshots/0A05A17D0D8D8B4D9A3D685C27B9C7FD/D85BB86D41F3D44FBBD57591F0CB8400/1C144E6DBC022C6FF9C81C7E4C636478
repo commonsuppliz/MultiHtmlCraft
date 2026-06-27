@@ -1,0 +1,624 @@
+﻿using MultiHtmlCraft.Interfaces;
+using NiL.JS;
+using NiL.JS.BaseLibrary;
+using NiL.JS.Core;
+using NiL.JS.Core.Functions;
+using NiL.JS.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Xml.Linq;
+using static System.Formats.Asn1.AsnWriter;
+// removed using MultiHtmlCraft.Core to avoid circular dependency
+namespace NilJsProcessor
+{
+#pragma warning disable 618
+    public class NilJsScope : IMultiversalScriptScope
+    {
+        private IMultiversalWindow multiwindow = null;
+        public NiL.JS.Core.Context context = null;
+        public NiL.JS.Core.GlobalContext globalContext = null;
+        private bool _isInitCompleted = false;
+        private IMultiversalScriptProcessor processor = null;
+        private readonly object _initLock = new object();
+        private Func<string, object[], object>? _objectFactory;
+
+        private JSValue _cachedWindowJsValue;
+        private IMultiversalWindow _cachedWindowSource;
+
+        private string _scopeName = "NilJsScope"; // default scope name
+        private IMultiversalWindowType _windowType = IMultiversalWindowType.Unknown; // backing for window type
+
+        public void setObjectFactory(Func<string, object[], object> factory)
+        {
+            _objectFactory = factory;
+        }
+        public NilJsScope(IMultiversalWindow multi)
+        {
+            multiwindow = multi;
+
+        }
+        public NilJsScope() { }
+
+        public void disposeScriptEngine()
+        {
+            try
+            {
+                _isInitCompleted = false;
+                processor = null;
+
+                // contextを先にnullにしてからglobalContextをnullにする
+                context = null;
+                globalContext = null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error disposing NilJS engine: {ex.Message}");
+            }
+        }
+
+        public string getMultivasalScopeName()
+        {
+            return _scopeName;
+        }
+
+        public IMultiversalScriptProcessor getMultiversalScriptProcessor()
+        {
+            processor.multiversalscope = this;
+            return processor;
+        }
+
+        public bool isDefaultMultiversalProcessor()
+        {
+            return true;
+        }
+
+        public bool isInitCompleted()
+        {
+            return _isInitCompleted;
+        }
+
+        public void relaseMultiversal()
+        {
+            multiwindow = null;
+        }
+        private void setHostWindowToContext(Context ctx, IMultiversalWindow sourceWindow)
+        {
+            if (_cachedWindowJsValue == null || !object.ReferenceEquals(_cachedWindowSource, multiwindow))
+            {
+                _cachedWindowJsValue = JSValue.Marshal(multiwindow);
+                _cachedWindowSource = multiwindow;
+            }
+
+            try
+            {
+                if (globalContext != null)
+                {
+                    globalContext.DefineVariable("__hostWindow").Assign(_cachedWindowJsValue);
+                }
+                if (context != null)
+                {
+                    context.DefineVariable("__hostWindow").Assign(_cachedWindowJsValue);
+
+                    var bridge = @"
+(function(){
+  try {
+    if (typeof __hostWindow !== 'undefined' && __hostWindow) {
+      var root = (function(){ return this; })();
+      var win = (root.window && root.window.__unifiedWindowMarker) ? root.window : {};
+      try { Object.defineProperty(win,'__unifiedWindowMarker',{ value:true, configurable:false }); } catch(_){}
+      function map(name){
+        try {
+          Object.defineProperty(win, name, {
+            configurable:true,
+            enumerable:true,
+            get:function(){ try { return __hostWindow[name]; } catch(_){ return undefined; } },
+            set:function(v){ try { __hostWindow[name] = v; } catch(_){ } }
+          });
+        } catch(_){ }
+      }
+      var names = [
+        'document','console','navigator','location','history',
+        'setTimeout','clearTimeout','setInterval','clearInterval',
+        'alert','confirm','prompt','open','postMessage'
+      ];
+      for (var i=0;i<names.length;i++) map(names[i]);
+      try { Object.defineProperty(win,'innerWidth',{ configurable:true, enumerable:true, get:function(){ try{ return __hostWindow.___getinnerWidth ? __hostWindow.___getinnerWidth() : 0; }catch(_){ return 0; } } }); } catch(_){ }
+      try { Object.defineProperty(win,'innerHeight',{ configurable:true, enumerable:true, get:function(){ try{ return __hostWindow.___getinnerHeight ? __hostWindow.___getinnerHeight() : 0; }catch(_){ return 0; } } }); } catch(_){ }
+      try { win.toString = function(){ return '[object Window]'; }; } catch(_){ }
+      try { win.__hostWindow = __hostWindow; } catch(_){ }
+      try { root.window = win; } catch(_){ }
+      try { root.self = win; } catch(_){ }
+      try { root.globalThis = win; } catch(_){ }
+    }
+  } catch(_){ }
+})();";
+                    try { context.Eval(bridge); } catch { }
+
+                    // === 追加: on* イベントプロパティをホスト側 ___set/get_onfunction_property に委譲 ===
+                    try
+                    {
+                        var list = createWindowFunctionSortedList(); // 既存メソッド利用
+                        var sb = new System.Text.StringBuilder();
+                        sb.Append("(function(){try{var w=(typeof window!=='undefined')?window:(function(){return this;})();");
+                        sb.Append("if(w && typeof __hostWindow!=='undefined' && __hostWindow){");
+                        sb.Append("function bindEvt(n){try{Object.defineProperty(w,n,{configurable:true,enumerable:true,");
+                        sb.Append("get:function(){try{return __hostWindow.___get_onfunction_property(n);}catch(_){return undefined;}},");
+                        sb.Append("set:function(v){try{__hostWindow.___set_onfunction_property(n,v);}catch(_){}}});}catch(_){}}");
+                        foreach (var kv in list)
+                        {
+                            sb.Append("bindEvt('").Append(kv.Key).Append("');");
+                        }
+                        // 念のため window.onload がない場合確実に定義
+                        sb.Append("if(!('onload' in w)) bindEvt('onload');");
+                        sb.Append("}}catch(_){}})();");
+                        context.Eval(sb.ToString());
+                    }
+                    catch { }
+
+                    // Patch: ensure animation frame functions ...
+                    try {
+                        context.Eval(@"(function(){try{var w=(typeof window!=='undefined')?window:(typeof globalThis!=='undefined'?globalThis:this);if(w&&typeof requestAnimationFrame==='function'){w.requestAnimationFrame=requestAnimationFrame;}if(w&&typeof cancelAnimationFrame==='function'){w.cancelAnimationFrame=cancelAnimationFrame;}}catch(e){}})();");
+                    } catch { }
+                }
+            }
+            catch { }
+
+            // touch/pointer globals as identifiers only
+            try
+            {
+                var touchEvents = new string[] {
+                    "ontouchstart", "ontouchend", "ontouchmove", "ontouchcancel",
+                    "ontouchenter", "ontouchleave"
+                };
+                foreach (var eventName in touchEvents)
+                {
+                    try { context.DefineVariable(eventName).Assign(JSValue.Null); } catch { }
+                }
+                var pointerEvents = new string[] {
+                    "onpointerdown", "onpointerup", "onpointermove", "onpointerover",
+                    "onpointerout", "onpointerenter", "onpointerleave", "onpointercancel"
+                };
+                foreach (var eventName in pointerEvents)
+                {
+                    try { context.DefineVariable(eventName).Assign(JSValue.Null); } catch { }
+                }
+            }
+            catch { }
+        }
+        public void setMultiversalWindow(IMultiversalWindow window)
+        {
+            multiwindow = window;
+            /*
+            if (_cachedWindowJsValue == null || !object.ReferenceEquals(_cachedWindowSource, multiwindow))
+            {
+                _cachedWindowJsValue = JSValue.Marshal(multiwindow);
+                _cachedWindowSource = multiwindow;
+            }
+
+            try
+            {
+                if (globalContext != null)
+                {
+                    globalContext.DefineVariable("__hostWindow").Assign(_cachedWindowJsValue);
+                }
+                if (context != null)
+                {
+                    context.DefineVariable("__hostWindow").Assign(_cachedWindowJsValue);
+
+                    var bridge = @"
+(function(){
+  try {
+    if (typeof __hostWindow !== 'undefined' && __hostWindow) {
+      var root = (function(){ return this; })();
+      var win = (root.window && root.window.__unifiedWindowMarker) ? root.window : {};
+      try { Object.defineProperty(win,'__unifiedWindowMarker',{ value:true, configurable:false }); } catch(_){}
+      function map(name){
+        try {
+          Object.defineProperty(win, name, {
+            configurable:true,
+            enumerable:true,
+            get:function(){ try { return __hostWindow[name]; } catch(_){ return undefined; } },
+            set:function(v){ try { __hostWindow[name] = v; } catch(_){ } }
+          });
+        } catch(_){ }
+      }
+      var names = [
+        'document','console','navigator','location','history',
+        'setTimeout','clearTimeout','setInterval','clearInterval',
+        'alert','confirm','prompt','open','postMessage'
+      ];
+      for (var i=0;i<names.length;i++) map(names[i]);
+      try { Object.defineProperty(win,'innerWidth',{ configurable:true, enumerable:true, get:function(){ try{ return __hostWindow.___getinnerWidth ? __hostWindow.___getinnerWidth() : 0; }catch(_){ return 0; } } }); } catch(_){ }
+      try { Object.defineProperty(win,'innerHeight',{ configurable:true, enumerable:true, get:function(){ try{ return __hostWindow.___getinnerHeight ? __hostWindow.___getinnerHeight() : 0; }catch(_){ return 0; } } }); } catch(_){ }
+      try { win.toString = function(){ return '[object Window]'; }; } catch(_){ }
+      try { win.__hostWindow = __hostWindow; } catch(_){ }
+      try { root.window = win; } catch(_){ }
+      try { root.self = win; } catch(_){ }
+      try { root.globalThis = win; } catch(_){ }
+    }
+  } catch(_){ }
+})();";
+                    try { context.Eval(bridge); } catch { }
+
+                    // === 追加: on* イベントプロパティをホスト側 ___set/get_onfunction_property に委譲 ===
+                    try
+                    {
+                        var list = createWindowFunctionSortedList(); // 既存メソッド利用
+                        var sb = new System.Text.StringBuilder();
+                        sb.Append("(function(){try{var w=(typeof window!=='undefined')?window:(function(){return this;})();");
+                        sb.Append("if(w && typeof __hostWindow!=='undefined' && __hostWindow){");
+                        sb.Append("function bindEvt(n){try{Object.defineProperty(w,n,{configurable:true,enumerable:true,");
+                        sb.Append("get:function(){try{return __hostWindow.___get_onfunction_property(n);}catch(_){return undefined;}},");
+                        sb.Append("set:function(v){try{__hostWindow.___set_onfunction_property(n,v);}catch(_){}}});}catch(_){}}");
+                        foreach (var kv in list)
+                        {
+                            sb.Append("bindEvt('").Append(kv.Key).Append("');");
+                        }
+                        // 念のため window.onload がない場合確実に定義
+                        sb.Append("if(!('onload' in w)) bindEvt('onload');");
+                        sb.Append("}}catch(_){}})();");
+                        context.Eval(sb.ToString());
+                    }
+                    catch { }
+
+                    // Patch: ensure animation frame functions ...
+                    try {
+                        context.Eval(@"(function(){try{var w=(typeof window!=='undefined')?window:(typeof globalThis!=='undefined'?globalThis:this);if(w&&typeof requestAnimationFrame==='function'){w.requestAnimationFrame=requestAnimationFrame;}if(w&&typeof cancelAnimationFrame==='function'){w.cancelAnimationFrame=cancelAnimationFrame;}}catch(e){}})();");
+                    } catch { }
+                }
+            }
+            catch { }
+
+            // touch/pointer globals as identifiers only
+            try
+            {
+                var touchEvents = new string[] {
+                    "ontouchstart", "ontouchend", "ontouchmove", "ontouchcancel",
+                    "ontouchenter", "ontouchleave"
+                };
+                foreach (var eventName in touchEvents)
+                {
+                    try { context.DefineVariable(eventName).Assign(JSValue.Null); } catch { }
+                }
+                var pointerEvents = new string[] {
+                    "onpointerdown", "onpointerup", "onpointermove", "onpointerover",
+                    "onpointerout", "onpointerenter", "onpointerleave", "onpointercancel"
+                };
+                foreach (var eventName in pointerEvents)
+                {
+                    try { context.DefineVariable(eventName).Assign(JSValue.Null); } catch { }
+                }
+            }
+            */
+        }
+        public void initScriptEngine()
+        {
+            lock (_initLock)
+            {
+                if (_isInitCompleted)
+                    return;
+
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine($"NilJs init called {System.Threading.Thread.CurrentThread}");
+
+                    globalContext = new GlobalContext
+                    {
+                        GlobalObjectsAssignMode = GlobalObjectsAssignMode.Allow
+                    };
+
+                    context = new NiL.JS.Core.Context(globalContext);
+                    processor = new NilJsProcessor();
+                    processor.multiversalscope = this;
+
+                    this.setHostWindowToContext(context, multiwindow);
+                    var w = getMultiversalWindow();
+                    if (w != null)
+                    {
+                        EnsureWindowGlobal(context, w);
+                        try {
+                            context.Eval(@"(function(win){ if(!win) return; var props=['navigator','history','location']; for(var i=0;i<props.length;i++){ var n=props[i]; try{ var v=win[n]; } catch(e){ if(e&&e.message&&e.message.indexOf('NotImplemented')>=0){ try{ win[n]={}; }catch(_){} } } } })(typeof window!=='undefined'?window: (typeof globalThis!=='undefined'?globalThis:null));");
+                        } catch { }
+                    }
+
+                    createStandardObjects();
+                    createWindowFunctionSortedList();
+
+                    // Define lightweight constructors that delegate to window.___createObject
+                    try
+                    {
+                        defineHostlessConstructor("XMLHttpRequest");
+                        defineHostlessConstructor("Image");
+                        defineHostlessConstructor("DOMParser");
+                    }
+                    catch (Exception exCtor)
+                    {
+                        System.Diagnostics.Debug.WriteLine("NilJs: hostless ctor error " + exCtor.Message);
+                    }
+
+                    ___InitGlobalAliases(globalContext);
+                    _isInitCompleted = true;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"NilJS initScriptEngine failed: {ex.Message}");
+                    try
+                    {
+                        context = new NiL.JS.Core.Context();
+                        processor = new NilJsProcessor();
+                        processor.multiversalscope = this;
+                        _isInitCompleted = true;
+                        createBasicStandardObjects();
+                        createWindowFunctionSortedList();
+                        try
+                        {
+                            defineHostlessConstructor("XMLHttpRequest");
+                            defineHostlessConstructor("Image");
+                            defineHostlessConstructor("DOMParser");
+                        }
+                        catch { }
+                    }
+                    catch (Exception fallbackEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"NilJS fallback init failed: {fallbackEx.Message}");
+                        throw new InvalidOperationException("Failed to initialize NiL.JS engine", fallbackEx);
+                    }
+                }
+            }
+        }
+
+        // New helper: creates JS constructor that forwards to window.___createObject(jsName,...)
+        private void defineHostlessConstructor(string jsName)
+        {
+            if (context == null) return;
+            ensureCreateObjectBridge();
+            var script = @"(function(){function __JSNAME__(){try{if(typeof window!=='undefined'&&typeof window.___createObject==='function'){var arr=['__JSNAME__'];for(var i=0;i<arguments.length;i++)arr.push(arguments[i]);var r0=window.___createObject.apply(window,arr);if(r0!==undefined&&r0!==null)return r0;}}catch(e){}return {};}(typeof globalThis!=='undefined'?globalThis:this)['__JSNAME__']=__JSNAME__})();";
+            script = script.Replace("__JSNAME__", jsName);
+            context.Eval(script);
+            try
+            {
+                var funcVal = context.Eval($"(typeof globalThis!=='undefined' && globalThis['{jsName}']) || (typeof window!=='undefined' && window['{jsName}']) || undefined");
+                if (funcVal != null && funcVal.ValueType == JSValueType.Function)
+                {
+                    context.DefineVariable(jsName).Assign(funcVal);
+                }
+            }
+            catch { }
+        }
+        private void ensureCreateObjectBridge()
+        {
+            // すでに __host_createObject が定義済みなら何もしない
+            var existing = context.GetVariable("__host_createObject");
+            if (existing != null && existing.ValueType == JSValueType.Function)
+                return;
+
+            // __host_createObject を定義
+            var hostCreate = new ExternalFunction((JSValue thisArg, Arguments args) =>
+            {
+                try
+                {
+                    if (multiwindow == null || args == null || args.Length == 0)
+                        return JSValue.Undefined;
+
+                    var typeName = Convert.ToString(args[0].Value);
+                    var ctorArgsCount = System.Math.Max(0, args.Length - 1); // ← System.Math に固定
+                    var ctorArgs = new object[ctorArgsCount];
+                    for (int i = 0; i < ctorArgsCount; i++)
+                        ctorArgs[i] = args[i + 1]?.Value;
+
+                    var inst = multiwindow.___createObject(typeName, ctorArgs);
+                    if (inst == null && _objectFactory != null)
+                        inst = _objectFactory(typeName, ctorArgs);
+
+                    return inst == null ? JSValue.Undefined : JSValue.Marshal(inst);
+                }
+                catch (Exception ex)
+                {
+#if DEBUG
+                    System.Diagnostics.Debug.WriteLine($"__host_createObject error: {ex}");
+#endif
+                    return JSValue.Undefined;
+                }
+            });
+            context.DefineVariable("__host_createObject").Assign(hostCreate);
+
+            var initScript = @"
+                (function() {
+                  if (typeof window !== 'undefined' && typeof window.___createObject !== 'function') {
+                    window.___createObject = function(typeName) {
+                      return __host_createObject.apply(window, arguments);
+                    };
+                  }
+                })();";
+            context.Eval(initScript);
+        }
+
+
+
+        public void defineConstructor(Type type, string jsName)
+        {
+
+            ensureCreateObjectBridge();
+
+            var defaultTagByJsName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["HTMLElement"] = "div",
+                ["Element"] = "div",
+                ["HTMLDivElement"] = "div",
+                ["HTMLInputElement"] = "input",
+                ["HTMLButtonElement"] = "button",
+                ["HTMLIFrameElement"] = "iframe",
+                ["SVGElement"] = "svg",
+                ["Image"] = "img",
+                ["XMLHttpRequest"] = "xmlhttprequest"
+            };
+
+            // C# 側ホストコンストラクタ：.NETでの実体生成のみを担当
+            var hostCtorName = $"__host_ctor_{jsName}";
+            var hostCtor = new ExternalFunction((JSValue thisArg, Arguments args) =>
+            {
+                try
+                {
+                    // JS -> .NET 引数変換
+                    var netArgs = new object[args.Length];
+                    for (int i = 0; i < args.Length; i++)
+                        netArgs[i] = args[i]?.Value;
+
+                    object? instance = null;
+
+                    // 1) MultiversalWindow 側のファクトリ
+                    if (multiwindow != null)
+                        instance = multiwindow.___createObject(jsName, netArgs);
+
+                    // 2) 注入ファクトリ
+                    if (instance == null && _objectFactory != null)
+                        instance = _objectFactory(jsName, netArgs);
+
+                    // 3) 型の既定コンストラクタ
+                    if (instance == null)
+                        instance = Activator.CreateInstance(type);
+
+                    if (instance != null)
+                    {
+                        // プロパティ補助 (tagName / Image.src)
+                        try
+                        {
+                            var tagProp = instance.GetType().GetProperty("tagName",
+                                BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                            if (tagProp?.CanWrite == true)
+                            {
+                                if (args.Length >= 1 && args[0]?.Value != null)
+                                    tagProp.SetValue(instance, Convert.ToString(args[0].Value));
+                                else if (defaultTagByJsName.TryGetValue(jsName, out var fallbackTag))
+                                    tagProp.SetValue(instance, fallbackTag);
+                            }
+
+                            if (jsName.Equals("Image", StringComparison.OrdinalIgnoreCase)
+                                && args.Length >= 1 && args[0]?.Value != null)
+                            {
+                                var srcProp = instance.GetType().GetProperty("src",
+                                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                                if (srcProp?.CanWrite == true)
+                                    srcProp.SetValue(instance, Convert.ToString(args[0].Value));
+                            }
+                        }
+                        catch (Exception setPropEx)
+                        {
+#if DEBUG
+                            System.Diagnostics.Debug.WriteLine($"defineConstructor('[jsName]') property assign failed: {setPropEx}");
+#endif
+                        }
+                    }
+
+                    return JSValue.Marshal(instance);
+                }
+                catch (Exception ex)
+                {
+#if DEBUG
+                    System.Diagnostics.Debug.WriteLine($"defineConstructor('[jsName]') error: {ex}");
+#endif
+                    return JSValue.Undefined;
+                }
+            });
+            context.DefineVariable(hostCtorName).Assign(hostCtor);
+
+            // JS 側ラッパー
+            var script = @"
+(function() {
+
+  function __JSNAME__() {
+    try {
+
+      if (typeof window !== 'undefined' && typeof window.___createObject === 'function') {
+        var arr = ['__JSNAME__'];
+        for (var i = 0; i < arguments.length; i++) arr.push(arguments[i]);
+        var r0 = window.___createObject.apply(window, arr);
+        if (r0 !== undefined && r0 !== null) return r0;
+      }
+    } catch (e) {}
+    var r = __HOSTCTOR__.apply(this, arguments);
+    return (r === undefined || r === null) ? this : r;
+  }
+
+  (typeof globalThis !== 'undefined' ? globalThis : this)['__JSNAME__'] = __JSNAME__;
+})();";
+            script = script.Replace("__JSNAME__", jsName).Replace("__HOSTCTOR__", hostCtorName);
+            context.Eval(script);
+
+
+            try
+            {
+                var funcVal = context.Eval($"(typeof globalThis!=='undefined' && globalThis['{jsName}']) || (typeof window!=='undefined' && window['{jsName}']) || undefined");
+                if (funcVal != null && funcVal.ValueType == JSValueType.Function)
+                {
+                    context.DefineVariable(jsName).Assign(funcVal);
+                }
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine($"defineConstructor: binding var {jsName} failed: {ex}");
+#endif
+            }
+        }
+        const string getClassNameString = "object";
+        public string getClasName()
+        {
+            return getClassNameString;
+        }
+  
+        private bool __GlobalAliasesInitialized = false;
+
+        private void ___InitGlobalAliases(NiL.JS.Core.Context ctx)
+        {
+            if (__GlobalAliasesInitialized) return;
+            __GlobalAliasesInitialized = true;
+
+            try
+            {
+                // Ensure console exists (bind multiwindow.console or stub)
+                try
+                {
+
+                    if (multiwindow?.console != null)
+                    {
+                        ctx.DefineVariable("console").Assign(JSValue.Marshal(multiwindow.console));
+                    }
+                }
+                catch { }
+
+                // Bridge global property names that some libraries assume as identifiers (e.g., glMatrix)
+                /*
+                ctx.Eval(@"
+(function(){
+  try{
+    var g = (typeof globalThis !== 'undefined') ? globalThis : (typeof window !== 'undefined' ? window : this);
+    if (g && typeof Object.defineProperty === 'function'){
+      // Map identifier `glMatrix` to window.glMatrix
+      var desc = Object.getOwnPropertyDescriptor(g, 'glMatrix');
+      if (!desc || (!desc.get && !desc.set)){
+        Object.defineProperty(g, 'glMatrix', {
+          configurable: true,
+          enumerable: true,
+          get: function(){ try{ return (typeof window!=='undefined' && window.glMatrix) ? window.glMatrix : undefined; }catch(_){ return undefined; } },
+          set: function(v){ try{ if (typeof window!=='undefined') window.glMatrix = v; else this.__glMatrix__=v; }catch(_){ } }
+        });
+      }
+    }
+  }catch(_){ }
+})();
+");
+                */
+
+                System.Diagnostics.Debug.WriteLine("NilJS: Global aliases initialized (C#).");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"NilJS: Global aliases init failed: {ex.Message}");
+            }
+        }
+    }
+
+}

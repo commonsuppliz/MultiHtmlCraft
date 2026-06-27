@@ -1,0 +1,30 @@
+﻿        // Static property dictionary for property name/index mapping
+        public static readonly Dictionary<string, int> CHtmlCanvasContext2Dproperties = createCHtmlCanvasContext2Dproperties();
+
+        private static Dictionary<string, int> createCHtmlCanvasContext2Dproperties()
+        {
+            // Add main property names and their indices here
+            var dict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+            {
+                {"fillStyle", 1},
+                {"strokeStyle", 2},
+                {"lineWidth", 3},
+                {"lineCap", 4},
+                {"lineJoin", 5},
+                {"miterLimit", 6},
+                {"font", 7},
+                {"textAlign", 8},
+                {"textBaseline", 9},
+                {"shadowColor", 10},
+                {"shadowBlur", 11},
+                {"shadowOffsetX", 12},
+                {"shadowOffsetY", 13},
+                {"globalAlpha", 14},
+                {"globalCompositeOperation", 15},
+                {"imageSmoothingEnabled", 16},
+                {"width", 17},
+                {"height", 18},
+                // Add more as needed
+            };
+            return dict;
+        }

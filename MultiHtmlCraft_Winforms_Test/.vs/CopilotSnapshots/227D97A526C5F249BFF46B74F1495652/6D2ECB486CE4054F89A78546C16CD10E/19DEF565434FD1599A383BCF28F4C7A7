@@ -1,0 +1,202 @@
+﻿using Microsoft.ClearScript;
+using Microsoft.ClearScript.V8;
+using MultiHtmlCraft.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+
+
+
+namespace ClearScriptProcessor
+{
+    public class ClearScriptProcessor : IMultiversalScriptProcessor, IDisposable
+    {
+        private IMultiversalScriptScope? _scope = null;
+        private V8ScriptEngine? _v8ScriptEngine = null;
+        private bool _isDisposed = false;
+
+    
+
+        public IMultiversalScriptScope multiversalscope
+        {
+            get
+            {
+                return _scope;
+            }
+            set
+            {
+                _scope = value;
+            }
+        }
+        public V8ScriptEngine clearscriptengine
+        {
+            get
+            {
+                return _v8ScriptEngine;
+
+            }
+            set
+            {
+                _v8ScriptEngine = value;
+            }
+        }
+
+        public IMultiversalWindow Window { get; }
+        public ICHtmlDocumentInterface Document { get; set; } = null;
+
+
+ 
+
+        public object callfunction(object functionobject, object scope, object thisObj, object[] args)
+        {
+            return CallFunctionInternal(functionobject, args);
+        }
+
+        public object callfunction(object functionobject, object[] args)
+        {
+            return CallFunctionInternal(functionobject, args);
+        }
+
+        public object callfunction(object functionobject)
+        {
+            return CallFunctionInternal(functionobject, null);
+        }
+
+        private object CallFunctionInternal(object functionobject, object[] args)
+        {
+            if (functionobject == null)
+            {
+                Debug.WriteLine("CallFunctionInternal: functionobject is null");
+                return null;
+            }
+
+            try
+            {
+                if (functionobject is ScriptObject scriptObject)
+                {
+                    // ScriptObject.InvokeAsFunction を使用して関数を呼び出す
+                    if (args != null && args.Length > 0)
+                    {
+                        return scriptObject.InvokeAsFunction(args);
+                    }
+                    else
+                    {
+                        return scriptObject.InvokeAsFunction();
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine($"CallFunctionInternal: functionobject is not ScriptObject, type: {functionobject.GetType().FullName}");
+                    return null;
+                }
+            }
+            catch (ScriptEngineException ex)
+            {
+                // Release モードでもエラー情報を出力（System.Diagnostics.Trace を使用）
+                string errorMessage = $"ScriptEngineException in CallFunctionInternal: {ex.Message}";
+                string errorDetails = $"  ErrorDetails: {ex.ErrorDetails}";
+                
+                Debug.WriteLine(errorMessage);
+                Debug.WriteLine(errorDetails);
+                System.Diagnostics.Trace.WriteLine(errorMessage);
+                System.Diagnostics.Trace.WriteLine(errorDetails);
+                
+                // Release モードでは例外を再スローせずに null を返す
+                // これにより、スクリプトエラーがあってもアプリケーションは継続する
+                return null;
+            }
+            catch (TargetInvocationException ex)
+            {
+                string errorMessage = $"TargetInvocationException in CallFunctionInternal: {ex.Message}";
+                string innerMessage = $"  InnerException: {ex.InnerException?.Message}";
+                
+                Debug.WriteLine(errorMessage);
+                Debug.WriteLine(innerMessage);
+                System.Diagnostics.Trace.WriteLine(errorMessage);
+                System.Diagnostics.Trace.WriteLine(innerMessage);
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                string errorMessage = $"Exception in CallFunctionInternal: {ex.GetType().Name} - {ex.Message}";
+                
+                Debug.WriteLine(errorMessage);
+                System.Diagnostics.Trace.WriteLine(errorMessage);
+                
+                return null;
+            }
+        }
+
+        public object compile(string script)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object execute(string script)
+        {
+            if (_v8ScriptEngine == null)
+            {
+                throw new InvalidOperationException("Script engine is not initialized.");
+            }
+
+            // Prelude: ensure console exists and has callable functions
+            const string prelude = @"(function(){
+                try {
+                    if (typeof console === 'undefined' || console === null || typeof console.log !== 'function') {
+                        var __stubConsole = {
+                            log: function(){},
+                            warn: function(){},
+                            error: function(){},
+                            debug: function(){}
+                        };
+                        globalThis.console = __stubConsole;
+                        if (typeof window !== 'undefined') window.console = __stubConsole;
+                        if (typeof self !== 'undefined') self.console = __stubConsole;
+                    }
+                } catch(e) {
+                    var __stubConsole = { log:function(){}, warn:function(){}, error:function(){}, debug:function(){} };
+                    globalThis.console = __stubConsole;
+                }
+            })();";
+            _v8ScriptEngine.Execute(prelude);
+
+            // Execute user script
+            _v8ScriptEngine.Execute(script);
+            return null;
+        }
+
+        public object get(string name)
+        {
+            if (_v8ScriptEngine == null)
+                throw new InvalidOperationException("Script engine is not initialized.");
+            return _v8ScriptEngine.Global[name];
+        }
+
+        public void put(string name, object val)
+        {
+            if (_v8ScriptEngine == null)
+                throw new InvalidOperationException("Script engine is not initialized.");
+            _v8ScriptEngine.Global[name] = val;
+        }
+
+        void IDisposable.Dispose()
+        {
+            if (_isDisposed)
+                return;
+            _isDisposed = true;
+            try
+            {
+                _v8ScriptEngine?.Dispose();
+            }
+            catch { }
+            _v8ScriptEngine = null;
+            _scope = null;
+        }
+    }
+}

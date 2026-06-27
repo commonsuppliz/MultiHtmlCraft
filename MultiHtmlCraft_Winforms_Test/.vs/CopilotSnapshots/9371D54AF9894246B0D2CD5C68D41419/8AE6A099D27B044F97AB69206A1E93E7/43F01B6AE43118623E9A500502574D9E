@@ -1,0 +1,331 @@
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using System.Linq.Expressions;
+using System.Reflection.PortableExecutable;
+
+using NiL.JS.Expressions;
+using System.Threading;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Net;
+using System.Text.RegularExpressions;
+using NiL.JS.Statements;
+
+namespace MultiHtmlCraft.Core
+{
+
+    public static class CHmlMultiversalWebCache
+
+    {
+        internal static object WebCacheLock = new object();
+        internal static string MultiversalDataStoreFolder = "MultiversalDataStore";
+        internal static string CachedData = "Cachedata.json";
+        internal static string TrustedWenAuthorityData = "TrustedWenAuthority.json";
+        public static List<string> TrustedWebAuthority = new List<string>();
+        public static string StoregePath
+        {
+            get
+            ; set;
+        }
+        internal static Dictionary<string, CHtmlMultiversalContentData> CacheData = new Dictionary<string, CHtmlMultiversalContentData>();
+        internal static void initHTMLDataStorePath()
+        {
+
+            StoregePath = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + System.IO.Path.DirectorySeparatorChar + MultiversalDataStoreFolder;
+            if (System.IO.Directory.Exists(StoregePath) == false)
+            {
+                System.IO.Directory.CreateDirectory(StoregePath);
+            }
+            if (System.IO.File.Exists(StoregePath + System.IO.Path.DirectorySeparatorChar + CachedData) == true)
+            {
+                string _cachedData = System.IO.File.ReadAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + CachedData);
+                CacheData = JsonSerializer.Deserialize<Dictionary<string, CHtmlMultiversalContentData>>(_cachedData);
+            }
+            if (System.IO.File.Exists(StoregePath + System.IO.Path.DirectorySeparatorChar + TrustedWenAuthorityData) == true)
+            {
+                string _trustedWenAuthorityData = System.IO.File.ReadAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + TrustedWenAuthorityData);
+                TrustedWebAuthority = JsonSerializer.Deserialize<List<string>>(_trustedWenAuthorityData);
+            }
+        }
+        static CHmlMultiversalWebCache()
+        {
+            initHTMLDataStorePath();
+        }
+        public static void SaveCacheData()
+        {
+            string _cachedData = JsonSerializer.Serialize(CacheData);
+            System.IO.File.WriteAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + CachedData, _cachedData);
+
+        }
+        public static void SaveTrustedWebAuthority()
+        {
+            string _trustedWenAuthorityData = JsonSerializer.Serialize(TrustedWebAuthority);
+            System.IO.File.WriteAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + TrustedWenAuthorityData, _trustedWenAuthorityData);
+        }
+
+        // URLを正規化する（大文字小文字・末尾スラッシュ・不要な部分を統一）
+        private static string NormalizeUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return url;
+            try
+            {
+                var uri = new Uri(url);
+                var builder = new UriBuilder(uri)
+                {
+                    Scheme = uri.Scheme.ToLowerInvariant(),
+                    Host = uri.Host.ToLowerInvariant(),
+                    Path = uri.AbsolutePath.TrimEnd('/'),
+                    Query = uri.Query
+                };
+                // 末尾スラッシュを除去し、標準化
+                return builder.Uri.GetLeftPart(UriPartial.Path).TrimEnd('/').ToLowerInvariant() + builder.Uri.Query;
+            }
+            catch
+            {
+                return url.Trim().ToLowerInvariant();
+            }
+        }
+
+        // オーバーロード1: url のみ
+        internal static Task<CHtmlMultiversalContentData> getMultiversalContentData(string url)
+        {
+            return getMultiversalContentData(url, null, null);
+        }
+
+        // オーバーロード2: url, contentType
+        internal static Task<CHtmlMultiversalContentData> getMultiversalContentData(string url, string contentType)
+        {
+            return getMultiversalContentData(url, contentType, null);
+        }
+
+        // オーバーロード3: url, contentType, charset (本体)
+        internal static async Task<CHtmlMultiversalContentData> getMultiversalContentData(string _url, string? _contentType, string? _charset)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("enter getMultiversalContentData {0} {1} {2}  ManagedThreadID: {3}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
+            }
+            string normalizedUrl = NormalizeUrl(_url);
+            CHtmlMultiversalContentData multivasalContentData = null;
+            CHtmlMultiversalContentData result = null;
+
+
+            lock (WebCacheLock)
+            {
+                if (CacheData.TryGetValue(normalizedUrl, out multivasalContentData) == true)
+                {
+
+                    multivasalContentData = CloneContentData(multivasalContentData);
+                }
+            }
+            if (multivasalContentData != null)
+            {
+                var httpClient = MultiHtmlCraft.Core.CHtmlMultiversalWindow.getHttpClient() ?? new System.Net.Http.HttpClient();
+                var request = new HttpRequestMessage(HttpMethod.Get, _url);
+                if (multivasalContentData.LastModified.HasValue)
+                {
+                    request.Headers.IfModifiedSince = multivasalContentData.LastModified.Value;
+                }
+                try
+                {
+                    var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                    if (response.StatusCode == HttpStatusCode.NotModified)
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("CHtmlMultiversalWebCache found file valid (304) within getMultiversalContentData {0} {1} {2} ManagedThreadID: {3}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                        }
+                        return multivasalContentData;
+                    }
+                    else if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        var newContentData = CreateUrlContentDataPath(_url, _contentType);
+                        if (commonHTML.isContentTypePlainText(_contentType))
+                        {
+                            newContentData.HtmlContent = await response.Content.ReadAsStringAsync();
+                            newContentData.ContentLength = newContentData.HtmlContent.Length;
+                        }
+                        else
+                        {
+                            newContentData.RawData = await response.Content.ReadAsByteArrayAsync();
+                            newContentData.ContentLength = newContentData.RawData.Length;
+                        }
+                        newContentData.LastModified = response.Content.Headers.LastModified;
+                        newContentData.ContentType = response.Content.Headers.ContentType?.ToString() ?? _contentType;
+                        newContentData.Url = _url;
+                        newContentData.Authority = multivasalContentData.Authority;
+                        var _fileLocation = StoregePath + newContentData.FileLocation;
+                        var _directory = System.IO.Path.GetDirectoryName(_fileLocation);
+                        if (!Directory.Exists(_directory))
+                        {
+                            Directory.CreateDirectory(_directory);
+                        }
+                        if (commonHTML.isContentTypePlainText(_contentType))
+                        {
+                            await System.IO.File.WriteAllTextAsync(_fileLocation, newContentData.HtmlContent);
+                        }
+                        else
+                        {
+                            await System.IO.File.WriteAllBytesAsync(_fileLocation, newContentData.RawData);
+                        }
+                        lock (WebCacheLock)
+                        {
+                            CacheData[normalizedUrl] = newContentData;
+                        }
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("object cache updated (200) within getMultiversalContentData {0} {1} {2} ManagedThreadID: {3}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                        }
+                        return newContentData;
+                    }
+                    else
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry($"object cache fallback (status: {response.StatusCode}) within getMultiversalContentData {{0}} {{1}} {{2}} ManagedThreadID: {{3}}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                        }
+                        return multivasalContentData;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("Error checking server for cache update: ", ex);
+                    }
+                    return multivasalContentData;
+                }
+            }
+            var httpClientElse = MultiHtmlCraft.Core.CHtmlMultiversalWindow.getHttpClient() ?? new System.Net.Http.HttpClient();
+            multivasalContentData = CreateUrlContentDataPath(_url, _contentType);
+            var _fileLocationElse = StoregePath + multivasalContentData.FileLocation;
+            var _directoryElse = System.IO.Path.GetDirectoryName(_fileLocationElse);
+            if (Directory.Exists(_directoryElse) == false)
+            {
+                Directory.CreateDirectory(_directoryElse);
+            }
+            if (System.IO.File.Exists(_fileLocationElse) == true)
+            {
+                if (commonHTML.isContentTypePlainText(_contentType) == true)
+                {
+                    multivasalContentData.HtmlContent = await System.IO.File.ReadAllTextAsync(_fileLocationElse);
+                }
+                else
+                {
+                    multivasalContentData.RawData = await System.IO.File.ReadAllBytesAsync(_fileLocationElse);
+                }
+                multivasalContentData.ContentLength = multivasalContentData.HtmlContent != null ? multivasalContentData.HtmlContent.Length : (multivasalContentData.RawData?.Length ?? 0);
+                // ファイルの最終更新日時を LastModified に設定
+                var fileInfo = new FileInfo(_fileLocationElse);
+                multivasalContentData.LastModified = fileInfo.Exists ? (DateTimeOffset?)fileInfo.LastWriteTimeUtc : null;
+                lock (WebCacheLock)
+                {
+                    CacheData[normalizedUrl] = multivasalContentData;
+                }
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("exit getMultiversalContentData {0} {1} {2} ManagedThreadID: {3}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                }
+                return multivasalContentData;
+            }
+            else
+            {
+                var _httpContentDownload = new MultiHtmlCraft.Core.CHttpContentDownload();
+                try
+                {
+                    var _task = await MultiHtmlCraft.Core.ContentBuilder.GetCHtttpContentAsync(httpClientElse, _url, _fileLocationElse, _httpContentDownload).ConfigureAwait(false);
+                    if (_task != null)
+                    {
+                        if (System.IO.File.Exists(_fileLocationElse))
+                        {
+                            var fileInfo = new FileInfo(_fileLocationElse);
+                            if (fileInfo.Length > int.MaxValue)
+                            {
+                                throw new InvalidOperationException("File is too large to read into memory.");
+                            }
+                            if (commonHTML.isContentTypePlainText(_task.ContentType) == true)
+                            {
+                                System.Text.Encoding? _encoding = null;
+                                string _encodingString = _task.ContentEncoding ?? _charset;
+                                switch (_task.ContentType)
+                                {
+                                    case "text/html":
+                                        _encodingString = CHtmlMultiversalContentData.GetCharsetFromHtmlHeader(_task.RawData, _fileLocationElse) ?? _encodingString;
+                                        break;
+                                    case "text/javascript":
+                                    case "text/css":
+                                        break;
+                                    default:
+                                        if (string.IsNullOrEmpty(_encodingString))
+                                        {
+                                            _encodingString = "UTF-8"; // Default to UTF-8 if no encoding specified
+                                        }
+                                        break;
+                                }
+
+                                try
+                                {
+                                    _encoding = System.Text.Encoding.GetEncoding(_encodingString);
+                                }
+                                catch (ArgumentException)
+                                {
+                                    _encoding = System.Text.Encoding.UTF8; // Fallback to UTF-8 if encoding is invalid
+                                    if (string.IsNullOrEmpty(_encodingString) == false)
+                                    {
+                                        multivasalContentData.Charset = _encodingString;
+                                        multivasalContentData.HtmlContent = System.Text.Encoding.GetEncoding(_encodingString).GetString(_task.RawData);
+                                    }
+                                    else
+                                    {
+                                        multivasalContentData.HtmlContent = System.Text.Encoding.UTF8.GetString(_task.RawData);
+                                    }
+                                    multivasalContentData.HtmlContent = await System.IO.File.ReadAllTextAsync(_fileLocationElse, _encoding);
+
+
+                                }
+
+                            }
+                        }
+                        multivasalContentData.ContentLength = _task.ContentLength;
+                        lock (WebCacheLock)
+                        {
+                            CacheData[normalizedUrl] = multivasalContentData;
+                        }
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("exit getMultiversalContentData {0} {1} {2} ManagedThreadID: {3}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                        }
+                        return multivasalContentData;
+                    }
+                    else { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("exit getMultiversalContentData {0} {1} {2} ManagedThreadID: {3}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                        }
+                        return multivasalContentData;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("Reading file Error : ", ex);
+                    }
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("exit getMultiversalContentData {0} {1} {2} ManagedThreadID: {3}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                    }
+                    return multivasalContentData;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+}

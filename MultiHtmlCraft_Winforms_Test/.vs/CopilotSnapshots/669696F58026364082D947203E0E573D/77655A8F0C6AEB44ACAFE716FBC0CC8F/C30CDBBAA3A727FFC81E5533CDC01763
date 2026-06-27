@@ -1,0 +1,728 @@
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using System.Linq.Expressions;
+using System.Reflection.PortableExecutable;
+
+using NiL.JS.Expressions;
+using System.Threading;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Net;
+using System.Text.RegularExpressions;
+
+namespace MultiHtmlCraft.Core
+{
+
+    public static class CHmlMultiversalWebCache
+
+    {
+        internal static string MultiversalDataStoreFolder = "MultiversalDataStore";
+        internal static string CachedData = "Cachedata.json";
+        internal static string TrustedWenAuthorityData = "TrustedWenAuthority.json";
+        public static List<string> TrustedWebAuthority = new List<string>();
+        public static string StoregePath
+        {
+            get
+            ; set;
+        }
+        internal static Dictionary<string, CHtmlMultivalContentData> CacheData = new Dictionary<string, CHtmlMultivalContentData>();
+        internal static void initHTMLDataStorePath()
+        {
+
+            StoregePath = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + System.IO.Path.DirectorySeparatorChar + MultiversalDataStoreFolder;
+            if (System.IO.Directory.Exists(StoregePath) == false)
+            {
+                System.IO.Directory.CreateDirectory(StoregePath);
+            }
+            if (System.IO.File.Exists(StoregePath + System.IO.Path.DirectorySeparatorChar + CachedData) == true)
+            {
+                string _cachedData = System.IO.File.ReadAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + CachedData);
+                CacheData = JsonSerializer.Deserialize<Dictionary<string, CHtmlMultivalContentData>>(_cachedData);
+            }
+            if (System.IO.File.Exists(StoregePath + System.IO.Path.DirectorySeparatorChar + TrustedWenAuthorityData) == true)
+            {
+                string _trustedWenAuthorityData = System.IO.File.ReadAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + TrustedWenAuthorityData);
+                TrustedWebAuthority = JsonSerializer.Deserialize<List<string>>(_trustedWenAuthorityData);
+            }
+        }
+        static CHmlMultiversalWebCache()
+        {
+            initHTMLDataStorePath();
+        }
+        public static void SaveCacheData()
+        {
+            string _cachedData = JsonSerializer.Serialize(CacheData);
+            System.IO.File.WriteAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + CachedData, _cachedData);
+
+        }
+        public static void SaveTrustedWebAuthority()
+        {
+            string _trustedWenAuthorityData = JsonSerializer.Serialize(TrustedWebAuthority);
+            System.IO.File.WriteAllText(StoregePath + System.IO.Path.DirectorySeparatorChar + TrustedWenAuthorityData, _trustedWenAuthorityData);
+        }
+
+        internal static async Task<CHtmlMultivalContentData> getMultiversalContentData(string _url, string _contentType)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("enter getMultiversalContentData {0} {1}  ManagedThreadID: {2}", _url, _contentType, System.Threading.Thread.CurrentThread.ManagedThreadId);
+            }
+            CHtmlMultivalContentData multivasalContentData = null;
+
+            if (CacheData.TryGetValue(_url, out multivasalContentData) == true)
+            {
+                // Implement the logic to return the cached data
+                // If the content type is text, return the HTML content
+                // If the content type is binary, return the raw data
+                // Check LastModified date and if the content is modified, download the content again
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("object cache found  within getMultiversalContentData {0} {1}  ManagedThreadID: {2}", _url, _contentType, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                }
+                return multivasalContentData;
+            }
+            else
+            {
+                var httpClient = MultiHtmlCraft.Core.CHtmlMultiversalWindow.getHttpClient();
+                if (httpClient == null)
+                {
+                    httpClient = new System.Net.Http.HttpClient();
+                }
+                multivasalContentData = CreateUrlContentDataPath(_url, _contentType);
+                var _fileLocation = StoregePath + multivasalContentData.FileLocation;
+                var _directory = System.IO.Path.GetDirectoryName(_fileLocation);
+                if (Directory.Exists(_directory) == false)
+                {
+                    Directory.CreateDirectory(_directory);
+                }
+                if (System.IO.File.Exists(_fileLocation) == true)
+                {
+
+                    if (commonHTML.isContentTypePlainText(_contentType) == true)
+                    {
+                        multivasalContentData.HtmlContent = await System.IO.File.ReadAllTextAsync(_fileLocation);
+                    }
+                    else
+                    {
+                        multivasalContentData.RawData = await System.IO.File.ReadAllBytesAsync(_fileLocation);
+                    }
+                    multivasalContentData.ContentLength = multivasalContentData.HtmlContent.Length;
+                    CacheData[_url] = multivasalContentData;
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("exit getMultiversalContentData {0} {1}  ManagedThreadID: {2}", _url, _contentType, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                    }
+                    return multivasalContentData;
+                }
+                else
+                {
+                    var _httpContentDownload = new MultiHtmlCraft.Core.CHttpContentDownload();
+                    try
+                    {
+                        var _task = await MultiHtmlCraft.Core.ContentBuilder.GetCHtttpContentAsync(httpClient, _url, _fileLocation, _httpContentDownload).ConfigureAwait(false);
+                       
+                        if (_task != null)
+                        {
+                            if (System.IO.File.Exists(_fileLocation))
+                            {
+                                var fileInfo = new FileInfo(_fileLocation);
+                                if (fileInfo.Length > int.MaxValue)
+                                {
+                                    throw new InvalidOperationException("File is too large to read into memory.");
+                                }
+                                if (commonHTML.isContentTypePlainText(_contentType) == true)
+                                {
+                                    multivasalContentData.HtmlContent =await System.IO.File.ReadAllTextAsync(_fileLocation);
+
+                                }
+                                else
+                                {
+                                    /*
+                                    using (var stream = new FileStream(_fileLocation, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                    {
+                                        using (var memoryStream = new MemoryStream())
+                                        {
+                                            await stream.CopyToAsync(memoryStream);
+                                            multivasalContentData.RawData = memoryStream.ToArray();
+                                        }
+
+                                    }
+                                    */
+                                    multivasalContentData.RawData = await System.IO.File.ReadAllBytesAsync(_fileLocation);
+
+
+
+
+                                }
+                            }
+                        }
+                        multivasalContentData.ContentLength = _task.ContentLength;
+                        CacheData[_url] = multivasalContentData;
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("exit getMultiversalContentData {0} {1}  ManagedThreadID: {2}", _url, _contentType, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                        }
+
+                        return multivasalContentData;
+
+                    }
+                    catch (Exception ex)
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                        {
+                            commonLog.LogEntry("Reading file Error : ", ex);
+                        }
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("exit getMultiversalContentData {0} {1}  ManagedThreadID: {2}", _url, _contentType, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                        }
+                        return multivasalContentData;
+                    }
+                }
+            }
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("exit getMultiversalContentData {0} {1}  ManagedThreadID: {2}", _url, _contentType, System.Threading.Thread.CurrentThread.ManagedThreadId);
+            }
+            return multivasalContentData;
+
+        }
+        internal  async static Task<MultiHtmlCraft.Core.CHtmlMultivalContentData> getContentData(string url)
+        {
+            MultiHtmlCraft.Core.CHtmlMultivalContentData __contentData = null;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            string strEncodingName = "";
+            HttpClient ___httpClient = CHtmlMultiversalWindow.getHttpClient();
+
+            ___httpClient.DefaultRequestVersion = new Version(1, 1);
+            ___httpClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+
+            ___httpClient.Timeout = TimeSpan.FromSeconds(360);
+
+            bool IsCharsetFound = false;
+            string charset = "UTF-8";
+
+            ___httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
+            ___httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
+
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            StringBuilder sbRsponseReporter = new StringBuilder();
+            MultiHtmlCraft.Core.CHtmlMultiversalWindow.setHttpClient(___httpClient);
+
+            try
+            {
+                var cts = new CancellationTokenSource();
+                cts.CancelAfter(TimeSpan.FromSeconds(1000));
+                //HttpResponseMessage response = await client.GetAsync(url, cts.Token);
+                HttpResponseMessage response = await ___httpClient.GetAsync(url, cts.Token);
+                response.EnsureSuccessStatusCode();
+
+                bool IsContentTypeHTML = false;
+                if (response.Content.Headers.ContentType.MediaType != "text/html")
+                {
+                    IsContentTypeHTML = false;
+                }
+                else
+                {
+                    IsContentTypeHTML = true;
+                }
+
+                using (Stream contentStream = await response.Content.ReadAsStreamAsync())
+                {
+
+                    byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    StringBuilder stringBuilder = new StringBuilder();
+                    int ___bytesReead = 0;
+                    if (IsContentTypeHTML == false)
+                    {
+                        goto ___StorePhase;
+                    }
+
+                    while ((___bytesReead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                    {
+                        string partialContent = Encoding.UTF8.GetString(buffer, 0, ___bytesReead);
+                        stringBuilder.Append(partialContent);
+
+
+                        int headEndPos = stringBuilder.ToString().IndexOf("</head>");
+
+                        var match = Regex.Match(stringBuilder.ToString(), @"<meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s""']*)?([^>]*?)[\s""';]*charset\s*=[\s""']*([^\s""'/>]*)", RegexOptions.IgnoreCase);
+                        if (match.Success)
+                        {
+                            // Debug.WriteLine($"charset match.Value: {match.Value}");
+                            //var metaCharset = match.Value;
+                            int charsetPos = match.Value.IndexOf("charset", StringComparison.OrdinalIgnoreCase);
+                            if (charsetPos > 0)
+                            {
+                                var charsetString = match.Value.Substring(charsetPos + 7);
+                                //Debug.WriteLine(charsetString);
+                                var metaCharsetArray = charsetString.ToCharArray();
+                                var sbCharset = new StringBuilder();
+                                for (int i = 0; i < metaCharsetArray.Length; i++)
+                                {
+                                    char c = metaCharsetArray[i];
+                                    switch (c)
+                                    {
+                                        case '-':
+
+                                            sbCharset.Append(c);
+                                            break;
+                                        case char ch when char.IsLetterOrDigit(ch):
+                                            sbCharset.Append(ch);
+                                            break;
+                                    }
+                                }
+                                if (sbCharset.Length > 0)
+                                {
+                                    {
+                                        IsCharsetFound = true;
+                                        charset = sbCharset.ToString();
+                                        sbRsponseReporter.Append($"Charset result was {charset}\r");
+                                        //Console.WriteLine($"Charset result was {sbCharset.ToString()}");
+                                        if (IsCharsetFound)
+                                        {
+                                            strEncodingName = charset;
+                                            goto ___StorePhase;
+                                        }
+
+                                    }
+
+
+                                }
+
+
+
+                            }
+
+                        }
+                        goto ___StorePhase;
+                    }
+
+
+                ___StorePhase:
+                    string __contentType = string.Format("{0}", response.Content.Headers.ContentType.MediaType);
+
+
+                    __contentData = CHmlMultiversalWebCache.CreateUrlContentDataPath(url, __contentType);
+                    var contentDataPath = CHmlMultiversalWebCache.StoregePath + __contentData.FileLocation;
+                    if (!string.IsNullOrEmpty(contentDataPath))
+                    {
+                        string directoryPath = Path.GetDirectoryName(contentDataPath);
+                        if (!string.IsNullOrEmpty(directoryPath))
+                        {
+                            System.IO.Directory.CreateDirectory(directoryPath);
+                        }
+                        else
+                        {
+                            // Handle the case where directoryPath is null or empty
+                            Console.WriteLine("Invalid directory path.");
+                        }
+                    }
+                    else
+                    {
+                        // Handle the case where contentDataPath is null or empty
+                        Console.WriteLine("Invalid content data path.");
+                    }
+
+
+                    if (IsContentTypeHTML)
+                    {
+                        MemoryStream ms = new MemoryStream();
+                        await ms.WriteAsync(buffer, 0, ___bytesReead);
+                        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        {
+                            await ms.WriteAsync(buffer, 0, bytesRead);
+                        }
+                       
+
+                        Encoding encoding = null;
+                        try
+                        {
+                            if (string.IsNullOrEmpty(strEncodingName))
+                            {
+                                encoding = Encoding.UTF8;
+                            }
+                            else
+                            {
+                                strEncodingName  = commonData.GetCharsetFromHTMLCharset(strEncodingName);
+                                encoding = Encoding.GetEncoding(strEncodingName);
+                            }
+                            }
+                        catch
+                        {
+
+                            encoding = Encoding.UTF8;
+                        }
+                        string content = encoding.GetString(ms.ToArray());
+#if DEBUG
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("document {0} : {1}", url, content );
+                        }
+
+#endif
+                        __contentData.Charset = charset;
+
+                        if (commonHTML.IsNotNull(response.Content.Headers.ContentLength))
+                        {
+                            __contentData.ContentLength = (long)response.Content.Headers.ContentLength;
+                        }else
+                        {
+                            __contentData.ContentLength = ms.Length;
+                        }
+                        if (commonHTML.IsNotNull(response.Content.Headers.LastModified))
+                        {
+                            __contentData.LastModified = response.Content.Headers.LastModified;
+                        }
+
+                        __contentData.HtmlContent = content;
+                        sbRsponseReporter.Append($"contents ___hasInner saved to {__contentData.FileLocation} \r");
+                        //var contentData = CHmlMultiversalWebCache.CreateUrlContentDataPath(url, __contentType);
+                        ;
+
+
+
+                    }
+                    else
+                    {
+                        if (commonHTML.IsNotNull(response.Content.Headers.ContentLength))
+                        {
+                            __contentData.ContentLength = (int)response.Content.Headers.ContentLength;
+                        }
+                        if (commonHTML.IsNotNull(response.Content.Headers.LastModified))
+                        {
+                            __contentData.LastModified = response.Content.Headers.LastModified;
+                        }
+                        using (var fileStream = new FileStream(contentDataPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                        {
+                            await fileStream.WriteAsync(buffer, 0, ___bytesReead);
+                            while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                            {
+                                await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            }
+                        }
+                        sbRsponseReporter.Append($"contents ___hasInner saved to {__contentData.FileLocation}\r");
+                    }
+
+                    CHmlMultiversalWebCache.CacheData[url] = __contentData;
+
+                }
+
+
+                if (response.Headers.TryGetValues("Alt-Svc", out var altSvc))
+                {
+                    //Console.WriteLine("Alt-Svc header: " + string.Join(",", altSvc));
+                    if (string.Join(",", altSvc).Contains("h3"))
+                    {
+                        sbRsponseReporter.Append("HTTP/3 is avaiable\r");
+                    }
+                    else
+                    {
+                        sbRsponseReporter.Append("HTTP/3 is not avaiable\r");
+                    }
+                }
+                else
+                {
+                    sbRsponseReporter.Append("Alt-Svc heder does not exit\r");
+                }
+
+            }
+
+            catch (HttpRequestException e)
+            {
+                sbRsponseReporter.Append($"Http Request Error : {e.Message}\r");
+            }
+            return __contentData;
+
+
+
+
+        }
+
+        /*
+        public static async Task<CHtmlMultivalContentData> getMultiversalContentData(string _url, string _contentType)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("enter getMultiversalContentData With Task {0} {1} ManagedThreadID: {2}",_url, _contentType, System.Threading.Thread.CurrentThread.ManagedThreadId);
+            }
+
+        }
+        */
+
+
+
+        internal static CHtmlMultivalContentData CreateUrlContentDataPath(string _url, string _contentType)
+        {
+            CHtmlMultivalContentData httpContentData = new CHtmlMultivalContentData();
+            httpContentData.ContentType = _contentType;
+            httpContentData.Url = _url;
+            httpContentData.ContentType = _contentType;
+            System.Text.StringBuilder _sbFileLocation = new System.Text.StringBuilder();
+            string ___prototolString = null;
+
+            Uri uri = new Uri(_url);
+            string authority = uri.Authority;
+            string dirname = Guid.NewGuid().ToString();
+            _sbFileLocation.Append(System.IO.Path.DirectorySeparatorChar);
+            _sbFileLocation.Append(authority);
+            _sbFileLocation.Append(System.IO.Path.DirectorySeparatorChar);
+            _sbFileLocation.Append(dirname);
+            string curdirname = CHmlMultiversalWebCache.StoregePath + _sbFileLocation;
+            if (System.IO.Directory.Exists(curdirname))
+            {
+                dirname = Guid.NewGuid().ToString();
+                _sbFileLocation.Append(System.IO.Path.DirectorySeparatorChar);
+                _sbFileLocation.Append(authority);
+                _sbFileLocation.Append(System.IO.Path.DirectorySeparatorChar);
+                _sbFileLocation.Append(dirname);
+            }
+
+            _sbFileLocation.Append(System.IO.Path.DirectorySeparatorChar);
+            string _fileextension = System.IO.Path.GetExtension(uri.LocalPath).ToLower();
+            string _fileName = System.IO.Path.GetFileName(uri.LocalPath);
+            switch (_fileextension)
+            {
+                case ".html":
+                case ".htm":
+                case ".css":
+                case ".js":
+                case ".json":
+                case ".cookie":
+                case ".hdb":
+                case ".gif":
+                case ".jpg":
+                case ".png":
+                case ".webp":
+                case ".bmp":
+                case ".svg":
+                case ".ico":
+                case ".woff":
+                case ".woff2":
+                case ".ttf":
+                case ".eot":
+                case ".otf":
+                case ".mp4":
+                case ".webm":
+                case ".ogg":
+                case ".mp3":
+                case ".wav":
+                case ".flac":
+                case ".m4a":
+                case ".aac":
+                case ".opus":
+                case ".flv":
+                case ".avi":
+                case ".wmv":
+                case ".mov":
+                case ".mpg":
+                case ".mpeg":
+                case ".m4v":
+                case ".mkv":
+                case ".ogv":
+                case ".3gp":
+                case ".3g2":
+                case ".pdf":
+                case ".doc":
+                case ".docx":
+                case ".xls":
+                case ".xlsx":
+                case ".ppt":
+                case ".pptx":
+                case ".txt":
+                case ".rtf":
+                case ".csv":
+                case ".xml":
+
+                    _sbFileLocation.Append(_fileName);
+                    break;
+                default:
+                    bool _IsFileNameAppended = false;
+                    if (string.IsNullOrEmpty(_contentType) == false)
+                    {
+                        string _contentTypeExt = "";
+                        if (_contentType.IndexOf(';') > -1)
+                        {
+                            _contentTypeExt = _contentType.Remove(_contentType.IndexOf(';')).ToLower();
+                        }
+                        else
+                        {
+                            _contentTypeExt = _contentType.ToLower();
+                        }
+
+                        switch (_contentTypeExt)
+                        {
+                            case "text/html":
+                                _sbFileLocation.Append("index.html");
+                                _IsFileNameAppended = true;
+                                break;
+                            case "text/css":
+                                _sbFileLocation.Append("web.css");
+                                _IsFileNameAppended = true;
+                                break;
+                            defalut:
+                                break;
+                        }
+                    }
+                    if (_IsFileNameAppended == false)
+                    {
+                        _sbFileLocation.Append("web.bin");
+                    }
+
+                    break;
+            }
+            httpContentData.FileLocation = _sbFileLocation.ToString();
+            httpContentData.ContentType = _contentType;
+            httpContentData.Authority = authority;
+            return httpContentData;
+        }
+
+
+
+
+        private static readonly char[] passwordChars = "123456789abcdefghijklmnopqrstuvwxz".ToCharArray();
+        private static int RandomSeed = -1;
+        public static string GenerateRandomString(int length)
+        {
+            StringBuilder sb = new StringBuilder(length);
+            if (RandomSeed == -1)
+            {
+                RandomSeed = System.Environment.TickCount;
+            }
+            else
+            {
+                System.Threading.Interlocked.Increment(ref RandomSeed);
+            }
+            Random r = new Random(RandomSeed);
+
+            for (int i = 0; i < length; i++)
+            {
+
+                int pos = r.Next(passwordChars.Length);
+
+                char c = passwordChars[pos];
+
+                sb.Append(c);
+            }
+
+            return sb.ToString();
+        }
+        public static string GetFileExtentionByContentType(string _url)
+        {
+            string _prototol = string.Empty; ;
+            return GetFileExtentionByContentType(_url, _prototol);
+        }
+        private static string GetFileExtentionByContentType(string _s, string ___prototol)
+        {
+            switch (_s)
+            {
+                case "image/gif":
+                    return ".gif";
+                case "image/jpeg":
+                case "image/jpg":
+                case "image/jfif":
+                case "image/jfi":
+                    return ".jpg";
+                case "image/png":
+                    return ".png";
+                case "image/bmp":
+                    return ".bmp";
+                case "text/dummy":
+                case "text/html":
+                    return ".html";
+                case "text/css":
+                    return ".css";
+                case "text/javascript":
+                case "application/javascript":
+                case "application/x-javascript":
+                    return ".js";
+                case "text/json":
+                case "text/x-json":
+                case "text/x-jsn":
+                case "application/json":
+                    return ".json";
+                case "text/cookie":
+                    return ".cookie";
+                case "application/hdb":
+                    return ".hdb";
+                default:
+                    if (string.IsNullOrEmpty(___prototol) == true)
+                    {
+                        return ".bin";
+                    }
+                    else
+                    {
+                        return "." + ___prototol;
+                    }
+
+            }
+
+        }
+        public static void LoadTrustedWebsites(string trustedWebWites)
+        {
+            var lines = trustedWebWites.Split("\n");
+            if (lines.Length == 1)
+            {
+                var dataValues = lines[0].Split(",");
+                foreach (var valuesplit in dataValues)
+                {
+                    if (valuesplit.Contains("."))
+                    {
+                        var _authority = valuesplit.Replace("\"", "").Trim();
+                        if (_authority.Length > 5)
+                        {
+                            char fistLetter = _authority[0];
+                            char lastLetter = _authority[_authority.Length - 1];
+                            if (char.IsLetter(fistLetter) && char.IsLetter(lastLetter))
+                            {
+                                if (!TrustedWebAuthority.Contains(_authority))
+                                    TrustedWebAuthority.Add(_authority);
+                            }
+                        }
+                    }
+                }
+            }
+
+            else
+                foreach (var line in lines)
+                {
+                    var eachLine = line.Trim();
+                    var dataValues = eachLine.Split(",");
+                    foreach (var valuesplit in dataValues)
+                    {
+                        if (valuesplit.Contains("."))
+                        {
+                            var _authority = valuesplit.Replace("\"", "").Trim();
+                            if (_authority.Length > 5)
+                            {
+                                char fistLetter = _authority[0];
+                                char lastLetter = _authority[_authority.Length - 1];
+                                if (char.IsLetter(fistLetter) && char.IsLetter(lastLetter))
+                                {
+                                    if (!TrustedWebAuthority.Contains(_authority))
+                                        TrustedWebAuthority.Add(_authority);
+                                }
+                            }
+                        }
+                    }
+
+
+                }
+
+
+
+
+        }
+    }
+}
+
+    

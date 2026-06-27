@@ -1,0 +1,319 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+
+// NOTE: Minimal MutationObserver style implementation for MultiHtmlCraft.
+// To generate mutation notifications, integrate calls to
+// CHtmlMutationObserverDispatcher.NodeChildAdded / NodeChildRemoved /
+// NodeAttributeChanged / NodeCharacterDataChanged inside existing
+// node manipulation logic (e.g., append/remove child, set attribute, text changes).
+// This keeps existing classes unchanged until you decide where to invoke them.
+
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// Mutation record similar to DOM MutationRecord.
+    /// </summary>
+    public class CHtmlMutationRecord
+    {
+        public string Type { get; init; } = string.Empty; // childList | attributes | characterData
+        public CHtmlNode? Target { get; init; }
+        public List<CHtmlNode>? AddedNodes { get; init; }
+        public List<CHtmlNode>? RemovedNodes { get; init; }
+        public string? PreviousSiblingId { get; init; }
+        public string? NextSiblingId { get; init; }
+        public string? AttributeName { get; init; }
+        public string? OldValue { get; init; }
+    }
+
+    /// <summary>
+    /// Observer init options similar to MutationObserverInit.
+    /// </summary>
+    public class CHtmlMutationObserverInit
+    {
+        public bool childList { get; set; }
+        public bool attributes { get; set; }
+        public bool characterData { get; set; }
+        public bool subtree { get; set; }
+        public bool attributeOldValue { get; set; }
+        public bool characterDataOldValue { get; set; }
+        public string[]? attributeFilter { get; set; }
+    }
+
+    /// <summary>
+    /// Delegate signature for mutation callback.
+    /// </summary>
+    /// <param name="records">Collected mutation records.</param>
+    /// <param name="observer">Observer instance.</param>
+    public delegate void CHtmlMutationCallback(IReadOnlyList<CHtmlMutationRecord> records, CHtmlMutationObserver observer);
+
+    /// <summary>
+    /// MutationObserver like class for MultiHtmlCraft DOM.
+    /// </summary>
+    public class CHtmlMutationObserver
+    {
+        private readonly CHtmlMutationCallback _callback;
+        private readonly List<CHtmlMutationRecord> _queue = new();
+        private readonly object _queueLock = new();
+
+        internal CHtmlMutationObserver(CHtmlMutationCallback callback)
+        {
+            _callback = callback ?? throw new ArgumentNullException(nameof(callback));
+        }
+
+        private record Registration(CHtmlNode Target, CHtmlMutationObserverInit Options);
+        private readonly List<Registration> _registrations = new();
+
+        /// <summary>
+        /// Begin observing target node.
+        /// </summary>
+        public void Observe(CHtmlNode target, CHtmlMutationObserverInit options)
+        {
+            if (target == null) throw new ArgumentNullException(nameof(target));
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            lock (_registrations)
+            {
+                _registrations.Add(new Registration(target, options));
+                CHtmlMutationObserverDispatcher.Register(target, this, options);
+            }
+        }
+
+        /// <summary>
+        /// Stop listening to all mutations for this observer.
+        /// </summary>
+        public void Disconnect()
+        {
+            lock (_registrations)
+            {
+                foreach (var r in _registrations)
+                    CHtmlMutationObserverDispatcher.Unregister(r.Target, this);
+                _registrations.Clear();
+            }
+            lock (_queueLock)
+            {
+                _queue.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Take queued mutation records (empties internal queue).
+        /// </summary>
+        public List<CHtmlMutationRecord> TakeRecords()
+        {
+            lock (_queueLock)
+            {
+                var list = new List<CHtmlMutationRecord>(_queue);
+                _queue.Clear();
+                return list;
+            }
+        }
+
+        internal void Enqueue(CHtmlMutationRecord record)
+        {
+            lock (_queueLock)
+            {
+                _queue.Add(record);
+            }
+        }
+
+        /// <summary>
+        /// Deliver queued mutations immediately.
+        /// </summary>
+        public void Flush()
+        {
+            List<CHtmlMutationRecord> deliver;
+            lock (_queueLock)
+            {
+                if (_queue.Count == 0) return;
+                deliver = new List<CHtmlMutationRecord>(_queue);
+                _queue.Clear();
+            }
+            try
+            {
+                _callback(deliver, this);
+            }
+            catch
+            {
+                // Swallow to mimic browser MutationObserver resilience.
+            }
+        }
+    }
+
+    /// <summary>
+    /// Internal dispatcher responsible for routing DOM change notifications to observers.
+    /// Existing CHtmlNode manipulation code should call the appropriate static Notify method.
+    /// </summary>
+    public static class CHtmlMutationObserverDispatcher
+    {
+        private class ObserverRegistration
+        {
+            public WeakReference<CHtmlMutationObserver> Observer { get; }
+            public CHtmlMutationObserverInit Options { get; }
+            public ObserverRegistration(CHtmlMutationObserver observer, CHtmlMutationObserverInit options)
+            {
+                Observer = new WeakReference<CHtmlMutationObserver>(observer);
+                Options = options;
+            }
+        }
+
+        private static readonly ConcurrentDictionary<CHtmlNode, List<ObserverRegistration>> _map = new();
+        private static int _deliveryScheduled; // 0/1
+
+        public static CHtmlMutationObserver Create(CHtmlMutationCallback callback) => new(callback);
+
+        internal static void Register(CHtmlNode target, CHtmlMutationObserver observer, CHtmlMutationObserverInit options)
+        {
+            var list = _map.GetOrAdd(target, _ => new List<ObserverRegistration>());
+            lock (list)
+            {
+                list.Add(new ObserverRegistration(observer, options));
+            }
+        }
+
+        internal static void Unregister(CHtmlNode target, CHtmlMutationObserver observer)
+        {
+            if (!_map.TryGetValue(target, out var list)) return;
+            lock (list)
+            {
+                list.RemoveAll(r => !r.Observer.TryGetTarget(out var o) || o == observer);
+                if (list.Count == 0) _map.TryRemove(target, out _);
+            }
+        }
+
+        // Integration points - call these from node mutation code.
+        public static void NodeChildAdded(CHtmlNode parent, CHtmlNode added, CHtmlNode? previousSibling, CHtmlNode? nextSibling)
+            => NotifyChildList(parent, new List<CHtmlNode> { added }, null, previousSibling, nextSibling);
+
+        public static void NodeChildRemoved(CHtmlNode parent, CHtmlNode removed, CHtmlNode? previousSibling, CHtmlNode? nextSibling)
+            => NotifyChildList(parent, null, new List<CHtmlNode> { removed }, previousSibling, nextSibling);
+
+        public static void NodeAttributeChanged(CHtmlNode target, string attributeName, string? oldValue)
+            => NotifyAttribute(target, attributeName, oldValue);
+
+        public static void NodeCharacterDataChanged(CHtmlNode target, string? oldValue)
+            => NotifyCharacterData(target, oldValue);
+
+        private static void NotifyChildList(CHtmlNode target, List<CHtmlNode>? added, List<CHtmlNode>? removed, CHtmlNode? prev, CHtmlNode? next)
+        {
+            Dispatch(target, (r, opt) => opt.childList, () => new CHtmlMutationRecord
+            {
+                Type = "childList",
+                Target = target,
+                AddedNodes = added,
+                RemovedNodes = removed,
+                PreviousSiblingId = prev?.Id,
+                NextSiblingId = next?.Id
+            });
+        }
+
+        private static void NotifyAttribute(CHtmlNode target, string attributeName, string? oldValue)
+        {
+            Dispatch(target, (r, opt) => opt.attributes && (opt.attributeFilter == null || opt.attributeFilter.Contains(attributeName)), () => new CHtmlMutationRecord
+            {
+                Type = "attributes",
+                Target = target,
+                AttributeName = attributeName,
+                OldValue = oldValue
+            });
+        }
+
+        private static void NotifyCharacterData(CHtmlNode target, string? oldValue)
+        {
+            Dispatch(target, (r, opt) => opt.characterData, () => new CHtmlMutationRecord
+            {
+                Type = "characterData",
+                Target = target,
+                OldValue = oldValue
+            });
+        }
+
+        private static void Dispatch(CHtmlNode target, Func<ObserverRegistration, CHtmlMutationObserverInit, bool> filter, Func<CHtmlMutationRecord> recordFactory)
+        {
+            // Collect observers for target and optionally its ancestors when subtree=true.
+            var candidates = new List<(CHtmlMutationObserver observer, CHtmlMutationObserverInit options)>();
+
+            foreach (var kv in _map)
+            {
+                bool include = kv.Key == target || (IsAncestor(kv.Key, target));
+                if (!include) continue;
+                var list = kv.Value;
+                lock (list)
+                {
+                    foreach (var reg in list)
+                    {
+                        if (!reg.Observer.TryGetTarget(out var observer)) continue;
+                        bool passes = kv.Key == target
+                            ? filter(reg, reg.Options)
+                            : (reg.Options.subtree && filter(reg, reg.Options));
+                        if (passes)
+                            candidates.Add((observer, reg.Options));
+                    }
+                }
+            }
+
+            if (candidates.Count == 0) return;
+            var record = recordFactory();
+            foreach (var (obs, _) in candidates)
+            {
+                obs.Enqueue(record);
+            }
+
+            // Schedule microtask style delivery: simple ThreadPool callback.
+            if (Interlocked.Exchange(ref _deliveryScheduled, 1) == 0)
+            {
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    try
+                    {
+                        Deliver();
+                    }
+                    finally
+                    {
+                        Interlocked.Exchange(ref _deliveryScheduled, 0);
+                    }
+                });
+            }
+        }
+
+        private static bool IsAncestor(CHtmlNode ancestor, CHtmlNode node)
+        {
+            var cur = node.ParentNode; // Assuming CHtmlNode has ParentNode property.
+            while (cur != null)
+            {
+                if (cur == ancestor) return true;
+                cur = cur.ParentNode;
+            }
+            return false;
+        }
+
+        private static void Deliver()
+        {
+            // Snapshot observers & flush.
+            var delivered = new HashSet<CHtmlMutationObserver>();
+            foreach (var kv in _map)
+            {
+                var list = kv.Value;
+                lock (list)
+                {
+                    foreach (var reg in list)
+                    {
+                        if (!reg.Observer.TryGetTarget(out var observer)) continue;
+                        if (delivered.Contains(observer)) continue;
+                        var records = observer.TakeRecords();
+                        if (records.Count > 0)
+                        {
+                            try
+                            {
+                                observer.Flush(); // Flush already delivers queued (but we cleared). Re-queue records first.
+                            }
+                            catch { }
+                        }
+                        delivered.Add(observer);
+                    }
+                }
+            }
+        }
+    }
+}

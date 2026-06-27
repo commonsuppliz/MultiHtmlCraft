@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MultiHtmlCraaft.AvaloniaControl_Tesst.Controls.MultiversalAvaroniaView">
+  <Border Padding="8" Background="White">
+    <Grid RowDefinitions="Auto,*">
+      <TextBlock x:Name="StatusText" Grid.Row="0" Text="Control not initialized."/>
+      <!-- Placeholder where control visuals will be placed later -->
+      <ContentPresenter x:Name="ControlHost" Grid.Row="1" Focusable="True" />
+    </Grid>
+  </Border>
+</UserControl>

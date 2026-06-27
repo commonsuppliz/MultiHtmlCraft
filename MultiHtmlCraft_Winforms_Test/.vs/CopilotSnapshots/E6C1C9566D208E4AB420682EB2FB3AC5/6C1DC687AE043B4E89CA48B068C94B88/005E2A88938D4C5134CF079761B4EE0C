@@ -1,0 +1,330 @@
+﻿using System;
+using System.Collections.Generic;
+using MultiHtmlCraft.Interfaces;
+#if WINDOWS
+using System.Drawing;
+#endif
+using SkiaSharp;
+using System.Text;
+using NiL.JS.BaseLibrary;
+using System.Runtime.InteropServices;
+using System.Reflection.Emit;
+using System.Linq;
+
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// CHtmlGraphicContainer 
+    /// </summary>
+    public class CHtmlGraphicContainer : IDrawingContext , IDisposable
+    {
+
+
+        public Graphics Graphic = null;
+        public Font Font = null;
+        public System.Drawing.StringFormat StandardStringFormat = null;
+        private Bitmap ___bitmapForGDI = null;
+
+        // Avalonia/SkiaSharp
+        public SKCanvas SkiaCanvas = null;
+        public SKPaint SkiaPaint = null;
+
+        public ColorSpec BackgroundColor;
+        public ColorSpec ForegroundColor;
+        public RectangleF PaintRectangle;
+        public RectangleF DisplayRectangle;
+        public RectangleF ClientRectangle;
+        public RectangleF ScreenRectangle;
+        public RectangleF ControlBounds;
+        public Image ImageNA = null;
+        public int CurrentPos = -1;
+        public int StartingPos = -1;
+        public int EndingPos = -1;
+        public float TotalOffsetLeft = 0;
+        public float TotalOffsetTop = 0;
+        public bool IsUIThreadPaint = false;
+        public bool IsDrawLayoutPanel = false;
+        public RectangleF ScreenMaximunBounds = RectangleF.Empty;
+        public int CurrentElementDepth = 0;
+        public bool IsHoverPaintMode = false;
+        public CHtmlGraphicAPIType PlatformGraphicAPIType = CHtmlGraphicAPIType.Unknown;
+
+
+        public CHtmlGraphicContainer() : this(commonHTML.GraphicApiType)
+        {
+            
+        }
+
+        public CHtmlGraphicContainer(CHtmlGraphicAPIType graphicAPIType)
+        {
+            if (graphicAPIType != CHtmlGraphicAPIType.Unknown && commonHTML.GraphicApiType != graphicAPIType)
+            {
+                commonHTML.GraphicApiType = graphicAPIType;
+                PlatformGraphicAPIType = graphicAPIType;
+            }
+            else if(graphicAPIType != CHtmlGraphicAPIType.Unknown)
+            {
+                PlatformGraphicAPIType = graphicAPIType;
+            }
+
+              
+
+            switch (commonHTML.GraphicApiType)
+            {
+
+                case CHtmlGraphicAPIType.SkiaSharp:
+                    {
+                        SKBitmap skBitmap = new SKBitmap();
+                        this.SkiaCanvas = new SKCanvas(skBitmap);
+                        this.SkiaPaint = new SKPaint();
+                    }
+                    break;
+                case CHtmlGraphicAPIType.Avalonia:
+                    {
+                        // Avalonia
+                        SKBitmap skBitmap = new SKBitmap();
+                        this.SkiaCanvas = new SKCanvas(skBitmap);
+                        this.SkiaPaint = new SKPaint();
+                    }
+                    break;
+                case CHtmlGraphicAPIType.UnoPlatform:
+                    {
+                        throw new NotImplementedException();
+                    }
+                    break;
+                case CHtmlGraphicAPIType.Maui:
+                    {
+                        throw new NotImplementedException();
+                    }
+                    break;
+                case CHtmlGraphicAPIType.WPF:
+                    {
+                        throw new NotImplementedException();
+
+                    }
+                    break;
+                case CHtmlGraphicAPIType.ETO:
+                    {
+                        throw new NotImplementedException();
+
+                    }
+                    break;
+
+                case CHtmlGraphicAPIType.WinformsGDI:
+                    {
+                        ___bitmapForGDI = new Bitmap(1, 1);
+                        this.Graphic = Graphics.FromImage(___bitmapForGDI);
+                        this.Font = SystemFonts.DefaultFont;
+                        this.StandardStringFormat = new System.Drawing.StringFormat();
+                        break;
+                    }
+                default:
+                    {
+
+
+
+
+                        throw new NotImplementedException();
+
+
+                    }
+            }
+             GUIPlatformDetected:
+
+
+            this.BackgroundColor = ColorSpec.Empty;
+            this.ForegroundColor = ColorSpec.Empty;
+            this.DisplayRectangle = RectangleF.Empty;
+            this.ClientRectangle = RectangleF.Empty;
+            this.ScreenRectangle = RectangleF.Empty;
+            this.PaintRectangle = RectangleF.Empty;
+            this.ControlBounds = RectangleF.Empty;
+        }
+
+        #region IDisposable メンバ
+        public void Dispose()
+        {
+#if WINDOWS
+            if (this.StandardStringFormat != null)
+            {
+                this.StandardStringFormat.Dispose();
+                this.StandardStringFormat = null;
+            }
+            if (this.Font != null)
+            {
+                this.Font.Dispose();
+                this.Font = null;
+            }
+            if (this.Graphic != null)
+            {
+                this.Graphic.Dispose();
+                this.Graphic = null;
+            }
+            if(___bitmapForGDI != null)
+            {
+                ___bitmapForGDI.Dispose();
+                ___bitmapForGDI = null;
+            }
+#endif
+            if (this.SkiaPaint != null)
+            {
+                this.SkiaPaint.Dispose();
+                this.SkiaPaint = null;
+            }
+
+            
+            this.ImageNA = null;
+        }
+
+        public void Dispose(bool DisposeGrahicObject)
+        {
+#if WINDOWS
+            if (this.StandardStringFormat != null)
+            {
+                this.StandardStringFormat.Dispose();
+                this.StandardStringFormat = null;
+            }
+            if (this.Font != null)
+            {
+                this.Font.Dispose();
+                this.Font = null;
+            }
+            if (DisposeGrahicObject)
+            {
+                if (this.Graphic != null)
+                {
+                    this.Graphic.Dispose();
+                    this.Graphic = null;
+                }
+            }
+#endif
+            if (this.SkiaPaint != null)
+            {
+                this.SkiaPaint.Dispose();
+                this.SkiaPaint = null;
+            }
+            this.ImageNA = null;
+        }
+        #endregion
+
+
+
+        #region Drawing APIs
+        public void DrawLine(PenSpec pen, float x1, float y1, float x2, float y2)
+        {
+            switch (commonHTML.GraphicApiType)
+            {
+                case CHtmlGraphicAPIType.SkiaSharp:
+                    if (SkiaCanvas != null)
+                    {
+                        using var paint = new SKPaint
+                        {
+                            Color = new SKColor(pen.Color.R, pen.Color.G, pen.Color.B, pen.Color.A),
+                            StrokeWidth = pen.Thickness,
+                            IsStroke = true
+                        };
+                        SkiaCanvas.DrawLine(x1, y1, x2, y2, paint);
+                    }
+                    break;
+                    
+            }
+        }
+
+        public void FillRectangle(BrushSpec brush, float x, float y, float width, float height)
+        {
+            switch (commonHTML.GraphicApiType)
+            {
+                case CHtmlGraphicAPIType.SkiaSharp:
+                    if (SkiaCanvas != null)
+                    {
+                        using var paint = new SKPaint
+                        {
+                            Color = new SKColor(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A),
+                            Style = SKPaintStyle.Fill
+                        };
+                        SkiaCanvas.DrawRect(x, y, width, height, paint);
+                    }
+                    break;
+            }
+        }
+
+        public void DrawRectangle(PenSpec pen, float x, float y, float width, float height)
+        {
+            switch (commonHTML.GraphicApiType)
+            {
+                case CHtmlGraphicAPIType.SkiaSharp:
+                    if (SkiaCanvas != null)
+                    {
+                        using var paint = new SKPaint
+                        {
+                            Color = new SKColor(pen.Color.R, pen.Color.G, pen.Color.B, pen.Color.A),
+                            StrokeWidth = pen.Thickness,
+                            Style = SKPaintStyle.Stroke
+                        };
+                        SkiaCanvas.DrawRect(x, y, width, height, paint);
+                    }
+                    break;
+            }
+        }
+
+        public void DrawImage(object image, float x, float y, float width, float height)
+        {
+            switch (commonHTML.GraphicApiType)
+            {
+                case CHtmlGraphicAPIType.SkiaSharp:
+                    if (SkiaCanvas != null && image is SKBitmap bitmap)
+                    {
+                        var destRect = new SKRect(x, y, x + width, y + height);
+                        SkiaCanvas.DrawBitmap(bitmap, destRect);
+                    }
+                    break;
+            }
+        }
+
+        public void DrawString(string text, FontSpec font, BrushSpec brush, float x, float y)
+        {
+            switch (commonHTML.GraphicApiType)
+            {
+                case CHtmlGraphicAPIType.SkiaSharp:
+                    if (SkiaCanvas != null)
+                    {
+                        using var paint = new SKPaint
+                        {
+                            Color = new SKColor(brush.Color.R, brush.Color.G, brush.Color.B, brush.Color.A),
+                            TextSize = font.Size,
+                            Typeface = SKTypeface.FromFamilyName(font.FamilyName, ToSKFontStyle(font.Style))
+                        };
+                        SkiaCanvas.DrawText(text, x, y + paint.TextSize, paint);
+                    }
+                    break;
+            }
+        }
+
+
+
+        public void SetClip(RectangleF rect)
+        {
+            switch (commonHTML.GraphicApiType)
+            {
+                case CHtmlGraphicAPIType.SkiaSharp:
+                    SkiaCanvas?.Save();
+                    SkiaCanvas?.ClipRect(new SKRect(rect.Left, rect.Top, rect.Right, rect.Bottom));
+                    break;
+            }
+        }
+
+
+        private static SKFontStyle ToSKFontStyle(FontStyleSpec style)
+        {
+            return style switch
+            {
+                FontStyleSpec.Bold => SKFontStyle.Bold,
+                FontStyleSpec.Italic => SKFontStyle.Italic,
+                FontStyleSpec.BoldItalic => SKFontStyle.BoldItalic,
+                _ => SKFontStyle.Normal
+            };
+        }
+
+        #endregion 
+    }
+}

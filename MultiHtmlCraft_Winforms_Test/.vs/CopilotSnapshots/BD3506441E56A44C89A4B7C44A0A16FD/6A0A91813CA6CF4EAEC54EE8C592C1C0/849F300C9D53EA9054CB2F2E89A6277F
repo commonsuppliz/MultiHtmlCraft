@@ -1,0 +1,301 @@
+﻿using MultiHtmlCraft.Core;
+using MultiHtmlCraft.Interfaces;
+using NiL.JS.Expressions;
+using System.Configuration;
+using System.Net;
+using System.Reflection.Metadata;
+using System.Security.Authentication;
+using System.Windows.Forms;
+using static System.Net.WebRequestMethods;
+namespace MultiversalRendererWinFormsTest
+{
+    public partial class FormMain : Form
+    {
+        CHtmlDocument? document = null;
+        RectangleF ___LastPaintRectangle = RectangleF.Empty;
+        public FormMain()
+        {
+            InitializeComponent();
+            // ダブルバッファリングと描画最適化
+            this.SetStyle(ControlStyles.DoubleBuffer | ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint, true);
+            this.UpdateStyles();
+
+            btnScripts.Image = Image.FromFile("Assets/Gear.png"); 
+
+            btnDOM.Image = Image.FromFile("Assets/Tree.png");
+
+            btnNavigate.Image = Image.FromFile("Assets/Rocket.png");
+
+            btnCSS.Image = Image.FromFile("Assets/Pallet.png");
+
+        }
+        
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            
+            base.OnSizeChanged(e);
+            int buttonWidth = 31;
+            ///int buttonHeight = 31;
+            int buttonSpacing = 2;
+            int rightMargin = 0;
+    
+            //splitterText.Width = 800;
+            this.SuspendLayout();
+            txtUrl.Width = this.ClientSize.Width - 110;
+            btnNavigate.Location = new Point(this.ClientSize.Width - rightMargin - buttonWidth, 0);
+            btnScripts.Location = new Point(btnNavigate.Left - buttonSpacing - buttonWidth, 0);
+            btnCSS.Location = new Point(btnScripts.Left - buttonSpacing - buttonWidth, 0);
+            btnDOM.Location = new Point(btnCSS.Left - buttonSpacing - buttonWidth, 0);
+            this.ResumeLayout();
+         
+            
+        }
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            typeof(Panel)
+    .GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+    ?.SetValue(pnlHtml, true);
+            this.___horizontalBar.Visible = false;
+            this.___verticalBar.Visible = false;
+            this.OnSizeChanged(EventArgs.Empty);
+
+            //  this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc3Imgs.html";
+            // this.txtUrl.Text = "http://localhost/csssample/sample2.htm";
+            // this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc.html";
+            // this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc2.html";
+            //  this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc3Imgs.html";
+            // this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc3ImgsWithText.html";
+            // this.txtUrl.Text = "http://localhost/jstest/jqueryTest/JQuwey360Test1.html"; // JQuery 3.6.0 Test
+            //this.txtUrl.Text = "http://localhost/jstest/jqueryTest/JQuwey371Test2.html"; // JQuery 3,7,1 Test
+            // this.txtUrl.Text = "http://localhost/jstest/CreateElementTest3.html";
+            // this.txtUrl.Text = "http://localhost/jstest/GetElementByIDTtest1.html";
+            // this.txtUrl.Text = "http://localhost/jstest/SetIntervalTest.html"; //setIntervalTest ok
+            // this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc3ImgsWithText.html";  // Image Load Test. OK
+            // this.txtUrl.Text = "http://localhost/jstest/SetTimeoutTest1.html"; // setTimeoutTest ok
+
+            // this.txtUrl.Text = "http://localhost/jstest/RequestAnimationFrameTest1.html";
+
+            //this.txtUrl.Text = "http://localhost/html/SvgImagesTest1.html"; // SVG Display Test ok
+            // this.txtUrl.Text = "http://localhost/jstest/ClearTimerTest1.html"; // Clear Timer Test
+            //this.txtUrl.Text = "http://localhost/jstest/TextFontChangeWithMatchSeleter.html"; // font size change with js
+            this.txtUrl.Text = "http://localhost/html/TextFontFontSizeChagewithNotJS.html";
+        }
+
+        int _documentPaintCount = 0;
+        private void pnlHtml_Paint(object? sender, PaintEventArgs e)
+        {
+
+            Graphics gr = e.Graphics;
+
+            var grCon = this.CreateGraphicContainer(e.Graphics);
+           // grCon.PaintRectangle = new RectangleF(0, 0, 1000, 800);
+            grCon.IsUIThreadPaint = true;
+            grCon.Graphic = gr;
+            grCon.PaintRectangle = this.GetPaintRectScrollbar();
+            if (document != null && document.documentElement != null)
+            {
+
+
+                CHtmlElement documentRootElement = document.documentElement as CHtmlElement;
+
+                if (_documentPaintCount >= int.MaxValue)
+                    _documentPaintCount = 0;
+                _documentPaintCount++;
+                if (_documentPaintCount == 1 && documentRootElement != null)
+                {
+                    commonUtils.LogElementDOMTree(documentRootElement, "", commonUtils.CJHtmlDOMElementLogModeType.ElementWidthAndHeight);
+                }
+
+                document.drawRootElementRecursively(documentRootElement, ref grCon);
+            }
+        }
+        HttpClientHandler handler = new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            MaxRequestContentBufferSize = 1_000_000,
+            SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
+        };
+
+        private async void navigateUrl()
+        {
+
+            string strUrl = this.txtUrl.Text.Trim();
+            if (strUrl.StartsWith("http") == false)
+            {
+                MessageBox.Show($"{strUrl} is invalid url");
+                return;
+            }
+            var window = new MultiHtmlCraft.Core.CHtmlMultiversalWindow(null, true, IMultiversalWindowType.NormalWindow);
+            HttpClient? ___httpClient = null;
+            ___httpClient = new HttpClient(handler);
+            ___httpClient.Timeout = new TimeSpan(1000);
+            MultiHtmlCraft.Core.CHtmlMultiversalWindow.setHttpClient(___httpClient);
+            MultiHtmlCraft.Core.commonLog.LoggingEnabled = true;
+            MultiHtmlCraft.Core.commonLog.LogLevel = 10;
+
+            commonLog.LoggingEnabled = true;
+            commonLog.LogLevel = 10;
+
+            if (commonLog.LoggingEnabled)
+            {
+                commonLog.LogEntry($"Requesting {strUrl} Managed Thread ID :{System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            }
+            try
+            {
+                document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, window);
+                if (document.body != null)
+                {
+                    CHtmlElement? ___body = document.body as CHtmlElement;
+                    if(___body != null)
+                    {
+                        
+                        setRenderingSize(___body.offsetWidth, ___body.offsetHeight);
+                    }
+                }
+                if (this.___horizontalBar.Visible == false)
+                    this.___horizontalBar.Visible = true;
+                if (this.___verticalBar.Visible == false)
+                {
+                    this.___verticalBar.Visible = true;
+                }
+                pnlHtml.Invalidate();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+        public void setRenderingSize(double ___width, double ___height)
+        {
+            if (this.___horizontalBar != null)
+            {
+                this.___horizontalBar.Value = 0;
+                this.___horizontalBar.Maximum = (int)___width;
+            }
+            if (this.___verticalBar != null)
+            {
+                this.___verticalBar.Value = 0;
+                this.___verticalBar.Maximum = (int)___height;
+            }
+        }
+        private void btnDOM_Click(object sender, EventArgs e)
+        {
+            navigateUrl();
+        }
+        public MultiHtmlCraft.Core.CHtmlGraphicContainer CreateGraphicContainer(System.Drawing.Graphics ___gr)
+        {
+            if (this.Disposing)
+                return null;
+            MultiHtmlCraft.Core.CHtmlGraphicContainer ___htmlGraphics = null;
+            ___htmlGraphics = new MultiHtmlCraft.Core.CHtmlGraphicContainer();
+            if (___gr != null)
+            {
+                ___htmlGraphics.Graphic = ___gr;
+            }
+            else
+            {
+                ___htmlGraphics.Graphic = this.CreateGraphics();
+            }
+            ___htmlGraphics.ImageNA = null;
+            ___htmlGraphics.Font = this.Font.Clone() as Font;
+            if (___htmlGraphics.Font == null)
+            {
+                ___htmlGraphics.Font = new Font(FontFamily.GenericSansSerif, 12f);
+            }
+            ___htmlGraphics.BackgroundColor = MultiHtmlCraft.Core.ColorSpec.FromColor(this.BackColor);
+            ___htmlGraphics.ForegroundColor = MultiHtmlCraft.Core.ColorSpec.FromColor(this.ForeColor);
+            ___htmlGraphics.DisplayRectangle = this.DisplayRectangle;
+            ___htmlGraphics.ClientRectangle = this.ClientRectangle;
+            ___htmlGraphics.ControlBounds = this.Bounds;
+            ___htmlGraphics.PaintRectangle = this.GetPaintRectScrollbar();
+
+            ___htmlGraphics.StartingPos = 0;
+            ___htmlGraphics.TotalOffsetLeft = 0;
+            ___htmlGraphics.TotalOffsetTop = 0;
+            System.Drawing.StringFormat sf = new StringFormat();
+            sf.Trimming = System.Drawing.StringTrimming.Word;
+            sf.FormatFlags = StringFormatFlags.MeasureTrailingSpaces;
+
+            ___htmlGraphics.StandardStringFormat = sf;
+            /*
+            if (Unicus.commonMCS.MCSGeneralFdr != null && Unicus.commonMCS.MCSGeneralFdr.EnableSmoothDrawing)
+            {
+                ___htmlGraphics.Graphic.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                ___htmlGraphics.Graphic.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            }
+            else
+            {
+                ___htmlGraphics.Graphic.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                ___htmlGraphics.Graphic.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
+
+            }
+            */
+            this.___LastPaintRectangle = ___htmlGraphics.PaintRectangle;
+            return ___htmlGraphics;
+        }
+
+
+        public Rectangle GetPaintRectScrollbar()
+        {
+            if (this.Disposing == true)
+                return Rectangle.Empty;
+            int ___horizontalBarValue = 0;
+
+            int ___horizontalBarMaximum = 0;
+            if (this.___horizontalBar != null)
+            {
+                ___horizontalBarValue = this.___horizontalBar.Value;
+                ___horizontalBarMaximum = this.___horizontalBar.Maximum;
+            }
+            else
+            {
+                ___horizontalBarMaximum = this.Width;
+            }
+            int _verticalBarValue = 0;
+
+
+            int _verticalMaximum = 0;
+            if (this.___verticalBar != null)
+            {
+                _verticalMaximum = this.___verticalBar.Maximum;
+                _verticalBarValue = this.___verticalBar.Value;
+            }
+            else
+            {
+                _verticalMaximum = this.Height;
+            }
+
+            int _HalfHeight = (int)((double)this.ClientRectangle.Height / (double)2);
+            if (_verticalMaximum > this.ClientRectangle.Height && _verticalBarValue > _verticalMaximum - this.ClientRectangle.Height)
+            {
+                _verticalBarValue = _verticalMaximum - this.ClientRectangle.Height + 20;
+            }
+
+
+            if (___horizontalBarValue < 0)
+            {
+                if (this.___horizontalBar != null)
+                {
+                    this.___horizontalBar.SuspendLayout();
+                    this.___horizontalBar.Value = 0;
+                    this.___horizontalBar.ResumeLayout();
+                }
+            }
+            if (_verticalBarValue < 0)
+            {
+                if (this.___verticalBar != null)
+                {
+                    this.___verticalBar.SuspendLayout();
+                    this.___verticalBar.Value = 0;
+                    this.___verticalBar.ResumeLayout();
+                }
+            }
+            Rectangle dispRect = new Rectangle(___horizontalBarValue, _verticalBarValue, ___horizontalBarMaximum, _verticalMaximum);
+            Rectangle cliRect = this.ClientRectangle;
+            Rectangle PaintRect = new Rectangle(Math.Abs(dispRect.X), Math.Abs(dispRect.Y), cliRect.Width, cliRect.Height);
+            return PaintRect;
+        }
+    }
+}

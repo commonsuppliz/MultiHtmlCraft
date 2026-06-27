@@ -1,0 +1,295 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using Microsoft.ClearScript;
+using System.Dynamic;
+
+namespace MultiHtmlCraft.Core
+{
+    public class CHtmlMutationRecord
+    {
+        public string Type { get; init; } = string.Empty;
+        public CHtmlNode? Target { get; init; }
+        public List<CHtmlNode>? AddedNodes { get; init; }
+        public List<CHtmlNode>? RemovedNodes { get; init; }
+        public string? PreviousSiblingId { get; init; }
+        public string? NextSiblingId { get; init; }
+        public string? AttributeName { get; init; }
+        public string? OldValue { get; init; }
+    }
+
+    public class CHtmlMutationObserverInit
+    {
+        public bool childList { get; set; }
+        public bool attributes { get; set; }
+        public bool characterData { get; set; }
+        public bool subtree { get; set; }
+        public bool attributeOldValue { get; set; }
+        public bool characterDataOldValue { get; set; }
+        public string[]? attributeFilter { get; set; }
+    }
+
+    public delegate void CHtmlMutationCallback(IReadOnlyList<CHtmlMutationRecord> records, CHtmlMutationObserver observer);
+
+    public class CHtmlMutationObserver
+    {
+        private readonly List<CHtmlMutationRecord> _queue = new();
+        private readonly object _queueLock = new();
+        private record Registration(CHtmlNode Target, CHtmlMutationObserverInit Options);
+        private readonly List<Registration> _registrations = new();
+
+        private readonly CHtmlMutationCallback _callback; // internal delivery delegate
+        private ScriptObject? _scriptCallback; // JS function passed from ClearScript
+
+        // JS friendly constructor: new MutationObserver(function(records, observer){ ... })
+        public CHtmlMutationObserver(params object[] args)
+        {
+            if (args != null && args.Length > 0 && args[0] is ScriptObject so)
+            {
+                _scriptCallback = so;
+            }
+            _callback = DeliverToScriptCallback;
+        }
+
+        internal CHtmlMutationObserver(CHtmlMutationCallback callback)
+        {
+            _callback = callback ?? throw new ArgumentNullException(nameof(callback));
+        }
+
+        private static object ConvertRecordToJs(CHtmlMutationRecord r)
+        {
+            IDictionary<string, object?> exp = new ExpandoObject();
+            exp["type"] = r.Type;
+            exp["target"] = r.Target;
+            exp["addedNodes"] = r.AddedNodes?.ToArray() ?? Array.Empty<CHtmlNode>();
+            exp["removedNodes"] = r.RemovedNodes?.ToArray() ?? Array.Empty<CHtmlNode>();
+            exp["previousSibling"] = r.Target; // simplified
+            exp["nextSibling"] = r.Target; // simplified
+            exp["attributeName"] = r.AttributeName;
+            exp["oldValue"] = r.OldValue;
+            return exp;
+        }
+
+        private void DeliverToScriptCallback(IReadOnlyList<CHtmlMutationRecord> records, CHtmlMutationObserver observer)
+        {
+            if (_scriptCallback == null) return;
+            try
+            {
+                var jsArray = records.Select(ConvertRecordToJs).ToArray();
+                _scriptCallback.Invoke(false, jsArray, observer);
+            }
+            catch { }
+        }
+
+        public void Observe(CHtmlNode target, CHtmlMutationObserverInit options)
+        {
+            if (target == null) throw new ArgumentNullException(nameof(target));
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            lock (_registrations)
+            {
+                _registrations.Add(new Registration(target, options));
+                CHtmlMutationObserverDispatcher.Register(target, this, options);
+            }
+        }
+
+        public void observe(object target, object options)
+        {
+            if (target is CHtmlNode node)
+            {
+                var init = ConvertOptions(options);
+                Observe(node, init);
+            }
+        }
+
+        private static CHtmlMutationObserverInit ConvertOptions(object options)
+        {
+            var init = new CHtmlMutationObserverInit();
+            if (options is ScriptObject so)
+            {
+                bool GetBool(string name) => so.PropertyNames.Contains(name) && Convert.ToBoolean(so.GetProperty(name));
+                init.childList = GetBool("childList");
+                init.attributes = GetBool("attributes");
+                init.characterData = GetBool("characterData");
+                init.subtree = GetBool("subtree");
+                init.attributeOldValue = GetBool("attributeOldValue");
+                init.characterDataOldValue = GetBool("characterDataOldValue");
+                if (so.PropertyNames.Contains("attributeFilter"))
+                {
+                    var af = so.GetProperty("attributeFilter");
+                    if (af is ScriptObject afSo)
+                    {
+                        var list = new List<string>();
+                        foreach (var pn in afSo.PropertyNames)
+                        {
+                            var v = afSo.GetProperty(pn)?.ToString();
+                            if (v != null) list.Add(v);
+                        }
+                        init.attributeFilter = list.ToArray();
+                    }
+                }
+            }
+            return init;
+        }
+
+        public void Disconnect()
+        {
+            lock (_registrations)
+            {
+                foreach (var r in _registrations)
+                    CHtmlMutationObserverDispatcher.Unregister(r.Target, this);
+                _registrations.Clear();
+            }
+            lock (_queueLock) { _queue.Clear(); }
+        }
+        public void disconnect() => Disconnect();
+
+        public List<CHtmlMutationRecord> TakeRecords()
+        {
+            lock (_queueLock)
+            {
+                var list = new List<CHtmlMutationRecord>(_queue);
+                _queue.Clear();
+                return list;
+            }
+        }
+        public object takeRecords() => TakeRecords().Select(ConvertRecordToJs).ToArray();
+
+        internal void Enqueue(CHtmlMutationRecord record)
+        {
+            lock (_queueLock) { _queue.Add(record); }
+        }
+
+        internal void DeliverQueued()
+        {
+            List<CHtmlMutationRecord> deliver;
+            lock (_queueLock)
+            {
+                if (_queue.Count == 0) return;
+                deliver = new List<CHtmlMutationRecord>(_queue);
+                _queue.Clear();
+            }
+            try { _callback(deliver, this); } catch { }
+        }
+    }
+
+    public static class CHtmlMutationObserverDispatcher
+    {
+        private class ObserverRegistration
+        {
+            public WeakReference<CHtmlMutationObserver> Observer { get; }
+            public CHtmlMutationObserverInit Options { get; }
+            public ObserverRegistration(CHtmlMutationObserver observer, CHtmlMutationObserverInit options)
+            { Observer = new WeakReference<CHtmlMutationObserver>(observer); Options = options; }
+        }
+
+        private static readonly ConcurrentDictionary<CHtmlNode, List<ObserverRegistration>> _map = new();
+        private static int _deliveryScheduled;
+
+        public static CHtmlMutationObserver Create(CHtmlMutationCallback callback) => new(callback);
+
+        internal static void Register(CHtmlNode target, CHtmlMutationObserver observer, CHtmlMutationObserverInit options)
+        {
+            var list = _map.GetOrAdd(target, _ => new List<ObserverRegistration>());
+            lock (list) { list.Add(new ObserverRegistration(observer, options)); }
+        }
+
+        internal static void Unregister(CHtmlNode target, CHtmlMutationObserver observer)
+        {
+            if (!_map.TryGetValue(target, out var list)) return;
+            lock (list)
+            {
+                list.RemoveAll(r => !r.Observer.TryGetTarget(out var o) || o == observer);
+                if (list.Count == 0) _map.TryRemove(target, out _);
+            }
+        }
+
+        public static void NodeChildAdded(CHtmlNode parent, CHtmlNode added, CHtmlNode? previousSibling, CHtmlNode? nextSibling)
+            => NotifyChildList(parent, new List<CHtmlNode> { added }, null, previousSibling, nextSibling);
+        public static void NodeChildRemoved(CHtmlNode parent, CHtmlNode removed, CHtmlNode? previousSibling, CHtmlNode? nextSibling)
+            => NotifyChildList(parent, null, new List<CHtmlNode> { removed }, previousSibling, nextSibling);
+        public static void NodeAttributeChanged(CHtmlNode target, string attributeName, string? oldValue)
+            => NotifyAttribute(target, attributeName, oldValue);
+        public static void NodeCharacterDataChanged(CHtmlNode target, string? oldValue)
+            => NotifyCharacterData(target, oldValue);
+
+        private static void NotifyChildList(CHtmlNode target, List<CHtmlNode>? added, List<CHtmlNode>? removed, CHtmlNode? prev, CHtmlNode? next)
+        {
+            Dispatch(target, opt => opt.childList, () => new CHtmlMutationRecord
+            {
+                Type = "childList",
+                Target = target,
+                AddedNodes = added,
+                RemovedNodes = removed,
+                PreviousSiblingId = prev != null ? prev.GetHashCode().ToString() : null,
+                NextSiblingId = next != null ? next.GetHashCode().ToString() : null
+            });
+        }
+        private static void NotifyAttribute(CHtmlNode target, string attributeName, string? oldValue)
+        {
+            Dispatch(target, opt => opt.attributes && (opt.attributeFilter == null || opt.attributeFilter.Contains(attributeName)), () => new CHtmlMutationRecord
+            {
+                Type = "attributes",
+                Target = target,
+                AttributeName = attributeName,
+                OldValue = oldValue
+            });
+        }
+        private static void NotifyCharacterData(CHtmlNode target, string? oldValue)
+        {
+            Dispatch(target, opt => opt.characterData, () => new CHtmlMutationRecord
+            {
+                Type = "characterData",
+                Target = target,
+                OldValue = oldValue
+            });
+        }
+
+        private static void Dispatch(CHtmlNode target, Func<CHtmlMutationObserverInit, bool> filter, Func<CHtmlMutationRecord> recordFactory)
+        {
+            if (!_map.TryGetValue(target, out var list)) return;
+            List<CHtmlMutationObserver> observers = new();
+            lock (list)
+            {
+                foreach (var reg in list)
+                {
+                    if (!reg.Observer.TryGetTarget(out var observer)) continue;
+                    if (filter(reg.Options)) observers.Add(observer);
+                }
+            }
+            if (observers.Count == 0) return;
+            var record = recordFactory();
+            foreach (var obs in observers) obs.Enqueue(record);
+            ScheduleDelivery();
+        }
+
+        private static void ScheduleDelivery()
+        {
+            if (Interlocked.Exchange(ref _deliveryScheduled, 1) == 0)
+            {
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    try { Deliver(); }
+                    finally { Interlocked.Exchange(ref _deliveryScheduled, 0); }
+                });
+            }
+        }
+
+        private static void Deliver()
+        {
+            foreach (var kv in _map)
+            {
+                var list = kv.Value;
+                lock (list)
+                {
+                    foreach (var reg in list)
+                    {
+                        if (!reg.Observer.TryGetTarget(out var observer)) continue;
+                        observer.DeliverQueued();
+                    }
+                }
+            }
+        }
+    }
+}

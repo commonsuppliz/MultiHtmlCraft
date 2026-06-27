@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft_WinFormsTest", "MultiHtmlCraft_WinFormsTest.csproj", "{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft.Core", "..\MultiHtmlCraft\MultiHtmlCraft.Core\MultiHtmlCraft.Core.csproj", "{4DEFC56E-1BC3-7F1A-F2C0-8DB7FC7C4095}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft.Interfaces", "..\MultiHtmlCraft\Interfaces\MultiHtmlCraft.Interfaces.csproj", "{47CF743F-957F-A14F-01A1-B672DBF482CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClearScriptProcessor", "..\MultiHtmlCraft\ClearScriptProcessor\ClearScriptProcessor.csproj", "{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NilJsProcessor", "..\MultiHtmlCraft\NilJsProcessor\NilJsProcessor.csproj", "{BBC2E3F1-3B57-846E-CE67-ECA00A000808}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PythonProcessor", "..\MultiHtmlCraft\PythonProssesor\PythonProcessor.csproj", "{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft.WinformsControl", "..\MultiHtmlCraft\MultiHtmlCraft.WinformsControl\MultiHtmlCraft.WinformsControl.csproj", "{41DDD92E-46F3-1C4D-EF8E-469F7D8AD40B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47C08BC1-0435-A8AB-7799-BF81C5DAACA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DEFC56E-1BC3-7F1A-F2C0-8DB7FC7C4095}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DEFC56E-1BC3-7F1A-F2C0-8DB7FC7C4095}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DEFC56E-1BC3-7F1A-F2C0-8DB7FC7C4095}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DEFC56E-1BC3-7F1A-F2C0-8DB7FC7C4095}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47CF743F-957F-A14F-01A1-B672DBF482CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47CF743F-957F-A14F-01A1-B672DBF482CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47CF743F-957F-A14F-01A1-B672DBF482CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47CF743F-957F-A14F-01A1-B672DBF482CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBC2E3F1-3B57-846E-CE67-ECA00A000808}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBC2E3F1-3B57-846E-CE67-ECA00A000808}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBC2E3F1-3B57-846E-CE67-ECA00A000808}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBC2E3F1-3B57-846E-CE67-ECA00A000808}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41DDD92E-46F3-1C4D-EF8E-469F7D8AD40B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41DDD92E-46F3-1C4D-EF8E-469F7D8AD40B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41DDD92E-46F3-1C4D-EF8E-469F7D8AD40B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41DDD92E-46F3-1C4D-EF8E-469F7D8AD40B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {521A6C89-D79A-40EB-8B01-E1569DFCABEB}
+	EndGlobalSection
+EndGlobal

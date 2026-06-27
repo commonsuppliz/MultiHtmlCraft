@@ -1,0 +1,1221 @@
+﻿using MultiHtmlCraft.Interfaces;
+using NiL.JS.BaseLibrary;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Net.WebSockets;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
+
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// This class is to support script engines which use DynamicObject. Since it is difficult to support DynamicObject in this project, DynamicMetaObject is used instead.
+    /// </summary>
+    public class CHtmlClearScriptDynamicMetaObject<T> : DynamicMetaObject
+    {
+        private static readonly ConcurrentDictionary<(Type, string, Type[] parameterTypes), MethodInfo> ClearScriptMetaObjectMethodCache = new();
+        private static readonly ConcurrentDictionary<(Type, string), PropertyInfo> ClearScriptMetaObjectPropertyCache = new();
+
+        // Method to get MethodInfo from cache or add it if not present
+        private static MethodInfo GetCachedMethod(Type type, string methodName, Type[] parameterTypes)
+        {
+            // 修正前
+            // var key = (type, methodName);
+            // var method = ClearScriptMetaObjectMethodCache.GetOrAdd(key, _ => type.GetMethod(methodName, parameterTypes));
+
+            // 修正後
+            var key = (type, methodName, parameterTypes);
+            // parameterTypes も key に含めてキャッシュする
+            var method = ClearScriptMetaObjectMethodCache.GetOrAdd(key, _ => type.GetMethod(methodName, parameterTypes));
+            return method ?? throw new MissingMethodException($"Method '{methodName}' not found in type '{type.FullName}' with specified parameters.");
+        }
+
+        // Method to get PropertyInfo from cache or add it if not present
+        private static PropertyInfo GetCachedProperty(Type type, string propertyName)
+        {
+            var key = (type, propertyName);
+            //return ClearScriptMetaObjectPropertyCache.GetOrAdd(key, _ => type.GetProperty(propertyName));
+            var property = ClearScriptMetaObjectPropertyCache.GetOrAdd(key, _ => type.GetProperty(propertyName));
+            return property ?? throw new MissingMemberException($"Property '{propertyName}' not found in type '{type.FullName}'.");
+        }
+        public CHtmlClearScriptDynamicMetaObject(System.Linq.Expressions.Expression expression, object value)
+            : base(expression, BindingRestrictions.Empty, value)
+        {
+            
+        }
+        // Fix for CS1003: Ensure all 'switch' cases are properly closed with a 'break' statement or strElemName valid syntax.
+        public override DynamicMetaObject BindInvokeMember(InvokeMemberBinder binder, DynamicMetaObject[] args)
+        {
+
+
+            switch (this.Value)
+            {
+                case CHtmlDocument self:
+                    {
+                        var methodInfo = GetCachedMethod(typeof(CHtmlDocument), binder.Name, args.Select(a => a.LimitType).ToArray());
+                        if (methodInfo != null)
+                        {
+                            var parameters = methodInfo.GetParameters();
+                            var callArgs = new Expression[parameters.Length];
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                            }
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo, callArgs),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        break;
+                    }
+
+                case CHtmlElement _celement:
+                    {
+                        switch (binder.Name)
+                        {
+
+                            case "compareDocumentPosition":
+                                {
+                                    MethodInfo method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(ICHtmlNodeInterface) });
+                                    var parameters = method.GetParameters();
+                                    var callArgs = new Expression[parameters.Length];
+                                    for (int i = 0; i < parameters.Length; i++)
+                                    {
+                                        callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                    }
+                                    return new DynamicMetaObject(
+                                        Expression.Call(Expression.Constant(_celement), method, callArgs),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                break;
+                                }
+                            case "insertBefore":
+                            case "appendChild":
+                            case "removeChild":
+                                {
+                                    MethodInfo method;
+                                    if (args.Length == 2)
+                                        method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(CHtmlElement), typeof(CHtmlElement) });
+                                    else
+                                        method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(CHtmlElement) });
+                                    var parameters = method.GetParameters();
+                                    var callArgs = new Expression[parameters.Length];
+                                    for (int i = 0; i < parameters.Length; i++)
+                                    {
+                                        callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                    }
+                                    return new DynamicMetaObject(
+                                        Expression.Call(Expression.Constant(_celement), method, callArgs),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                            case "getElementById":
+                            case "getElementsByClassName":
+                            case "getElementsByTagNameNS":
+                            case "getElementsByTagName":
+                            case "getAttribute":
+                            case "createElement":
+                                {
+                                    MethodInfo methodgetgetElements = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(string) });
+                                    var parametersGetElementByTagName = methodgetgetElements.GetParameters();
+                                    var callArgsGetElementByTagName = new Expression[parametersGetElementByTagName.Length];
+                                    for (int i = 0; i < parametersGetElementByTagName.Length; i++)
+                                    {
+                                        callArgsGetElementByTagName[i] = Expression.Convert(args[i].Expression, parametersGetElementByTagName[i].ParameterType);
+                                    }
+                                    return new DynamicMetaObject(
+                                        Expression.Call(Expression.Constant(_celement), methodgetgetElements, callArgsGetElementByTagName),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                            case "setAttribute":
+                                {
+                                    if (args == null)
+                                        break;
+                                    MethodInfo method = null;
+                                    if (args.Length >= 3)
+                                        method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(string), typeof(object), typeof(object) });
+                                    else if (args.Length == 2)
+                                        method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(string), typeof(object) });
+                                    else if (args.Length == 1 || args.Length == 0)
+                                        throw new NotImplementedException("Parameter is not supported");
+                                    var parameters = method.GetParameters();
+                                    var callArgs = new Expression[parameters.Length];
+                                    for (int i = 0; i < parameters.Length; i++)
+                                    {
+                                        callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                    }
+                                    return new DynamicMetaObject(
+                                        Expression.Call(Expression.Constant(_celement), method, callArgs),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                            case "setAttributeNode":
+                            case "setAttributeNodeNS":
+                            case "setAttributeNS":
+                                {
+                                    throw new NotImplementedException();
+                                }
+                            case "cloneNode":
+                                {
+                                    MethodInfo method;
+                                    if (args.Length >= 1)
+                                        method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(object) });
+                                    else
+                                        method = GetCachedMethod(_celement.GetType(), binder.Name, Type.EmptyTypes);
+                                    var parameters = method.GetParameters();
+                                    var callArgs = new Expression[parameters.Length];
+                                    for (int i = 0; i < parameters.Length; i++)
+                                    {
+                                        callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                    }
+                                    return new DynamicMetaObject(
+                                        Expression.Call(Expression.Constant(_celement), method, callArgs),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                            case "getContext":
+                                {
+                                    if (args.Length >= 1)
+                                    {
+                                        MethodInfo method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(object[]) });
+                                        if (method != null)
+                                        {
+                                            var arrayExpr = Expression.NewArrayInit(
+                                                typeof(object),
+                                                args.Select(a => Expression.Convert(a.Expression, typeof(object)))
+                                            );
+                                            return new DynamicMetaObject(
+                                                Expression.Call(Expression.Constant(_celement), method, arrayExpr),
+                                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            );
+                                        }
+                                    }
+                                    else
+                                    {
+                                        throw new NotImplementedException("getContext needs two parama");
+                                    }
+                                    break;
+                                }
+                            case "addEventListener":
+                                {
+                                    if (args.Length >= 1)
+                                    {
+                                        MethodInfo method = GetCachedMethod(_celement.GetType(), binder.Name, new Type[] { typeof(string), typeof(object) });
+                                        var parameters = method.GetParameters();
+                                        var callArgs = new Expression[parameters.Length];
+                                        for (int i = 0; i < parameters.Length; i++)
+                                        {
+                                            callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                                        }
+                                        return new DynamicMetaObject(
+                                            Expression.Call(Expression.Constant(_celement), method, callArgs),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                    else
+                                    {
+                                        throw new NotImplementedException("addEventLinser needs two parama");
+
+                                    }
+                                    break;
+                                   
+                                }
+                        }
+                        
+                        }
+                        break; // Ensure the case block ends properly
+                    
+
+                case CHtmlXMLHttpRequest xhr:
+                    {
+                        var methodInfo = typeof(CHtmlXMLHttpRequest).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            var parameters = methodInfo.GetParameters();
+                            if (parameters.Length == 1 && parameters[0].ParameterType == typeof(object[]))
+                            {
+                                var arrayExpr = Expression.NewArrayInit(
+                                    typeof(object),
+                                    args.Select(a => Expression.Convert(a.Expression, typeof(object)))
+                                );
+                                return new DynamicMetaObject(
+                                    Expression.Call(Expression.Constant(xhr), methodInfo, arrayExpr),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+
+                            var callArgs = new Expression[parameters.Length];
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                            }
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(xhr), methodInfo, callArgs),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        break; // Ensure the case block ends properly
+
+                    }
+                case CHtmlWorkerWindow _workerWindow:
+                    {
+                        var methodInfo = typeof(CHtmlWorkerWindow).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            var parameters = methodInfo.GetParameters();
+                            var callArgs = new Expression[parameters.Length];
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                            }
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(_workerWindow), methodInfo, callArgs),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        break; // Ensure the case block ends properly
+                    }
+                case CHtmlCanvasContext2D cHtmlCanvasContext2D:
+                    {
+                        var methodInfo = typeof(CHtmlCanvasContext2D).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            var parameters = methodInfo.GetParameters();
+                            var callArgs = new Expression[parameters.Length];
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                            }
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(cHtmlCanvasContext2D), methodInfo, callArgs),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        break; // Ensure the case block ends properly
+                    }
+                case CHtmlSharedWorkerWindow _sharedWorkerWindow:
+                    {
+                        var methodInfo = typeof(CHtmlSharedWorkerWindow).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            var parameters = methodInfo.GetParameters();
+                            var callArgs = new Expression[parameters.Length];
+                            for (int i = 0; i < parameters.Length; i++)
+                            {
+                                callArgs[i] = Expression.Convert(args[i].Expression, parameters[i].ParameterType);
+                            }
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(_sharedWorkerWindow), methodInfo, callArgs),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        break; // Ensure the case block ends properly
+                    }
+                case CHtmlFontFace _fontface:
+
+                    { 
+                        if(commonLog.LoggingEnabled &&  commonLog.LogLevel >= 8)
+                        {
+                            commonLog.LogEntry("Bind to fontface is requred");
+                        }
+                    }
+                    break;
+            }
+
+            return base.BindInvokeMember(binder, args);
+        }
+
+        public override IEnumerable<string> GetDynamicMemberNames()
+        {
+            switch(this.Value)
+            {
+                case CHtmlDomTokenList _domTokenList:
+                    {
+                        var self = _domTokenList;
+                        return self.GetDynamicMemberNames();
+                    }
+                    break;
+                case CHtmlSVGElement cHtmlSVGElement:
+                                        {
+                        var self = cHtmlSVGElement;
+                        return self.GetDynamicMemberNames();
+                    }
+                    break;
+                case CHtmlInputElement inputElement:
+                    {
+                        var self = inputElement;
+                        return self.GetDynamicMemberNames();
+                    }
+                    break;
+                case CHtmlElement element:
+                    {
+                        var self = element;
+                        return self.GetDynamicMemberNames();
+                    }
+                    break;
+                case CHtmlDocument cHtmlDocument:
+                    {
+                        var self = cHtmlDocument;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlWorkerWindow cHtmlWorkerWindow:
+                    {
+                        var self = cHtmlWorkerWindow;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlSharedWorkerWindow cHtmlSharedWorkerWindow:
+                    {
+                        var self = cHtmlSharedWorkerWindow;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlMultiversalWindow cHtmlMultiversalWindow:
+                    {
+                        var self = cHtmlMultiversalWindow;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlCanvasContext2D _canvasContext:
+                    {
+                        
+                        var self = _canvasContext;
+                        return self.GetDynamicMemberNames();
+                        
+                        /*
+
+                        */
+                    }
+                case CHtmlConsole consoleObject:
+                    {
+                        var self = consoleObject;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlNavigator navigatorObject:
+                    {
+                        var self = navigatorObject;
+                        return self.GetDynamicMemberNames();
+
+                    }
+                case CHtmlLocationBase cHtmlLocationBase:
+                    {
+                        var self = cHtmlLocationBase;
+                        return self.GetDynamicMemberNames();
+
+                    }
+
+                case CHtmlCollection cHtmlCollection:
+                    {
+                        var self = cHtmlCollection;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlURLSearchParams cHtmlUrlSearchParams:
+                    {
+                        var self = cHtmlUrlSearchParams;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlCSSStyleSheet _cssSheet:
+                    {
+                        var self = _cssSheet;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlWindowURL cHtmlWindowURL:
+                    {
+                        var self = cHtmlWindowURL;
+                        return self.GetDynamicMemberNames();
+                    }
+   
+                case CHtmlAttribute cHtmlAttribute:
+                    {
+                        var self = cHtmlAttribute;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlAttributeList cHtmlAttributeList:
+                    {
+                        var self = cHtmlAttributeList;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlXMLHttpRequest _xhr:
+                    {
+                        var self = _xhr;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlFontFace cHtmlFontFace:
+                    {
+                        var self = cHtmlFontFace;
+                        return self.GetDynamicMemberNames();
+                    }
+                case CHtmlNode cHtmlNode:
+                    {
+                        {
+                            var self = cHtmlNode;
+                            return self.GetDynamicMemberNames();
+                        }
+                    }
+  
+            }
+            throw new NotImplementedException($"CHtmlDynamicMetaObject Error {this.Value.GetType()}");
+
+        }
+
+        public override DynamicMetaObject BindGetMember(GetMemberBinder binder)
+        {
+            switch (this.Value)
+            {
+                case CHtmlElement element:
+                    {
+                        var self = element;
+                        if (CHtmlElement.CHtmlElementProperties.ContainsKey(binder.Name))
+                        {
+                            var propertyInfo = GetCachedProperty(typeof(CHtmlElement), binder.Name);
+                            if (propertyInfo == null)
+                                propertyInfo = GetCachedProperty(typeof(CHtmlNode), binder.Name);
+                            if (propertyInfo != null)
+                            {
+                                return new DynamicMetaObject(
+                                    Expression.Property(Expression.Constant(self), propertyInfo),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                        }
+                        MethodInfo methodInfo = null;
+                        if (CHtmlElement.CHtmlElementMethods.ContainsKey(binder.Name) == true)
+                        {
+                            switch (binder.Name)
+                            {
+                                case "insertBefore":
+                                case "getContext":
+                                case "removeChild":
+                                case "getElementsByTagName":
+                                case "setAttribute":
+                                case "cloneNode":
+                                case "addEventListener":
+                                case "getAttribute":
+                                    return base.BindGetMember(binder);
+                                case "toString":
+                                    Func<string> toStringFunc = () => element.ToString();
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(toStringFunc),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                case "appendChild":
+                                    var methodInfoAppendChild = GetCachedMethod(typeof(CHtmlElement), "appendChild", new[] { typeof(CHtmlElement) });
+                                    if (methodInfoAppendChild != null)
+                                    {
+                                        var del = Delegate.CreateDelegate(
+                                            Expression.GetDelegateType(
+                                                methodInfoAppendChild.GetParameters()
+                                                    .Select(p => p.ParameterType)
+                                                    .Concat(new[] { methodInfoAppendChild.ReturnType })
+                                                    .ToArray()
+                                            ),
+                                            self,
+                                            methodInfoAppendChild
+                                        );
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(del),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                    break;
+                                case "compareDocumentPosition":
+                                    var methodcompareDocumentPosition = GetCachedMethod(typeof(CHtmlElement), "compareDocumentPosition", new Type[] { typeof(ICHtmlNodeInterface) });
+                                    if (methodcompareDocumentPosition != null)
+                                    {
+                                        Func<object, double> delcompareDocumentPosition = (other) =>
+                                        {
+                                            if (other is ICHtmlNodeInterface node)
+                                                return (double)methodcompareDocumentPosition.Invoke(self, new object[] { node });
+                                            throw new ArgumentException("Argument must be ICHtmlNodeInterface");
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(delcompareDocumentPosition),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                    break;
+                            }
+                            methodInfo = GetCachedMethod(typeof(CHtmlElement), binder.Name, Type.EmptyTypes);
+                            if (methodInfo != null)
+                            {
+                                var del = Delegate.CreateDelegate(
+                                    Expression.GetDelegateType(
+                                        methodInfo.GetParameters()
+                                            .Select(p => p.ParameterType)
+                                            .Concat(new[] { methodInfo.ReturnType })
+                                            .ToArray()
+                                    ),
+                                    self,
+                                    methodInfo
+                                );
+                                return new DynamicMetaObject(
+                                    Expression.Constant(del),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+                            Expression.Constant(result),
+                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+                case CHtmlDocument _document:
+                    {
+                        var self = _document;
+                        switch (binder.Name)
+                        {
+                            case "createElement":
+                            case "getElementById":
+                                {
+                                    var methodWithOneString = typeof(CHtmlDocument).GetMethod(binder.Name, new Type[] { typeof(string) });
+                                    if (methodWithOneString != null)
+                                    {
+                                        Func<object, CHtmlElement> delCreateElement = (strElemName) =>
+                                        {
+                                            if (strElemName is string)
+                                            { 
+                                            return (CHtmlElement)methodWithOneString.Invoke(self, new object[] { strElemName });
+                                            }
+                                            throw new ArgumentException("Argument must be string");
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(delCreateElement),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                    break;
+                                }
+          
+                        }
+                            if (CHtmlDocument.CHtmlDocumentProperties.ContainsKey(binder.Name))
+                        {
+                            var propertyInfo = typeof(CHtmlDocument).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+.FirstOrDefault(p => p.Name == binder.Name && p.DeclaringType == typeof(CHtmlDocument))
+?? typeof(CHtmlNode).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+.FirstOrDefault(p => p.Name == binder.Name && p.DeclaringType == typeof(CHtmlNode));
+                            if (propertyInfo != null)
+                            {
+                                return new DynamicMetaObject(
+                                    Expression.Property(Expression.Constant(self), propertyInfo),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                        
+                        }
+                        if (CHtmlDocument.CHtmlDocumentMethods.ContainsKey(binder.Name))
+                        {
+                            var methodInfo = typeof(CHtmlDocument).GetMethod(binder.Name);
+                            if (methodInfo != null)
+                            {
+                                var del = Delegate.CreateDelegate(
+                                    Expression.GetDelegateType(
+                                        (from parameter in methodInfo.GetParameters() select parameter.ParameterType)
+                                        .Concat(new[] { methodInfo.ReturnType })
+                                        .ToArray()
+                                    ),
+                                    self,
+                                    methodInfo
+                                );
+                                return new DynamicMetaObject(
+                                    Expression.Constant(del),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+
+                                );
+
+                            }
+                        }
+                        else // in case of the methods name not defined in CHtmlDocumentMethods
+                        {
+                            var methodInfo = typeof(CHtmlDocument).GetMethod(binder.Name);
+                            if (methodInfo != null)
+                            {
+                                var del = Delegate.CreateDelegate(
+                                    Expression.GetDelegateType(
+                                        (from parameter in methodInfo.GetParameters() select parameter.ParameterType)
+                                        .Concat(new[] { methodInfo.ReturnType })
+                                        .ToArray()
+                                    ),
+                                    self,
+                                    methodInfo
+                                );
+                                return new DynamicMetaObject(
+                                    Expression.Constant(del),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+
+                                );
+
+                            }
+                        }
+
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+                case CHtmlWorkerWindow _workerWindow:
+
+                    {
+                        var self = _workerWindow;
+                        var methodInfo = typeof(CHtmlMultiversalWindow).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+                case CHtmlMultiversalWindow window:
+                    {
+                        var self = window;
+                        var methodInfo = typeof(CHtmlMultiversalWindow).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+                case CHtmlCSSStyleSheet _sheet:
+                    {
+                        var self = _sheet;
+                        var methodInfo = typeof(CHtmlCSSStyleSheet).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+                case CHtmlFontFace _fontFace:
+                    {
+                        var self = _fontFace;
+                        if (CHtmlFontFace.CHtmlFontFaceProperties.ContainsKey(binder.Name))
+                        {
+                            var value = self.GetDynamicMember(binder.Name);
+                            return new DynamicMetaObject(
+                                Expression.Constant(value),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, typeof(CHtmlFontFace))
+                            );
+                        }
+                            var methodInfo = typeof(CHtmlFontFace).GetMethod(binder.Name);
+                            if (methodInfo != null)
+                            {
+                                return new DynamicMetaObject(
+                                    Expression.Call(Expression.Constant(self), methodInfo),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                            else {                                 var result = self.GetDynamicMember(binder.Name);
+                                return new DynamicMetaObject(
+                                    Expression.Constant(result),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                        
+                    }
+                    break;
+
+            
+                case CHtmlConsole _console:
+                    {
+                        var self = _console;
+                        switch(binder.Name)
+                        {
+                            case "log":
+                            case "info":
+                            case "assert":
+                            case "count":
+                            case "debug":
+                            case "error":
+                            case "clear":
+                            case "grouop":
+                            case "dir":
+                            case "groupStart":
+                            case "groupEnd":
+                            case "dirxml":
+                            case "groupCollapsed":
+                            case "countReset":
+                            case "profile":
+                            case "profileEnd":
+                            case "table":
+                                return base.BindGetMember(binder);
+                        }
+                        var methodInfo = typeof(CHtmlConsole).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                    }
+                case CHtmlCanvasContext2D _canvasContext2D:
+                    {
+                        /*
+                        var _celement = _canvasContext2D;
+                        var result = _celement.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                        */
+                        var self = _canvasContext2D;
+                        var methodInfo = typeof(CHtmlCanvasContext2D).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+                            Expression.Constant(result),
+                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                        );
+
+                    }
+
+                case CHtmlCollection _chtmlCollection:
+                    {
+                        var self = _chtmlCollection;
+                        switch (binder.Name)
+                        {
+
+
+                            case "length":
+                                {
+                                    var propertyInfo = typeof(CHtmlCollection).GetProperty(binder.Name, BindingFlags.Instance | BindingFlags.Public);
+                                    if (propertyInfo != null)
+                                    {
+                                        return new DynamicMetaObject(
+                                            Expression.Property(Expression.Constant(self), propertyInfo),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                    break; // Add a break statement to prevent fall-through
+                                }
+
+                            default:
+                                break;
+                        }
+
+                        var methodInfo = typeof(CHtmlCollection).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                    }
+                case CHtmlDomTokenList _domTokenList:
+                    {
+                        var self = _domTokenList;
+                        var methodInfo = typeof(CHtmlDomTokenList).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+                case CHtmlAttributeList cHtmlAttributeList:
+                    {
+                        var self = cHtmlAttributeList;
+                        var methodInfo = typeof(CHtmlAttributeList).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+                case CHtmlAttribute cHtmlAttribute:
+                    {
+                        var self = cHtmlAttribute;
+                        var methodInfo = typeof(CHtmlAttribute).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+                case CHtmlXMLHttpRequest _xhr:
+                    {
+                        var self = _xhr;
+                        if (CHtmlXMLHttpRequest.CHtmlXMLHttpRequestMethods.ContainsKey(binder.Name))
+                        {
+                            var methodInfo = typeof(CHtmlXMLHttpRequest).GetMethod(binder.Name);
+                            var del = Delegate.CreateDelegate(
+    Expression.GetDelegateType(
+        (from parameter in methodInfo.GetParameters() select parameter.ParameterType)
+        .Concat(new[] { methodInfo.ReturnType })
+        .ToArray()
+    ),
+    self,
+    methodInfo
+);
+                            return new DynamicMetaObject(
+                                Expression.Constant(del),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+
+                            );
+
+                        }else if(CHtmlXMLHttpRequest.CHtmlXMLHttpRequestProperties.ContainsKey(binder.Name))
+                         {
+#if DEBUG
+                            var properties = typeof(CHtmlXMLHttpRequest).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+                            var matchingProperties = properties.Where(p => p.Name == binder.Name).ToList();
+
+                            if (matchingProperties.Count > 1)
+                            {
+                                Console.WriteLine($"Ambiguous properties found for '{binder.Name}':");
+                                foreach (var prop in matchingProperties)
+                                {
+                                    Console.WriteLine($"- {prop.DeclaringType}.{prop.Name}");
+                                }
+                            }
+#endif
+                            /*
+                            var propertyInfo = typeof(CHtmlElement).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .FirstOrDefault(p => p.Name == binder.Name && p.DeclaringType == typeof(CHtmlElement))
+            ?? typeof(CHtmlNode).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .FirstOrDefault(p => p.Name == binder.Name && p.DeclaringType == typeof(CHtmlNode)); 
+                            */
+                            var propertyInfo = typeof(CHtmlXMLHttpRequest).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+.FirstOrDefault(p => p.Name == binder.Name && p.DeclaringType == typeof(CHtmlXMLHttpRequest))
+?? typeof(CHtmlNode).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+.FirstOrDefault(p => p.Name == binder.Name && p.DeclaringType == typeof(CHtmlNode));
+                            if (propertyInfo != null)
+                            {
+                                return new DynamicMetaObject(
+                                    Expression.Property(Expression.Constant(self), propertyInfo),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                        }
+
+
+
+                            var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                    }
+       
+     
+
+
+
+
+                case CHtmlNode _chtmlnode:
+                    {
+                        var self = _chtmlnode;
+                        var methodInfo = typeof(CHtmlNode).GetMethod(binder.Name);
+                        if (methodInfo != null)
+                        {
+                            return new DynamicMetaObject(
+                                Expression.Call(Expression.Constant(self), methodInfo),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        var result = self.GetDynamicMember(binder.Name);
+                        return new DynamicMetaObject(
+    Expression.Constant(result),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                    }
+
+
+
+
+            }
+            throw new NotImplementedException();
+
+        }
+        public override DynamicMetaObject BindConvert(ConvertBinder binder)
+        {
+          
+            if (binder.Type == typeof(string))
+            {
+                var self = this.Value;
+                var toStringMethod = self.GetType().GetMethod("ToString", Type.EmptyTypes);
+                var callToString = Expression.Call(Expression.Constant(self), toStringMethod);
+                return new DynamicMetaObject(
+                    callToString,
+                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                );
+            }
+            return base.BindConvert(binder);
+        }
+
+        public override DynamicMetaObject BindSetMember(SetMemberBinder binder, DynamicMetaObject value)
+        {
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("BindSetMember is called with value {0}", value);
+            }
+            /*
+            var _celement = this.Value as CHtmlElement;
+            _celement.SetDynamicMember(binder.Name, value.Value);
+            return new DynamicMetaObject(
+                Expression.Constant(value.Value),
+                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+            );
+            */
+            switch (this.Value)
+            {
+                case CHtmlInputElement cHtmlInputElement:
+                    {
+                        try
+                        {
+                            var self = cHtmlInputElement;
+                            self.SetDynamicMember(binder.Name, value.Value);
+                            return new DynamicMetaObject(
+                                Expression.Constant(value.Value),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        catch (Exception exInputElement)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("BindSetMember InputElement error with value {0}", value);
+                            }
+                        }
+                    }
+                    break;
+                case CHtmlElement element:
+
+                    {
+                        try
+                        {
+                            var self = element;
+                            self.SetDynamicMember(binder.Name, value.Value);
+                            return new DynamicMetaObject(
+                                       Expression.Constant(value.Value),
+                                       BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                   );
+                        }
+                        catch (Exception exElement)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("BindSetMember Element error with value {0}", value);
+                            }
+                        }
+                    }
+                    break;
+                case CHtmlDomTokenList domTokenList:
+                    {
+                        try
+                        {
+                            var self = domTokenList;
+                            self.SetDynamicMember(binder.Name, value.Value);
+                            return new DynamicMetaObject(
+                                Expression.Constant(value.Value),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        catch (Exception exDomTokenList)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("BindSetMember DomTokenList error with value {0}", value);
+                            }
+                        }
+                    }
+                    break;
+
+                case CHtmlDocument doc:
+                    {
+                        try
+                        {
+                            var self = doc;
+                            self.SetDynamicMember(binder.Name, value.Value);
+                            return new DynamicMetaObject(
+                          Expression.Constant(value.Value),
+                          BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                        } 
+                        catch (Exception exDocument)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("BindSetMember Document error with value {0}", value);
+                            }
+                        }
+                  
+                    }
+                    break;
+                case CHtmlMultiversalWindow cMultiversalWindow:
+                    {
+                        try
+                        {
+                            var self = cMultiversalWindow;
+                            self.SetDynamicMember(binder.Name, value.Value);
+                            return new DynamicMetaObject(
+                          Expression.Constant(value.Value),
+                          BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                           );
+                        }
+                        catch (Exception exWindow)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("BindSetMember Window error with value {0}", value);
+                            }
+                        }
+                    }
+                    break;
+                case CHtmlCanvasContext2D canvasContext2D:
+                    {
+                        try
+                        {
+                            var self = canvasContext2D;
+                            self.___setPropertyByName(binder.Name, value.Value);
+                            return new DynamicMetaObject(
+                          Expression.Constant(value.Value),
+                          BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                        }
+                        catch (Exception exDocument)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("BindSetMember Document error with value {0}", value);
+                            }
+                        }
+
+                    }
+                    break;
+                    break;
+                case CHtmlCSSStyleSheet _sheet:
+                    {
+                        {
+                            try
+                            {
+
+
+                                var self = _sheet;
+                                self.SetDynamicMember(binder.Name, value.Value);
+                                return new DynamicMetaObject(
+                              Expression.Constant(value.Value),
+                              BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                              );
+                            }
+                            catch (Exception exCanvasContext2D)
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                {
+                                    commonLog.LogEntry("BindSetMember CHtmlCSSStyleSheet error with value {0}", value);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                case CHtmlXMLHttpRequest _xhr:
+                    {
+                        try
+                        {
+                            _xhr.SetDynamicMember(binder.Name, value.Value);
+                            return new DynamicMetaObject(
+                                Expression.Constant(value.Value),
+                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                            );
+                        }
+                        catch (Exception exXhr)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("BindSetMember XMLHttpRequest error with value {0}", value);
+                            }
+                        }
+                        break;
+                    }
+
+            }
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("BindSetMember is not implemented for this class error with value {0} : {1}", binder, value);
+            }
+            throw new NotImplementedException();
+            
+        }
+        public override DynamicMetaObject BindGetIndex(GetIndexBinder binder, DynamicMetaObject[] indexes)
+        {
+
+            switch (this.Value)
+            {
+                case CHtmlCollection _collection:
+                    { }
+                    // index[0] を int に変換
+                    var indexExpr = Expression.Convert(indexes[0].Expression, typeof(int));
+                    // this.Expression を CHtmlCollection 型に変換
+                    var selfExpr = Expression.Convert(this.Expression, typeof(MultiHtmlCraft.Core.CHtmlCollection));
+                    // インデクサープロパティ取得
+                    var indexer = typeof(MultiHtmlCraft.Core.CHtmlCollection).GetProperty("Item", new[] { typeof(int) });
+                    // インデクサー呼び出し式
+                    var call = Expression.Property(selfExpr, indexer, indexExpr);
+
+                    return new DynamicMetaObject(
+                        call,
+                        BindingRestrictions.GetTypeRestriction(this.Expression, typeof(MultiHtmlCraft.Core.CHtmlCollection))
+                    );
+            
+            }
+
+            // デフォルトの動作
+            return base.BindGetIndex(binder, indexes);
+        }
+       
+
+    }
+}

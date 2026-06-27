@@ -1,0 +1,196 @@
+﻿using MultiHtmlCraft.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+namespace MultiHtmlCraft.Core
+{
+    public class CHtmlFontFace : IDynamicMetaObjectProvider, ICommonObjectInterface
+    {
+        public static Dictionary<string, object> CHtmlFonFaceProperties = createChtmlFontFaceProperties();
+
+        private static Dictionary<string, object> createChtmlFontFaceProperties()
+        {
+            return new Dictionary<string, object>
+    {
+        { "fontFamily", string.Empty },
+        { "src", string.Empty },
+        { "fontWeight", "normal" },
+        { "fontStyle", "normal" },
+        { "fontStretch", "normal" },
+        { "unicodeRange", string.Empty },
+        { "ascentOverride", string.Empty },
+        { "descentOverride", string.Empty },
+        { "lineGapOverride", string.Empty },
+        { "loaded", false },
+        { "status", "unloaded" },
+        { "style", string.Empty }
+    };
+        }
+
+        internal IDictionary<string, object> ___properties = new Dictionary<string, object>();
+
+        // font-family: Font family name
+        public string fontFamily { get; set; }
+        // src: Font file URL or local path
+        public string src { get; set; }
+        // font-weight: e.g. normal, bold, 100-900
+        public string fontWeight { get; set; }
+        // font-style: e.g. normal, italic, oblique
+        public string fontStyle { get; set; }
+        // font-stretch: e.g. normal, condensed, expanded
+        public string fontStretch { get; set; }
+        // unicode-range: Target Unicode range
+        public string unicodeRange { get; set; }
+        // ascent-override, descent-override, line-gap-override as needed
+        public string ascentOverride { get; set; }
+        public string descentOverride { get; set; }
+        public string lineGapOverride { get; set; }
+        // loaded: Whether the font is loaded
+        public bool loaded { get; set; }
+        // status: Font loading status (e.g. unloaded, loading, loaded, error)
+        public string status { get; set; }
+        // style: Additional style information
+        public string style { get; set; }
+
+        public CHtmlFontFace()
+        {
+            // Set default values
+            fontFamily = string.Empty;
+            src = string.Empty;
+            fontWeight = "normal";
+            fontStyle = "normal";
+            fontStretch = "normal";
+            unicodeRange = string.Empty;
+            ascentOverride = string.Empty;
+            descentOverride = string.Empty;
+            lineGapOverride = string.Empty;
+            loaded = false;
+            status = "unloaded";
+            style = string.Empty;
+        }
+
+        // Asynchronously load the font. Returns a Task as a Promise-like object.
+        public Task<CHtmlFontFace> load()
+        {
+            return Task.Run(async () =>
+            {
+                status = "loading";
+                try
+                {
+                    // Implement font file existence check and loading here
+                    // Dummy delay for simulation
+                    await Task.Delay(100); // Replace with actual file/network access
+                    loaded = true;
+                    status = "loaded";
+                }
+                catch (Exception)
+                {
+                    loaded = false;
+                    status = "error";
+                }
+                return this;
+            });
+        }
+
+        // IDynamicMetaObjectProvider implementation
+        public DynamicMetaObject GetMetaObject(Expression parameter)
+        {
+            return new MultiHtmlCraft.Core.CHtmlDynamicMetaObject<CHtmlFontFace>(parameter, this);
+        }
+
+        // ICommonObjectInterface implementation
+        public void ___setPropertyByName(string name, object val)
+        {
+            switch (name)
+            {
+                case "fontFamily": fontFamily = val as string ?? string.Empty; break;
+                case "src": src = val as string ?? string.Empty; break;
+                case "fontWeight": fontWeight = val as string ?? "normal"; break;
+                case "fontStyle": fontStyle = val as string ?? "normal"; break;
+                case "fontStretch": fontStretch = val as string ?? "normal"; break;
+                case "unicodeRange": unicodeRange = val as string ?? string.Empty; break;
+                case "ascentOverride": ascentOverride = val as string ?? string.Empty; break;
+                case "descentOverride": descentOverride = val as string ?? string.Empty; break;
+                case "lineGapOverride": lineGapOverride = val as string ?? string.Empty; break;
+                case "loaded": loaded = val is bool b ? b : false; break;
+                case "status": status = val as string ?? "unloaded"; break;
+                case "style": style = val as string ?? string.Empty; break;
+                default: ___properties[name] = val; break;
+            }
+        }
+        public void ___setPropertyByIndex(int ___index, object val)
+        {
+            var key = CHtmlFonFaceProperties.Keys.ElementAtOrDefault(___index);
+            if (key != null)
+                ___setPropertyByName(key, val);
+        }
+        public object ___getPropertyByName(string name)
+        {
+            switch (name)
+            {
+                case "fontFamily": return fontFamily;
+                case "src": return src;
+                case "fontWeight": return fontWeight;
+                case "fontStyle": return fontStyle;
+                case "fontStretch": return fontStretch;
+                case "unicodeRange": return unicodeRange;
+                case "ascentOverride": return ascentOverride;
+                case "descentOverride": return descentOverride;
+                case "lineGapOverride": return lineGapOverride;
+                case "loaded": return loaded;
+                case "status": return status;
+                case "style": return style;
+                default: return ___properties.TryGetValue(name, out var v) ? v : null;
+            }
+        }
+        public object ___getPropertyByIndex(int ___index)
+        {
+            var key = CHtmlFonFaceProperties.Keys.ElementAtOrDefault(___index);
+            return key != null ? ___getPropertyByName(key) : null;
+        }
+        public bool ___hasPropertyByName(string name)
+        {
+            return CHtmlFonFaceProperties.ContainsKey(name) || ___properties.ContainsKey(name);
+        }
+        public bool ___hasPropertyByIndex(int ___index)
+        {
+            return ___index >= 0 && ___index < CHtmlFonFaceProperties.Count;
+        }
+        public void ___deleteByIndex(int ___index)
+        {
+            var key = CHtmlFonFaceProperties.Keys.ElementAtOrDefault(___index);
+            if (key != null) ___properties.Remove(key);
+        }
+        public void ___deleteByName(string ___Name)
+        {
+            ___properties.Remove(___Name);
+        }
+        public object[] ___getByIds()
+        {
+            return CHtmlFonFaceProperties.Keys.Select(k => ___getPropertyByName(k)).ToArray();
+        }
+        public object ___getDefaultValue() => fontFamily;
+        public object ___getProtoType() => null;
+        public void ___setProtoType(object __object) { }
+        public void ___setParentScope(object __object) { }
+        public object ___getParentScope() => null;
+        public string ___getClassName() => nameof(CHtmlFontFace);
+        public bool ___hasInstance(object __object) => __object is CHtmlFontFace;
+        public bool ___instanceEquals(object __object) => ReferenceEquals(this, __object);
+        public object ___common_object_clone()
+        {
+            var clone = new CHtmlFontFace();
+            foreach (var key in CHtmlFonFaceProperties.Keys)
+                clone.___setPropertyByName(key, ___getPropertyByName(key));
+            foreach (var kv in ___properties)
+                clone.___properties[kv.Key] = kv.Value;
+            return clone;
+        }
+        public IMutilversalObjectType multiversalClassType => IMutilversalObjectType.CSSFontFaceRule;
+    }
+}

@@ -1,0 +1,664 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.ClearScript;
+using Microsoft.ClearScript.JavaScript;
+using Microsoft.ClearScript.V8;
+using MultiHtmlCraft.Interfaces;
+using ClearScriptProcessor; 
+
+namespace ClearScriptProcessor
+{
+
+    public class ClearScriptProcessorScope : IMultiversalScriptScope, IDisposable
+    {
+        private V8ScriptEngine? _v8Engine = null;
+        private bool _isInitCompleted = false;
+        private bool _isDisposed = false;
+        private IMultiversalWindow _multiversalWindow = null;
+        private ICHtmlDocumentInterface _document = null;
+        private ClearScriptProcessor? processor = null;
+        public ClearScriptProcessorScope()
+        {
+            initScriptEngine();
+            _isInitCompleted = true;
+            _isDisposed = false;
+            processor = new ClearScriptProcessor();
+            processor.multiversalscope = this;
+            processor.clearscriptengine = _v8Engine;
+
+        }
+        public void Dispose()
+        {
+            _v8Engine.Dispose();
+            _isDisposed = true;
+        }
+        public V8ScriptEngine engine
+        {
+            get { return _v8Engine; }
+        }
+        public void disposeScriptEngine()
+        {
+            _v8Engine.Dispose();
+            _isDisposed = true;
+        }
+
+        public string getMultivasalScopeName()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        private static List<string> _multiversalInvokeScriptNames = createNames();
+        private static List<string> createNames()
+        {
+            List<string> names = new List<string>();
+            names.Add("text/javascript");
+            names.Add("text/json");
+            names.Add("javascript");
+            names.Add("Javascript");
+            names.Add("application/javascript");
+            names.Add("application/json");
+            names.Add("application/x-javascript");
+            names.Add("application/x-javascript; charset=UTF-8");
+            names.Add("application/x-javascript; charset=ISO-8859-1");
+            names.Add("application/x-javascript; charset=ISO-8859-15");
+            names.Add("application/x-javascript; charset=windows-1252");
+            names.Add("application/x-javascript; charset=windows-1251");
+            names.Add("application/x-javascript; charset=windows-1250");
+            names.Add("application/x-javascript; charset=windows-1253");
+            names.Add("application/x-javascript; charset=windows-1254");
+            names.Add("application/x-javascript; charset=windows-1255");
+            names.Add("application/x-javascript; charset=windows-1256");
+            names.Add("application/x-javascript; charset=windows-1257");
+            names.Add("application/x-javascript; charset=gb2312");
+            names.Add("application/x-javascript; charset=sjis");
+            names.Add("application/x-javascript; charset=shift_jis");
+            names.Add("application/x-javascript; charset=shiftjis");
+
+            return names;
+        }
+        public string[] getMultiversalInvokeScriptNames()
+        {
+            return _multiversalInvokeScriptNames.ToArray();
+        }
+
+        public IMultiversalScriptProcessor getMultiversalScriptProcessor()
+        {
+
+            return processor;
+        }
+
+        public IMultiversalWindow getMultiversalWindow()
+        {
+            return _multiversalWindow;
+        }
+
+        public IMultiversalWindowType getMutilversalWindowType()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void initScriptEngine()
+        {
+            if (!_isInitCompleted)
+            {
+#if DEBUG
+                _v8Engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDebugging);
+               
+#else
+                _v8Engine = new V8ScriptEngine(V8ScriptEngineFlags.None);
+            
+#endif
+                _v8Engine.AllowReflection = true; // Keep This True for Reflection
+                _v8Engine.DisableExtensionMethods = false;
+              //  _v8Engine.DisableExtensionMethods = true;
+            }
+      
+            _isInitCompleted = true;
+        }
+
+        public bool isDefaultMultiversalProcessor()
+        {
+            return true;
+        }
+
+        public bool isInitCompleted()
+        {
+            return _isInitCompleted;
+        }
+
+        public void relaseMultiversal()
+        {
+            _multiversalWindow = null;
+        }
+
+        public void setMultiversalWindow(IMultiversalWindow window)
+        {
+            if (_isInitCompleted)
+            {
+#if DEBUG
+
+#endif
+
+                //this._v8Engine.AddHostObject("window",Microsoft.ClearScript.HostItemFlags.GlobalMembers,window);
+                this._v8Engine.Execute("var window = this;");
+                this._v8Engine.Execute("var self = this;");
+
+                //this._v8Engine.AddHostObject("global", window);
+                //this._v8Engine.AddHostObject("window", "this");
+
+
+
+
+#if DEBUG
+                //var windowObj = _v8Engine.ExecuteCommand("window");
+#endif
+                this._multiversalWindow = window;
+
+                createStandardObjects();
+                createWindowFunctionSortedList();
+            }
+        }
+        public void setMultiversalWindowType(IMultiversalWindowType windowType)
+        {
+            throw new NotImplementedException();
+        }
+        public void setDcoument(ICHtmlDocumentInterface document)
+        {
+            if (_isInitCompleted)
+            {
+                //_v8Engine.Global.SetProperty("document", document);
+                _v8Engine.AddHostObject("document", document);
+
+               // _v8Engine.AddHostObject("window.document", document);
+                _v8Engine.AddHostObject("document.parentWindow", this._multiversalWindow);
+                _v8Engine.AddHostObject("document.parent", this._multiversalWindow);
+                _v8Engine.AddHostObject("document.parentWindow.document", document);
+                _v8Engine.AddHostObject("document.parent.document", document);
+                _v8Engine.AddHostObject("document.parentWindow.parent", this._multiversalWindow);
+                _v8Engine.AddHostObject("document.parent.parentWindow", this._multiversalWindow);
+                if (document is ICHtmlDocumentInterface)
+                {
+                    this._v8Engine.AddHostObject("location", ((ICHtmlDocumentInterface)document).location);
+             
+                }
+                // Fix for CS1026: Added the missing closing parenthesis ')' at the end of the line.
+                // Fix for CS0123: Corrected the usage of the `createElement` method to match the expected delegate signature.
+
+                // this._v8Engine.AddHostObject("document.createElement", new Func<object, object, ICHtmlElementInterface>((p1, p2) => document.createElement(p1, p2)));
+                // this._v8Engine.AddHostObject("createElement", new Func<ICHtmlElementInterface>(document.createElement);
+
+            }
+            _document = document as ICHtmlDocumentInterface;
+        }
+
+        public void setMutilversalWindowType(IMultiversalWindowType windowType)
+        {
+            throw new NotImplementedException();
+        }
+        public void AddHostType(string _className, Type targetType)
+        {
+            _v8Engine.AddHostType(_className, targetType);
+        }
+        public void AddHostObject(string _className, object obj)
+            {
+            _v8Engine.AddHostObject(_className, obj);
+        }
+
+        private static System.Collections.Generic.SortedList<string, ushort> createWindowFunctionSortedList()
+        {
+            System.Collections.Generic.SortedList<string, ushort> list = new SortedList<string, ushort>(StringComparer.Ordinal);
+            list["ondeviceorientation"] = 0;
+            list["ondevicemotion"] = 0;
+            list["onunload"] = 0;
+            list["onstorage"] = 0;
+            list["onpopstate"] = 0;
+            list["onhashchange"] = 0;
+            list["onpageshow"] = 0;
+            list["onpagehide"] = 0;
+            list["ononline"] = 0;
+            list["onoffline"] = 0;
+            list["onmessage"] = 0;
+            list["onbeforeunload"] = 0;
+            list["onwaiting"] = 0;
+            list["onvolumechange"] = 0;
+            list["ontimeupdate"] = 0;
+            list["onsuspend"] = 0;
+            list["onsubmit"] = 0;
+            list["onstalled"] = 0;
+            list["onshow"] = 0;
+            list["onselect"] = 0;
+            list["onseeking"] = 0;
+            list["onseeked"] = 0;
+            list["onscroll"] = 0;
+            list["onresize"] = 0;
+            list["onreset"] = 0;
+            list["onratechange"] = 0;
+            list["onprogress"] = 0;
+            list["onplaying"] = 0;
+            list["onplay"] = 0;
+            list["onpause"] = 0;
+            list["onmousewheel"] = 0;
+            list["onmouseup"] = 0;
+            list["onmouseover"] = 0;
+            list["onmouseout"] = 0;
+            list["onmousemove"] = 0;
+            list["onmouseleave"] = 0;
+            list["onmouseenter"] = 0;
+            list["onmousedown"] = 0;
+            list["onloadstart"] = 0;
+            list["onloadedmetadata"] = 0;
+            list["onloadeddata"] = 0;
+            list["onload"] = 0;
+            list["onkeyup"] = 0;
+            list["onkeypress"] = 0;
+            list["onkeydown"] = 0;
+            list["oninvalid"] = 0;
+            list["oninput"] = 0;
+            list["onfocus"] = 0;
+            list["onfocusin"] = 0;
+            list["onfocusout"] = 0;
+            list["onerror"] = 0;
+            list["onended"] = 0;
+            list["onemptied"] = 0;
+            list["ondurationchange"] = 0;
+            list["ondrop"] = 0;
+            list["ondragstart"] = 0;
+            list["ondragover"] = 0;
+            list["ondragleave"] = 0;
+            list["ondragenter"] = 0;
+            list["ondragend"] = 0;
+            list["ondrag"] = 0;
+            list["ondblclick"] = 0;
+            list["oncuechange"] = 0;
+            list["oncontextmenu"] = 0;
+            list["onclose"] = 0;
+            list["onclick"] = 0;
+            list["onchange"] = 0;
+            list["oncanplaythrough"] = 0;
+            list["oncanplay"] = 0;
+            list["oncancel"] = 0;
+            list["onblur"] = 0;
+            list["onabort"] = 0;
+            list["onwheel"] = 0;
+            list["onwebkittransitione"] = 0;
+            list["onwebkitanimationstart"] = 0;
+            list["onwebkitanimationiteration"] = 0;
+            list["onwebkitanimationend"] = 0;
+            list["ontransitionend"] = 0;
+            list["onsearch"] = 0;
+            list["onhelp"] = 0;
+            list["onpointercancel"] = 0;
+            list["onpointerdown"] = 0;
+            list["onpointerenter"] = 0;
+            list["onpointerleave"] = 0;
+            list["onpointermove"] = 0;
+            list["onpointerout"] = 0;
+            list["onpointerover"] = 0;
+            list["onpointerup"] = 0;
+            list["onmsgesturechange"] = 0;
+            list["onmsgesturedoubletap"] = 0;
+            list["onmsgestureend"] = 0;
+            list["onmsgesturehold"] = 0;
+            list["onmsgesturestart"] = 0;
+            list["onmsgesturetap"] = 0;
+            list["onmsinertiastart"] = 0;
+            list["onmspointercancel"] = 0;
+            list["onmspointerdown"] = 0;
+            list["onmspointerenter"] = 0;
+            list["onmspointerleave"] = 0;
+            list["onmspointermove"] = 0;
+            list["onmspointerout"] = 0;
+            list["onmspointerover"] = 0;
+            list["onmspointerup"] = 0;
+            list["ongotpointercapture"] = 0;
+            list["onlostpointercapture"] = 0;
+            list["onbeforescriptexecute"] = 0;
+            list["onafterscriptexecute"] = 0;
+            list["onmozfullscreenchange"] = 0;
+            list["onmozfullscreenerror"] = 0;
+            list["onmozpointerlockchange"] = 0;
+            list["onmozpointerlockerror"] = 0;
+            list["ondeviceproximity"] = 0;
+            list["onuserproximity"] = 0;
+            list["ondevicelight"] = 0;
+            return list;
+        }
+        const string getClassNameString = "object";
+        public string getClasName()
+        {
+            return getClassNameString;
+
+        }
+        // fetch実装
+        [ScriptMember("fetch")]
+        public async Task<object> FetchImpl(object input, object options = null)
+        {
+            string url = null;
+            string method = "GET";
+            IDictionary<string, string> headers = new Dictionary<string, string>();
+            object body = null;
+
+            // RequestオブジェクトまたはURL文字列を受け取る
+            if (input is string s)
+            {
+                url = s;
+            }
+            else if (input != null && input.GetType().GetProperty("Url") != null)
+            {
+                var urlProp = input.GetType().GetProperty("Url");
+                url = urlProp?.GetValue(input)?.ToString();
+                var methodProp = input.GetType().GetProperty("Method");
+                if (methodProp != null) method = methodProp.GetValue(input)?.ToString() ?? "GET";
+                var headersProp = input.GetType().GetProperty("Headers");
+                if (headersProp != null)
+                {
+                    var h = headersProp.GetValue(input) as IDictionary<string, string>;
+                    if (h != null) headers = h;
+                }
+                var bodyProp = input.GetType().GetProperty("Body");
+                if (bodyProp != null) body = bodyProp.GetValue(input);
+            }
+            if (string.IsNullOrEmpty(url))
+                throw new ArgumentException("fetch: url is required");
+
+            using var client = new HttpClient();
+            var req = new HttpRequestMessage(new HttpMethod(method), url);
+            foreach (var kv in headers)
+                req.Headers.TryAddWithoutValidation(kv.Key, kv.Value);
+            if (body != null && method != "GET" && method != "HEAD")
+                req.Content = new StringContent(body.ToString());
+            var resp = await client.SendAsync(req);
+            var content = await resp.Content.ReadAsStringAsync();
+            // 必要に応じてResponse風オブジェクトを返す
+            return new { status = (int)resp.StatusCode, ok = resp.IsSuccessStatusCode, text = content };
+        }
+
+        public void createStandardObjects()
+        {
+
+            _v8Engine.AddHostObject("removeEventListener", new Action<object , object>((param1 , param2) =>
+            {
+                 _multiversalWindow.removeEventListener(new object[] { param1, param2 });
+            }));
+
+            /*
+            _v8Engine.AddHostObject("addEventListener", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.addEventListener(args);
+            }));
+            */
+            _v8Engine.AddHostObject("addEventListener", new Action<object, object, object>((param1, param2, param3) =>
+            {
+                 _multiversalWindow.addEventListener(new object[] { param1, param2, param3 });
+            }));
+            _v8Engine.AddHostObject("addEventListener", new Action< object, object>((param1, param2) =>
+            {
+                _multiversalWindow.addEventListener(new object[] { param1, param2});
+            }));
+
+
+
+            _v8Engine.AddHostObject("postMessage", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.postMessage(args);
+            }));
+
+
+
+
+
+            // Fix for CS1593: The issue occurs because the delegate 'Func<Action, int>' expects a single argument of type Action and returns an int. 
+            // However, the provided lambda expression has two parameters (callback and interval). 
+            // To fix this, we need to use a delegate that matches the signature of the lambda expression.
+            /*
+            _v8Engine.AddHostObject("setInterval", new Func<Action<int>, int, >((callback, interval) =>
+            {
+                return _multiversalWindow.setInterval(callback, interval);
+            }));
+            */
+            // Fix for CS1593: The issue occurs because the delegate 'Func<object, object>' expects a single argument of type object and returns an object.
+            // However, the provided lambda expression has two parameters (callback and interval).
+            // To fix this, we need to use a delegate that matches the signature of the lambda expression.
+
+            _v8Engine.AddHostObject("setInterval", new Func<object, object, object>((callback, interval) =>
+            {
+                return _multiversalWindow.setInterval(callback, interval);
+            }));
+
+            _v8Engine.AddHostObject("setInterval", new Func<object, int, object>((callback, interval) =>
+            {
+                return _multiversalWindow.setInterval(callback, interval);
+            }));
+
+            _v8Engine.AddHostObject("setTimeout", new Func<object, int, object>((callback, interval) =>
+            {
+                return _multiversalWindow.setTimeout(callback, interval);
+            }));
+
+            _v8Engine.AddHostObject("setTimeout", new Func<object, object, object>((callback, interval) =>
+            {
+                return _multiversalWindow.setTimeout(callback, interval);
+            }));
+
+
+            _v8Engine.AddHostObject("setTimeout", new Func<object, object, object>((callback, interval) =>
+            {
+                return _multiversalWindow.setTimeout(callback, interval);
+            }));
+            _v8Engine.AddHostObject("setTimeout", new Func<object, object>((callback) =>
+            {
+                return _multiversalWindow.setTimeout(callback);
+            }));
+            _v8Engine.AddHostObject("setTimeout", new Func<object, object>((callback) =>
+            {
+                return _multiversalWindow.setTimeout(callback, 0);
+            }));
+            _v8Engine.AddHostObject("clearInterval", new Action<int>((interval) =>
+            {
+                _multiversalWindow.clearInterval(new object[] { interval });
+            }));
+            _v8Engine.AddHostObject("clearTimeout", new Action<object>((timeout) =>
+            {
+                _multiversalWindow.clearTimeout(new object[] { timeout });
+            }));
+
+
+
+
+            _v8Engine.AddHostObject("requestAnimationFrame", new Func<object, object>((func) =>
+            {
+                return _multiversalWindow.requestAnimationFrame(func);
+            }));
+            _v8Engine.AddHostObject("open", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.open(args);
+            }));
+            _v8Engine.AddHostObject("alert", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.alert(args);
+            }));
+            _v8Engine.AddHostObject("confirm", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.confirm(args);
+            }));
+            _v8Engine.AddHostObject("navigate", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.navigate(args);
+            }));
+            _v8Engine.AddHostObject("stop", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.stop(args);
+            }));
+            _v8Engine.AddHostObject("close", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.close(args);
+            }));
+            _v8Engine.AddHostObject("prompt", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.prompt(args);
+            }));
+            _v8Engine.AddHostObject("print", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.print(args);
+            }));
+            _v8Engine.AddHostObject("showModalDialog", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.showModalDialog(args);
+            }));
+            _v8Engine.AddHostObject("focus", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.focus(args);
+            }));
+            _v8Engine.AddHostObject("escape", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.escape(args);
+            }));
+            _v8Engine.AddHostObject("unescape", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.unescape(args);
+            }));
+            _v8Engine.AddHostObject("attachEvent", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.addEventListener(args);
+            }));
+            _v8Engine.AddHostObject("detachEvent", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.removeEventListener(args);
+            }));
+            _v8Engine.AddHostObject("dispatchEvent", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.dispatchEvent(args);
+            }));
+
+            _v8Engine.AddHostObject(
+               "releaseEvents", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+               {
+                   return _multiversalWindow.releaseEvents(args);
+               }));
+            _v8Engine.AddHostObject("blur", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.blur(args);
+            }));
+            _v8Engine.AddHostObject("encodeURI", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.encodeURI(args);
+            }));
+            _v8Engine.AddHostObject("decodeURI", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.decodeURI(args);
+            }));
+            _v8Engine.AddHostObject("encodeURIComponent", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.encodeURIComponent(args);
+            }));
+            _v8Engine.AddHostObject("decodeURIComponent", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.decodeURIComponent(args);
+            }));
+            _v8Engine.AddHostObject("atob", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.atob(args);
+            }));
+            _v8Engine.AddHostObject("btoa", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.btoa(args);
+            }));
+            _v8Engine.AddHostObject("getSelection", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return null;
+            }));
+            _v8Engine.AddHostObject("find", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.find(args);
+            }));
+            _v8Engine.AddHostObject("scroll", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.scroll(args);
+            }));
+            _v8Engine.AddHostObject("scrollTo", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.scrollTo(args);
+            }));
+            _v8Engine.AddHostObject("scrollBy", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.scrollBy(args);
+            }));
+            _v8Engine.AddHostObject("moveTo", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.moveTo(args);
+            }));
+            _v8Engine.AddHostObject("moveBy", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.moveBy(args);
+            }));
+            _v8Engine.AddHostObject("resizeTo", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.resizeTo(args);
+            }));
+            _v8Engine.AddHostObject("resizeBy", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.resizeBy(args);
+            }));
+            _v8Engine.AddHostObject("focus", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.focus(args);
+            }));
+            _v8Engine.AddHostObject("blur", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.blur(args);
+            }));
+            _v8Engine.AddHostObject("print", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.print(args);
+            }));
+            _v8Engine.AddHostObject("prompt", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.prompt(args);
+            }));
+            _v8Engine.AddHostObject("showModalDialog", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.showModalDialog(args);
+            }));
+            _v8Engine.AddHostObject("matchMedia", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.matchMedia(args);
+            }));
+            _v8Engine.AddHostObject("msMatchMedia", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.matchMedia(args);
+            }));
+            _v8Engine.AddHostObject("webkitMatchMedia", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.matchMedia(args);
+            }));
+            _v8Engine.AddHostObject("mozMatchMedia", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.matchMedia(args);
+            }));
+            _v8Engine.AddHostObject("blur", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.blur(args);
+            }));
+            _v8Engine.AddHostObject("cancelRqeuestFrame", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.cancelAnimationFrame(args);
+            }));
+            _v8Engine.AddHostObject("getSelection", new Func<dynamic, dynamic, dynamic, dynamic>((self, thisObj, args) =>
+            {
+                return _multiversalWindow.getSelection(args);
+            }));
+
+            // fetchをグローバル関数としてバインド
+            _v8Engine.Script.fetch = new Func<object, object, Task<object>>(FetchImpl);
+            _v8Engine.Script.fetch = new Func<object, Task<object>>(input => FetchImpl(input, null));
+        }
+     
+
+
+
+
+    }
+}

@@ -1,0 +1,1373 @@
+﻿using System;
+using System.Collections;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Windows.Forms;
+using System.Runtime.InteropServices;
+using System.IO;
+using MultiHtmlCraft.Interfaces;
+using System.Runtime.CompilerServices;
+using MultiHtmlCraft.Interfaces;
+using System.Dynamic;
+using System.Linq.Expressions;
+using System.Collections.Generic;
+using System.Xml.Linq;
+
+using MultiHtmlCraft.Core;
+using System.Reflection;
+using System.Diagnostics;
+
+
+
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// Canvas Context
+    /// </summary>
+
+    public class CHtmlCanvasContext2D : CHtmlNode, IDynamicMetaObjectProvider, ICommonObjectInterface, System.IDisposable
+    {
+        private System.Collections.Generic.Stack<CHtmlCanvasState> ___CanvasStateStack = null;
+        // simple storage for numeric indexed properties requested by the interface
+        private System.Collections.Generic.Dictionary<int, object> ___indexedProperties = new System.Collections.Generic.Dictionary<int, object>();
+        internal System.WeakReference ___CanvasPrototypeInstanceWeakReference = null;
+        internal CHtmlCanvasContextAttributes ___contextAttributes = null;
+        internal System.WeakReference ___MultiversalWindowWeakReference = null;
+        internal static System.Collections.Generic.Dictionary<string, CHtmlFontInfo> ___canvasCHtmlFontInfoDictionary = new System.Collections.Generic.Dictionary<string, CHtmlFontInfo>();
+        private static object ___canvasCHtmlFontInfoLockingObject = new object();
+        private const int ___canvasCHtmlFontInfoMaximumEntries = 10000;
+        private const double ___audioContextSampleRate = 48000;
+
+        #region ICommonObjectInterface implementation (simple stubs/backing storage)
+        void ICommonObjectInterface.___setPropertyByName(string name, object val)
+        {
+            if (this.___properties == null) this.___properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            this.___properties[name] = val;
+        }
+
+        void ICommonObjectInterface.___setPropertyByIndex(int ___index, object val)
+        {
+            this.___indexedProperties[___index] = val;
+        }
+
+        object ICommonObjectInterface.___getPropertyByName(string name)
+        {
+            if (this.___properties != null && this.___properties.TryGetValue(name, out var v)) return v;
+            return null;
+        }
+
+        object ICommonObjectInterface.___getPropertyByIndex(int ___index)
+        {
+            if (this.___indexedProperties != null && this.___indexedProperties.TryGetValue(___index, out var v)) return v;
+            return null;
+        }
+
+        bool ICommonObjectInterface.___hasPropertyByName(string name)
+        {
+            return (this.___properties != null && this.___properties.ContainsKey(name)) || CHtmlCanvasContext2Dproperties.ContainsKey(name) || CHtmlCanvasContext2Dmethods.ContainsKey(name);
+        }
+
+        bool ICommonObjectInterface.___hasPropertyByIndex(int ___index)
+        {
+            return this.___indexedProperties != null && this.___indexedProperties.ContainsKey(___index);
+        }
+
+        void ICommonObjectInterface.___deleteByIndex(int ___index)
+        {
+            if (this.___indexedProperties != null) this.___indexedProperties.Remove(___index);
+        }
+
+        void ICommonObjectInterface.___deleteByName(string ___Name)
+        {
+            if (this.___properties != null) this.___properties.Remove(___Name);
+        }
+
+        object[] ICommonObjectInterface.___getByIds()
+        {
+            if (this.___properties == null) return new object[0];
+            var keys = new object[this.___properties.Count];
+            int i = 0;
+            foreach (var k in this.___properties.Keys) keys[i++] = k;
+            return keys;
+        }
+
+        object ICommonObjectInterface.___getDefaultValue()
+        {
+            return this.ToString();
+        }
+
+        object ICommonObjectInterface.___getProtoType()
+        {
+            return this.prototype;
+        }
+
+        void ICommonObjectInterface.___setProtoType(object __object)
+        {
+            this.prototype = __object;
+        }
+
+        private object ___parentScope = null;
+        void ICommonObjectInterface.___setParentScope(object __object)
+        {
+            this.___parentScope = __object;
+        }
+
+        object ICommonObjectInterface.___getParentScope()
+        {
+            return this.___parentScope;
+        }
+
+        string ICommonObjectInterface.___getClassName()
+        {
+            return this.GetType().Name;
+        }
+
+        bool ICommonObjectInterface.___hasInstance(object __object)
+        {
+            return __object is CHtmlCanvasContext2D;
+        }
+
+        bool ICommonObjectInterface.___instanceEquals(object __object)
+        {
+            return object.ReferenceEquals(this, __object);
+        }
+
+        object ICommonObjectInterface.___common_object_clone()
+        {
+            return this.MemberwiseClone();
+        }
+
+        IMutilversalObjectType ICommonObjectInterface.multiversalClassType
+        {
+            get { return this.multiversalClassType; }
+        }
+        #endregion
+
+        internal bool ___needAvoidToCallCanvasActivityIntoDocument = false;
+        /// <summary>
+        /// Property names for Context Attributes
+        /// </summary>
+        internal static string[] ____Context_Attribute_Name_Array = new string[] { "alpha", "depth", "stencil", "antialias", "premultipliedAlpha", "preserveDrawingBuffer" };
+        /// <summary>
+        /// Graphics Object which is created with target Bitmap (which should be disposed just before drawing)
+        /// </summary>
+        private System.Drawing.Graphics ___C2DGraphicsObjectFromBitmap = null;
+        private float[] ___lineDashList;
+
+        /// <summary>
+        /// Canvas 2D Brush Object (This will be created or disposed when object is defiend)
+        /// </summary>
+        private System.Drawing.Brush ___canvas2DBrush = null;
+        public static readonly Dictionary<string, int> CHtmlCanvasContext2Dproperties = createCHtmlCanvasContext2Dproperties();
+
+        private static Dictionary<string, int> createCHtmlCanvasContext2Dproperties()
+        {
+            var dict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+    {
+        {"fillStyle", 1},
+        {"strokeStyle", 2},
+        {"lineWidth", 3},
+        {"lineCap", 4},
+        {"lineJoin", 5},
+        {"miterLimit", 6},
+        {"font", 7},
+        {"textAlign", 8},
+        {"textBaseline", 9},
+        {"shadowColor", 10},
+        {"shadowBlur", 11},
+        {"shadowOffsetX", 12},
+        {"shadowOffsetY", 13},
+        {"globalAlpha", 14},
+        {"globalCompositeOperation", 15},
+        {"imageSmoothingEnabled", 16},
+        {"width", 17},
+        {"height", 18},
+
+    };
+            return dict;
+        }
+        public static readonly Dictionary<string, int> CHtmlCanvasContext2Dmethods = createCHtmlCanvasContext2DMethods();
+
+        private static Dictionary<string, int> createCHtmlCanvasContext2DMethods()
+        {
+            var dict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+    {
+        {"fillRect", 1},
+        {"strokeRect", 2},
+        {"beginPath", 3},
+        {"moveTo", 4},
+        {"lineTo", 5},
+        {"arc", 6},
+        {"arcTo", 7},
+        {"bezierCurveTo", 8},
+        {"quadraticCurveTo", 9},
+        {"ellipse", 10},
+        {"rect", 11},
+        {"closePath", 12},
+        {"fill", 13},
+        {"stroke", 14},
+        {"clearRect", 15},
+        {"drawImage", 16},
+        {"save", 17},
+        {"restore", 18},
+        {"setTransform", 19},
+        {"resetTransform", 20},
+        {"translate", 21},
+        {"scale", 22},
+        {"rotate", 23},
+        {"getImageData", 24},
+        {"putImageData", 25},
+        {"createLinearGradient", 26},
+        {"createRadialGradient", 27},
+        {"createPattern", 28},
+        {"measureText", 29},
+        {"fillText", 30},
+        {"strokeText", 31},
+        {"getLineDash", 32},
+        {"setLineDash", 33},
+        {"clip", 34},
+        {"isPointInPath", 35},
+        {"flush", 36},
+        {"drawElements", 37},
+
+    };
+            return dict;
+        }
+        public CHtmlCanvasContext2D()
+        {
+
+            //this.___PointFList = new System.Collections.Generic.List<System.Drawing.PointF>();
+            this.___CanvasStateStack = new System.Collections.Generic.Stack<CHtmlCanvasState>();
+#if WINDOWS
+            this.___graphic2DPath = new GraphicsPath();
+#endif
+
+            this.___CanvasContextCreatedTime = DateTime.Now;
+
+
+
+            this.___CanvasInstructionsList = new System.Collections.Generic.List<CHtmlCanvasContextInstruction>();
+
+
+        }
+        // Provide ClearScript with a stable host proxy to avoid dynamic binding paths
+        public CHtmlClearScriptCanvasContextHostProxy GetClearScriptHostProxy()
+        {
+            return new CHtmlClearScriptCanvasContextHostProxy(this);
+        }
+        public CHtmlCanvasContext2D(bool isPrototype)
+        {
+            this.___properties = new System.Collections.Generic.Dictionary<string, object>(System.StringComparer.OrdinalIgnoreCase);
+
+            this.___CanvasInstructionsList = new System.Collections.Generic.List<CHtmlCanvasContextInstruction>();
+
+        }
+
+        ~CHtmlCanvasContext2D()
+        {
+
+            this.___IsDisposing = true;
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                if (this.___IsPrototype == false)
+                {
+                    commonLog.LogEntry("Canvas Context Fializing ...");
+                }
+            }
+
+
+            this.___cleanUp();
+        }
+        private object ___ContextTimerLockingObject = new object();
+        private int ___ContextTimerDelay = 50;
+        private const int MAX_CONTEXT_TIMER_DELAY = 15000; // 15 seconds
+        private int CONTEXT_TIMER_WATCH_INTERVAL = 50;
+
+#if WINDOWS
+        private System.Drawing.Image ___C2DSavedStateImage = null;
+#endif
+        /// <summary>
+        /// If the background color ___hasInner been assigned or not.
+        /// </summary>
+        internal bool ___IsCanvasBackgroundSysColorSpecified = false;
+
+        /// <summary>
+        /// If backgroundColorSearch Tried once
+        /// </summary>
+        internal bool ___IsCanvasBackgroundSysColorSearchAttempted = false;
+        internal ColorSpec ___CanvasBackgroundSysColor = new ColorSpec(0, 0, 0, 255);
+
+        internal ColorSpec ___CanvasForegroundSysColor = new ColorSpec(0, 0, 0);
+
+        internal PointFSpec ___CanvasTranslatePoint = new PointFSpec(0, 0);
+        internal static PointF PointNaN = new PointF(float.NaN, float.NaN);
+        internal float ___CanvasRotateAngle = 0;
+
+        internal System.Collections.Generic.List<CHtmlCanvasContextInstruction> ___CanvasInstructionsList;
+
+        internal int ___CanvasInstructionSavedPoint = 0;
+
+
+        private System.IntPtr ___ParentWindowControlHandle = IntPtr.Zero;
+        private DateTime ___CanvasContextCreatedTime = DateTime.Now;
+        // private DateTime ___CanvasContextLatestDrawTime = DateTime.Now;
+        private string ___ContextMode = null;
+        internal CanvasContextModeType ___CanvasContextModeType = CanvasContextModeType.None;
+        internal System.WeakReference ___parentElementWeakReference = null;
+        internal int ___parentElementOID = -1;
+        internal System.WeakReference ___ownerDocumentWeakReference = null;
+        internal System.WeakReference ___C2DImageWeakReference = null;
+        internal System.Drawing.Brush ___C2DStokeBrush = null;
+
+        internal double ___CanvasWidth = 300;
+        internal double ___CanvasHeight = 3000;
+        #region ContextAttributes
+
+        internal bool ___Context_Attributes_alpha = true;
+        internal bool ___Context_Attributes_depth = true;
+        internal bool ___Context_Attributes_stencil = false;
+        internal bool ___Context_Attributes_antialias = true;
+        internal bool ___Context_Attributes_premultipliedAlpha = true;
+        internal bool ___Context_Attributes_preserveDrawingBuffer = true;
+        internal bool ___CanvasImageSmoothingEnabled = true;
+        internal double ___CanvasBackingStorePixelRatio = 1;
+
+
+
+        #endregion
+        /// <summary>
+        /// Number of Context Object Finalized Count
+        /// 
+        /// </summary>
+
+
+
+
+        private double ___BackingStorePixelRatio = 1.0;
+        internal object ___contextFillStyleAsObject = null;
+        /// <summary>
+        /// Object is created last time
+        /// </summary>
+        private object ___contextFillStylePriorAsObject = null;
+
+#if WINDOWS
+        private System.Drawing.Brush ___contextBrushPriorClone = null;
+        //private System.Collections.Generic.List<System.Drawing.PointF> ___PointFList = null;
+        private System.Drawing.Drawing2D.GraphicsPath ___graphic2DPath = null;
+
+#endif
+        private bool ___IsGraphicsPathOpen = false;
+        /// <summary>
+        /// ___currentPointF
+        /// if not set it is (float.NaN, floatNaN)
+        /// </summary>
+        private System.Drawing.PointF ___currentPointF = PointNaN;
+        private bool ___isMoveToPointNeedsToSetToPath = false;
+        public bool ___IsDisposing = false;
+#if WINDOWS
+        // private bool ___IsPathClosed = false;
+        /// <summary>
+        /// TextureBrush Base Image (will be cloned).
+        /// </summary>
+        private Image ___BrushPatternImage = null;
+#endif
+
+
+
+        public object fillStyle
+        {
+            set
+            {
+                if (this.___canvas2DBrush != null)
+                {
+                    this.___canvas2DBrush.Dispose();
+                    this.___canvas2DBrush = null;
+                }
+                this.___contextFillStyleAsObject = value;
+                this.___createBrushFromFillStyleObject(Color.Transparent);
+            }
+            get { return commonHTML.GetStringValue(this.___contextFillStyleAsObject); }
+        }
+
+        private object ___contextStrokeStyleAsObject = null;
+        public object strokeStyle
+        {
+            set
+            {
+                this.___contextStrokeStyleAsObject = value;
+                this.___createStrokeBrushInstance();
+            }
+            get { return this.___contextStrokeStyleAsObject; }
+        }
+        internal object ___contextDestination = null;
+
+
+        private object ___contextShadowColorAsObject = null;
+
+        public object shadowColor
+        {
+            set { this.___contextShadowColorAsObject = value; }
+            get { return this.___contextShadowColorAsObject; }
+        }
+
+        private double ___contextShadowBlur = 0;
+        public double shadowBlur
+        {
+            get { return this.___contextShadowBlur; }
+            set { this.___contextShadowBlur = value; }
+        }
+        public bool msImageSmoothingEnabled
+        {
+            get
+            {
+                return this.___CanvasImageSmoothingEnabled;
+            }
+        }
+        public bool webkitImageSmoothingEnabled
+        {
+            get
+            {
+                return this.___CanvasImageSmoothingEnabled;
+            }
+        }
+        public bool mozImageSmoothingEnabled
+        {
+            get
+            {
+                return this.___CanvasImageSmoothingEnabled;
+            }
+        }
+        public bool imageSmoothingEnabled
+        {
+            get
+            {
+                return this.___CanvasImageSmoothingEnabled;
+            }
+        }
+        public double webkitBackingStorePixelRatio
+        {
+            get { return this.___CanvasBackingStorePixelRatio; }
+        }
+        public double backingStorePixelRatio
+        {
+            get { return this.___CanvasBackingStorePixelRatio; }
+        }
+        public double msBackingStorePixelRatio
+        {
+            get { return this.___CanvasBackingStorePixelRatio; }
+        }
+        public double mosBackingStorePixelRatio
+        {
+            get { return this.___CanvasBackingStorePixelRatio; }
+        }
+        public double oBackingStorePixelRatio
+        {
+            get { return this.___CanvasBackingStorePixelRatio; }
+        }
+        private double ___contextShadowOffsetX = 0;
+        public double shadowOffsetX
+        {
+            get { return this.___contextShadowOffsetX; }
+            set { this.___contextShadowOffsetX = value; }
+        }
+
+        private double ___contextShadowOffsetY = 0;
+        public double shadowOffsetY
+        {
+            get { return this.___contextShadowOffsetY; }
+            set { this.___contextShadowOffsetY = value; }
+        }
+
+        private object ___contextLineCap = null;
+        public object LineCap
+        {
+            set { this.___contextLineCap = value; }
+            get { return this.___contextLineCap; }
+        }
+        public object lineCap
+        {
+            set { this.___contextLineCap = value; }
+            get { return this.___contextLineCap; }
+        }
+
+        private object ___contextLineJoin = null;
+        public object lineJoin
+        {
+            set { this.___contextLineJoin = value; }
+            get { return this.___contextLineJoin; }
+        }
+        public object LineJoin
+        {
+            set { this.___contextLineJoin = value; }
+            get { return this.___contextLineJoin; }
+        }
+
+
+        private double ___contextLineWidth = 1;
+
+        public double LineWidth
+        {
+            get { return this.___contextLineWidth; }
+            set { this.___contextLineWidth = value; }
+        }
+
+        public object lineWidth
+        {
+            get { return this.___contextLineWidth; }
+            set { this.___contextLineWidth = commonData.GetDoubleFromObject(value, 1); }
+
+        }
+
+
+
+        private double ___contextMiterLimit = 0;
+
+        public double miterLimit
+        {
+            get { return this.___contextMiterLimit; }
+            set { this.___contextMiterLimit = value; }
+        }
+        public double MiterLimit
+        {
+            get { return this.___contextMiterLimit; }
+            set { this.___contextMiterLimit = value; }
+        }
+        /// <summary>
+        /// Context Attribtes value
+        /// </summary>
+        public bool alpha
+        {
+            get { return this.___Context_Attributes_alpha; }
+            set { this.___Context_Attributes_alpha = value; }
+        }
+        /// <summary>
+        /// Context Attribtes value
+        /// </summary>
+        public bool depth
+        {
+            get { return this.___Context_Attributes_depth; }
+            set { this.___Context_Attributes_depth = value; }
+        }
+        /// <summary>
+        /// Context Attribtes value
+        /// </summary>
+        public bool stencil
+        {
+            get { return this.___Context_Attributes_stencil; }
+            set { this.___Context_Attributes_stencil = value; }
+        }
+        /// <summary>
+        /// Context Attribtes value
+        /// </summary>
+        public bool antialias
+        {
+            get { return this.___Context_Attributes_antialias; }
+            set { this.___Context_Attributes_antialias = value; }
+        }
+        /// <summary>
+        /// Context Attribtes value
+        /// </summary>
+        public bool premultipliedAlpha
+        {
+            get { return this.___Context_Attributes_premultipliedAlpha; }
+            set { this.___Context_Attributes_premultipliedAlpha = value; }
+        }
+        /// <summary>
+        /// Context Attribtes value
+        /// </summary>
+        public bool preserveDrawingBuffer
+        {
+            get { return this.___Context_Attributes_preserveDrawingBuffer; }
+            set { this.___Context_Attributes_preserveDrawingBuffer = value; }
+        }
+
+
+
+        private object ___contextFontAsObject = (object)"";
+        private string ___contextFontAsString = null;
+        private CHtmlFontInfo ___contextCHtmlFontInfo = null;
+        /// <summary>
+        /// Canvas font. Valid Valies should be the same as Css FontSpec Value.
+        /// ex.  'italic 400 12px/2 Unknown FontSpec, sans-serif';
+        /// </summary>
+		public object font
+        {
+            set
+            {
+                this.___setContextFont(value);
+            }
+            get { return this.___contextFontAsObject; }
+
+        }
+        private void ___setContextFont(object value)
+        {
+            this.___contextFontAsObject = value;
+            try
+            {
+                switch (___contextFontAsObject)
+                {
+                    case String str:
+                        string ___strFont = str;
+                        if (string.IsNullOrEmpty(___strFont) == false && string.CompareOrdinal(___strFont, this.___contextFontAsString) == 0 && (this.___contextCHtmlFontInfo != null))
+                        {
+                            // same font
+                            return;
+                        }
+
+                        if (string.IsNullOrEmpty(___strFont) == false)
+                        {
+
+                            CHtmlFontInfo ___cachedFont = null;
+                            if (___canvasCHtmlFontInfoDictionary.TryGetValue(___strFont, out ___cachedFont))
+                            {
+                                this.___contextCHtmlFontInfo = ___cachedFont;
+                                this.___contextFontAsString = ___strFont;
+                                return;
+                            }
+                            else
+                            {
+
+                                CHtmlFontInfo __CHtmlFontInfo = new CHtmlFontInfo();
+                                commonHTML.setCSSFontStyleIntoStyleSheetOrCHtmlFontInfo(null, __CHtmlFontInfo, ___strFont);
+                                System.Drawing.Color ___tmpColor = System.Drawing.Color.Black;
+                                this.___contextCHtmlFontInfo = __CHtmlFontInfo;
+                                this.___contextFontAsString = ___strFont;
+
+
+
+                                return;
+                            }
+
+                        }
+                        break;
+                    case NiL.JS.Core.JSValue nilvalue:
+                        {
+                            if (nilvalue.Value is string)
+                            {
+                                string ___strFontNilJs = nilvalue.Value as string;
+                                if (string.IsNullOrEmpty(___strFontNilJs) == false && string.CompareOrdinal(___strFontNilJs, this.___contextFontAsString) == 0 && (this.___contextCHtmlFontInfo != null))
+                                {
+                                    // same font
+                                    return;
+                                }
+                                if (string.IsNullOrEmpty(___strFontNilJs) == false)
+                                {
+                                    CHtmlFontInfo ___cachedFont = null;
+                                    if (___canvasCHtmlFontInfoDictionary.TryGetValue(___strFontNilJs, out ___cachedFont))
+                                    {
+                                        this.___contextCHtmlFontInfo = ___cachedFont;
+                                        this.___contextFontAsString = ___strFontNilJs;
+                                        return;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+
+
+
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                        {
+                            commonLog.LogEntry("TODO: CHtmlCanvasContext.___setContextFont() for non string...");
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                {
+                    commonLog.LogEntry("CHtmlCanvasContext.___setContextFont() errror : ", ex);
+                }
+
+
+            }
+        }
+
+        private object ___contextTextAlignAsObject = null;
+
+        public object textAlign
+        {
+            get { return this.___contextTextAlignAsObject; }
+            set { this.___contextTextAlignAsObject = value; }
+        }
+
+        private object ___contextTextBaseline = null;
+
+        public object textBaseLine
+        {
+            get { return this.___contextTextBaseline; }
+            set { this.___contextTextBaseline = value; }
+        }
+        internal object ___contextglobalCompositeOperationAsObject = null;
+        internal CHtmlCanvasContextGlobalCompositionType ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.source_over;
+        public object globalCompositeOperation
+        {
+            get { return this.___contextglobalCompositeOperationAsObject; }
+            set { this.___setGlobalCompositeOperationValue(value); }
+        }
+        /// <summary>
+        /// assuming paramater is string now...
+        /// </summary>
+        /// <param name="val"></param>
+        public void ___setGlobalCompositeOperationValue(object val)
+        {
+            this.___contextglobalCompositeOperationAsObject = val;
+            string strGlobalCompositeOperation = commonHTML.GetStringValue(this.___contextglobalCompositeOperationAsObject);
+            if (string.IsNullOrEmpty(strGlobalCompositeOperation) == false)
+            {
+                switch (strGlobalCompositeOperation)
+                {
+                    case "source-over"://   Default.Displays the source image over the destination image  
+                        ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.source_over;
+                        break;
+                    case "source-atop":// Displays the source image on top of the destination image. The part of the source image that is outside the destination image is not shown 
+                        ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.source_atop;
+                        break;
+                    case "source-in":	//Displays the source image in to the destination image. Only the part of the source image that is INSIDE the destination image is shown, and the destination image is transparent
+                        ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.source_in;
+                        break;
+                    case "source-out": //	Displays the source image out of the destination image. Only the part of the source image that is OUTSIDE the destination image is shown, and the destination image is transparent  
+                        ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.source_out;
+                        break;
+                    case "destination-over":  //  Displays the destination image over the source image
+                        ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.destination_over;
+                        break;
+                    case "destination-atop": //    Displays the destination image on top of the source image. The part of the destination image that is outside the source image is not shown 
+                        ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.destination_atop;
+                        break;
+                    case "destination-in"://	Displays the destination image in to the source image. Only the part of the destination image that is INSIDE the source image is shown, and the source image is transparent Play it »
+                    case "destination-out"://	Displays the destination image out of the source image. Only the part of the destination image that is OUTSIDE the source image is shown, and the source image is transparent   Play it »
+                        ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.destination_out;
+                        break;
+                    case "lighter": //Displays the source image + the destination image   Play it »
+                        ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.lighter;
+                        break;
+                    case "copy":// Displays the source image.The destination image is ignored Play it »
+                        ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.copy;
+                        break;
+                    case "xor":
+                        ___contextGlobalCompositionMode = CHtmlCanvasContextGlobalCompositionType.xor;
+                        break;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Global Alpha is default 1
+        /// </summary>
+		private double ___contextGlobalAlpha = 1;
+        private int ___contextGlobalAlphaAsInt255 = -1;
+        public double globalAlpha
+        {
+            get { return this.___contextGlobalAlpha; }
+            set { this.___contextGlobalAlpha = value; }
+        }
+
+
+        private void ____doNothing()
+        {
+            if (this.___IsGraphicsPathOpen)
+            {
+            }
+        }
+
+
+
+
+
+        #region IDisposable メンバ
+
+        public void Dispose()
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 1000)
+            {
+                if (this.___IsPrototype == false)
+                {
+                    commonLog.LogEntry("Canvas Context Disposing ...");
+                }
+            }
+            this.___IsDisposing = true;
+            this.___cleanUp();
+            GC.SuppressFinalize(this);
+        }
+
+
+
+        #endregion
+
+        private void ___cleanUp()
+        {
+            this.___disposeC2DBitmapContext();
+
+            if (this.___contextFillStylePriorAsObject != null)
+            {
+                this.___contextFillStylePriorAsObject = null;
+            }
+#if WINDOWS
+            if (this.___contextBrushPriorClone != null)
+            {
+                this.___contextBrushPriorClone.Dispose();
+                this.___contextBrushPriorClone = null;
+            }
+#endif
+
+            if (this.___parentElementWeakReference != null)
+            {
+                this.___parentElementWeakReference = null;
+            }
+            if (this.___contextShadowColorAsObject != null)
+            {
+                this.___contextShadowColorAsObject = null;
+            }
+            if (this.___contextStrokeStyleAsObject != null)
+            {
+                this.___contextStrokeStyleAsObject = null;
+            }
+            if (this.___contextTextAlignAsObject != null)
+            {
+                this.___contextTextAlignAsObject = null;
+            }
+            if (this.___contextTextBaseline != null)
+            {
+                this.___contextTextBaseline = null;
+            }
+            if (this.___contextFillStyleAsObject != null)
+            {
+                this.___contextFillStyleAsObject = null;
+            }
+            if (this.___contextFontAsObject != null)
+            {
+                this.___contextFontAsObject = null;
+            }
+            if (this.___contextLineCap != null)
+            {
+                ___contextLineCap = null;
+            }
+            if (this.___contextLineJoin != null)
+            {
+                this.___contextLineJoin = null;
+            }
+#if WINDOWS
+            if (this.___BrushPatternImage != null)
+            {
+                this.___BrushPatternImage.Dispose();
+                this.___BrushPatternImage = null;
+            }
+#endif
+
+            if (this.___contextCHtmlFontInfo != null)
+            {
+                this.___contextCHtmlFontInfo = null;
+            }
+#if WINDOWS
+            if (this.___graphic2DPath != null)
+            {
+                this.___graphic2DPath.Dispose();
+                this.___graphic2DPath = null;
+            }
+#endif
+            this.___ContextTimerLockingObject = null;
+            if (this.___CanvasStateStack != null)
+            {
+
+                this.___CanvasStateStack = null;
+            }
+            if (this.___CanvasInstructionsList != null)
+            {
+
+                this.___CanvasInstructionsList = null;
+            }
+#if WINDOWS
+            if (this.___canvas2DBrush != null)
+            {
+
+                this.___canvas2DBrush.Dispose();
+                this.___canvas2DBrush = null;
+            }
+#endif
+#if WINDOwS
+            if (this.___clearBackgroundSolidBrush != null)
+            {
+                this.___clearBackgroundSolidBrush.Dispose();
+                this.___clearBackgroundSolidBrush = null;
+            }
+#endif
+        }
+
+        public string ContextMode
+        {
+            get { return this.___ContextMode; }
+            set { this.___ContextMode = value; }
+        }
+        public CHtmlElement parentElement
+        {
+            get
+            {
+                if (this.___parentElementWeakReference != null)
+                {
+                    return this.___parentElementWeakReference.Target as CHtmlElement;
+                }
+                return null;
+            }
+            set { this.___parentElementWeakReference = new WeakReference(value, false); }
+        }
+        public CHtmlElement canvas
+        {
+            get { return this.parentElement; }
+
+        }
+        public override string ToString()
+        {
+            return string.Format("Context : " + this.___CanvasContextModeType.ToString());
+        }
+        private const double MIN_GRADIENT_WIDTH = 300;
+        public CHtmlCanvasContextExtenstionObject createLinearGradient(double x0, double y0, double x1, double y1)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("entering {0}.createLinearGradient({1},{2},{3},{4})", this, x0, y0, x1, y1);
+            }
+            CHtmlCanvasContextExtenstionObject __gradient = new CHtmlCanvasContextExtenstionObject(CanvasExtentionObjectType.LinerGradient);
+
+            __gradient.___ownerCanvasContextWeakReference = new WeakReference(this, false);
+
+            RectangleF gradientRect = new RectangleF((float)x0, (float)y0, (float)x1, (float)y1);
+            __gradient.___baseRectangle1 = gradientRect;
+            this.___contextFillStyleAsObject = __gradient;
+            return __gradient;
+        }
+        public CHtmlCanvasContextExtenstionObject createLinearGradient(double x0, double y0, double x1, double y1, double p5)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("entering {0}.createLinearGradient({1},{2},{3},{4},{5})", this, x0, y0, x1, y1, p5);
+            }
+            CHtmlCanvasContextExtenstionObject __gradient = new CHtmlCanvasContextExtenstionObject(CanvasExtentionObjectType.LinerGradient);
+
+            __gradient.___ownerCanvasContextWeakReference = new WeakReference(this, false);
+
+            RectangleF gradientRect = new RectangleF((float)x0, (float)y0, (float)x1, (float)y1);
+            __gradient.___baseRectangle1 = gradientRect;
+            return __gradient;
+        }
+        public CHtmlCanvasContextExtenstionObject createLinearGradient(double x0, double y0, double x1, double y1, double p5, double p6)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("entering {0}.createLinearGradient({1},{2},{3},{4},{5},{6})", this, x0, y0, x1, y1, p5, p6);
+            }
+            CHtmlCanvasContextExtenstionObject __gradient = new CHtmlCanvasContextExtenstionObject(CanvasExtentionObjectType.LinerGradient);
+
+            __gradient.___ownerCanvasContextWeakReference = new WeakReference(this, false);
+
+            RectangleF gradientRect = new RectangleF((float)x0, (float)y0, (float)x1, (float)y1);
+            __gradient.___baseRectangle1 = gradientRect;
+            return __gradient;
+        }
+        /// <summary>
+        /// Just Buggy browser support
+        /// </summary>
+        /// <param name="x0"></param>
+        /// <param name="y0"></param>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <param name="p5"></param>
+        /// <param name="obj_p6"></param>
+        /// <returns></returns>
+        public CHtmlCanvasContextExtenstionObject createLinearGradient(double x0, double y0, double x1, double y1, double p5, object obj_p6)
+        {
+            return this.createLinearGradient(x0, y0, x1, y1, p5, commonData.GetDoubleFromObject(obj_p6, 0));
+        }
+        /// <summary>
+        /// createRadialGradient(startX,startY,startR,endX,endY,endR)
+        /// 属性名／パラメーター	内　容
+        /// ==============================
+        /// startX	グラデーションの開始X座標を指定します。
+        /// startY	グラデーションの開始Y座標を指定します。
+        /// startR	最初の円の半径を指定します。
+        /// endX	グラデーションの終了X座標を指定します。
+        /// endY	グラデーションの終了Y座標を指定します。
+        /// endR	終了の円の半径を指定します。
+        /// </summary>
+        /// <param name="x0"></param>
+        /// <param name="y0"></param>
+        /// <param name="r0"></param>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <param name="r1"></param>
+        /// <returns></returns>
+        public CHtmlCanvasContextExtenstionObject createRadialGradient(double x0, double y0, double r0, double x1, double y1, double r1)
+        {
+            x0 = double.IsNaN(x0) ? 0 : x0;
+            y0 = double.IsNaN(y0) ? 0 : y0;
+            r0 = double.IsNaN(r0) ? 0 : r0;
+            x1 = double.IsNaN(x1) ? 0 : x1;
+            y1 = double.IsNaN(y1) ? 0 : y1;
+            r1 = double.IsNaN(r1) ? 0 : r1;
+
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("entering {0}.createRadialGradient({1},{2},{3},{4},{5},{6})", this, x0, y0, r0, x1, y1, r1);
+            }
+            CHtmlCanvasContextExtenstionObject __gradient = new CHtmlCanvasContextExtenstionObject(CanvasExtentionObjectType.RadialGradient);
+            __gradient.___ownerCanvasContextWeakReference = new WeakReference(this, false);
+            RectangleF paramFirst = new RectangleF((float)x0, (float)y0, (float)r0, (float)r0);
+            RectangleF paramSecond = new RectangleF((float)x1, (float)y1, (float)r1, (float)r1);
+            __gradient.___baseRectangle1 = paramFirst;
+            __gradient.___baseRectangle2 = paramSecond;
+#if WINDOWS
+            __gradient.___grapicPathWeakRef = new WeakReference(this.___graphic2DPath, false);
+#endif
+            return __gradient;
+
+        }
+        public CHtmlCanvasContextExtenstionObject createRadialGradient(double x0, double y0, double r0, double x1, double y1, object obj_r1)
+        {
+            double r1 = commonData.GetDoubleFromObject(obj_r1, 0);
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("entering {0}.createRadialGradient({1},{2},{3},{4},{5},{6})", this, x0, y0, r0, x1, y1, obj_r1);
+            }
+            CHtmlCanvasContextExtenstionObject __gradient = new CHtmlCanvasContextExtenstionObject(CanvasExtentionObjectType.RadialGradient);
+            __gradient.___ownerCanvasContextWeakReference = new WeakReference(this, false);
+
+            RectangleF paramFirst = new RectangleF((float)x0, (float)y0, (float)r0, (float)r0);
+            RectangleF paramSecond = new RectangleF((float)x1, (float)y1, (float)r1, (float)r1);
+            __gradient.___baseRectangle1 = paramFirst;
+            __gradient.___baseRectangle2 = paramSecond;
+#if WINDOWS
+            __gradient.___grapicPathWeakRef = new WeakReference(this.___graphic2DPath, false);
+#endif
+            return __gradient;
+
+        }
+        /// <summary>
+        /// The WebGLRenderingContext.getError() method of the WebGL API returns error information.
+        /// </summary>
+        /// <returns>0: no error</returns>
+        public object getError()
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("entering {0}.getError()", this);
+            }
+            return 0;
+        }
+        private CHtmlCanvas2DImageData ___createImageDataInner(double w, double h)
+        {
+            CHtmlCanvas2DImageData ___imageDataNew = new CHtmlCanvas2DImageData();
+            CHtmlNativeArray _byteArray = new CHtmlNativeArray(CHtmlNumericArrayType.Uint8ClampedArray);
+
+            _byteArray.___width = w;
+            _byteArray.___height = h;
+            int byteLength = (int)(w * h) * 4;
+            _byteArray.___byteArray = new byte[byteLength];
+            _byteArray.___arrayLength = byteLength;
+            ___imageDataNew.___width = w;
+            ___imageDataNew.___height = h;
+            ___imageDataNew.___data = _byteArray;
+            return ___imageDataNew;
+        }
+        /// <summary>
+        /// Creates blank image data of specified width, and height
+        /// </summary>
+        /// <param name="p1"></param>
+        /// <param name="p2"></param>
+        /// <returns></returns>
+		public ICHtmlCanvas2DImageData createImageData(object p1Object, object p2Object)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("entering {0}.getImageDataInner({1}, {2})", this, p1Object, p2Object);
+            }
+            double p1 = 0;
+            if (p1Object != null)
+            {
+                p1 = (float)___ConvertNaNInfiniteToZero(commonData.GetDoubleFromObject(p1Object, 0));
+            }
+            double p2 = 0;
+            if (p2Object != null)
+            {
+                p2 = (float)___ConvertNaNInfiniteToZero(commonData.GetDoubleFromObject(p2Object, 0));
+            }
+            if (p1 <= 0)
+            {
+                p1 = 1;
+            }
+            if (p2 <= 0)
+            {
+                p2 = p1;
+            }
+            return this.___createImageDataInner(p1, p2);
+
+        }
+        /// <summary>
+        /// createImageData() with one parameter is image element or etc.
+        /// </summary>
+        /// <param name="imageObject"></param>
+        /// <returns></returns>
+        public CHtmlCanvas2DImageData createImageData(object imageObject)
+        {
+            CHtmlCanvas2DImageData _ImageData = new CHtmlCanvas2DImageData();
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("createImageData with 1 parameter: {0}", imageObject);
+            }
+            try
+            {
+                if (commonHTML.isClrNumeric(imageObject))
+                {
+                    double doubleValue = commonData.GetDoubleFromObject(imageObject, 0);
+                    return this.___createImageDataInner(doubleValue, doubleValue);
+                }
+                else
+                {
+                    throw new NotSupportedException();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                {
+                    commonLog.LogEntry("Error  createImageData unkonwn data type ", ex);
+                }
+
+            }
+            return this.___createImageDataInner(100, 100);
+        }
+
+        public ICHtmlCanvas2DImageData getImageDataHD(object p1, object p2, object p3, object p4)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("calling getImageDataHD()...", this);
+            }
+            return this.getImageDataInner(p1, p2, p3, p4);
+        }
+        public ICHtmlCanvas2DImageData getImageData(object p1, object p2, object p3, object p4)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("calling getImageData()...", this);
+            }
+            return this.getImageDataInner(p1, p2, p3, p4);
+        }
+        private ICHtmlCanvas2DImageData getImageDataInner(object p1, object p2, object p3, object p4)
+        {
+            CHtmlCanvas2DImageData imageDateResult = new CHtmlCanvas2DImageData();
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("entering {0}.getImageDataH({1}, {2}, {3}, {4})...", this, p1, p2, p3, p4);
+            }
+            System.Drawing.Graphics ___grAdhocContext = null;
+            CHtmlNativeArray _byteArrayList = new CHtmlNativeArray(CHtmlNumericArrayType.Uint8ClampedArray);
+            double ___x1 = 0;
+            double ___y1 = 0;
+            double ___width1 = 0;
+            double ___height1 = 0;
+            Bitmap targetBmp = null;
+            Image srcImage = null;
+            try
+            {
+                if (p1 != null)
+                {
+                    ___x1 = ___ConvertNaNInfiniteToZero(commonData.GetDoubleFromObject(p1, 0));
+                }
+                if (p2 != null)
+                {
+                    ___y1 = ___ConvertNaNInfiniteToZero(commonData.GetDoubleFromObject(p2, 0));
+                }
+                if (p3 != null)
+                {
+                    ___width1 = ___ConvertNaNInfiniteToZero(commonData.GetDoubleFromObject(p3, 0));
+                }
+                if (p4 != null)
+                {
+                    ___height1 = ___ConvertNaNInfiniteToZero(commonData.GetDoubleFromObject(p4, 0));
+                }
+
+
+                _byteArrayList.___width = ___width1;
+                _byteArrayList.___height = ___height1;
+
+                if (this.___CanvasContextModeType == CanvasContextModeType.Canvas2D || this.___CanvasContextModeType == CanvasContextModeType.SVG)
+                {
+                    Rectangle section = new Rectangle((int)___x1, (int)___y1, (int)___width1, (int)___height1);
+
+                    if (___width1 < 1)
+                    {
+                        ___width1 = 1;
+                    }
+                    if (___height1 < 1)
+                    {
+                        ___height1 = 1;
+                    }
+                    // ===================================================
+                    // PixelFormat.Format32bppArgb is better for this situation.
+                    // PixelFormat.Format32bppPArgb shoud not be used for calucurations
+                    // ===================================================
+#if WINDOWS
+                    targetBmp = new Bitmap((int)___width1, (int)___height1, PixelFormat.Format32bppArgb);
+
+
+
+                    if (this.___C2DImageWeakReference != null)
+                    {
+                        srcImage = this.___C2DImageWeakReference.Target as Image;
+                    }
+                    if (srcImage != null)
+                    {
+                        this.___disposeC2DBitmapContext();
+                        // Grahics Context is from bitmap
+                        ___grAdhocContext = Graphics.FromImage(targetBmp);
+
+                        ___grAdhocContext.DrawImageUnscaled(srcImage, (int)section.X, (int)section.Y, (int)section.Width, (int)section.Height);
+
+                    }
+                    else
+                    {
+
+                    }
+
+                    // Clean u
+                    if (___grAdhocContext != null)
+                    {
+                        ___grAdhocContext.Dispose();
+                        ___grAdhocContext = null;
+
+
+                    }
+
+
+
+                    // [Array Format]
+                    // 32x32 size image should become 32 * 32 * 4 =  4094 length byte length
+                    if (dirtyX == null || dirtyY == null || dirtyWidth == null || dirtyHeight == null)
+                    {
+                        dirtyX = 0;
+                        dirtyY = 0;
+                        dirtyWidth = ___imageWidth;
+                        dirtyHeight = ___imageHeight;
+                    }
+
+                    _byteArrayList.___byteArray = this.___ImageToBytes(targetBmp);
+                    _byteArrayList.___arrayLength = _byteArrayList.___byteArray.Length;
+                    imageDateResult.width = ___imageWidth;
+                    imageDateResult.height = ___imageHeight;
+                    imageDateResult.data = _byteArrayList;
+#endif
+                }
+                else
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("Canvas getImageDataInner Failed. ", ex);
+                }
+            }
+            // Clean up
+            if (___grAdhocContext != null)
+            {
+                ___grAdhocContext.Dispose();
+                ___grAdhocContext = null;
+
+            }
+
+
+            return imageDateResult;
+        }
+        private byte[] ___ImageToBytes(Bitmap bmp)
+        {
+#if WINDOWS
+            // Lock the bitmap's bits. 
+            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+            System.Drawing.Imaging.BitmapData bmpData =
+             bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+            // Get the address of the first line.
+            IntPtr ptr = bmpData.Scan0;
+
+            // Declare an array  to hold the bytes  of the bitmap.
+            int bytes = bmpData.Stride * bmp.Height;
+            byte[] rgbValues = new byte[bytes];
+
+            // Copy the RGB values into the array.
+            System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes); bmp.UnlockBits(bmpData);
+            ___swapBitmapByteOrder(ref rgbValues);
+            return rgbValues;
+#else
+            return new byte[] { };
+#endif
+
+
+
+
+        }
+
+        // helper used by rotate
+        private double ___getRadianToDegree(double rad)
+        {
+            return rad * (180.0 / Math.PI);
+        }
+
+#if WINDOWS
+        // basic fallback for radial gradient brush creation
+        private System.Drawing.Brush ___createRadialGradationAsPathGradientBrush(ref CHtmlCanvasContextExtenstionObject __ext)
+        {
+            try
+            {
+                if (__ext != null && __ext.___ColorStopList != null && __ext.___ColorStopList.Count > 0)
+                {
+                    return new System.Drawing.SolidBrush(__ext.___ColorStopList.Values[0]);
+                }
+            }
+            catch { }
+            return new System.Drawing.SolidBrush(System.Drawing.Color.Transparent);
+        }
+#endif
+
+        // create brush from fill style object (string/color/gradient)
+        private System.Drawing.Brush ___createBrushFromFillStyleObject(System.Drawing.Color fallback)
+        {
+            try
+            {
+                if (this.___contextFillStyleAsObject == null) return new System.Drawing.SolidBrush(fallback);
+                switch (this.___contextFillStyleAsObject)
+                {
+                    case string s:
+                        return new System.Drawing.SolidBrush(commonHTML.GetColorFromHTMLColorExtend(s));
+                    case NiL.JS.Core.JSValue jsv:
+                        if (jsv.Value is string ss) return new System.Drawing.SolidBrush(commonHTML.GetColorFromHTMLColorExtend(ss));
+                        if (jsv.Value is CHtmlCanvasContextExtenstionObject extJs && extJs.___ColorStopList != null && extJs.___ColorStopList.Count > 0)
+                            return new System.Drawing.SolidBrush(extJs.___ColorStopList.Values[0]);
+                        break;
+                    case CHtmlCanvasContextExtenstionObject extObj:
+                        if (extObj.___ContextGraphicsObjectType == CanvasExtentionObjectType.LinerGradient)
+                        {
+                            var c1 = System.Drawing.Color.Transparent;
+                            var c2 = System.Drawing.Color.Transparent;
+                            if (extObj.___ColorStopList.Count > 0) c1 = extObj.___ColorStopList.Values[0];
+                            if (extObj.___ColorStopList.Count > 1) c2 = extObj.___ColorStopList.Values[1];
+                            try { return new System.Drawing.Drawing2D.LinearGradientBrush(new System.Drawing.Point((int)extObj.___baseRectangle1.X, (int)extObj.___baseRectangle1.Y), new System.Drawing.Point((int)extObj.___baseRectangle1.Width, (int)extObj.___baseRectangle1.Height), c1, c2); }
+                            catch { return new System.Drawing.SolidBrush(c1); }
+                        }
+                        else if (extObj.___ContextGraphicsObjectType == CanvasExtentionObjectType.RadialGradient)
+                        {
+#if WINDOWS
+                            return ___createRadialGradationAsPathGradientBrush(ref extObj);
+#else
+                            return new System.Drawing.SolidBrush(System.Drawing.Color.Transparent);
+#endif
+                        }
+                        break;
+                }
+            }
+            catch { }
+            return new System.Drawing.SolidBrush(fallback);
+        }

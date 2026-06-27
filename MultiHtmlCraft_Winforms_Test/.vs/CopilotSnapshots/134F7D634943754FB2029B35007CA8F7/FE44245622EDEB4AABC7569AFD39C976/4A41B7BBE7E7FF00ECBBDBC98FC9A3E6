@@ -1,0 +1,218 @@
+﻿using MultiHtmlCraft.Core;
+using MultiHtmlCraft.Interfaces;
+using System.Net;
+using System.Security.Authentication;
+namespace MultiversalRendererWinFormsTest
+{
+    public partial class FormMain : Form
+    {
+        CHtmlDocument? document = null;
+        RectangleFSpec ___LastPaintRectangle = RectangleFSpec.Empty;
+        public FormMain()
+        {
+            InitializeComponent();
+            // ダブルバッファリングと描画最適化
+            this.SetStyle(ControlStyles.DoubleBuffer | ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint, true);
+            this.UpdateStyles();
+
+            btnScripts.Image = Image.FromFile("Assets/Gear.png"); 
+
+            btnDOM.Image = Image.FromFile("Assets/Tree.png");
+
+            btnNavigate.Image = Image.FromFile("Assets/Rocket.png");
+
+            btnCSS.Image = Image.FromFile("Assets/Pallet.png");
+            
+        }
+        
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            
+            base.OnSizeChanged(e);
+            int buttonWidth = 31;
+            ///int buttonHeight = 31;
+            int buttonSpacing = 2;
+            int rightMargin = 0;
+    
+            //splitterText.Width = 800;
+            this.SuspendLayout();
+            txtUrl.Width = this.ClientSize.Width - 110;
+            btnNavigate.Location = new Point(this.ClientSize.Width - rightMargin - buttonWidth, 0);
+            btnScripts.Location = new Point(btnNavigate.Left - buttonSpacing - buttonWidth, 0);
+            btnCSS.Location = new Point(btnScripts.Left - buttonSpacing - buttonWidth, 0);
+            btnDOM.Location = new Point(btnCSS.Left - buttonSpacing - buttonWidth, 0);
+            this.ResumeLayout();
+         
+            
+        }
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            this.Text = string.Format("MultiHtmlCraft with .Net Runtime Version : {0} ,  GraphicAPI : {1}", System.Environment.Version.ToString(), commonHTML.GraphicApiType);
+#if DEBUG
+            commonLog.LoggingEnabled = true;
+#else
+            commonLog.LoggingEnabled = false;
+#endif 
+            // this.___horizontalBar.Visible = false;
+            //  this.___verticalBar.Visible = false;
+            this.OnSizeChanged(EventArgs.Empty);
+
+            //  this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc3Imgs.html";
+            //t his.txtUrl.Text = "http://localhost/csssample/sample1.htm";
+            //this.txtUrl.Text = "http://localhost/csssample/sample2.htm";
+            // this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc.html";
+            // this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc2.html";
+            this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc3Imgs.html";
+            //this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc3ImgsWithText.html";
+            // this.txtUrl.Text = "http://localhost/jstest/jqueryTest/JQuwey360Test1.html"; // JQuery 3.6.0 Test
+            // this.txtUrl.Text = "http://localhost/jstest/jqueryTest/JQuwey371Test2.html";  // JQuery 3,7,1 Test
+
+            // this.txtUrl.Text = "http://localhost/jstest/CreateElementTest3.html";
+            // this.txtUrl.Text = "http://localhost/jstest/GetElementByIDTtest1.html";
+            // this.txtUrl.Text = "http://localhost/jstest/SetIntervalTest.html"; //setIntervalTest ok
+            // this.txtUrl.Text = "http://localhost/html/SimpleHTMLDoc3ImgsWithText.html";  // Image Load Test. OK
+            // this.txtUrl.Text = "http://localhost/jstest/SetTimeoutTest1.html"; // setTimeoutTest ok
+
+            // this.txtUrl.Text = "http://localhost/jstest/RequestAnimationFrameTest1.html";
+
+            //this.txtUrl.Text = "http://localhost/html/SvgImagesTest1.html"; // SVG Display Test ok
+            // this.txtUrl.Text = "http://localhost/jstest/ClearTimerTest1.html"; // Clear Timer Test
+            //this.txtUrl.Text = "http://localhost/jstest/TextFontChangeWithMatchSeleter.html"; // font size change with js
+            // this.txtUrl.Text = "http://localhost/html/TextFontFontSizeChagewithNotJS.html";
+            //this.txtUrl.Text = "http://localhost/html/ColorfullTableColumns.html"; // Color Table Test
+            // this.txtUrl.Text = "http://localhost/html/SpanTextSizeChange.html";
+            // this.txtUrl.Text = "http://localhost/jstest/JQeueryFontSizeChange.html"; // looks ok!
+            //this.txtUrl.Text = "http://localhost/jstest/SetTimeoutTestThreeparams.html"; SetTimeout 3 params OK!
+            //this.txtUrl.Text = "http://localhost/csssample/Csss3GridLayout.htm";
+            //  this.txtUrl.Text = "http://localhost/jstest/jqueryTest/JQuwey371TotalTest1.html";
+            //this.txtUrl.Text = "http://localhost/jstest/jqueryTest/JQuwey371Test2.html";// JQuery 3.7.1 Test 2
+
+            //this.txtUrl.Text = "http://localhost/jstest/RequestAnimationFrameTest2.html";
+            //this.txtUrl.Text = "http://localhost/jstest/DomContentetloadedtest.html";
+            // this.txtUrl.Text = "http://localhost/jstest/ElementTypeChangeTest.html";
+            //this.txtUrl.Text = "http://localhost/jstest/SetTimeoutSetIntervalRequestAnimationFrameTest1.html"; // SetTimeout, SetInterval, RequestAnimationFrame Test
+            //this.txtUrl.Text = "http://localhost";
+            // this.txtUrl.Text = "http://localhost/jstest/FontFaceLoadTest1.html";
+            // this.txtUrl.Text = "http://localhost/jstest/FontFaceLoadTest2NoAsync.html";
+            //  this.txtUrl.Text = "http://localhost/jstest/DomContentLoadedTest.html";
+            //this.txtUrl.Text = "http://localhost/jstest/AsyncFunctionCallTest.html";
+            //this.txtUrl.Text = "http://localhost/csssample/ImportCSSLayout/CssLayoutSample.html";
+
+            //this.txtUrl.Text = "http://localhost/html/CreateControlText.html"; // Create Control Text Test
+            // this.txtUrl.Text = "http://localhost/jstest/VueJSTest1.html"; // Vue.js Test
+            // this.txtUrl.Text = "http://localhost/jstest/ReactJSLoadTest1.html"; // React.js Test
+            // this.txtUrl.Text = "http://localhost/jstest/ConsoleTest2.html";
+            //this.txtUrl.Text = "http://localhost/jstest/SVGElementCreationTest1.html";// SVG Element Creation Test
+            //this.txtUrl.Text = "http://localhost/jstest/AngularLoadTest1.html";// angular load Test
+            //this.txtUrl.Text = "http://localhost/jstest/JSNodeTest1.html";// JS Node Test
+            //this.txtUrl.Text = "http://localhost/jstest/JSNodeTest1.html";//  Node method Test
+            // this.txtUrl.Text = "http://localhost/html/HTMLEUC_JS_Taketorimotogatari.html";// Encoding EUC_JP HTML Test
+            // this.txtUrl.Text = "http://localhost/jstest/ScriptAsyncDeferExample.html"; // Async and Defer Script Loading Test, OK
+            // this.txtUrl.Text = "http://localhost/html/IFrameTest1.html"; // IFrame Test, OK
+            // this.txtUrl.Text = "http://localhost/jstest/ErrorScriptTest1.html"; // Error Script Test, OK
+            // this.txtUrl.Text = "http://localhost/"; // Default URL to load on startup
+            // this.txtUrl.Text = "http://localhost/jstest/WebWorkerTest1.html"; // Web Worker Test, OK
+            //this.txtUrl.Text = "http://localhost/jstest/JsfrechTest1.html"; // fetch test
+            //this.txtUrl.Text = "http://localhost/jstest/JsfrechTest1.html"; // fetch test 1 using convertScriptObjetoString
+            // this.txtUrl.Text = "http://localhost/jstest/JsfetchTest3.html"; // fetch test 1 using convertScriptObjetoString
+            //  this.txtUrl.Text = "http://localhost/jstest/JsfrechTest2.html"; // fetch test 1 using convertScriptObjetoString
+            // this.txtUrl.Text = "http://localhost/html/SubmitTest2.html"; // Submit Test, OK
+            //this.txtUrl.Text = "http://localhost/canvas/CanvasFillRectTest2.html"; // Canvas Rectangle Test, OK
+            //this.txtUrl.Text = "http://localhost/canvas/RequestAnimationFrameTestWithImages1.html"; // RequestAnimationFrame with Images Test, OK
+            //  this.txtUrl.Text = "http://localhost/canvas/CanvasImageMove3.html"; // Canvas Image Move Test, OK, no timer.
+            //  this.txtUrl.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test with setInterval 100
+            // this.txtUrl.Text = "http://localhost/canvas/RequestAnimationFrameTest1.html"; // RequestAnimationFrame Test, OK
+            // this.txtUrl.Text = "http://localhost/canvas/CanavasImageMove5.html";
+            //this.txtUrl.Text = "http://localhost/phoriajs/Phoria%20-%20Dev%20test%20page%201.html"; //PhoriaJS Test
+            //this.txtUrl.Text = "http://localhost/canvas/CanavasImageMove6OnlysetInterval.html";//NilJs Only setInterval Test, OK
+            //this.txtUrl.Text = "http://localhost/jstest/SetIntervalTestSimple.html"; /// SetInterval Test,
+            // this.txtUrl.Text = "http://localhost/jstest/JSCSSListtoConsole.html"; // Conpile OK.
+            // this.txtUrl.Text = "http://localhost/jstest/ModernizerTest1.html"; // Modernizer Test - DISABLED due to offsetTop undefined error
+            //this.txtUrl.Text = "http://localhost/jstest/SetIntervalTestSimple.html"; // SetInterval Test - safer alternative
+           // this.txtUrl.Text = "http://localhost/jstest/ModernizerTest1.html";// Modernizer Test - DISABLED due to offsetTop undefined error
+            this.txtUrl.Text = "http://localhost/jstest/PreMonizerTest1.html"; // 
+        }
+
+
+        int _documentPaintCount = 0;
+
+        HttpClientHandler handler = new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            MaxRequestContentBufferSize = 1_000_000,
+            SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
+        };
+        private async Task navigateUrl_Inner()
+        {
+            this.ActiveControl = null;
+            await Task.Run(async () =>
+            {
+                await this.multiHtmlCraftControl.Navigate(txtUrl.Text);
+            });
+            
+        }
+
+
+        private async void btnDOM_Click(object sender, EventArgs e)
+        {
+            await Task.Run(async () =>
+            {
+                await this.multiHtmlCraftControl.Navigate(txtUrl.Text);
+            });
+        }
+        public MultiHtmlCraft.Core.CHtmlGraphicContainer? CreateGraphicContainer(System.Drawing.Graphics ___gr)
+        {
+            if (this.Disposing)
+                return null;
+            MultiHtmlCraft.Core.CHtmlGraphicContainer? ___htmlGraphics = null;
+            ___htmlGraphics = new MultiHtmlCraft.Core.CHtmlGraphicContainer();
+#if WINDOWS
+            if (___gr != null)
+            {
+                ___htmlGraphics.Graphic = ___gr;
+            }
+            else
+            {
+                ___htmlGraphics.Graphic = this.CreateGraphics();
+            }
+            ___htmlGraphics.ImageNA = null;
+#endif
+
+            if (___htmlGraphics.FontSpec == null)
+            {
+                ___htmlGraphics.FontSpec = new FontSpec("", 12L);
+            }
+            ___htmlGraphics.BackgroundColor = commonTypeConverter.convertGDIColorToColorSpec(
+(this.BackColor));
+            ___htmlGraphics.ForegroundColor = commonTypeConverter.convertGDIColorToColorSpec(this.ForeColor);
+            ___htmlGraphics.DisplayRectangle = commonTypeConverter.ToRectangleFSpec(this.DisplayRectangle);
+            ___htmlGraphics.ClientRectangle = commonTypeConverter.ToRectangleFSpec(this.ClientRectangle);
+            ___htmlGraphics.ControlBounds = commonTypeConverter.ToRectangleFSpec(this.Bounds);
+          //  ___htmlGraphics.PaintRectangle = this.GetPaintRectScrollbar();
+
+            ___htmlGraphics.StartingPos = 0;
+            ___htmlGraphics.TotalOffsetLeft = 0;
+            ___htmlGraphics.TotalOffsetTop = 0;
+            System.Drawing.StringFormat sf = new StringFormat();
+            sf.Trimming = System.Drawing.StringTrimming.Word;
+            sf.FormatFlags = StringFormatFlags.MeasureTrailingSpaces;
+
+            ___htmlGraphics.StandardStringFormat = sf;
+
+            this.___LastPaintRectangle = ___htmlGraphics.PaintRectangle;
+            return ___htmlGraphics;
+        }
+
+        private void FormMain_Shown(object sender, EventArgs e)
+        {
+            this.multiHtmlCraftControl.BringToFront();
+            this.multiHtmlCraftControl.Select();
+            // フォームが表示された後に実行されるコード
+
+        }
+
+    }
+
+}
+

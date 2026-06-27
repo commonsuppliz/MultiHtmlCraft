@@ -1,0 +1,580 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using Microsoft.ClearScript;
+using System.Dynamic;
+using System.Drawing;
+
+namespace MultiHtmlCraft.Core
+{
+    public class CHtmlIntersectionRecord
+    {
+        // made mutable so we can populate intersection info per-observer
+        public string Type { get; set; } = string.Empty;
+        public CHtmlNode? Target { get; set; }
+        public List<CHtmlNode>? AddedNodes { get; set; }
+        public List<CHtmlNode>? RemovedNodes { get; set; }
+        public string? PreviousSiblingId { get; set; }
+        public string? NextSiblingId { get; set; }
+        public string? AttributeName { get; set; }
+        public string? OldValue { get; set; }
+
+        // Intersection specific fields
+        public bool IsIntersecting { get; set; }
+        public double IntersectionRatio { get; set; }
+        // rectangle values are stored as RectangleFSpec elsewhere; keep as System.Drawing.RectangleF for safety
+        public RectangleF? BoundingClientRect { get; set; }
+        public RectangleF? RootBounds { get; set; }
+        public RectangleF? IntersectionRect { get; set; }
+    }
+
+    public class CHtmlIntersectionObserverInit
+    {
+        public bool childList { get; set; }
+        public bool attributes { get; set; }
+        public bool characterData { get; set; }
+        public bool subtree { get; set; }
+        public bool attributeOldValue { get; set; }
+        public bool characterDataOldValue { get; set; }
+        public string[]? attributeFilter { get; set; }
+
+        // IntersectionObserver-like options (optional)
+        public object? root { get; set; }
+        public string? rootMargin { get; set; }
+        public double[]? threshold { get; set; }
+    }
+
+    // callback delegate used internally
+    public delegate void CHtmlIntersectionCallback(IReadOnlyList<CHtmlIntersectionRecord> records, CHtmlIntersectionObserver observer);
+    // keep compatibility name if referenced elsewhere
+    public delegate void CHtmlIntersectionObserverCallback(IReadOnlyList<CHtmlIntersectionRecord> records, CHtmlIntersectionObserver observer);
+
+    public class CHtmlIntersectionObserver
+    {
+        // Compatibility fields (other DOM classes expose these; window.___createObject assigns them)
+        public bool ___IsPrototype { get; set; }
+        public WeakReference? ___ownerDocumentWeakReference { get; set; }
+
+        private readonly List<CHtmlIntersectionRecord> _queue = new();
+        private readonly object _queueLock = new();
+        private record Registration(CHtmlNode Target, CHtmlIntersectionObserverInit Options);
+        private readonly List<Registration> _registrations = new();
+
+        private readonly CHtmlIntersectionCallback _callback; // internal delivery delegate
+        private ScriptObject? _scriptCallback; // JS function passed from ClearScript
+
+        // JS friendly constructor: new IntersectionObserver(function(records, observer){ ... })
+        public CHtmlIntersectionObserver(params object[] args)
+        {
+            if (args != null && args.Length > 0 && args[0] is ScriptObject so)
+            {
+                _scriptCallback = so;
+            }
+            _callback = DeliverToScriptCallback;
+        }
+
+        internal CHtmlIntersectionObserver(CHtmlIntersectionCallback callback)
+        {
+            _callback = callback ?? throw new ArgumentNullException(nameof(callback));
+        }
+
+        private static object ConvertRectToJs(RectangleF? r)
+        {
+            if (r == null) return null;
+            IDictionary<string, object?> exp = new ExpandoObject();
+            exp["left"] = r.Value.X;
+            exp["top"] = r.Value.Y;
+            exp["width"] = r.Value.Width;
+            exp["height"] = r.Value.Height;
+            exp["right"] = r.Value.X + r.Value.Width;
+            exp["bottom"] = r.Value.Y + r.Value.Height;
+            return exp;
+        }
+
+        private static object ConvertRecordToJs(CHtmlIntersectionRecord r)
+        {
+            IDictionary<string, object?> exp = new ExpandoObject();
+            exp["type"] = r.Type;
+            exp["target"] = r.Target;
+            exp["addedNodes"] = r.AddedNodes?.ToArray() ?? Array.Empty<CHtmlNode>();
+            exp["removedNodes"] = r.RemovedNodes?.ToArray() ?? Array.Empty<CHtmlNode>();
+            exp["previousSibling"] = r.PreviousSiblingId; // simplified
+            exp["nextSibling"] = r.NextSiblingId; // simplified
+            exp["attributeName"] = r.AttributeName;
+            exp["oldValue"] = r.OldValue;
+            exp["isIntersecting"] = r.IsIntersecting;
+            exp["intersectionRatio"] = r.IntersectionRatio;
+            exp["boundingClientRect"] = ConvertRectToJs(r.BoundingClientRect);
+            exp["rootBounds"] = ConvertRectToJs(r.RootBounds);
+            exp["intersectionRect"] = ConvertRectToJs(r.IntersectionRect);
+            return exp;
+        }
+
+        private void DeliverToScriptCallback(IReadOnlyList<CHtmlIntersectionRecord> records, CHtmlIntersectionObserver observer)
+        {
+            if (_scriptCallback == null) return;
+            try
+            {
+                var jsArray = records.Select(ConvertRecordToJs).ToArray();
+                _scriptCallback.Invoke(false, jsArray, observer);
+            }
+            catch { }
+        }
+
+        public void Observe(CHtmlNode target, CHtmlIntersectionObserverInit options)
+        {
+            if (target == null) throw new ArgumentNullException(nameof(target));
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            lock (_registrations)
+            {
+                _registrations.Add(new Registration(target, options));
+                CHtmlIntersectionObserverDispatcher.Register(target, this, options);
+            }
+        }
+
+        public void observe(object target, object options)
+        {
+            if (target is CHtmlNode node)
+            {
+                var init = ConvertOptions(options);
+                Observe(node, init);
+            }
+        }
+
+        private static CHtmlIntersectionObserverInit ConvertOptions(object options)
+        {
+            var init = new CHtmlIntersectionObserverInit();
+            if (options is ScriptObject so)
+            {
+                bool GetBool(string name) => so.PropertyNames.Contains(name) && Convert.ToBoolean(so.GetProperty(name));
+                init.childList = GetBool("childList");
+                init.attributes = GetBool("attributes");
+                init.characterData = GetBool("characterData");
+                init.subtree = GetBool("subtree");
+                init.attributeOldValue = GetBool("attributeOldValue");
+                init.characterDataOldValue = GetBool("characterDataOldValue");
+                if (so.PropertyNames.Contains("attributeFilter"))
+                {
+                    var af = so.GetProperty("attributeFilter");
+                    if (af is ScriptObject afSo)
+                    {
+                        var list = new List<string>();
+                        foreach (var pn in afSo.PropertyNames)
+                        {
+                            var v = afSo.GetProperty(pn)?.ToString();
+                            if (v != null) list.Add(v);
+                        }
+                        init.attributeFilter = list.ToArray();
+                    }
+                }
+                // optional intersection-like options
+                if (so.PropertyNames.Contains("root"))
+                {
+                    init.root = so.GetProperty("root");
+                }
+                if (so.PropertyNames.Contains("rootMargin"))
+                {
+                    init.rootMargin = so.GetProperty("rootMargin")?.ToString();
+                }
+                if (so.PropertyNames.Contains("threshold"))
+                {
+                    var thr = so.GetProperty("threshold");
+                    if (thr is ScriptObject thrSo)
+                    {
+                        var values = new List<double>();
+                        foreach (var pn in thrSo.PropertyNames)
+                        {
+                            var v = thrSo.GetProperty(pn);
+                            if (v != null && double.TryParse(v.ToString(), out var d)) values.Add(d);
+                        }
+                        init.threshold = values.ToArray();
+                    }
+                    else if (thr is double d)
+                    {
+                        init.threshold = new[] { d };
+                    }
+                }
+            }
+            return init;
+        }
+
+        public void Disconnect()
+        {
+            lock (_registrations)
+            {
+                foreach (var r in _registrations)
+                    CHtmlIntersectionObserverDispatcher.Unregister(r.Target, this);
+                _registrations.Clear();
+            }
+            lock (_queueLock) { _queue.Clear(); }
+        }
+        public void disconnect() => Disconnect();
+
+        public List<CHtmlIntersectionRecord> TakeRecords()
+        {
+            lock (_queueLock)
+            {
+                var list = new List<CHtmlIntersectionRecord>(_queue);
+                _queue.Clear();
+                return list;
+            }
+        }
+        public object takeRecords() => TakeRecords().Select(ConvertRecordToJs).ToArray();
+
+        internal void Enqueue(CHtmlIntersectionRecord record)
+        {
+            lock (_queueLock) { _queue.Add(record); }
+        }
+
+        internal void DeliverQueued()
+        {
+            List<CHtmlIntersectionRecord> deliver;
+            lock (_queueLock)
+            {
+                if (_queue.Count == 0) return;
+                deliver = new List<CHtmlIntersectionRecord>(_queue);
+                _queue.Clear();
+            }
+            try { _callback(deliver, this); } catch { }
+        }
+    }
+
+    public static class CHtmlIntersectionObserverDispatcher
+    {
+        private class ObserverRegistration
+        {
+            public WeakReference<CHtmlIntersectionObserver> Observer { get; }
+            public CHtmlIntersectionObserverInit Options { get; }
+            // store last known values for threshold crossing detection
+            public double LastIntersectionRatio { get; set; }
+            public RectangleF LastBounds { get; set; }
+            public ObserverRegistration(CHtmlIntersectionObserver observer, CHtmlIntersectionObserverInit options)
+            { Observer = new WeakReference<CHtmlIntersectionObserver>(observer); Options = options; }
+        }
+
+        private static readonly ConcurrentDictionary<CHtmlNode, List<ObserverRegistration>> _map = new();
+        private static int _deliveryScheduled;
+        private static System.Threading.Timer? _pollTimer;
+        private static readonly object _pollLock = new object();
+        private const int POLL_INTERVAL_MS = 100; // periodic evaluation interval
+
+        public static CHtmlIntersectionObserver Create(CHtmlIntersectionCallback callback) => new(callback);
+
+        internal static void Register(CHtmlNode target, CHtmlIntersectionObserver observer, CHtmlIntersectionObserverInit options)
+        {
+            var list = _map.GetOrAdd(target, _ => new List<ObserverRegistration>());
+            lock (list) { list.Add(new ObserverRegistration(observer, options)); }
+            EnsurePollTimerRunning();
+        }
+
+        internal static void Unregister(CHtmlNode target, CHtmlIntersectionObserver observer)
+        {
+            if (!_map.TryGetValue(target, out var list)) return;
+            lock (list)
+            {
+                list.RemoveAll(r => !r.Observer.TryGetTarget(out var o) || o == observer);
+                if (list.Count == 0) _map.TryRemove(target, out _);
+            }
+        }
+
+        public static void NodeChildAdded(CHtmlNode parent, CHtmlNode added, CHtmlNode? previousSibling, CHtmlNode? nextSibling)
+            => NotifyChildList(parent, new List<CHtmlNode> { added }, null, previousSibling, nextSibling);
+        public static void NodeChildRemoved(CHtmlNode parent, CHtmlNode removed, CHtmlNode? previousSibling, CHtmlNode? nextSibling)
+            => NotifyChildList(parent, null, new List<CHtmlNode> { removed }, previousSibling, nextSibling);
+        public static void NodeAttributeChanged(CHtmlNode target, string attributeName, string? oldValue)
+            => NotifyAttribute(target, attributeName, oldValue);
+        public static void NodeCharacterDataChanged(CHtmlNode target, string? oldValue)
+            => NotifyCharacterData(target, oldValue);
+
+        private static void NotifyChildList(CHtmlNode target, List<CHtmlNode>? added, List<CHtmlNode>? removed, CHtmlNode? prev, CHtmlNode? next)
+        {
+            Dispatch(target, opt => opt.childList, () => new CHtmlIntersectionRecord
+            {
+                Type = "childList",
+                Target = target,
+                AddedNodes = added,
+                RemovedNodes = removed,
+                PreviousSiblingId = prev != null ? prev.GetHashCode().ToString() : null,
+                NextSiblingId = next != null ? next.GetHashCode().ToString() : null
+            });
+        }
+        private static void NotifyAttribute(CHtmlNode target, string attributeName, string? oldValue)
+        {
+            Dispatch(target, opt => opt.attributes && (opt.attributeFilter == null || opt.attributeFilter.Contains(attributeName)), () => new CHtmlIntersectionRecord
+            {
+                Type = "attributes",
+                Target = target,
+                AttributeName = attributeName,
+                OldValue = oldValue
+            });
+        }
+        private static void NotifyCharacterData(CHtmlNode target, string? oldValue)
+        {
+            Dispatch(target, opt => opt.characterData, () => new CHtmlIntersectionRecord
+            {
+                Type = "characterData",
+                Target = target,
+                OldValue = oldValue
+            });
+        }
+
+        private static bool TryGetElementBounds(CHtmlNode node, out RectangleF bounds)
+        {
+            bounds = RectangleF.Empty;
+            try
+            {
+                if (node is CHtmlElement el)
+                {
+                    // Use GetElementBoundsOnScreen which returns RectangleFSpec; convert to RectangleF
+                    var rectSpec = el.GetElementBoundsOnScreen();
+                    bounds = new RectangleF(rectSpec.Left, rectSpec.Top, rectSpec.Width, rectSpec.Height);
+                    return true;
+                }
+            }
+            catch { }
+            return false;
+        }
+
+        private static RectangleF GetViewportBoundsForNode(CHtmlNode node)
+        {
+            // default viewport (0,0) .. width/height from document/window
+            float vw = 0, vh = 0;
+            try
+            {
+                if (node is CHtmlElement el)
+                {
+                    var doc = el.___getDocument();
+                    if (doc != null)
+                    {
+                        // try different window properties
+                        try
+                        {
+                            var mw = doc.parentWindow as CHtmlMultiversalWindow;
+                            if (mw != null)
+                            {
+                                vw = (float)mw.___getinnerWidth();
+                                vh = (float)mw.___getinnerHeight();
+                            }
+                            else
+                            {
+                                var mw2 = doc.___window as CHtmlMultiversalWindow;
+                                if (mw2 != null)
+                                {
+                                    vw = (float)mw2.___getinnerWidth();
+                                    vh = (float)mw2.___getinnerHeight();
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+            if (vw <= 0) vw = 1200; // fallback
+            if (vh <= 0) vh = 1000;
+            return new RectangleF(0, 0, vw, vh);
+        }
+
+        private static RectangleF? IntersectRect(RectangleF a, RectangleF b)
+        {
+            var x1 = Math.Max(a.Left, b.Left);
+            var y1 = Math.Max(a.Top, b.Top);
+            var x2 = Math.Min(a.Right, b.Right);
+            var y2 = Math.Min(a.Bottom, b.Bottom);
+            if (x2 >= x1 && y2 >= y1)
+            {
+                return new RectangleF(x1, y1, x2 - x1, y2 - y1);
+            }
+            return null;
+        }
+
+        private static void Dispatch(CHtmlNode target, Func<CHtmlIntersectionObserverInit, bool> filter, Func<CHtmlIntersectionRecord> recordFactory)
+        {
+            if (!_map.TryGetValue(target, out var list)) return;
+            List<(ObserverRegistration reg, CHtmlIntersectionObserver obs)> toNotify = new();
+            lock (list)
+            {
+                foreach (var reg in list)
+                {
+                    if (!reg.Observer.TryGetTarget(out var observer)) continue;
+                    if (filter(reg.Options)) toNotify.Add((reg, observer));
+                }
+            }
+            if (toNotify.Count == 0) return;
+
+            bool anyEnqueued = false;
+            foreach (var pair in toNotify)
+            {
+                try
+                {
+                    // create a fresh record per observer since intersection info may differ
+                    var record = recordFactory();
+
+                    // compute intersection information
+                    if (TryGetElementBounds(target, out var targetBounds))
+                    {
+                        var rootBounds = GetViewportBoundsForNode(target);
+                        var intersection = IntersectRect(targetBounds, rootBounds);
+                        record.BoundingClientRect = targetBounds;
+                        record.RootBounds = rootBounds;
+                        record.IntersectionRect = intersection;
+                        if (intersection.HasValue)
+                        {
+                            var targetArea = Math.Max(0.0f, targetBounds.Width * targetBounds.Height);
+                            var intersectionArea = Math.Max(0.0f, intersection.Value.Width * intersection.Value.Height);
+                            double ratio = 0.0;
+                            if (targetArea > 0) ratio = intersectionArea / targetArea;
+                            record.IsIntersecting = intersectionArea > 0.0f;
+                            record.IntersectionRatio = ratio;
+                        }
+                        else
+                        {
+                            record.IsIntersecting = false;
+                            record.IntersectionRatio = 0.0;
+                        }
+                    }
+
+                    if (pair.obs != null)
+                    {
+                        pair.obs.Enqueue(record);
+                        anyEnqueued = true;
+                    }
+                }
+                catch
+                {
+                    // ignore per-observer error
+                }
+            }
+
+            if (anyEnqueued) ScheduleDelivery();
+        }
+
+        private static void ScheduleDelivery()
+        {
+            if (Interlocked.Exchange(ref _deliveryScheduled, 1) == 0)
+            {
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    try { Deliver(); }
+                    finally { Interlocked.Exchange(ref _deliveryScheduled, 0); }
+                });
+            }
+        }
+
+        private static void Deliver()
+        {
+            foreach (var kv in _map)
+            {
+                var list = kv.Value;
+                lock (list)
+                {
+                    foreach (var reg in list)
+                    {
+                        if (!reg.Observer.TryGetTarget(out var observer)) continue;
+                        observer.DeliverQueued();
+                    }
+                }
+            }
+        }
+
+        private static void EnsurePollTimerRunning()
+        {
+            lock (_pollLock)
+            {
+                if (_pollTimer == null)
+                {
+                    _pollTimer = new System.Threading.Timer(_ => { try { PollEvaluate(); } catch { } }, null, POLL_INTERVAL_MS, POLL_INTERVAL_MS);
+                }
+            }
+        }
+
+        private static void PollEvaluate()
+        {
+            try
+            {
+                foreach (var kv in _map)
+                {
+                    var target = kv.Key;
+                    var list = kv.Value;
+                    RectangleF targetBounds;
+                    if (!TryGetElementBounds(target, out targetBounds)) continue;
+
+                    List<(ObserverRegistration reg, CHtmlIntersectionObserver obs)> toNotify = new();
+                    lock (list)
+                    {
+                        foreach (var reg in list)
+                        {
+                            if (!reg.Observer.TryGetTarget(out var observer)) continue;
+                            // Only consider intersection observers here (filter by options)
+                            // We'll use options.threshold if provided
+                            toNotify.Add((reg, observer));
+                        }
+                    }
+                    foreach (var pair in toNotify)
+                    {
+                        try
+                        {
+                            var reg = pair.reg;
+                            var obs = pair.obs;
+                            // compute viewport/root bounds
+                            var rootBounds = GetViewportBoundsForNode(target);
+                            var intersection = IntersectRect(targetBounds, rootBounds);
+                            double ratio = 0.0;
+                            if (intersection.HasValue)
+                            {
+                                var targetArea = Math.Max(0.0f, targetBounds.Width * targetBounds.Height);
+                                var interArea = Math.Max(0.0f, intersection.Value.Width * intersection.Value.Height);
+                                if (targetArea > 0) ratio = interArea / targetArea;
+                            }
+
+                            bool shouldNotify = false;
+                            var thresholds = reg.Options.threshold;
+                            if (thresholds != null && thresholds.Length > 0)
+                            {
+                                // notify if any threshold crossed
+                                foreach (var t in thresholds)
+                                {
+                                    if ((reg.LastIntersectionRatio < t && ratio >= t) || (reg.LastIntersectionRatio >= t && ratio < t))
+                                    {
+                                        shouldNotify = true; break;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // default: notify when intersection boolean changes
+                                bool prevIntersect = reg.LastIntersectionRatio > 0.0;
+                                bool currIntersect = ratio > 0.0;
+                                if (prevIntersect != currIntersect) shouldNotify = true;
+                            }
+
+                            if (shouldNotify)
+                            {
+                                var record = new CHtmlIntersectionRecord
+                                {
+                                    Type = "childList",
+                                    Target = target,
+                                    BoundingClientRect = targetBounds,
+                                    RootBounds = rootBounds,
+                                    IntersectionRect = intersection,
+                                    IsIntersecting = (intersection.HasValue && intersection.Value.Width * intersection.Value.Height > 0),
+                                    IntersectionRatio = ratio
+                                };
+                                obs.Enqueue(record);
+                                ScheduleDelivery();
+                            }
+
+                            // store last values
+                            reg.LastIntersectionRatio = ratio;
+                            reg.LastBounds = targetBounds;
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+    }
+}

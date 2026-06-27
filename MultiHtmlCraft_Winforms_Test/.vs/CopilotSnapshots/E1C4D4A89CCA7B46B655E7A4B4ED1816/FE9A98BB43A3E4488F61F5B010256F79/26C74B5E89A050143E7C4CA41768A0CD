@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MultiHtmlCraft.Core
+{
+    public class CHtmlFontFace
+    {
+        // font-family: フォントファミリー名
+        public string fontFamily { get; set; }
+        // src: フォントファイルのURLやローカルパス
+        public string src { get; set; }
+        // font-weight: 通常は normal, bold, 100-900 など
+        public string fontWeight { get; set; }
+        // font-style: normal, italic, oblique など
+        public string fontStyle { get; set; }
+        // font-stretch: normal, condensed, expanded など
+        public string fontStretch { get; set; }
+        // unicode-range: 対象となるUnicode範囲
+        public string unicodeRange { get; set; }
+        // ascent-override, descent-override, line-gap-override なども必要に応じて
+        public string ascentOverride { get; set; }
+        public string descentOverride { get; set; }
+        public string lineGapOverride { get; set; }
+
+        public CHtmlFontFace()
+        {
+            // デフォルト値を設定
+            fontFamily = string.Empty;
+            src = string.Empty;
+            fontWeight = "normal";
+            fontStyle = "normal";
+            fontStretch = "normal";
+            unicodeRange = string.Empty;
+            ascentOverride = string.Empty;
+            descentOverride = string.Empty;
+            lineGapOverride = string.Empty;
+        }
+    }
+}

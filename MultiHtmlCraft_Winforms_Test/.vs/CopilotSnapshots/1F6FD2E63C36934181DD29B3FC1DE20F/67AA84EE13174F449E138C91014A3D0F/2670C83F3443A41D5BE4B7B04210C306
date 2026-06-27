@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MultiHtmlCraft.Interfaces
+{
+    public interface ICHtmlShadowRoot
+    {
+        public ICHtmlDocumentInterface ShadowRoot { get; }
+        public ShadowRootMode Mode { get; } 
+        public SlotAssignmentMode SlotAssignment { get; }   
+        public void AppendChild(ICHtmlElementInterface? node);       
+
+        public void InsertBefore(ICHtmlElementInterface? newChild, ICHtmlElementInterface? referenceChild);   
+        public void ReplaceChild(ICHtmlElementInterface ?newChild, ICHtmlElementInterface? oldChild);
+        public void RemoveChild(ICHtmlElementInterface? child);
+        public void AdoptNode(ICHtmlElementInterface? node);
+        public void CloneNode(bool deep = false);
+
+
+        public enum ShadowRootMode
+        {
+            Open, // Fixed: Changed "open" to Open (valid identifier)
+            Closed // Fixed: Changed "closed" to Closed (valid identifier)
+        }
+
+        public enum SlotAssignmentMode
+        {
+            Manual, // Fixed: Changed "manual" to Manual (valid identifier)
+            Named // Fixed: Changed "named" to Named (valid identifier)
+        }
+    }
+}

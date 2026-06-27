@@ -1,0 +1,67 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MultiHtmlCraft.Interfaces
+{
+    public interface ICHtmlShadowRoot
+    {
+        public ICHtmlDocumentInterface ShadowRoot { get; }
+        public ShadowRootMode Mode { get; }
+        public SlotAssignmentMode SlotAssignment { get; }
+        public void AppendChild(ICHtmlElementInterface? node);
+        public void InsertBefore(ICHtmlElementInterface? newChild, ICHtmlElementInterface? referenceChild);
+        public void ReplaceChild(ICHtmlElementInterface? newChild, ICHtmlElementInterface? oldChild);
+        public void RemoveChild(ICHtmlElementInterface? child);
+        public void AdoptNode(ICHtmlElementInterface? node);
+        public void CloneNode(bool deep = false);
+
+        // --- Added standard ShadowRoot fields and methods ---
+        public ICHtmlElementInterface host { get; }
+        public bool delegatesFocus { get; }
+        public ICHtmlElementInterface activeElement { get; }
+        public string innerHTML { get; set; }
+        public string textContent { get; set; }
+        public ICHtmlCollectionInterface children { get; }
+        public ICHtmlCollectionInterface childNodes { get; }
+        public ICHtmlElementInterface? firstChild { get; }
+        public ICHtmlElementInterface? lastChild { get; }
+        public bool isConnected { get; }
+        public int nodeType { get; }
+        public ICHtmlElementInterface? parentNode { get; }
+        public ICHtmlElementInterface? getElementById(string id);
+        public ICHtmlElementInterface? querySelector(string selectors);
+        public ICHtmlCollectionInterface? querySelectorAll(string selectors);
+        public bool contains(ICHtmlElementInterface? node);
+        public string ToString();
+
+        // --- Add missing/typical ShadowRoot methods ---
+        public void addEventListener(string type, object listener, bool useCapture = false);
+        public void removeEventListener(string type, object listener, bool useCapture = false);
+        public object dispatchEvent(object evt);
+        public bool hasChildNodes();
+        public ICHtmlElementInterface? cloneNode(bool deep);
+        public ICHtmlElementInterface? append(ICHtmlElementInterface? node);
+        public ICHtmlElementInterface? prepend(ICHtmlElementInterface? node);
+        public ICHtmlElementInterface? remove();
+        public ICHtmlElementInterface? replaceWith(ICHtmlElementInterface? node);
+        public ICHtmlElementInterface? closest(string selector);
+        public ICHtmlCollectionInterface? getElementsByClassName(string className);
+        public ICHtmlCollectionInterface? getElementsByTagName(string tagName);
+        public ICHtmlCollectionInterface? getElementsByName(string name);
+
+        public enum ShadowRootMode
+        {
+            Open, // Fixed: Changed "open" to Open (valid identifier)
+            Closed // Fixed: Changed "closed" to Closed (valid identifier)
+        }
+
+        public enum SlotAssignmentMode
+        {
+            Manual, // Fixed: Changed "manual" to Manual (valid identifier)
+            Named // Fixed: Changed "named" to Named (valid identifier)
+        }
+    }
+}

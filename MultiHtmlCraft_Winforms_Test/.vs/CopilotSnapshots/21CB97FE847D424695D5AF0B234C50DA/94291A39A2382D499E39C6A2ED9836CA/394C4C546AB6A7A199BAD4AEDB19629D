@@ -1,0 +1,224 @@
+﻿using MultiHtmlCraft.Core;
+using MultiHtmlCraft.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
+// OtherInformation: This is a WinForms control for MultiHtmlCraft
+namespace MultiHtmlCraft.WinformsControl
+{
+    public class MultiHtmlCraft_WinControl : UserControl
+    {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Compiler", "CS8618", Justification = "Fields are initialized in InitializeComponent.")]
+        private HScrollBar horizontalBar;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Compiler", "CS8618", Justification = "Fields are initialized in InitializeComponent.")]
+        private VScrollBar verticalBar;
+        private System.ComponentModel.IContainer components = new System.ComponentModel.Container();
+
+        private Panel? sidePanel;
+        private TabControl? tabControl;
+        private Button? closeButton;
+        private Splitter? sideSplitter;
+        private ListView? sideListView;
+        private Dictionary<int, List<ListViewItem>>? tabItems;
+
+        public MultiHtmlCraft_WinControl()
+        {
+            //this.AutoScroll = true;
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.ResizeRedraw, true);
+            this.SetStyle(ControlStyles.UserPaint, true);
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            InitializeComponent();
+        }
+        private void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+
+        private void InitializeComponent()
+        {
+            this.horizontalBar = new HScrollBar();
+            this.verticalBar = new VScrollBar();
+            this.SuspendLayout();
+            // 
+            // horizontalBar
+            // 
+            this.horizontalBar.Name = "horizontalBar";
+            this.horizontalBar.Height = 20;
+            this.horizontalBar.ValueChanged += (s, e) => this.Invalidate();
+            // 
+            // verticalBar
+            // 
+            this.verticalBar.Name = "verticalBar";
+            this.verticalBar.Width = 20;
+            this.verticalBar.ValueChanged += (s, e) => this.Invalidate();
+            // 
+            // MultiHtmlCraft_WinControl
+            // 
+            this.Name = "MultiHtmlCraft_WinControl";
+            this.Size = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.verticalBar);
+            this.Controls.Add(this.horizontalBar);
+            this.ResumeLayout(false);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            // Custom painting logic can be added here
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            base.OnClick(e);
+            if (sidePanel == null)
+            {
+                sidePanel = new Panel();
+                sidePanel.Dock = DockStyle.Right;
+                sidePanel.Width = this.Width / 4;
+                sidePanel.BackColor = System.Drawing.Color.LightGray;
+
+                tabControl = new TabControl();
+                tabControl.Dock = DockStyle.Fill;
+                tabControl.TabPages.Add("🌳"); // DOM Tree
+                tabControl.TabPages.Add("🎨"); // CSS
+                tabControl.TabPages.Add("📜"); // Script
+                tabControl.TabPages.Add("⬇️"); // Download
+                sidePanel.Controls.Add(tabControl);
+
+                // ListViewの追加
+                sideListView = new ListView
+                {
+                    Dock = DockStyle.Fill,
+                    View = View.Details,
+                    FullRowSelect = true,
+                    GridLines = true
+                };
+                sideListView.Columns.Add("Name", 180);
+                sideListView.Columns.Add("Value", 100);
+                tabControl.TabPages[0].Controls.Add(sideListView);
+
+                // タブごとのアイテムを生成
+                tabItems = new Dictionary<int, List<ListViewItem>>();
+                var rand = new Random();
+                for (int tab = 0; tab < tabControl.TabPages.Count; tab++)
+                {
+                    var items = new List<ListViewItem>();
+                    for (int i = 0; i < 300; i++)
+                    {
+                        var item = new ListViewItem($"Item {tab + 1}-{i + 1}");
+                        item.SubItems.Add($"Value {rand.Next(1000)}");
+                        items.Add(item);
+                    }
+                    tabItems[tab] = items;
+                }
+                // 最初のタブのアイテムを表示
+                sideListView.Items.AddRange(tabItems[0].ToArray());
+
+                // タブ切り替え時のイベント
+                tabControl.SelectedIndexChanged += (s, args) =>
+                {
+                    if (sideListView != null && tabItems != null)
+                    {
+                        sideListView.Items.Clear();
+                        if (tabItems.TryGetValue(tabControl.SelectedIndex, out var items))
+                        {
+                            sideListView.Items.AddRange(items.ToArray());
+                        }
+                    }
+                };
+
+                this.Controls.Add(sidePanel);
+                sidePanel.BringToFront();
+
+                // Splitterの追加（sidePanelの左側に配置）
+                sideSplitter = new Splitter();
+                sideSplitter.Dock = DockStyle.Right;
+                sideSplitter.Width = 5;
+                sideSplitter.MinExtra = 100;
+                sideSplitter.MinSize = 50;
+                sideSplitter.BackColor = System.Drawing.Color.LightSlateGray;
+                this.Controls.Add(sideSplitter);
+                sideSplitter.BringToFront();
+
+                closeButton = new Button();
+                closeButton.Text = "❌";
+                closeButton.FlatStyle = FlatStyle.Flat;
+                closeButton.Width = 32;
+                closeButton.Height = tabControl.ItemSize.Height > 0 ? tabControl.ItemSize.Height : 25;
+                closeButton.BackColor = this.BackColor;
+
+                this.Controls.Add(closeButton);
+                closeButton.BringToFront();
+                closeButton.Click += (s, args) =>
+                {
+                    this.Controls.Remove(closeButton);
+                    this.Controls.Remove(sidePanel);
+                    if (sideSplitter != null)
+                    {
+                        this.Controls.Remove(sideSplitter);
+                        sideSplitter.Dispose();
+                        sideSplitter = null;
+                    }
+                    sidePanel.Dispose();
+                    sidePanel = null;
+                    tabControl = null;
+                    closeButton = null;
+                    sideListView = null;
+                    tabItems = null;
+                };
+                UpdateCloseButtonLocation();
+            }
+        }
+
+       
+        private void UpdateCloseButtonLocation()
+        {
+            if (closeButton != null && closeButton.Parent == this)
+            {
+                int x = this.ClientSize.Width - closeButton.Width - 4;
+                int y = 2;
+                closeButton.Location = new System.Drawing.Point(x, y);
+                closeButton.BringToFront();
+                closeButton.Visible = (sidePanel != null && sidePanel.Visible);
+            }
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            this.SuspendLayout();
+            this.horizontalBar.Location = new System.Drawing.Point(0, this.ClientSize.Height - this.horizontalBar.Height);
+            this.horizontalBar.Size = new System.Drawing.Size(this.ClientSize.Width - this.verticalBar.Width, this.horizontalBar.Height);
+
+            this.verticalBar.Location = new System.Drawing.Point(this.ClientSize.Width - this.verticalBar.Width, 0);
+            this.verticalBar.Size = new System.Drawing.Size(this.verticalBar.Width, this.ClientSize.Height - this.horizontalBar.Height);
+            int oldH = horizontalBar.Value;
+            if (horizontalBar.Maximum > 0)
+                horizontalBar.Value = (oldH == 0) ? 1 : 0;
+            horizontalBar.Value = oldH;
+
+            int oldV = verticalBar.Value;
+            if (verticalBar.Maximum > 0)
+                verticalBar.Value = (oldV == 0) ? 1 : 0;
+            verticalBar.Value = oldV;
+            if (sidePanel != null)
+            {
+                // sidePanelの幅はSplitterで調整されるのでここでは何もしない
+            }
+            this.ResumeLayout(false);
+            UpdateCloseButtonLocation();
+        }
+    }
+}

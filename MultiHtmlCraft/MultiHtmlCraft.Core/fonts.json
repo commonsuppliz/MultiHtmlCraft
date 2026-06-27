@@ -1,0 +1,239 @@
+{
+  "generatedBy": "MultiHtmlCraft.Core Font Assets",
+  "version": "1.0",
+  "default": "Noto Sans JP",
+  "fonts": [
+    {
+      "file": "Assets/Fonts/Google_Sans_Code/GoogleSansCode-VariableFont_wght.ttf",
+      "family": "Google Sans Code",
+      "postScriptName": "GoogleSansCode-VariableFont_wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Color_Emoji/NotoColorEmoji-Regular.ttf",
+      "family": "Noto Color Emoji",
+      "postScriptName": "NotoColorEmoji-Regular",
+      "variable": false,
+      "weight": {
+        "min": 400,
+        "max": 400
+      },
+      "styles": [ "Regular" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf",
+      "family": "Noto Sans",
+      "postScriptName": "NotoSans-VariableFont_wdth,wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Italic", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Sans_Display/NotoSansDisplay-VariableFont_wdth,wght.ttf",
+      "family": "Noto Sans Display",
+      "postScriptName": "NotoSansDisplay-VariableFont_wdth,wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Italic", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Sans_Hebrew/NotoSansHebrew-VariableFont_wdth,wght.ttf",
+      "family": "Noto Sans Hebrew",
+      "postScriptName": "NotoSansHebrew-VariableFont_wdth,wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Sans_JP/NotoSansJP-VariableFont_wght.ttf",
+      "family": "Noto Sans JP",
+      "postScriptName": "NotoSansJP-VariableFont",
+      "priority": 100,
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Sans_KR/NotoSansKR-VariableFont_wght.ttf",
+      "family": "Noto Sans KR",
+      "postScriptName": "NotoSansKR-VariableFont_wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Sans_Symbols/NotoSansSymbols-VariableFont_wght.ttf",
+      "family": "Noto Sans Symbols",
+      "postScriptName": "NotoSansSymbols-VariableFont_wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Sans_Syriac/NotoSansSyriac-VariableFont_wght.ttf",
+      "family": "Noto Sans Syriac",
+      "postScriptName": "NotoSansSyriac-VariableFont_wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Sans_Syriac_Western/NotoSansSyriacWestern-VariableFont_wght.ttf",
+      "family": "Noto Sans Syriac Western",
+      "postScriptName": "NotoSansSyriacWestern-VariableFont_wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Sans_TC/NotoSansTC-VariableFont_wght.ttf",
+      "family": "Noto Sans TC",
+      "postScriptName": "NotoSansTC-VariableFont_wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Noto_Serif_JP/NotoSerifJP-VariableFont_wght.ttf",
+      "family": "Noto Serif JP",
+      "postScriptName": "NotoSerifJP-VariableFont_wght",
+      "priority": 90,
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Open_Sans/OpenSans-VariableFont_wdth,wght.ttf",
+      "family": "Open Sans",
+      "postScriptName": "OpenSans-VariableFont_wdth,wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Italic", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Oswald/Oswald-VariableFont_wght.ttf",
+      "family": "Oswald",
+      "postScriptName": "Oswald-VariableFont_wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Roboto_Serif/RobotoSerif-VariableFont_GRAD,opsz,wdth,wght.ttf",
+      "family": "Roboto Serif",
+      "postScriptName": "RobotoSerif-VariableFont_GRAD,opsz,wdth,wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Italic", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Sora/Sora-VariableFont_wght.ttf",
+      "family": "Sora",
+      "postScriptName": "Sora-VariableFont_wght",
+      "variable": true,
+      "weight": {
+        "min": 100,
+        "max": 900
+      },
+      "styles": [ "Regular", "Bold" ],
+      "source": "Google Fonts",
+      "license": "SIL Open Font License (OFL)"
+    },
+    {
+      "file": "Assets/Fonts/Zen_Kaku_Gothic_New/ZenKakuGothicNew-Regular.ttf",
+      "family": "Zen Kaku Gothic New",
+      "postScriptName": "ZenKakuGothicNew-Regular",
+      "variable": false,
+      "weight": {
+        "min": 400,
+        "max": 400
+      },
+      "styles": [ "Regular", "Bold" ]
+    },
+    {
+      "file": "Assets/Fonts/Zen_Old_Mincho/ZenOldMincho-Regular.ttf",
+      "family": "Zen Old Mincho",
+      "postScriptName": "ZenOldMincho-Regular",
+      "variable": false,
+      "weight": {
+        "min": 400,
+        "max": 400
+      },
+      "styles": [ "Regular", "Bold" ]
+    }
+  ]
+}

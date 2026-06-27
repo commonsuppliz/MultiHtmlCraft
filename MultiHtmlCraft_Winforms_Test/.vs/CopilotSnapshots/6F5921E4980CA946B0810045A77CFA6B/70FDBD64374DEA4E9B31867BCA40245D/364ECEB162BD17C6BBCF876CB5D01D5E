@@ -1,0 +1,1860 @@
+﻿using MultiHtmlCraft.Core;
+using MultiHtmlCraft.Interfaces;
+using MultiHtmlCraft.WinformsControl;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Net;
+using System.Net.Http;
+using System.Security.Authentication;
+using System.Security.Permissions;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+// OtherInformation: This is a WinForms control for MultiHtmlCraft
+namespace MultiHtmlCraft.WinFormsControl
+{
+
+    public class CHtmlMultiHtmlCraft_WinControl : UserControl, ICHtmlMultiversalControlInterface
+    {
+        private readonly object _drawImageLock = new object();
+        private Graphics? _cachedGraphics;
+
+        private const int GRAPHICS_CACHE_TIMEOUT_MS = 100;
+        private DateTime _lastGraphicsCreated = DateTime.MinValue;
+        private DateTime _lastGCCollectTime = DateTime.MinValue;
+        public CHtmlMultiHtmlCraft_WinControl()
+        {
+
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.ResizeRedraw, true);
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            this.SetStyle(ControlStyles.Selectable, true);
+            this.TabStop = true;
+            InitializeComponent();
+
+            this.horizontalBar.ValueChanged += (s, e) => this.Invalidate();
+            this.verticalBar.ValueChanged += (s, e) => this.Invalidate();
+            this.horizontalBar.Visible = false;
+            this.verticalBar.Visible = false;
+            this.verticalBar.LargeChange = 100;
+            this.verticalBar.SmallChange = 30;
+            this.horizontalBar.LargeChange = 100;
+            this.horizontalBar.SmallChange = 30;
+            this.horizontalBar.Dock = DockStyle.Bottom;
+            this.verticalBar.Dock = DockStyle.Right;
+            this.horizontalBar.Scroll += (s, e) => this.Invalidate();
+            this.verticalBar.Scroll += (s, e) => this.Invalidate();
+            this.___multiversalWindow = new MultiHtmlCraft.Core.CHtmlMultiversalWindow(null, true, IMultiversalWindowType.NormalWindow);
+            // KeyDown/KeyUpイベントを明示的に登録
+            this.KeyDown += CHtmlMultiHtmlCraft_WinControl_KeyDown;
+            this.KeyUp += CHtmlMultiHtmlCraft_WinControl_KeyUp;
+            this.KeyPress += CHtmlMultiHtmlCraft_WinControl_KeyPress;
+
+        }
+        System.Drawing.Point ___LastMousePoint = System.Drawing.Point.Empty;
+        System.Drawing.Point ___LastMouseScreenXY = System.Drawing.Point.Empty;
+        private int _documentPaintCount = 0;
+        private int ___currentTabIndex = 0;
+        public static HttpClientHandler httpclientHandler = new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            MaxRequestContentBufferSize = 1_000_000,
+            SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
+        };
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Compiler", "CS8618", Justification = "Fields are initialized in InitializeComponent.")]
+        private HScrollBar horizontalBar;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Compiler", "CS8618", Justification = "Fields are initialized in InitializeComponent.")]
+        private VScrollBar verticalBar;
+        private System.ComponentModel.IContainer components = new System.ComponentModel.Container();
+
+        private Panel? sidePanel;
+        private TabControl? tabControl;
+        private Button? closeButton;
+        private Splitter? sideSplitter;
+        private Panel? sidePanelDOM;
+        private TreeView? treeViewDOM;
+        private Splitter? splitterDOM;
+        private ListView? listViewDOM;
+        private ListView? sideListViewCSS;
+        private ListView? sideListViewScript;
+        private MultiHtmlCraft.Core.CHtmlDocument? ___document;
+        private CHtmlMultiversalWindow? ___multiversalWindow;
+
+
+        public async Task navigate(string URL, params object[] args)
+        {
+            this.ActiveControl = null;
+            string strMethod = "GET";
+            
+            CHtmlRequestData? _requestData = null;
+            if (args !=null && args.Length > 0 )
+            {
+                if (args[0] is CHtmlRequestData)
+                {
+                    _requestData = (CHtmlRequestData)args[0];
+                    URL = _requestData.fields["url"];
+                    strMethod = _requestData.fields["method"] ?? "GET";
+
+                }
+            }
+
+            string strUrl = URL.Trim();
+
+            if (!strUrl.StartsWith("http"))
+            {
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new Action(() => MessageBox.Show($"{strUrl} is invalid url")));
+                }
+                else
+                {
+                    MessageBox.Show($"{strUrl} is invalid url");
+                }
+                return;
+            }
+
+            this.___multiversalWindow.___URL_Request_Current = URL;
+            this.___multiversalWindow.setMultiversalControl(this);
+
+            if (___multiversalWindow.hasHttpClient == false)
+            {
+                HttpClient ___httpClient = new HttpClient(httpclientHandler);
+
+                commonHTML.setHttpClientDefalutRequestHeaders(___httpClient);
+
+
+
+                ___httpClient.Timeout = TimeSpan.FromMilliseconds(30000);
+                MultiHtmlCraft.Core.CHtmlMultiversalWindow.setHttpClient(___httpClient);
+            }
+            this.___multiversalWindow.___URL_Request_Current = URL;
+            MultiHtmlCraft.Core.commonLog.LoggingEnabled = true;
+            MultiHtmlCraft.Core.commonLog.LogLevel = 10;
+
+            commonLog.LoggingEnabled = true;
+            commonLog.LogLevel = 10;
+
+            if (commonLog.LoggingEnabled)
+            {
+                commonLog.LogEntry($"Requesting {strUrl} Managed Thread ID :{System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            }
+            try
+            {
+                ___document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, this.___multiversalWindow, _requestData);
+                if (___document?.body is CHtmlElement ___body)
+                {
+                    if (this.InvokeRequired)
+                    {
+                        this.Invoke(new Action(() => setRenderingSize(___body.offsetWidth, ___body.offsetHeight)));
+                    }
+                    else
+                    {
+                        setRenderingSize(___body.offsetWidth, ___body.offsetHeight);
+                    }
+                }
+
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new Action(() =>
+                    {
+                        if (!this.horizontalBar.Visible)
+                            this.horizontalBar.Visible = true;
+                        if (!this.verticalBar.Visible)
+                            this.verticalBar.Visible = true;
+
+                        if (___document.___ManagedControlPendingElementList != null && ___document.___ManagedControlPendingElementList.Count > 0)
+                        {
+                            if (___document.___HtmlGraphics == null)
+                            {
+                                ___document.___HtmlGraphics = new CHtmlGraphicContainer();
+                                ___document.___HtmlGraphics.Graphic = this.CreateGraphics();
+                            }
+                            //this.createControlFromDocument(this.___document);
+                        }
+                        this.Invalidate();
+                        if (treeViewDOM != null && treeViewDOM.Visible == true)
+                        {
+
+                            createDOMTree();
+                        }
+                    }));
+                }
+                else
+                {
+                    if (!this.horizontalBar.Visible)
+                        this.horizontalBar.Visible = true;
+                    if (!this.verticalBar.Visible)
+                        this.verticalBar.Visible = true;
+                    this.Invalidate();
+                    if (treeViewDOM != null)
+                    {
+                        createDOMTree();
+
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        public void NavigateSync(string URL)
+        {
+            navigate(URL).GetAwaiter().GetResult();
+        }
+
+        private void createDOMTree()
+        {
+            if (___document?.documentElement is CHtmlElement documentRootElement)
+            {
+                this.treeViewDOM.SuspendLayout();
+                treeViewDOM.BeginUpdate();
+                treeViewDOM.Nodes.Clear();
+                treeViewDOM.Nodes.Add(createTreeNodeFromCHtmlElement(documentRootElement));
+                // TopNodeを保存
+                TreeNode? prevTopNode = treeViewDOM.TopNode;
+                treeViewDOM.ExpandAll();
+
+
+
+
+                // TopNodeを復元
+                if (prevTopNode != null)
+                    treeViewDOM.TopNode = prevTopNode;
+
+
+                this.treeViewDOM.ResumeLayout(false);
+            }
+        }
+        public void setRenderingSize(double ___width, double ___height)
+        {
+            if (this.horizontalBar != null)
+            {
+                this.horizontalBar.Value = 0;
+                this.horizontalBar.Maximum = (int)___width;
+            }
+            if (this.verticalBar != null)
+            {
+                this.verticalBar.Value = 0;
+                this.verticalBar.Maximum = (int)___height;
+            }
+        }
+        public void Invalidate(RectangleFSpec rectFSpec)
+        {   if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => this.Invalidate(commonTypeConverter.ToRectangle(rectFSpec))));
+            }
+            else
+            {
+                this.Invalidate(commonTypeConverter.ToRectangle(rectFSpec));
+            }
+        }
+        /*
+        public void DrawImage(object image, RectangleFSpec rectFSpec)
+        {
+            if (this.InvokeRequired)
+            {
+                if (image is Image img)
+                {
+                    using (Graphics g = this.CreateGraphics())
+                    {
+                        // BitBltを使用するためのコード
+                        IntPtr hdcDest = g.GetHdc();
+                        try
+                        {
+                            Rectangle rect = commonTypeConverter.ToRectangle(rectFSpec);
+                            using (Bitmap bitmap = new Bitmap(img))
+                            using (Graphics sourceGraphics = Graphics.FromImage(bitmap))
+                            {
+                                IntPtr hdcSrc = sourceGraphics.GetHdc();
+                                try
+                                {
+                                    // SRCCOPY (0x00CC0020) - コピーモード
+                                    BitBlt(hdcDest, rect.X, rect.Y, rect.Width, rect.Height,
+                                           hdcSrc, 0, 0, 0x00CC0020);
+                                }
+                                finally
+                                {
+                                    sourceGraphics.ReleaseHdc(hdcSrc);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            g.ReleaseHdc(hdcDest);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (image is Image img)
+                {
+                    using (Graphics g = this.CreateGraphics())
+                    {
+                        // BitBltを使用するためのコード
+                        IntPtr hdcDest = g.GetHdc();
+                        try
+                        {
+                            Rectangle rect = commonTypeConverter.ToRectangle(rectFSpec);
+                            using (Bitmap bitmap = new Bitmap(img))
+                            using (Graphics sourceGraphics = Graphics.FromImage(bitmap))
+                            {
+                                IntPtr hdcSrc = sourceGraphics.GetHdc();
+                                try
+                                {
+                                    // SRCCOPY (0x00CC0020) - コピーモード
+                                    BitBlt(hdcDest, rect.X, rect.Y, rect.Width, rect.Height,
+                                           hdcSrc, 0, 0, 0x00CC0020);
+                                }
+                                finally
+                                {
+                                    sourceGraphics.ReleaseHdc(hdcSrc);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            g.ReleaseHdc(hdcDest);
+                        }
+                    }
+                }
+            }
+        }
+
+        // BitBlt関数をインポート
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        private static extern bool BitBlt(
+            IntPtr hdcDest,     // コピー先デバイスコンテキストのハンドル
+            int nXDest,         // コピー先の左上X座標
+            int nYDest,         // コピー先の左上Y座標
+            int nWidth,         // コピーする幅
+            int nHeight,        // コピーする高さ
+            IntPtr hdcSrc,      // コピー元デバイスコンテキストのハンドル
+            int nXSrc,          // コピー元の左上X座標
+            int nYSrc,          // コピー元の左上Y座標
+            uint dwRop);        // ラスタオペレーションコード
+        */
+
+        private void SetHighSpeedDrawingMode(Graphics graphics)
+        {
+            graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+            graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
+            graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+            graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighSpeed;
+        }
+
+
+        private void DrawImageInternal(Image image, RectangleFSpec rectFSpec)
+        {
+            if (this.Disposing || !this.IsHandleCreated)
+                return;
+
+            lock (_drawImageLock)
+            {
+                try
+                {
+         
+                    var graphics = GetCachedGraphics();
+                    //var graphics = Graphics.FromHwnd(this.Handle);
+                    if (graphics != null)
+                    {
+                        var rect = commonTypeConverter.ToRectangle(rectFSpec);
+
+                        // より高速な描画オプションを設定
+                        graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                        graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
+                        graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                        graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+                        graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighSpeed;
+
+                        graphics.DrawImage(image, rect);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("DrawImage exception: {0}", ex);
+                    }
+                    // キャッシュをクリアして次回再作成
+                    ClearGraphicsCache();
+                }
+            }
+        }
+
+
+        private void ___createControlFromDocumentForElement(CHtmlDocument ___doc, CHtmlElement __element)
+        {
+            try
+            {
+                string ___strText = null;
+                if (__element.___IsElementVisible == false)
+                {
+                    return;
+                }
+                if (__element.___ManagedControlWeakReference == null)
+                {
+                    System.Drawing.Color ___ControlBackColor = Color.White;
+                    System.Drawing.Color ___ControlForeColor = Color.Black;
+                    if (__element.___style.___IsBackgroundColorSpecified == true)
+                    {
+                        ___ControlBackColor = System.Drawing.Color.FromArgb(__element.___style.___BackgroundSysColor.R, __element.___style.___BackgroundSysColor.G, __element.___style.___BackgroundSysColor.B);
+                    }
+                    if (__element.___style.___IsForegroundSysColorSpecified == true)
+                    {
+                        ___ControlForeColor = System.Drawing.Color.FromArgb(__element.___style.___ForegroundSysColor.R, __element.___style.___ForegroundSysColor.G, __element.___style.___ForegroundSysColor.B);
+                    }
+                    int ___ControlWidth = (int)__element.___offsetWidth;
+                    int ___ControlHeight = (int)__element.___offsetHeight;
+                    bool ___IsControlCreatedSuccess = false;
+                    switch (__element.___elementTagType)
+                    {
+                        case CHtmlElementType.TEXTAREA:
+
+                            System.Windows.Forms.TextBox ___textArea = new TextBox();
+                            ___textArea.WordWrap = true;
+                            ___textArea.ScrollBars = ScrollBars.None;
+                            ___textArea.Anchor = AnchorStyles.None;
+                            ___strText = commonHTML.GetElementInnerText(__element);
+                            ___textArea.Multiline = true;
+                            ___textArea.BackColor = ___ControlBackColor;
+                            ___textArea.ForeColor = ___ControlForeColor;
+
+
+
+
+
+                            if (__element.___attributes.ContainsKey("cols") == true)
+                            {
+                                ___textArea.Width = (int)getTextAreaColsRowsWith(__element, 2, commonTypeConverter.convertFontSpecToGDIFont(___doc.___HtmlGraphics.FontSpec));
+                            }
+                            else
+                            {
+                                ___textArea.Width = 800;
+                            }
+
+
+                            if (__element.___attributes.ContainsKey("rows") == true)
+                            {
+                                ___textArea.Height = (int)getTextAreaColsRowsWith(__element, 1, commonTypeConverter.convertFontSpecToGDIFont(___doc.___HtmlGraphics.FontSpec));
+                            }
+                            else
+                            {
+                                ___textArea.Height = 300;
+                            }
+
+                            ___textArea.Size = new Size(___ControlWidth, ___ControlHeight);
+                            if (___textArea.Height == 0)
+                            {
+                                ___textArea.Height = 300;
+
+                            }
+
+                            if (___textArea.Width == 0)
+                            {
+                                ___textArea.Width = 800;
+                            }
+                            //__textArea.Location = MeasureItemEventArgs.MinusPointReg;
+                            createCHtmlMultiversalRendererEventHandlerToControl(___textArea, this, __element);
+                            ___textArea.Tag = new System.WeakReference(__element, false);
+                            /*
+                            if (string.IsNullOrEmpty(___strText) == false)
+                            {
+                                ___textArea.Text = ___strText;
+                            }
+                            */
+                            __element.___ManagedControlWeakReference = new WeakReference(___textArea, false);
+                            this.Controls.Add(___textArea);
+
+
+
+                            ___IsControlCreatedSuccess = true;
+                            break;
+                        case CHtmlElementType.INPUT:
+                            if (string.Equals(__element.type, "hidden", StringComparison.OrdinalIgnoreCase) == true)
+                            {
+                                return;
+                            }
+                            else
+                            {
+                                ___strText = commonHTML.GetElementAttributeInString(__element, "value");
+                                switch (__element.type)
+                                {
+                                    case "button":
+                                    case "Button":
+                                    case "BUTTON":
+                                    case "reset":
+                                    case "submit":
+                                    case "Submit":
+                                    case "SUBMIT":
+                                        System.Windows.Forms.Button ___buttonInput = new Button();
+                                        ___buttonInput.BackColor = ___ControlBackColor;
+                                        ___buttonInput.ForeColor = ___ControlForeColor;
+                                        ___buttonInput.Width = ___ControlWidth;
+                                        ___buttonInput.Height = ___ControlHeight;
+                                        // ___buttonInput.Location = commonHTML.MinusPointReg;
+                                        createCHtmlMultiversalRendererEventHandlerToControl(___buttonInput, this, __element);
+
+                                        ___buttonInput.Tag = new System.WeakReference(__element, false);
+                                        if (string.IsNullOrEmpty(___strText) == false)
+                                        {
+                                            ___buttonInput.Text = ___strText;
+                                        }
+                                        else
+                                        {
+                                            ___buttonInput.Text = __element.type;
+                                        }
+                                        this.Controls.Add(___buttonInput);
+                                        __element.___ManagedControlWeakReference = new WeakReference(___buttonInput, false);
+                                        ___IsControlCreatedSuccess = true;
+                                        break;
+                                    /*
+                                    case "image":
+                                    case "Image":
+                                    case "IMAGE":
+                                        if (__element.___srcBase != null && !string.IsNullOrEmpty(__element.___srcBase.___Href))
+                                        {
+                                            // MCS.MCSDownloadImage ___mcsImage = commonMCS.MCSImageFdr.MCSDownloadManager.GetBlankMCSImageWithBTreeSearchByUrl(__element.___srcBase.___Href);
+                                            if (___mcsImage != null)
+                                            {
+                                                if (___mcsImage.FrameCount > 1)
+                                                {
+                                                    System.Drawing.Image ___Image = null;
+                                                    System.IO.MemoryStream memStream2 = null;
+                                                    try
+                                                    {
+                                                        ___doc.___images.TryGetValue(__element.___srcBase.Href, out ___Image);
+                                                        if (___Image == null)
+                                                        {
+                                                            System.IO.FileStream fileStream = new System.IO.FileStream(___mcsImage.FileLocation, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
+                                                            memStream2 = new System.IO.MemoryStream();
+                                                            memStream2.SetLength(fileStream.Length);
+                                                            fileStream.Read(memStream2.GetBuffer(), 0, (int)fileStream.Length);
+                                                            memStream2.Flush();
+                                                            if (memStream2.Length > 0 && commonHTML.IsImageContentType(___mcsImage.ContentType))
+                                                            {
+                                                                ___Image = Image.FromStream(memStream2, false, false);
+                                                            }
+                                                        }
+                                                        if (___Image != null)
+                                                        {
+                                                            System.Windows.Forms.PictureBox __picInput = new PictureBox();
+                                                            __picInput.Height = ___ControlWidth;
+                                                            __picInput.Width = ___ControlHeight;
+                                                            __picInput.BackColor = Color.Transparent;
+                                                            __picInput.Location = commonHTML.MinusPointReg;
+                                                            __picInput.SizeMode = PictureBoxSizeMode.AutoSize;
+                                                            commonHTML.createCHtmlMutiHtmlCraftEventHandlerToControl(__picInput, this);
+
+                                                            __picInput.Tag = new System.WeakReference(__element, false);
+                                                            __picInput.Image = ___Image;
+                                                            this.Controls.Add(__picInput);
+                                                            __element.___ManagedControlWeakReference = new WeakReference(__picInput, false);
+                                                            __element.___ElementImageFrameModeType = 10;
+                                                            ___IsControlCreatedSuccess = true;
+                                                        }
+                                                        else
+                                                        {
+                                                            __element.___ElementImageFrameModeType = -1;
+                                                        }
+                                                    }
+                                                    catch (Exception exImageControl)
+                                                    {
+                                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                        {
+                                                            commonLog.LogEntry("CHtmlMultiversalRenderer Cotrol Creation Exception : ", exImageControl);
+                                                        }
+                                                        __element.___ElementImageFrameModeType = 1;
+                                                        return;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    __element.___ElementImageFrameModeType = 1;
+                                                    return;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                __element.___ElementImageFrameModeType = -1;
+                                                return;
+                                            }
+                                        }
+                                        break;
+                                    */
+
+                                    case "file":
+                                    case "File":
+                                    case "FILE":
+                                        break;
+                                    case "password":
+                                    case "Password":
+                                    case "PASSWORD":
+                                    case "Text":
+                                    case "text":
+                                    case "TEXT":
+                                    case "":
+                                    case null:
+                                        System.Windows.Forms.TextBox ___textInput = new TextBox();
+                                        ___textInput.Multiline = false;
+                                        ___textInput.Location = commonTypeConverter.ToPoint(commonHTML.MinusPointReg);
+                                        ___textInput.BackColor = ___ControlBackColor;
+                                        ___textInput.ForeColor = ___ControlForeColor;
+                                        ___textInput.Width = ___ControlWidth;
+                                        ___textInput.Height = ___ControlHeight;
+                                        createCHtmlMultiversalRendererEventHandlerToControl(___textInput, this, __element);
+
+                                        ___textInput.Tag = new System.WeakReference(__element, false);
+                                        if (string.IsNullOrEmpty(___strText) == false)
+                                        {
+                                            ___textInput.Text = ___strText;
+                                        }
+                                        this.Controls.Add(___textInput);
+                                        __element.___ManagedControlWeakReference = new WeakReference(___textInput, false);
+                                        if (string.Equals(__element.type, "password", StringComparison.OrdinalIgnoreCase) == true)
+                                        {
+                                            ___textInput.PasswordChar = '*';
+                                        }
+                                        ___IsControlCreatedSuccess = true;
+                                        break;
+                                    case "check":
+                                    case "Check":
+                                    case "CHECK":
+                                    case "radio":
+                                    case "Radio":
+                                        break;
+                                }
+                            }
+                            break;
+                        case CHtmlElementType.BUTTON:
+                            System.Windows.Forms.Button ___button = new Button();
+                            ___strText = commonHTML.GetElementInnerText(__element);
+                            ___button.Location = commonTypeConverter.ToPoint(commonHTML.MinusPointReg);
+                            ___button.BackColor = ___ControlBackColor;
+                            ___button.ForeColor = ___ControlForeColor;
+                            if (___ControlWidth == 0 || ___ControlHeight == 0)
+                            {
+                                ___ControlWidth = 100;
+                                ___ControlHeight = 30;
+                            }
+                            ___button.Width = ___ControlWidth;
+                            ___button.Height = ___ControlHeight;
+                            createCHtmlMultiversalRendererEventHandlerToControl(___button, this, __element);
+
+                            ___button.Tag = new System.WeakReference(__element, false);
+                            if (string.IsNullOrEmpty(___strText) == false)
+                            {
+                                ___button.Text = ___strText;
+                            }
+                            this.Controls.Add(___button);
+                            __element.___ManagedControlWeakReference = new WeakReference(___button, false);
+                            ___IsControlCreatedSuccess = true;
+                            break;
+                        case CHtmlElementType.SELECT:
+                            CHtmlAttribute ___multiAttr = null;
+                            bool ___isMultiSelect = false;
+                            if (__element.___attributes.TryGetValue("multiple", out ___multiAttr) == true)
+                            {
+                                if (___multiAttr != null)
+                                {
+                                    ___isMultiSelect = commonHTML.isCHtmlAttributeValueTreatedAsTrue(___multiAttr);
+                                }
+                            }
+                            if (___isMultiSelect == false)
+                            {
+                                System.Windows.Forms.ComboBox ___combo = new System.Windows.Forms.ComboBox();
+                                ___combo.Location = commonTypeConverter.ToPoint(commonHTML.MinusPointReg);
+                                CHtmlCollection ___childOptions = __element.children;
+                                this.___populateComboBoxItemCollections(null, ___combo.Items, ___childOptions, __element, ___combo);
+                                ___combo.BackColor = ___ControlBackColor;
+                                ___combo.ForeColor = ___ControlForeColor;
+                                ___combo.Width = ___ControlWidth;
+                                ___combo.Height = ___ControlHeight;
+                                ___combo.IntegralHeight = false;
+                                createCHtmlMultiversalRendererEventHandlerToControl(___combo, this, __element);
+
+                                ___combo.Tag = new System.WeakReference(__element, false);
+                                this.Controls.Add(___combo);
+                                __element.___ManagedControlWeakReference = new WeakReference(___combo, false);
+                                ___IsControlCreatedSuccess = true;
+                            }
+                            else
+                            {
+                                System.Windows.Forms.ListBox ___listBox = new System.Windows.Forms.ListBox();
+                                CHtmlCollection ___childOptions = __element.children;
+                                this.___populateIListICollections(___listBox.Items, null, ___childOptions, __element, ___listBox);
+                                ___listBox.Location = commonTypeConverter.ToPoint(commonHTML.MinusPointReg);
+                                ___listBox.BackColor = ___ControlBackColor;
+                                ___listBox.ForeColor = ___ControlForeColor;
+                                ___listBox.Width = ___ControlWidth;
+                                ___listBox.Height = ___ControlHeight;
+                                ___listBox.IntegralHeight = true;
+                                createCHtmlMultiversalRendererEventHandlerToControl(___listBox, this, __element);
+
+                                ___listBox.Tag = new System.WeakReference(__element, false);
+                                this.Controls.Add(___listBox);
+                                __element.___ManagedControlWeakReference = new WeakReference(___listBox, false);
+                                ___IsControlCreatedSuccess = true;
+                            }
+                            break;
+
+
+                        case CHtmlElementType.IFRAME:
+                            CHtmlMultiHtmlCraft_WinControl __iframeRenderer = new CHtmlMultiHtmlCraft_WinControl();
+                            __iframeRenderer.Location = commonTypeConverter.ToPoint(commonHTML.MinusPointReg);
+                            __iframeRenderer.Width = ___ControlWidth;
+                            __iframeRenderer.Height = ___ControlHeight;
+                            /*
+                            if (___ControlWidth == 0 || ___ControlHeight == 0)
+                            {
+              
+                            }
+                            */
+                            __iframeRenderer.BackColor = ___ControlBackColor;
+                            __iframeRenderer.ForeColor = ___ControlForeColor;
+                            __iframeRenderer.Visible = __element.___IsElementVisible;
+                            __iframeRenderer.___multiversalWindow = __element.___iframeMultiversalWindow;
+                            if (__element.___iframeMultiversalWindow != null)
+                            {
+                                //  __iframeRenderer.___multiversalWindow.renderingTargetManagedControl = __iframeRenderer;
+                            }
+
+                            __iframeRenderer.Tag = new System.WeakReference(__element, false);
+                            // ============================================
+                            // DO NOT Create Event Hander for iFmame!!!
+                            // ============================================
+
+                            this.Controls.Add(__iframeRenderer);
+                            __element.___ManagedControlHandle = __iframeRenderer.Handle;
+                            //__iframeRenderer.___startMultiversalTimer();
+                            __element.___ManagedControlWeakReference = new WeakReference(__iframeRenderer, false);
+                            ___IsControlCreatedSuccess = true;
+                            break;
+                    }
+                ControlCreationCheck:
+
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("{0}  created control for {1} success: {2}", ___doc, __element, ___IsControlCreatedSuccess);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                {
+                    commonLog.LogEntry("CHtmlMultiversalRenderer Cotrol Creation Exception : {0} : {1}", __element, ex);
+                }
+            }
+
+        }
+
+        // createControlFromDocumentForElement の正しい呼び出し名に修正
+        internal void createControlFromDocumentForElement(CHtmlDocument ___doc, CHtmlElement __element)
+        {
+            ___createControlFromDocumentForElement(___doc, __element);
+        }
+
+        // ___fireWindoworDocumentEvent のダミー実装を追加
+        private void ___fireWindoworDocumentEvent(string eventName, int x, int y, MouseButtons button, int clicks, int delta)
+        {
+            string logPrefix = "___fireWindoworDocumentEvent";
+
+            logPrefix = ($"{logPrefix} called with eventName: {eventName}, x: {x}, y: {y}, button: {button}, clicks: {clicks}, delta: {delta}");
+            try
+            {
+                switch (eventName)
+                {
+                    case "mousemove":
+                    case "mousedown":
+                    case "mouseleave":                   
+                    case "mouseup":
+                    case "click":
+                    case "dblclick":
+                    case "mousewheel":
+                    case "wheel":
+                    case "contextmenu":
+                    case "mousehover":
+                    case "mouseover":
+                    case "mouseout":
+                    case "mouseenter":
+                        var mouseEvent = new MouseEventArgs(button, clicks, x, y, delta);
+                        ___executeWindowOrDocumentEventFunction(eventName, mouseEvent);
+                        return;
+                        break;
+                    case "keydown":
+                    case "keyup":
+
+                        var keyEvent = new KeyEventArgs(Keys.None); 
+                        ___executeWindowOrDocumentEventFunction(eventName, keyEvent);
+                        return;
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                {
+                     commonLog.LogEntry($"___fireWindoworDocumentEvent Not Implemented {logPrefix} ");
+                }
+            }
+            throw new NotImplementedException(logPrefix);
+        }
+        private int getTextAreaColsRowsWith(CHtmlElement element, int v, Font font)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ___populateIListICollections(ListBox.ObjectCollection items, object value, CHtmlCollection childOptions, CHtmlElement element, ListBox _listBox)
+        {
+            throw new NotImplementedException();
+        }
+        private void ___populateComboBoxItemCollections(ListBox.ObjectCollection items, object value, CHtmlCollection childOptions, CHtmlElement element, ComboBox  _combobox)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            // 
+            // horizontalBar
+            // 
+            this.horizontalBar.Name = "horizontalBar";
+            this.horizontalBar.Height = 20;
+            this.horizontalBar.ValueChanged += (s, e) => this.Invalidate();
+            // 
+            // verticalBar
+            // 
+            this.verticalBar.Name = "verticalBar";
+            this.verticalBar.Width = 20;
+            this.verticalBar.ValueChanged += (s, e) => this.Invalidate();
+            // 
+            // CHtmlMultiHtmlCraft_WinControl
+            // 
+            this.Name = "CHtmlMultiHtmlCraft_WinControl";
+            this.Size = new System.Drawing.Size(800, 450);
+        }
+        internal void createControlFromDocument(CHtmlDocument ___doc)
+        {
+            if (this.InvokeRequired == true)
+            {
+                return;
+            }
+            else
+            {
+                int iContolCont = ___doc.___ManagedControlPendingElementList.Count;
+                this.SuspendLayout();
+                try
+                {
+                    for (int i = 0; i < iContolCont; i++)
+                    {
+
+                        if (i >= ___doc.___ManagedControlPendingElementList.Count)
+                        {
+                            break;
+                        }
+                        int __oid = ___doc.___ManagedControlPendingElementList.Keys[i];
+                        CHtmlElement __element = ___doc.___ManagedControlPendingElementList.Values[i];
+                        if (__element != null)
+                        {
+                            if (___doc.___isElementParentTraceableToDocument(__element) == true)
+                            {
+                                this.createControlFromDocumentForElement(___doc, __element);
+                            }
+                            else
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry("createControlFromDocument will skip {0}, because it is not traceable to root document.", __element);
+                                }
+                            }
+                        }
+                        ___doc.___ManagedControlPendingElementList.RemoveAt(i);
+                        if (i >= 0 && ___doc.___ManagedControlPendingElementList.Count > 0)
+                        {
+                            i--;
+                        }
+                        if (___doc.___ManagedControlJobDoneList != null)
+                        {
+                            ___doc.___ManagedControlJobDoneList[__oid] = __element;
+                        }
+
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("createControlFromDocument for {0} done.", __element);
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("createControlFromDocument Exception. ", ex);
+                    }
+                }
+                this.ResumeLayout(false);
+
+            }
+        }
+
+        private TreeNode createTreeNodeFromCHtmlElement(CHtmlElement element)
+        {
+
+            if (element == null || treeViewDOM == null || treeViewDOM.Visible == false)
+            {
+                if (treeViewDOM != null)
+                {
+                    treeViewDOM.Nodes.Clear();
+                }
+                return new TreeNode("DOM is Empty");
+            }
+
+            TreeNode node = new TreeNode(element.toLogString());
+            node.Tag = element;
+            CHtmlCollection ____currentChildNodes = element.children as CHtmlCollection;
+            int ____currentChildNodesCount = ____currentChildNodes?.Count ?? 0;
+            for (int i = 0; i < ____currentChildNodesCount; i++)
+            {
+                var child = ____currentChildNodes[i];
+                if (child is CHtmlElement childElement)
+                {
+                    TreeNode elementNodeTree = new TreeNode(childElement.toLogString());
+                    elementNodeTree.Tag = childElement;
+                    node.Nodes.Add(createTreeNodeFromCHtmlElement(childElement));
+
+                }
+                else if (child is CHtmlTextElement textNode)
+                {
+                    TreeNode textNodeTree = new TreeNode(textNode.text);
+                    textNodeTree.Tag = textNode;
+                    node.Nodes.Add(textNodeTree);
+                }
+            }
+            return node;
+        }
+
+
+        /*
+        public void DrawImage(object image, RectangleFSpec rectFSpec)
+        {
+            if (this.InvokeRequired)
+            {
+                if (image is Image img)
+                {
+                    using (Graphics g = this.CreateGraphics())
+                    {
+                        // BitBltを使用するためのコード
+                        IntPtr hdcDest = g.GetHdc();
+                        try
+                        {
+                            Rectangle rect = commonTypeConverter.ToRectangle(rectFSpec);
+                            using (Bitmap bitmap = new Bitmap(img))
+                            using (Graphics sourceGraphics = Graphics.FromImage(bitmap))
+                            {
+                                IntPtr hdcSrc = sourceGraphics.GetHdc();
+                                try
+                                {
+                                    // SRCCOPY (0x00CC0020) - コピーモード
+                                    BitBlt(hdcDest, rect.X, rect.Y, rect.Width, rect.Height,
+                                           hdcSrc, 0, 0, 0x00CC0020);
+                                }
+                                finally
+                                {
+                                    sourceGraphics.ReleaseHdc(hdcSrc);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            g.ReleaseHdc(hdcDest);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (image is Image img)
+                {
+                    using (Graphics g = this.CreateGraphics())
+                    {
+                        // BitBltを使用するためのコード
+                        IntPtr hdcDest = g.GetHdc();
+                        try
+                        {
+                            Rectangle rect = commonTypeConverter.ToRectangle(rectFSpec);
+                            using (Bitmap bitmap = new Bitmap(img))
+                            using (Graphics sourceGraphics = Graphics.FromImage(bitmap))
+                            {
+                                IntPtr hdcSrc = sourceGraphics.GetHdc();
+                                try
+                                {
+                                    // SRCCOPY (0x00CC0020) - コピーモード
+                                    BitBlt(hdcDest, rect.X, rect.Y, rect.Width, rect.Height,
+                                           hdcSrc, 0, 0, 0x00CC0020);
+                                }
+                                finally
+                                {
+                                    sourceGraphics.ReleaseHdc(hdcSrc);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            g.ReleaseHdc(hdcDest);
+                        }
+                    }
+                }
+            }
+        }
+
+        // BitBlt関数をインポート
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        private static extern bool BitBlt(
+            IntPtr hdcDest,     // コピー先デバイスコンテキストのハンドル
+            int nXDest,         // コピー先の左上X座標
+            int nYDest,         // コピー先の左上Y座標
+            int nWidth,         // コピーする幅
+            int nHeight,        // コピーする高さ
+            IntPtr hdcSrc,      // コピー元デバイスコンテキストのハンドル
+            int nXSrc,          // コピー元の左上X座標
+            int nYSrc,          // コピー元の左上Y座標
+            uint dwRop);        // ラスタオペレーションコード
+        */
+        private Graphics? GetCachedGraphics()
+        {
+            var now = DateTime.Now;
+
+            // キャッシュが古い場合は削除
+            if (_cachedGraphics != null &&
+                (now - _lastGraphicsCreated).TotalMilliseconds > GRAPHICS_CACHE_TIMEOUT_MS)
+            {
+                ClearGraphicsCache();
+            }
+
+            // キャッシュがない場合は新規作成
+            if (_cachedGraphics == null && this.IsHandleCreated)
+            {
+                try
+                {
+                    _cachedGraphics = Graphics.FromHwnd(this.Handle);
+                    _lastGraphicsCreated = now;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+
+            return _cachedGraphics;
+        }
+
+
+
+
+        private void ClearGraphicsCache()
+        {
+            _cachedGraphics?.Dispose();
+            _cachedGraphics = null;
+            _lastGraphicsCreated = DateTime.MinValue;
+
+            // キャッシュクリア時に軽量なGCを実行
+            if ((DateTime.Now - _lastGCCollectTime).TotalMilliseconds > 1000) // 1秒以上経過時のみ
+            {
+                try
+                {
+                    GC.Collect(0, GCCollectionMode.Optimized);
+                    _lastGCCollectTime = DateTime.Now;
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("GC.Collect in ClearGraphicsCache failed: {0}", ex.Message);
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+        public void setMultiversalScriptScriptEngineType(IMultiversalScriptScriptEngineType value)
+        {
+            if (this.___multiversalWindow != null)
+            {
+                this.___multiversalWindow.___muultiversalScriptScriptEngineType = value;
+            }
+        }
+        public object getMultiversalScriptScriptEngineType()
+        {
+            return this.___multiversalWindow != null ? this.___multiversalWindow.___muultiversalScriptScriptEngineType : null;
+        }
+
+        // window/documentイベントファンクション呼び出し共通メソッド
+        private void ___executeWindowOrDocumentEventFunction(string eventType, object eventObj)
+        {
+            var window = this.___multiversalWindow;
+            var doc = window?.___document;
+            if (doc == null || doc.___IsHtmlParseCompleted == false)
+                return;
+            bool isWindowFuncExist = false;
+            bool isDocumentFuncExist = false;
+            object? winFunc = null;
+            object? docFunc= null;
+            switch (eventType)
+            {
+                case "dblclick":
+                    winFunc = doc.ondblclick;
+                    break;
+                case "keydown":
+                    winFunc = doc.onkeydown;
+                    break;
+
+                case "keydup":
+                    winFunc = doc.onkeyup;
+                    break;
+
+                case "click":
+
+                    winFunc = doc.onclick;
+           
+                    break;
+                case "mouseleave":
+                    winFunc = doc.onmousedown;
+                    break;
+                
+                case "mousemove":
+
+
+                    winFunc = doc.onmousemove;
+                    if (winFunc != null)
+                    {
+                        isWindowFuncExist = true;
+                       goto  WindowOrDocumentFunctionObjectMaybefound;
+                        break;
+                    }
+                    docFunc = doc.___WindowMouseMoveFunctionWeakReference != null ? doc.___WindowMouseMoveFunctionWeakReference.Target : null;
+                    if (docFunc != null)
+                    {
+                        isDocumentFuncExist = true;
+                        goto WindowOrDocumentFunctionObjectMaybefound;
+                        break;
+                    }
+                    break;
+
+
+
+               case "mousedown":
+                    winFunc = doc.onmousedown;
+                    docFunc = doc.___WindowMouseDownFunctionWeakReference != null ? doc.___WindowMouseDownFunctionWeakReference.Target : null;
+                    break;
+                case "mousewheel":
+                    winFunc = doc.onmousewheel;
+                    docFunc = doc.___WindowMouseWheelFunctionWeakReference != null ? doc.___WindowMouseWheelFunctionWeakReference.Target : null;
+                    break;
+                case "mouseup":
+                            winFunc = doc.onmouseup;
+                            docFunc = doc.___WindowMouseUpFunctionWeakReference != null ? doc.___WindowMouseUpFunctionWeakReference.Target : null;
+                            break;
+
+
+                        default:
+                            break;
+                        }
+                 
+               
+        WindowOrDocumentFunctionObjectMaybefound:
+
+            try
+            {
+                if (winFunc != null)
+                {
+                    window.___executeEventFunction(eventType, null, winFunc, new object[] { eventObj }, 1);
+                }
+                else if (docFunc != null)
+                {
+                    window.___executeEventFunction(eventType, null, docFunc, new object[] { eventObj }, 1);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                {
+                    commonLog.LogEntry("___executeWindowOrDocumentEventFunction Exception: {0}", ex);
+                }
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                ClearGraphicsCache();
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+
+        private void InitializeComponent()
+        {
+            this.horizontalBar = new HScrollBar();
+            this.verticalBar = new VScrollBar();
+            this.SuspendLayout();
+
+            this.Controls.Add(this.verticalBar);
+            this.Controls.Add(this.horizontalBar);
+            this.ResumeLayout(false);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            ClearGraphicsCache(); // Paintイベント時はキャッシュをクリア
+            base.OnPaint(e);
+            Graphics gr = e.Graphics;
+
+            var grCon = this.CreateGraphicContainer(e.Graphics);
+            if (grCon == null) return;
+            grCon.IsUIThreadPaint = true;
+            grCon.Graphic = gr;
+            grCon.PaintRectangle = commonTypeConverter.ToRectangleFSpec(this.GetPaintRectScrollbar());
+            if (___document != null && ___document.documentElement is CHtmlElement documentRootElement)
+            {
+                if (_documentPaintCount >= int.MaxValue)
+                    _documentPaintCount = 0;
+                _documentPaintCount++;
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 15 && _documentPaintCount == 1)
+                {
+                    commonUtils.LogElementDOMTree(documentRootElement, "", commonUtils.CJHtmlDOMElementLogModeType.ElementWidthAndHeight);
+                }
+
+                ___document.drawRootElementRecursively(documentRootElement, ref grCon);
+            }
+        }
+
+        private void TabControlSelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (tabControl == null)
+                return;
+            int currentTabIndex = tabControl.SelectedIndex;
+            switch (currentTabIndex)
+            {
+                case 0: // DOM Tree
+                    {
+
+                    }
+                    break;
+
+                case 1: // CSS
+                    {
+
+                        if (sideListViewCSS != null && ___document != null)
+                        {
+                            sideListViewCSS.BeginUpdate();
+                            foreach (CHtmlCSSRule rule in ___document.cssRuleGroundList)
+                            {
+                                ListViewItem item = new ListViewItem(rule.SelectorID);
+                                item.Name = rule.SelectorID;
+                                if (rule.___styleAttributeList != null && rule.___styleAttributeList.Count > 0)
+                                {
+                                    StringBuilder styleStringBuilder = new StringBuilder();
+
+                                    foreach (CHtmlStyleAttribute styleAttribute in rule.___styleAttributeList)
+                                    {
+
+                                        styleStringBuilder.Append($"{styleAttribute.Name}:{styleAttribute.value};");
+                                    }
+                                    item.SubItems.Add(styleStringBuilder.ToString());
+                                }
+                                else
+                                {
+                                    item.SubItems.Add("");
+                                }
+                                item.SubItems.Add(rule.type.ToString());
+                                //item.SubItems.Add(rule.styleAttribute.toLogString());
+                                sideListViewCSS.Items.Add(item);
+                            }
+                            sideListViewCSS.EndUpdate();
+                        }
+                    }
+                    break;
+                case 2: // Script
+                    {
+                        if (sideListViewScript != null && ___document != null && ___document.scriptEventList != null)
+                        {
+                            sideListViewScript.BeginUpdate();
+                            sideListViewScript.Items.Clear();
+                            int scriptCount = ___document.scriptEventList.Count;
+                            for (int i = 0; i < scriptCount; i++)
+                            {
+                                CHtmlScriptResult scriptEventResult = ___document.scriptEventList[i] as CHtmlScriptResult;
+                                if (scriptEventResult == null)
+                                {
+
+                                    continue;
+                                }
+                                else
+                                {
+                                    ListViewItem scriptResultListViewItem = new ListViewItem();
+                                    if (!string.IsNullOrEmpty(scriptEventResult.Url))
+                                    {
+                                        scriptResultListViewItem.Text = scriptEventResult.Url;
+                                        scriptResultListViewItem.Name = scriptEventResult.Url;
+                                        scriptResultListViewItem.UseItemStyleForSubItems = false;
+                                        scriptResultListViewItem.Tag = scriptEventResult;
+                                        string strResultStatus = string.Format("{0}", scriptEventResult.result);
+                                        switch (strResultStatus)
+                                        {
+                                            case "200":
+                                                var itemResutStatus = new ListViewItem.ListViewSubItem();
+                                                itemResutStatus.Text = "200";
+                                                itemResutStatus.ForeColor = System.Drawing.Color.Blue;
+                                                scriptResultListViewItem.SubItems.Add(itemResutStatus);
+                                                break;
+                                            case "500":
+                                                var itemResutStatus500 = new ListViewItem.ListViewSubItem();
+                                                itemResutStatus500.Text = "500";
+                                                itemResutStatus500.ForeColor = System.Drawing.Color.Red;
+                                                scriptResultListViewItem.SubItems.Add(itemResutStatus500);
+                                                break;
+                                            default:
+                                                var itemResutStatusDefault = new ListViewItem.ListViewSubItem();
+                                                itemResutStatusDefault.Text = strResultStatus;
+                                                itemResutStatusDefault.ForeColor = System.Drawing.Color.Gray;
+                                                scriptResultListViewItem.SubItems.Add(itemResutStatusDefault);
+                                                break;
+
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        scriptResultListViewItem.Text = "";
+                                        scriptResultListViewItem.Name = scriptEventResult.Url;
+                                        scriptResultListViewItem.UseItemStyleForSubItems = false;
+                                        scriptResultListViewItem.Tag = scriptEventResult;
+                                        string strResultStatus = string.Format("{0}", scriptEventResult.result);
+                                        switch (strResultStatus)
+                                        {
+                                            case "200":
+                                                var itemResutStatus = new ListViewItem.ListViewSubItem();
+                                                itemResutStatus.Text = "200";
+
+                                                itemResutStatus.ForeColor = System.Drawing.Color.Blue;
+                                                scriptResultListViewItem.SubItems.Add(itemResutStatus);
+                                                break;
+                                            case "500":
+                                                var itemResutStatus500 = new ListViewItem.ListViewSubItem();
+                                                itemResutStatus500.Text = "500";
+                                                itemResutStatus500.ForeColor = System.Drawing.Color.Red;
+                                                scriptResultListViewItem.SubItems.Add(itemResutStatus500);
+                                                break;
+                                            default:
+                                                var itemResutStatusDefault = new ListViewItem.ListViewSubItem();
+                                                itemResutStatusDefault.Text = strResultStatus;
+                                                itemResutStatusDefault.ForeColor = System.Drawing.Color.Gray;
+                                                scriptResultListViewItem.SubItems.Add(itemResutStatusDefault);
+                                                break;
+
+                                        }
+                                    }
+                                    sideListViewScript.Items.Add(scriptResultListViewItem);
+
+                                }
+
+                            }
+                            sideListViewScript.EndUpdate();
+
+                        }
+                        break;
+
+
+
+
+
+                    }
+            }
+        }
+
+
+
+        private void TreeViewDOM_OnAfterSelect(object? sender, TreeViewEventArgs e)
+        {
+            var nodeSelected = e.Node;
+            listViewDOM.BeginUpdate();
+            listViewDOM.Items.Clear();
+            if (nodeSelected != null)
+            {
+                if (listViewDOM != null)
+                {
+
+
+                    var elementSelected = nodeSelected.Tag as CHtmlElement;
+                    if (elementSelected != null)
+                    {
+                        Dictionary<string, string> checkedProperties = new Dictionary<string, string>();
+                        foreach (var namedProperty in CHtmlElement.CHtmlElementProperties)
+                        {
+
+                            var propValue = elementSelected.___getPropertyByName(namedProperty.Key);
+                            if (propValue != null)
+                            {
+                                ListViewItem item = new ListViewItem(namedProperty.Key);
+                                item.Name = namedProperty.Key;
+                                item.SubItems.Add(propValue.ToString() ?? "null");
+                                checkedProperties[namedProperty.Key] = propValue.ToString() ?? "null";
+                                listViewDOM.Items.Add(item);
+                            }
+
+
+                        }
+                        if (elementSelected.attributes != null)
+                        {
+                            foreach (var attr in elementSelected.attributes)
+                            {
+                                if (!checkedProperties.ContainsKey(attr.Key))
+                                {
+                                    ListViewItem item = new ListViewItem(attr.Key);
+                                    item.Name = attr.Key;
+                                    item.SubItems.Add($"{attr.Value}");
+                                    listViewDOM.Items.Add(item);
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            }
+            listViewDOM.EndUpdate();
+        }
+
+        private void UpdateCloseButtonLocation()
+        {
+            if (closeButton != null && closeButton.Parent == this)
+            {
+                int x = this.ClientSize.Width - closeButton.Width - 4;
+                int y = 2;
+                closeButton.Location = new System.Drawing.Point(x, y);
+                closeButton.BringToFront();
+                closeButton.Visible = (sidePanel != null && sidePanel.Visible);
+            }
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            this.SuspendLayout();
+            this.horizontalBar.Location = new System.Drawing.Point(0, this.ClientSize.Height - this.horizontalBar.Height);
+            this.horizontalBar.Size = new System.Drawing.Size(this.ClientSize.Width - this.verticalBar.Width, this.horizontalBar.Height);
+
+            this.verticalBar.Location = new System.Drawing.Point(this.ClientSize.Width - this.verticalBar.Width, 0);
+            this.verticalBar.Size = new System.Drawing.Size(this.verticalBar.Width, this.ClientSize.Height - this.horizontalBar.Height);
+            int oldH = horizontalBar.Value;
+            if (horizontalBar.Maximum > 0)
+                horizontalBar.Value = (oldH == 0) ? 1 : 0;
+            horizontalBar.Value = oldH;
+
+            int oldV = verticalBar.Value;
+            if (verticalBar.Maximum > 0)
+                verticalBar.Value = (oldV == 0) ? 1 : 0;
+            verticalBar.Value = oldV;
+            if (sidePanel != null)
+            {
+
+            }
+            this.ResumeLayout(false);
+            UpdateCloseButtonLocation();
+        }
+        public MultiHtmlCraft.Core.CHtmlGraphicContainer? CreateGraphicContainer(System.Drawing.Graphics ___gr)
+        {
+            if (this.Disposing)
+                return null;
+            MultiHtmlCraft.Core.CHtmlGraphicContainer ___htmlGraphics = new MultiHtmlCraft.Core.CHtmlGraphicContainer();
+            if (___gr != null)
+            {
+                ___htmlGraphics.Graphic = ___gr;
+            }
+            else
+            {
+                ___htmlGraphics.Graphic = this.CreateGraphics();
+            }
+            ___htmlGraphics.ImageNA = null;
+            ___htmlGraphics.FontSpec = commonTypeConverter.convertGDIFontToFontSpec(new Font(FontFamily.GenericSansSerif, 12f));
+            ___htmlGraphics.BackgroundColor = commonTypeConverter.convertGDIColorToColorSpec(this.BackColor);
+            ___htmlGraphics.ForegroundColor = commonTypeConverter.convertGDIColorToColorSpec(this.ForeColor);
+            ___htmlGraphics.DisplayRectangle = commonTypeConverter.ToRectangleFSpec(this.DisplayRectangle);
+            ___htmlGraphics.ClientRectangle = commonTypeConverter.ToRectangleFSpec(this.ClientRectangle);
+            ___htmlGraphics.ControlBounds = commonTypeConverter.ToRectangleFSpec(this.Bounds);
+            ___htmlGraphics.PaintRectangle = commonTypeConverter.ToRectangleFSpec(this.GetPaintRectScrollbar());
+
+            ___htmlGraphics.StartingPos = 0;
+            ___htmlGraphics.TotalOffsetLeft = 0;
+            ___htmlGraphics.TotalOffsetTop = 0;
+            System.Drawing.StringFormat sf = new StringFormat();
+            sf.Trimming = System.Drawing.StringTrimming.Word;
+            sf.FormatFlags = StringFormatFlags.MeasureTrailingSpaces;
+
+            ___htmlGraphics.StandardStringFormat = sf;
+            return ___htmlGraphics;
+        }
+        public Rectangle GetPaintRectScrollbar()
+        {
+            if (this.Disposing == true)
+                return Rectangle.Empty;
+            int ___horizontalBarValue = 0;
+
+            int ___horizontalBarMaximum = 0;
+            if (this.horizontalBar != null)
+            {
+                ___horizontalBarValue = this.horizontalBar.Value;
+                ___horizontalBarMaximum = this.horizontalBar.Maximum;
+            }
+            else
+            {
+                ___horizontalBarMaximum = this.Width;
+            }
+            int _verticalBarValue = 0;
+
+
+            int _verticalMaximum = 0;
+            if (this.verticalBar != null)
+            {
+                _verticalMaximum = this.verticalBar.Maximum;
+                _verticalBarValue = this.verticalBar.Value;
+            }
+            else
+            {
+                _verticalMaximum = this.Height;
+            }
+
+            int _HalfHeight = (int)((double)this.ClientRectangle.Height / (double)2);
+            if (_verticalMaximum > this.ClientRectangle.Height && _verticalBarValue > _verticalMaximum - this.ClientRectangle.Height)
+            {
+                _verticalBarValue = _verticalMaximum - this.ClientRectangle.Height + 20;
+            }
+
+
+            if (___horizontalBarValue < 0)
+            {
+                if (this.horizontalBar != null)
+                {
+                    this.horizontalBar.SuspendLayout();
+                    this.horizontalBar.Value = 0;
+                    this.horizontalBar.ResumeLayout();
+                }
+            }
+            if (_verticalBarValue < 0)
+            {
+                if (this.verticalBar != null)
+                {
+                    this.verticalBar.SuspendLayout();
+                    this.verticalBar.Value = 0;
+                    this.verticalBar.ResumeLayout();
+                }
+            }
+            Rectangle dispRect = new Rectangle(___horizontalBarValue, _verticalBarValue, ___horizontalBarMaximum, _verticalMaximum);
+            Rectangle cliRect = this.ClientRectangle;
+            Rectangle PaintRect = new Rectangle(Math.Abs(dispRect.X), Math.Abs(dispRect.Y), cliRect.Width, cliRect.Height);
+            return PaintRect;
+        }
+
+        internal void createCHtmlMultiversalRendererEventHandlerToControl(Control craftWinformControl, CHtmlMultiHtmlCraft_WinControl rootControl, CHtmlElement element)
+        {
+            if (craftWinformControl == null || rootControl == null)
+            {
+                return;
+            }
+            if (element.onclick != null)
+            {
+                craftWinformControl.Click += CraftWinformControl_Click;
+            }
+            if(element.___elementTagType == CHtmlElementType.INPUT && element.type == "submit")
+            {
+                craftWinformControl.Click += CraftWinformControl_Click;
+            }
+            if (element.onmousemove != null)
+            {
+                craftWinformControl.MouseMove += this.CraftWinformControl_MouseMove;
+            }
+            if (element.onmousedown != null)
+            {
+                craftWinformControl.MouseDown += CraftWinformControl_MouseDown;
+            }
+
+            if (element.onmouseup != null)
+            {
+                craftWinformControl.MouseUp += CraftWinformControl_MouseUp;
+            }
+
+            if (element.onmouseover != null)
+            {
+                craftWinformControl.MouseHover += CraftWinformControl_MouseHover;
+            }
+
+            if (element.onmouseenter != null)
+            {
+                craftWinformControl.MouseEnter += CraftWinformControl_MouseEnter;
+            }
+
+            if (element.onkeydown != null)
+            {
+                craftWinformControl.KeyDown += CraftWinformControl_KeyDown;
+            }
+
+            if (element.onkeyup != null)
+            {
+                craftWinformControl.KeyUp += CraftWinformControl_KeyUp;
+            }
+
+            // KeyPressイベントの登録名を修正
+            if (element.onkeypress != null)
+            {
+                craftWinformControl.KeyPress += CraftWinformControl_KeyPress;
+            }
+
+
+
+            if (craftWinformControl is System.Windows.Forms.ListBox)
+            {
+                System.Windows.Forms.ListBox lbox = (System.Windows.Forms.ListBox)craftWinformControl;
+                lbox.SelectedIndexChanged += CraftWinformControl_SelectedIndexChanged;
+            }
+            else if (craftWinformControl is System.Windows.Forms.ComboBox)
+            {
+                System.Windows.Forms.ComboBox cmb = (System.Windows.Forms.ComboBox)craftWinformControl;
+                //cmb.SelectedValueChanged += craftWinformControl.___managedControl_SelectedValueChanged;
+                cmb.SelectedIndexChanged += CraftWinformControl_SelectedIndexChanged;
+            }
+
+        }
+
+        private async void CraftWinformControl_Click(object? sender, EventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] Click event: sender={0}, type={1}", sender, sender?.GetType().Name);
+            CHtmlElement _eventElement = null;
+            object ___objFunction = null;
+
+            if (sender is Control control)
+            {
+                if (control.Tag is WeakReference weakRef && weakRef.IsAlive)
+                {
+                    _eventElement = weakRef.Target as CHtmlElement;
+                }
+            }
+            if (_eventElement != null)
+            {
+                if (_eventElement.___elementTagType == CHtmlElementType.INPUT && _eventElement.type == "submit")
+                {
+                    if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] Click event: sender={0}, type={1} Element={2} is submit button", sender, sender?.GetType().Name, _eventElement);
+                    }
+                    CHtmlRequestData _requestData = null;
+                    if(this.___document!= null)
+                    {
+                         _requestData =  CHtmlElement.___createSubmitDocumentFormData(_eventElement);
+                        if (_requestData != null && _requestData.fields.Count > 0)
+                        {
+                            foreach (var field in _requestData.fields)
+                            {
+                                MultiHtmlCraft.Core.commonLog.LogEntry($"{field.Key}, {field.Value}");
+                            }
+                            try
+                            {
+                                
+                                string strUrl = string.Format("{0}", _requestData.fields["action"]);
+                                strUrl = commonHTML.GetAbsoluteUri(this.___document.URL, "", strUrl);
+                                _requestData.fields["url"] = strUrl;
+                                await Task.Run(async () => await this.navigate(strUrl, new object[] { _requestData }));
+
+                            }
+                            catch (Exception ex)
+                            {
+                                MultiHtmlCraft.Core.commonLog.LogEntry("Error while navigating on submit button click: {0}", ex);
+                            }
+                        }
+                    }
+                    return;
+                }
+            }
+
+             ___objFunction = ___getSendersFunctionObject(sender, "click", _eventElement);
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] Click event: sender={0}, type={1} Element={2} EventFunc={3}", sender, sender?.GetType().Name, _eventElement, ___objFunction);
+            if (___objFunction != null)
+            {
+                this.___multiversalWindow.___executeElementEventFunction("click", _eventElement, ___objFunction, new object[] { null });
+            }
+        }
+
+        private object? ___getSendersFunctionObject(object sender, string v, CHtmlElement? eventElement)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void CraftWinformControl_MouseMove(object? sender, MouseEventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] MouseMove event: sender={0}, type={1}, X={2}, Y={3}", sender, sender?.GetType().Name, e?.X, e?.Y);
+        }
+        private void CraftWinformControl_MouseDown(object? sender, MouseEventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] MouseDown event: sender={0}, type={1}, Button={2}, X={3}, Y={4}", sender, sender?.GetType().Name, e?.Button, e?.X, e?.Y);
+        }
+        private void CraftWinformControl_MouseUp(object? sender, MouseEventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] MouseUp event: sender={0}, type={1}, Button={2}, X={3}, Y={4}", sender, sender?.GetType().Name, e?.Button, e?.X, e?.Y);
+        }
+        private void CraftWinformControl_MouseHover(object? sender, EventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] MouseHover event: sender={0}, type={1}", sender, sender?.GetType().Name);
+        }
+        private void CraftWinformControl_MouseEnter(object? sender, EventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] MouseEnter event: sender={0}, type={1}", sender, sender?.GetType().Name);
+        }
+        private void CraftWinformControl_KeyDown(object? sender, KeyEventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] KeyDown event (Selectable): sender={0}, type={1}, KeyCode={2}", sender, sender?.GetType().Name, e?.KeyCode);
+        }
+        private void CraftWinformControl_KeyUp(object? sender, KeyEventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] KeyUp event (Selectable): sender={0}, type={1}, KeyCode={2}", sender, sender?.GetType().Name, e?.KeyCode);
+        }
+        private void CraftWinformControl_KeyPress(object? sender, KeyPressEventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] KeyPress event (Selectable): sender={0}, type={1}, KeyChar={2}", sender, sender?.GetType().Name, e?.KeyChar);
+        }
+
+        // KeyDown/KeyUp/KeyPressイベントハンドラを定義
+        private void CHtmlMultiHtmlCraft_WinControl_KeyDown(object? sender, KeyEventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] KeyDown event (Selectable): sender={0}, type={1}, KeyCode={2}", sender, sender?.GetType().Name, e?.KeyCode);
+        }
+        private void CHtmlMultiHtmlCraft_WinControl_KeyUp(object? sender, KeyEventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] KeyUp event (Selectable): sender={0}, type={1}, KeyCode={2}", sender, sender?.GetType().Name, e?.KeyCode);
+        }
+        private void CHtmlMultiHtmlCraft_WinControl_KeyPress(object? sender, KeyPressEventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] KeyPress event (Selectable): sender={0}, type={1}, KeyChar={2}", sender, sender?.GetType().Name, e?.KeyChar);
+        }
+
+        // CraftWinformControl_KeyPressの重複定義を削除
+        
+        private void CraftWinformControl_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] SelectedIndexChanged event: sender={0}, type={1}", sender, sender?.GetType().Name);
+        }
+
+        #region MultiversalRendererControlEvents
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+
+            this.___fireWindoworDocumentEvent("mousemove", e.X, e.Y, e.Button, e.Clicks, e.Delta);
+            this.___LastMousePoint = new Point(e.X, e.Y);
+            this.___LastMouseScreenXY = new Point(System.Windows.Forms.Cursor.Position.X, System.Windows.Forms.Cursor.Position.Y);
+        }
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+
+            this.___fireWindoworDocumentEvent("mousedown", e.X, e.Y, e.Button, e.Clicks, e.Delta);
+
+
+        }
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            this.___fireWindoworDocumentEvent("mouseenter", this.___LastMousePoint.X, this.___LastMousePoint.Y, System.Windows.Forms.MouseButtons.None, 0, 0);
+        }
+        protected override void OnDoubleClick(EventArgs e)
+        {
+
+            this.___fireWindoworDocumentEvent("dblclick", this.___LastMousePoint.X, this.___LastMousePoint.Y, System.Windows.Forms.MouseButtons.Left, 0, 0);
+        }
+
+
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+
+            this.___fireWindoworDocumentEvent("mousedown", e.X, e.Y, e.Button, e.Clicks, e.Delta);
+        }
+        protected override void OnMouseLeave(EventArgs e)
+        {
+
+            this.___fireWindoworDocumentEvent("mouseleave", 0, 0, System.Windows.Forms.MouseButtons.None, 0, 0);
+        }
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+
+
+            this.___fireWindoworDocumentEvent("mouseup", e.X, e.Y, e.Button, e.Clicks, e.Delta);
+
+        }
+        protected override void OnMouseHover(EventArgs e)
+        {
+
+            this.___fireWindoworDocumentEvent("mousehover", 0, 0, System.Windows.Forms.MouseButtons.None, 0, 0);
+        }
+        /*
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+            this.Focus();
+        }
+        */
+        protected override bool IsInputKey(Keys keyData)
+        {
+            // 必要なキーをここでtrue返す（例: 矢印キー全部）
+            if ((keyData & Keys.Up) == Keys.Up || (keyData & Keys.Down) == Keys.Down ||
+                (keyData & Keys.Left) == Keys.Left || (keyData & Keys.Right) == Keys.Right ||
+                (keyData & Keys.Tab) == Keys.Tab /* 他のキーも追加可能 */)
+            {
+                return true;
+            }
+            return base.IsInputKey(keyData);
+        }
+
+
+        #endregion
+
+        public void DrawImage(object image, RectangleFSpec rectFSpec)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => DrawImage(image, rectFSpec)));
+                return;
+            }
+            if (image is Image img)
+            {
+                DrawImageInternal(img, rectFSpec);
+            }
+        }
+    }
+}
+

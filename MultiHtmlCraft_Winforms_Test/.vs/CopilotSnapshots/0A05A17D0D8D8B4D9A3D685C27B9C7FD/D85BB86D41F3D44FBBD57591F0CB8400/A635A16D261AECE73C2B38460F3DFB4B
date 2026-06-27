@@ -1,0 +1,72 @@
+﻿using MultiHtmlCraft.Interfaces;
+using NiL.JS;
+using NiL.JS.BaseLibrary;
+using NiL.JS.Core;
+using NiL.JS.Core.Functions;
+using NiL.JS.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Xml.Linq;
+using static System.Formats.Asn1.AsnWriter;
+namespace NilJsProcessor
+{
+#pragma warning disable 618
+    public class NilJsScope : IMultiversalScriptScope
+    {
+        private IMultiversalWindow multiwindow = null;
+        public Context context = null;
+        public GlobalContext globalContext = null;
+        private bool _isInitCompleted = false;
+        private IMultiversalScriptProcessor processor = null;
+        private readonly object _initLock = new object();
+        private Func<string, object[], object>? _objectFactory;
+        private JSValue _cachedWindowJsValue;
+        private IMultiversalWindow _cachedWindowSource;
+        private string _scopeName = "NilJsScope";
+        private IMultiversalWindowType _windowType = IMultiversalWindowType.Unknown;
+        private int _timeout = 0;
+        // script mime list
+        private static readonly List<string> _invokeNames = new List<string>{"text/javascript","javascript","application/javascript"};
+        public NilJsScope(IMultiversalWindow multi){ multiwindow = multi; }
+        public NilJsScope(){ }
+        public void setObjectFactory(Func<string, object[], object> factory){ _objectFactory = factory; }
+        public string getMultivasalScopeName()=> _scopeName;
+        public IMultiversalScriptProcessor getMultiversalScriptProcessor(){ processor.multiversalscope = this; return processor; }
+        public bool isDefaultMultiversalProcessor()=> true;
+        public bool isInitCompleted()=> _isInitCompleted;
+        public void relaseMultiversal(){ multiwindow = null; }
+        public IMultiversalWindow getMultiversalWindow()=> multiwindow;
+        public IMultiversalWindowType getMutilversalWindowType()=> _windowType;
+        public void setMutilversalWindowType(IMultiversalWindowType wt){ _windowType = wt; }
+        public string[] getMultiversalInvokeScriptNames()=> _invokeNames.ToArray();
+        public void setTimeout(int timeout){ _timeout = timeout; }
+        public void disposeScriptEngine(){ _isInitCompleted=false; processor=null; context=null; globalContext=null; }
+        private void setHostWindowToContext(Context ctx, IMultiversalWindow sourceWindow){
+            if(sourceWindow==null||ctx==null) return;
+            if(_cachedWindowJsValue==null || !ReferenceEquals(_cachedWindowSource, sourceWindow)){
+                _cachedWindowJsValue = JSValue.Marshal(sourceWindow);
+                _cachedWindowSource = sourceWindow;
+            }
+            ctx.DefineVariable("__hostWindow").Assign(_cachedWindowJsValue);
+            try{ ctx.Eval("(function(){try{var r=(function(){return this;})(); if(!r.window) r.window={}; var w=r.window; w.__hostWindow=__hostWindow; r.globalThis=w; r.self=w; }catch(e){}})();"); }catch{}
+        }
+        private void EnsureWindowGlobal(Context ctx, IMultiversalWindow source){ if(ctx==null||source==null) return; try{ var jsWin = JSValue.Marshal(source); ctx.DefineVariable("window").Assign(jsWin); ctx.DefineVariable("globalThis").Assign(jsWin); ctx.DefineVariable("self").Assign(jsWin);}catch{} }
+        private static SortedList<string,ushort> createWindowFunctionSortedList(){ var list=new SortedList<string,ushort>(StringComparer.Ordinal); list["onload"]=0; list["onerror"]=0; list["onmessage"]=0; return list; }
+        private void createBasicStandardObjects(){
+            if(context==null||multiwindow==null) return;
+            context.DefineVariable("setTimeout").Assign(JSValue.Marshal(new Func<JSValue,JSValue,JSValue>((cb,ms)=>{ var r= multiwindow.setTimeout(new object[]{cb.Value, ms.Value}); return JSValue.Marshal(r);} )));
+            context.DefineVariable("clearTimeout").Assign(JSValue.Marshal(new Action<JSValue>((id)=>{ multiwindow.clearTimeout(new object[]{ id.Value}); })));
+        }
+        private void createStandardObjects(){ createBasicStandardObjects(); context.DefineVariable("setInterval").Assign(JSValue.Marshal(new Func<JSValue,JSValue,JSValue>((cb,ms)=>{ var r= multiwindow.setInterval(new object[]{cb.Value, ms.Value}); return JSValue.Marshal(r);} ))); context.DefineVariable("clearInterval").Assign(JSValue.Marshal(new Action<JSValue>((id)=>{ multiwindow.clearInterval(new object[]{ id.Value}); }))); }
+        public void initScriptEngine(){ lock(_initLock){ if(_isInitCompleted) return; try{ globalContext = new GlobalContext(); context = new Context(globalContext); processor = new NilJsProcessor(); processor.multiversalscope=this; setHostWindowToContext(context,multiwindow); EnsureWindowGlobal(context,multiwindow); createStandardObjects(); // hostless ctors
+                defineHostlessConstructor("XMLHttpRequest"); defineHostlessConstructor("Image"); defineHostlessConstructor("DOMParser"); _isInitCompleted=true; } catch(Exception ex){ System.Diagnostics.Debug.WriteLine("NilJs init fail: "+ex.Message); try{ context = new Context(); processor = new NilJsProcessor(); processor.multiversalscope=this; createBasicStandardObjects(); defineHostlessConstructor("XMLHttpRequest"); defineHostlessConstructor("Image"); defineHostlessConstructor("DOMParser"); _isInitCompleted=true; } catch(Exception ex2){ throw new InvalidOperationException("Failed NilJs init", ex2);} } } }
+        private void ensureCreateObjectBridge(){ if(context==null) return; var existing = context.GetVariable("__host_createObject"); if(existing!=null && existing.ValueType==JSValueType.Function) return; var hostCreate = new ExternalFunction((JSValue thisArg, Arguments args)=>{ try{ if(multiwindow==null||args==null||args.Length==0) return JSValue.Undefined; var typeName = Convert.ToString(args[0].Value); int ctorCount = System.Math.Max(0,args.Length-1); var ctorArgs = new object[ctorCount]; for(int i=0;i<ctorCount;i++) ctorArgs[i]= args[i+1]?.Value; var inst = multiwindow.___createObject(typeName, ctorArgs); if(inst==null && _objectFactory!=null) inst=_objectFactory(typeName, ctorArgs); return inst==null? JSValue.Undefined: JSValue.Marshal(inst);}catch{ return JSValue.Undefined; }});
+            context.DefineVariable("__host_createObject").Assign(hostCreate); try{ context.Eval("(function(){ if(typeof window!=='undefined' && typeof window.___createObject!=='function'){ window.___createObject=function(t){ return __host_createObject.apply(window, arguments); }; } })();"); }catch{} }
+        private void defineHostlessConstructor(string jsName){ if(context==null) return; ensureCreateObjectBridge(); string script = "(function(){function __JSNAME__(){try{if(window&&window.___createObject){var a=['__JSNAME__'];for(var i=0;i<arguments.length;i++)a.push(arguments[i]);var r=window.___createObject.apply(window,a);if(r!=null)return r;}}catch(e){}return {};}(typeof globalThis!=='undefined'?globalThis:this)['__JSNAME__']=__JSNAME__})();".Replace("__JSNAME__", jsName); context.Eval(script); try{ var func = context.Eval($"(typeof globalThis!=='undefined' && globalThis['{jsName}']) || (typeof window!=='undefined' && window['{jsName}'])"); if(func!=null && func.ValueType==JSValueType.Function) context.DefineVariable(jsName).Assign(func); }catch{} }
+        // unused original defineConstructor retained for compatibility
+        public void defineConstructor(Type type, string jsName){ defineHostlessConstructor(jsName); }
+        public string getClasName()=> "object"; private bool __GlobalAliasesInitialized=false; private void ___InitGlobalAliases(Context ctx){ if(__GlobalAliasesInitialized) return; __GlobalAliasesInitialized=true; try{ if(multiwindow?.console!=null) ctx.DefineVariable("console").Assign(JSValue.Marshal(multiwindow.console)); }catch{} }
+    }
+}

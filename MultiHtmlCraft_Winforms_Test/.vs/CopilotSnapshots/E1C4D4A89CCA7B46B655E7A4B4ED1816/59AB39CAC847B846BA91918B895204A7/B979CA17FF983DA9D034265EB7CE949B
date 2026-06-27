@@ -1,0 +1,75 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MultiHtmlCraft.Core
+{
+    public class CHtmlFontFace
+    {
+        // font-family: Font family name
+        public string fontFamily { get; set; }
+        // src: Font file URL or local path
+        public string src { get; set; }
+        // font-weight: e.g. normal, bold, 100-900
+        public string fontWeight { get; set; }
+        // font-style: e.g. normal, italic, oblique
+        public string fontStyle { get; set; }
+        // font-stretch: e.g. normal, condensed, expanded
+        public string fontStretch { get; set; }
+        // unicode-range: Target Unicode range
+        public string unicodeRange { get; set; }
+        // ascent-override, descent-override, line-gap-override as needed
+        public string ascentOverride { get; set; }
+        public string descentOverride { get; set; }
+        public string lineGapOverride { get; set; }
+        // loaded: Whether the font is loaded
+        public bool loaded { get; set; }
+        // status: Font loading status (e.g. unloaded, loading, loaded, error)
+        public string status { get; set; }
+        // style: Additional style information
+        public string style { get; set; }
+
+        public CHtmlFontFace()
+        {
+            // Set default values
+            fontFamily = string.Empty;
+            src = string.Empty;
+            fontWeight = "normal";
+            fontStyle = "normal";
+            fontStretch = "normal";
+            unicodeRange = string.Empty;
+            ascentOverride = string.Empty;
+            descentOverride = string.Empty;
+            lineGapOverride = string.Empty;
+            loaded = false;
+            status = "unloaded";
+            style = string.Empty;
+        }
+
+        // Asynchronously load the font. Returns a Task as a Promise-like object.
+        public Task<CHtmlFontFace> load()
+        {
+            return Task.Run(async () =>
+            {
+                status = "loading";
+                try
+                {
+                    // Implement font file existence check and loading here
+                    // Dummy delay for simulation
+                    await Task.Delay(100); // Replace with actual file/network access
+                    loaded = true;
+                    status = "loaded";
+                }
+                catch (Exception)
+                {
+                    loaded = false;
+                    status = "error";
+                }
+                return this;
+            });
+        }
+    }
+}

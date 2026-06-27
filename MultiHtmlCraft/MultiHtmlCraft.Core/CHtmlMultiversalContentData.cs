@@ -1,0 +1,131 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+namespace MultiHtmlCraft.Core
+{
+    public class CHtmlMultiversalContentData
+    {
+        public string? Url { get; set; }
+        public string? FileLocation { get; set; }
+        public string? ContentType { get; set; }
+        public DateTimeOffset? LastModified { get; set; }
+        public string? Authority { get; set; }
+        public string? HtmlContent { get; set; }
+        public string? Charset { get; set; }
+        public long ContentLength { get; set; }
+        public string? ContentEncoding { get; set; }
+        public byte[]? RawData { get; set; }
+        public CHtmlMultiversalContentData() { }
+
+        /// <summary>
+        /// HTMLのbyte配列またはファイルから<head>～</head>内のcharsetを抽出する。見つからなければnullを返す。
+        /// </summary>
+        /// <param name="htmlBytes">HTMLファイルのbyte配列（null可）</param>
+        /// <param name="_fileLocation">ファイルパス（null可）</param>
+        /// <returns>charset値、またはnull</returns>
+        public static string? GetCharsetFromHtmlHeader(byte[]? htmlBytes, string? _fileLocation)
+        {
+            
+            if (!string.IsNullOrEmpty(_fileLocation) && System.IO.File.Exists(_fileLocation))
+            {
+                using (var fs = new System.IO.FileStream(_fileLocation, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
+                {
+                    int readLen = (int)Math.Min(8126, fs.Length);
+                    byte[] fileBytes = new byte[readLen];
+                    int actuallyRead = fs.Read(fileBytes, 0, readLen);
+                    if (actuallyRead > 0)
+                    {
+                        htmlBytes = fileBytes;
+                    }
+                }
+            }
+            if (htmlBytes == null || htmlBytes.Length == 0) return null;
+
+        
+            byte[] headStartBytes = new byte[] { 0x3C, 0x68, 0x65, 0x61, 0x64 }; // "<head"
+            byte[] headEndBytes = new byte[] { 0x3C, 0x2F, 0x68, 0x65, 0x61, 0x64, 0x3E }; // "</head>"
+
+            int headStart = IndexOfBytes(htmlBytes, headStartBytes, 0, true);
+            if (headStart < 0) headStart = 0;
+            int headEnd = IndexOfBytes(htmlBytes, headEndBytes, headStart, true);
+            if (headEnd < 0) return null;
+
+            int headLength = headEnd - headStart;
+            if (headLength <= 0) return null;
+            byte[] headContentBytes = new byte[headLength];
+            Array.Copy(htmlBytes, headStart, headContentBytes, 0, headLength);
+
+            // 
+            byte[] charsetBytes = new byte[] { 0x63, 0x68, 0x61, 0x72, 0x73, 0x65, 0x74 }; // "charset"
+            int idx = IndexOfBytes(headContentBytes, charsetBytes, 0, true);
+            while (idx >= 0 && idx < headContentBytes.Length)
+            {
+                int i = idx + charsetBytes.Length;
+                //
+                while (i < headContentBytes.Length && (headContentBytes[i] == 0x20 || headContentBytes[i] == 0x3D)) i++;
+                // 
+                if (i < headContentBytes.Length && (headContentBytes[i] == 0x22 || headContentBytes[i] == 0x27)) i++;
+                
+                int valStart = i;
+                while (i < headContentBytes.Length)
+                {
+                    byte b = headContentBytes[i];
+                    if (!((b >= 0x30 && b <= 0x39) || // 0-9
+                          (b >= 0x41 && b <= 0x5A) || // A-Z
+                          (b >= 0x61 && b <= 0x7A) || // a-z
+                          b == 0x2D || // - 
+                          b == 0x5F)) // _
+                    { 
+                        break;
+                    }
+                    i++;
+                }
+                int valLen = i - valStart;
+                if (valLen > 0)
+                {
+                    return Encoding.ASCII.GetString(headContentBytes, valStart, valLen);
+                }
+                // 次のcharsetを探す
+                idx = IndexOfBytes(headContentBytes, charsetBytes, idx + charsetBytes.Length, true);
+            }
+            return null;
+        }
+
+        
+        private static int IndexOfBytes(byte[] haystack, byte[] needle, int startIndex, bool ignoreCase)
+        {
+            for (int i = startIndex; i <= haystack.Length - needle.Length; i++)
+            {
+                bool found = true;
+                for (int j = 0; j < needle.Length; j++)
+                {
+                    byte b1 = haystack[i + j];
+                    byte b2 = needle[j];
+                    if (ignoreCase)
+                    {
+                        b1 = ToLowerAscii(b1);
+                        b2 = ToLowerAscii(b2);
+                    }
+                    if (b1 != b2)
+                    {
+                        found = false;
+                        break;
+                    }
+                }
+                if (found) return i;
+            }
+            return -1;
+        }
+
+        private static byte ToLowerAscii(byte b)
+        {
+            if (b >= 0x41 && b <= 0x5A) // 'A'-'Z'
+                return (byte)(b + 0x20);
+            return b;
+        }
+    }
+}

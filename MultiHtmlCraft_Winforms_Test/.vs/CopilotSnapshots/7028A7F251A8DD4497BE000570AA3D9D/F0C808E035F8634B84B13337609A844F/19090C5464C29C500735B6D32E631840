@@ -1,0 +1,141 @@
+﻿using System;
+
+namespace MultiHtmlCraft.Core
+{
+    public struct ColorSpec
+    {
+        public byte R, G, B, A;
+        public ColorSpec(byte r, byte g, byte b, byte a = 255)
+        {
+            R = r; G = g; B = b; A = a;
+        }
+        public static ColorSpec Empty => new ColorSpec(0, 0, 0, 0);
+        public static ColorSpec Transparent => new ColorSpec(0, 0, 0, 0);
+        public static ColorSpec Black => new ColorSpec(0, 0, 0, 255);
+        public static ColorSpec White => new ColorSpec(255, 255, 255, 255);
+        public static ColorSpec LightGray => new ColorSpec(211, 211, 211);
+        public static ColorSpec Yellow => new ColorSpec(255, 255, 0);
+        public static ColorSpec MidnightBlue => new ColorSpec(25, 25, 112);
+    }
+
+    public struct SizeSpec
+    {
+        public int Width, Height;
+        public SizeSpec(int width, int height)
+        {
+            Width = width;
+            Height = height;
+        }
+        public static SizeSpec Empty => new SizeSpec(0, 0);
+    }
+
+    public struct SizeFSpec
+    {
+        public float Width, Height;
+        public SizeFSpec(float width, float height)
+        {
+            Width = width;
+            Height = height;
+        }
+        public static SizeFSpec Empty => new SizeFSpec(0, 0);
+    }
+
+    public struct RectangleSpec
+    {
+        public int X, Y, Width, Height;
+        public RectangleSpec(int x, int y, int width, int height)
+        {
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
+        }
+        public static RectangleSpec Empty => new RectangleSpec(0, 0, 0, 0);
+    }
+
+    public struct RectangleFSpec
+    {
+        public float X, Y, Width, Height;
+        public RectangleFSpec(float x, float y, float width, float height)
+        {
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
+        }
+        public static RectangleFSpec Empty => new RectangleFSpec(0, 0, 0, 0);
+    }
+
+    // 浮動小数点座標構造体
+    public struct PointFSpec
+    {
+        public float X, Y;
+        public PointFSpec(float x, float y)
+        {
+            X = x;
+            Y = y;
+        }
+        public static PointFSpec Empty => new PointFSpec(0, 0);
+    }
+
+    public class PenSpec
+    {
+        public ColorSpec Color { get; set; }
+        public float Thickness { get; set; }
+
+        public PenSpec(ColorSpec color, float thickness = 1.0f)
+        {
+            Color = color;
+            Thickness = thickness;
+        }
+    }
+
+    public class BrushSpec
+    {
+        public ColorSpec Color { get; set; }
+
+        public BrushSpec(ColorSpec color)
+        {
+            Color = color;
+        }
+    }
+
+    public class FontSpec
+    {
+        public string FamilyName { get; set; }
+        public float Size { get; set; }
+        public FontStyleSpec Style { get; set; }
+
+        public FontSpec(string familyName, float size, FontStyleSpec style = FontStyleSpec.Regular)
+        {
+            FamilyName = familyName;
+            Size = size;
+            Style = style;
+        }
+    }
+
+    public enum FontStyleSpec
+    {
+        Regular,
+        Bold,
+        Italic,
+        BoldItalic
+    }
+
+    public interface IDrawingContext : IDisposable
+    {
+        void DrawLine(PenSpec pen, float x1, float y1, float x2, float y2);
+        void FillRectangle(BrushSpec brush, float x, float y, float width, float height);
+        void DrawRectangle(PenSpec pen, float x, float y, float width, float height);
+        void DrawImage(object image, float x, float y, float width, float height);
+
+        void DrawString(string text, FontSpec font, BrushSpec brush, float x, float y);
+        //SizeFSpec MeasureString(string text, FontSpec font);
+        /*
+        void SetClip(RectangleFSpec rect);
+        */
+        /*
+        void ResetClip();
+        */
+    }
+}

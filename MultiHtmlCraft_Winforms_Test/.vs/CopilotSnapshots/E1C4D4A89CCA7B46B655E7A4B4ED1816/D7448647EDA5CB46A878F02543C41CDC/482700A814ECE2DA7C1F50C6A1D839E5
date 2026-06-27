@@ -1,0 +1,210 @@
+﻿using MultiHtmlCraft.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+namespace MultiHtmlCraft.Core
+{
+    public class CHtmlFontFace : IDynamicMetaObjectProvider, ICommonObjectInterface
+    {
+        public static Dictionary<string, object> CHtmlFonFaceProperties = createChtmlFontFaceProperties();
+
+        private static Dictionary<string, object> createChtmlFontFaceProperties()
+        {
+            return new Dictionary<string, object>
+    {
+        { "fontFamily", string.Empty },
+        { "src", string.Empty },
+        { "fontWeight", "normal" },
+        { "fontStyle", "normal" },
+        { "fontStretch", "normal" },
+        { "unicodeRange", string.Empty },
+        { "ascentOverride", string.Empty },
+        { "descentOverride", string.Empty },
+        { "lineGapOverride", string.Empty },
+        { "loaded", false },
+        { "status", "unloaded" },
+        { "style", string.Empty }
+    };
+        }
+
+        internal IDictionary<string, object> ___properties = new Dictionary<string, object>();
+
+        // font-family: Font family name
+        public string fontFamily { get; set; }
+        // src: Font file URL or local path
+        public string src { get; set; }
+        // font-weight: e.g. normal, bold, 100-900
+        public string fontWeight { get; set; }
+        // font-style: e.g. normal, italic, oblique
+        public string fontStyle { get; set; }
+        // font-stretch: e.g. normal, condensed, expanded
+        public string fontStretch { get; set; }
+        // unicode-range: Target Unicode range
+        public string unicodeRange { get; set; }
+        // ascent-override, descent-override, line-gap-override as needed
+        public string ascentOverride { get; set; }
+        public string descentOverride { get; set; }
+        public string lineGapOverride { get; set; }
+        // loaded: Whether the font is loaded
+        public bool loaded { get; set; }
+        // status: Font loading status (e.g. unloaded, loading, loaded, error)
+        public string status { get; set; }
+        // style: Additional style information
+        public string style { get; set; }
+
+        public CHtmlFontFace()
+        {
+            // Set default values
+            fontFamily = string.Empty;
+            src = string.Empty;
+            fontWeight = "normal";
+            fontStyle = "normal";
+            fontStretch = "normal";
+            unicodeRange = string.Empty;
+            ascentOverride = string.Empty;
+            descentOverride = string.Empty;
+            lineGapOverride = string.Empty;
+            loaded = false;
+            status = "unloaded";
+            style = string.Empty;
+        }
+
+        // Asynchronously load the font. Returns a Task as a Promise-like object.
+        public Task<CHtmlFontFace> load()
+        {
+            return Task.Run(async () =>
+            {
+                status = "loading";
+                try
+                {
+                    // Implement font file existence check and loading here
+                    // Dummy delay for simulation
+                    await Task.Delay(100); // Replace with actual file/network access
+                    loaded = true;
+                    status = "loaded";
+                }
+                catch (Exception)
+                {
+                    loaded = false;
+                    status = "error";
+                }
+                return this;
+            });
+        }
+        
+
+        #region MetaObject
+        public DynamicMetaObject GetMetaObject(Expression parameter)
+        {
+            return new MultiHtmlCraft.Core.CHtmlDynamicMetaObject<CHtmlFontFace>(parameter, this);
+        }
+        public object GetDynamicMember(string name)
+        {
+            object objValue = null;
+            this.___properties.TryGetValue(name, out objValue);
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("{0}.GetDynamicMember({1} returns : {2}", this, name, objValue);
+            }
+            return objValue;
+        }
+        public void SetDynamicMember(string name, object value)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("{0}.SettDynamicMember({1} is called value: {2}", this, name, value);
+            }
+            switch (name)
+            {
+                case "innerHTML":
+                case "checked":
+                case "disabled":
+                case "value":
+                case "id":
+                case "tagName":
+                case "class":
+                case "classname":
+                case "className":
+                case "autoPlay":
+                case "classId":
+                case "classid":
+                case "name":
+                case "nodeValue":
+                case "src":
+                case "auto":
+                case "style":
+                case "styleSheet":
+                case "href":
+                case "charset":
+                case "characterSet":
+                case "dir":
+                case "type":
+                case "location":
+                case "async":
+                case "defer":
+                case "contentEditable":
+                case "contenteditable":
+                case "alt":
+                case "lang":
+                case "language":
+                case "title":
+                case "innerText":
+                case "selected":
+                case "htmlFor":
+                case "htmlfor":
+                case "mimetype":
+                case "mimeType":
+                case "width":
+                case "height":
+                case "crossOrigin":
+                case "crossorigin":
+                case "textContent":
+                    this.___setPropertyByName(name, value);
+                    return;
+
+            }
+
+            this.___properties[name] = value;
+        }
+        public IEnumerable<string> GetDynamicMemberNames()
+        {
+            List<string> members = new List<string>();
+            members.AddRange(CHtmlFontFace.CHtmlFonFaceProperties.Keys);
+ 
+            if (this.___properties.Count > 0)
+            {
+                members.AddRange(this.___properties.Keys);
+            }
+            return members;
+        }
+        public DynamicMetaObject BindInvokeMember(
+ InvokeMemberBinder binder, DynamicMetaObject[] args)
+        {
+            StringBuilder paramInfo = new StringBuilder();
+            paramInfo.AppendFormat("Calling {0}(", binder.Name);
+            foreach (var item in args)
+                paramInfo.AppendFormat("{0}, ", item.Value);
+            paramInfo.Append(")");
+            Expression[] parameters = new Expression[]
+            {
+ Expression.Constant(paramInfo.ToString())
+            };
+            DynamicMetaObject methodInfo = null;
+            /*
+            DynamicMetaObject methodInfo = new DynamicMetaObject(
+            Expression.Call(
+            Expression.Convert(Expression, LimitType),
+            typeof(DynamicDictionary).GetMethod("WriteMethodInfo"),
+            parameters),
+            BindingRestrictions.GetTypeRestriction(Expression, LimitType));
+            */
+            return methodInfo;
+        }
+        #endregion
+    }
+}

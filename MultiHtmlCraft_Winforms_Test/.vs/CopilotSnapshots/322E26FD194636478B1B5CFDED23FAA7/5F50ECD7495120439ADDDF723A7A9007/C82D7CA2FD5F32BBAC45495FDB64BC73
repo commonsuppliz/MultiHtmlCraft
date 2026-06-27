@@ -1,0 +1,608 @@
+﻿using MultiHtmlCraft.Core;
+using MultiHtmlCraft.Interfaces;
+using MultiHtmlCraft.WinformsControl;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Net;
+using System.Net.Http;
+using System.Security.Authentication;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+// OtherInformation: This is a WinForms control for MultiHtmlCraft
+namespace MultiHtmlCraft.WinFormsControl
+{
+
+    public class CHtmlMultiHtmlCraft_WinControl : UserControl, ICHtmlMultiversalControlInterface
+    {
+        private readonly object _drawImageLock = new object();
+        private Graphics? _cachedGraphics;
+
+        private const int GRAPHICS_CACHE_TIMEOUT_MS = 100;
+        private DateTime _lastGraphicsCreated = DateTime.MinValue;
+        private DateTime _lastGCCollectTime = DateTime.MinValue;
+        public CHtmlMultiHtmlCraft_WinControl()
+        {
+
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.ResizeRedraw, true);
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            InitializeComponent();
+
+            this.horizontalBar.ValueChanged += (s, e) => this.Invalidate();
+            this.verticalBar.ValueChanged += (s, e) => this.Invalidate();
+            this.horizontalBar.Visible = false;
+            this.verticalBar.Visible = false;
+            this.verticalBar.LargeChange = 100;
+            this.verticalBar.SmallChange = 30;
+            this.horizontalBar.LargeChange = 100;
+            this.horizontalBar.SmallChange = 30;
+            this.horizontalBar.Dock = DockStyle.Bottom;
+            this.verticalBar.Dock = DockStyle.Right;
+            this.horizontalBar.Scroll += (s, e) => this.Invalidate();
+            this.verticalBar.Scroll += (s, e) => this.Invalidate();
+            this.___multiversalWindow = new MultiHtmlCraft.Core.CHtmlMultiversalWindow(null, true, IMultiversalWindowType.NormalWindow);
+        }
+        System.Drawing.Point ___LastMousePoint = System.Drawing.Point.Empty;
+        System.Drawing.Point ___LastMouseScreenXY = System.Drawing.Point.Empty;
+        private int _documentPaintCount = 0;
+        private int ___currentTabIndex = 0;
+        public static HttpClientHandler httpclientHandler = new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            MaxRequestContentBufferSize = 1_000_000,
+            SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13
+        };
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Compiler", "CS8618", Justification = "Fields are initialized in InitializeComponent.")]
+        private HScrollBar horizontalBar;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Compiler", "CS8618", Justification = "Fields are initialized in InitializeComponent.")]
+        private VScrollBar verticalBar;
+        private System.ComponentModel.IContainer components = new System.ComponentModel.Container();
+
+        private Panel? sidePanel;
+        private TabControl? tabControl;
+        private Button? closeButton;
+        private Splitter? sideSplitter;
+        private Panel? sidePanelDOM;
+        private TreeView? treeViewDOM;
+        private Splitter? splitterDOM;
+        private ListView? listViewDOM;
+        private ListView? sideListViewCSS;
+        private ListView? sideListViewScript;
+        private MultiHtmlCraft.Core.CHtmlDocument? ___document;
+        private CHtmlMultiversalWindow? ___multiversalWindow;
+
+
+        public async Task navigate(string URL, params object[] args)
+        {
+            this.ActiveControl = null;
+            string strMethod = "GET";
+            CHtmlRequestData? _requestData = null;
+            if (args !=null && args.Length > 0 )
+            {
+                if (args[0] is CHtmlRequestData)
+                {
+                    _requestData = (CHtmlRequestData)args[0];
+                    URL = _requestData.fields["url"];
+                    strMethod = _requestData.fields["method"] ?? "GET";
+
+                }
+            }
+
+            string strUrl = URL.Trim();
+
+            if (!strUrl.StartsWith("http"))
+            {
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new Action(() => MessageBox.Show($"{strUrl} is invalid url")));
+                }
+                else
+                {
+                    MessageBox.Show($"{strUrl} is invalid url");
+                }
+                return;
+            }
+
+            this.___multiversalWindow.___URL_Request_Current = URL;
+            this.___multiversalWindow.setMultiversalControl(this);
+
+            if (___multiversalWindow.hasHttpClient == false)
+            {
+                HttpClient ___httpClient = new HttpClient(httpclientHandler);
+
+                commonHTML.setHttpClientDefalutRequestHeaders(___httpClient);
+
+
+
+                ___httpClient.Timeout = TimeSpan.FromMilliseconds(30000);
+                MultiHtmlCraft.Core.CHtmlMultiversalWindow.setHttpClient(___httpClient);
+            }
+            this.___multiversalWindow.___URL_Request_Current = URL;
+            MultiHtmlCraft.Core.commonLog.LoggingEnabled = true;
+            MultiHtmlCraft.Core.commonLog.LogLevel = 10;
+
+            commonLog.LoggingEnabled = true;
+            commonLog.LogLevel = 10;
+
+            if (commonLog.LoggingEnabled)
+            {
+                commonLog.LogEntry($"Requesting {strUrl} Managed Thread ID :{System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            }
+            try
+            {
+                ___document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, this.___multiversalWindow, _requestData);
+                if (___document?.body is CHtmlElement ___body)
+                {
+                    if (this.InvokeRequired)
+                    {
+                        this.Invoke(new Action(() => setRenderingSize(___body.offsetWidth, ___body.offsetHeight)));
+                    }
+                    else
+                    {
+                        setRenderingSize(___body.offsetWidth, ___body.offsetHeight);
+                    }
+                }
+
+                if (this.InvokeRequired)
+                {
+                    this.Invoke(new Action(() =>
+                    {
+                        if (!this.horizontalBar.Visible)
+                            this.horizontalBar.Visible = true;
+                        if (!this.verticalBar.Visible)
+                            this.verticalBar.Visible = true;
+
+                        if (___document.___ManagedControlPendingElementList != null && ___document.___ManagedControlPendingElementList.Count > 0)
+                        {
+                            if (___document.___HtmlGraphics == null)
+                            {
+                                ___document.___HtmlGraphics = new CHtmlGraphicContainer();
+                                ___document.___HtmlGraphics.Graphic = this.CreateGraphics();
+                            }
+                            this.createControlFromDocument(this.___document);
+                        }
+                        this.Invalidate();
+                        if (treeViewDOM != null && treeViewDOM.Visible == true)
+                        {
+
+                            createDOMTree();
+                        }
+                    }));
+                }
+                else
+                {
+                    if (!this.horizontalBar.Visible)
+                        this.horizontalBar.Visible = true;
+                    if (!this.verticalBar.Visible)
+                        this.verticalBar.Visible = true;
+                    this.Invalidate();
+                    if (treeViewDOM != null)
+                    {
+                        createDOMTree();
+
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        public void NavigateSync(string URL)
+        {
+            navigate(URL).GetAwaiter().GetResult();
+        }
+
+        private void createDOMTree()
+        {
+            if (___document?.documentElement is CHtmlElement documentRootElement)
+            {
+                this.treeViewDOM.SuspendLayout();
+                treeViewDOM.BeginUpdate();
+                treeViewDOM.Nodes.Clear();
+                treeViewDOM.Nodes.Add(createTreeNodeFromCHtmlElement(documentRootElement));
+                // TopNodeを保存
+                TreeNode? prevTopNode = treeViewDOM.TopNode;
+                treeViewDOM.ExpandAll();
+
+
+
+
+                // TopNodeを復元
+                if (prevTopNode != null)
+                    treeViewDOM.TopNode = prevTopNode;
+
+
+                this.treeViewDOM.ResumeLayout(false);
+            }
+        }
+        public void setRenderingSize(double ___width, double ___height)
+        {
+            if (this.horizontalBar != null)
+            {
+                this.horizontalBar.Value = 0;
+                this.horizontalBar.Maximum = (int)___width;
+            }
+            if (this.verticalBar != null)
+            {
+                this.verticalBar.Value = 0;
+                this.verticalBar.Maximum = (int)___height;
+            }
+        }
+        public void Invalidate(RectangleFSpec rectFSpec)
+        {   if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => this.Invalidate(commonTypeConverter.ToRectangle(rectFSpec))));
+            }
+            else
+            {
+                this.Invalidate(commonTypeConverter.ToRectangle(rectFSpec));
+            }
+        }
+        /*
+        public void DrawImage(object image, RectangleFSpec rectFSpec)
+        {
+            if (this.InvokeRequired)
+            {
+                if (image is Image img)
+                {
+                    using (Graphics g = this.CreateGraphics())
+                    {
+                        // BitBltを使用するためのコード
+                        IntPtr hdcDest = g.GetHdc();
+                        try
+                        {
+                            Rectangle rect = commonTypeConverter.ToRectangle(rectFSpec);
+                            using (Bitmap bitmap = new Bitmap(img))
+                            using (Graphics sourceGraphics = Graphics.FromImage(bitmap))
+                            {
+                                IntPtr hdcSrc = sourceGraphics.GetHdc();
+                                try
+                                {
+                                    // SRCCOPY (0x00CC0020) - コピーモード
+                                    BitBlt(hdcDest, rect.X, rect.Y, rect.Width, rect.Height,
+                                           hdcSrc, 0, 0, 0x00CC0020);
+                                }
+                                finally
+                                {
+                                    sourceGraphics.ReleaseHdc(hdcSrc);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            g.ReleaseHdc(hdcDest);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (image is Image img)
+                {
+                    using (Graphics g = this.CreateGraphics())
+                    {
+                        // BitBltを使用するためのコード
+                        IntPtr hdcDest = g.GetHdc();
+                        try
+                        {
+                            Rectangle rect = commonTypeConverter.ToRectangle(rectFSpec);
+                            using (Bitmap bitmap = new Bitmap(img))
+                            using (Graphics sourceGraphics = Graphics.FromImage(bitmap))
+                            {
+                                IntPtr hdcSrc = sourceGraphics.GetHdc();
+                                try
+                                {
+                                    // SRCCOPY (0x00CC0020) - コピーモード
+                                    BitBlt(hdcDest, rect.X, rect.Y, rect.Width, rect.Height,
+                                           hdcSrc, 0, 0, 0x00CC0020);
+                                }
+                                finally
+                                {
+                                    sourceGraphics.ReleaseHdc(hdcSrc);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            g.ReleaseHdc(hdcDest);
+                        }
+                    }
+                }
+            }
+        }
+
+        // BitBlt関数をインポート
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        private static extern bool BitBlt(
+            IntPtr hdcDest,     // コピー先デバイスコンテキストのハンドル
+            int nXDest,         // コピー先の左上X座標
+            int nYDest,         // コピー先の左上Y座標
+            int nWidth,         // コピーする幅
+            int nHeight,        // コピーする高さ
+            IntPtr hdcSrc,      // コピー元デバイスコンテキストのハンドル
+            int nXSrc,          // コピー元の左上X座標
+            int nYSrc,          // コピー元の左上Y座標
+            uint dwRop);        // ラスタオペレーションコード
+        */
+        private Graphics? GetCachedGraphics()
+        {
+            var now = DateTime.Now;
+
+            // キャッシュが古い場合は削除
+            if (_cachedGraphics != null &&
+                (now - _lastGraphicsCreated).TotalMilliseconds > GRAPHICS_CACHE_TIMEOUT_MS)
+            {
+                ClearGraphicsCache();
+            }
+
+            // キャッシュがない場合は新規作成
+            if (_cachedGraphics == null && this.IsHandleCreated)
+            {
+                try
+                {
+                    _cachedGraphics = Graphics.FromHwnd(this.Handle);
+                    _lastGraphicsCreated = now;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+
+            return _cachedGraphics;
+        }
+        private void SetHighSpeedDrawingMode(Graphics graphics)
+        {
+            graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+            graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
+            graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+            graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+            graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighSpeed;
+        }
+
+        public void DrawImage(object image, RectangleFSpec rectFSpec)
+        {
+            if (!(image is Image img) || this.Disposing)
+                return;
+
+            // InvokeRequiredチェックを統一
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => DrawImageInternal(img, rectFSpec)));
+                return;
+            }
+
+            DrawImageInternal(img, rectFSpec);
+        }
+        private void DrawImageInternal(Image image, RectangleFSpec rectFSpec)
+        {
+            if (this.Disposing || !this.IsHandleCreated)
+                return;
+
+            lock (_drawImageLock)
+            {
+                try
+                {
+         
+                    var graphics = GetCachedGraphics();
+                    //var graphics = Graphics.FromHwnd(this.Handle);
+                    if (graphics != null)
+                    {
+                        var rect = commonTypeConverter.ToRectangle(rectFSpec);
+
+                        // より高速な描画オプションを設定
+                        graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                        graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
+                        graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                        graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+                        graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighSpeed;
+
+                        graphics.DrawImage(image, rect);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("DrawImage exception: {0}", ex);
+                    }
+                    // キャッシュをクリアして次回再作成
+                    ClearGraphicsCache();
+                }
+            }
+        }
+
+
+        private void ClearGraphicsCache()
+        {
+            _cachedGraphics?.Dispose();
+            _cachedGraphics = null;
+            _lastGraphicsCreated = DateTime.MinValue;
+
+            // キャッシュクリア時に軽量なGCを実行
+            if ((DateTime.Now - _lastGCCollectTime).TotalMilliseconds > 1000) // 1秒以上経過時のみ
+            {
+                try
+                {
+                    GC.Collect(0, GCCollectionMode.Optimized);
+                    _lastGCCollectTime = DateTime.Now;
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("GC.Collect in ClearGraphicsCache failed: {0}", ex.Message);
+                    }
+                }
+            }
+        }
+
+
+
+
+
+        private void ___createControlFromDocumentForElement(CHtmlDocument ___doc, CHtmlElement __element)
+        {
+            try
+            {
+                string ___strText = null;
+                if (__element.___IsElementVisible == false)
+                {
+                    return;
+                }
+                if (__element.___ManagedControlWeakReference == null)
+                {
+                    System.Drawing.Color ___ControlBackColor = Color.White;
+                    System.Drawing.Color ___ControlForeColor = Color.Black;
+                    if (__element.___style.___IsBackgroundColorSpecified == true)
+                    {
+                        ___ControlBackColor = System.Drawing.Color.FromArgb(__element.___style.___BackgroundSysColor.R, __element.___style.___BackgroundSysColor.G, __element.___style.___BackgroundSysColor.B);
+                    }
+                    if (__element.___style.___IsForegroundSysColorSpecified == true)
+                    {
+                        ___ControlForeColor = System.Drawing.Color.FromArgb(__element.___style.___ForegroundSysColor.R, __element.___style.___ForegroundSysColor.G, __element.___style.___ForegroundSysColor.B);
+                    }
+                    int ___ControlWidth = (int)__element.___offsetWidth;
+                    int ___ControlHeight = (int)__element.___offsetHeight;
+                    bool ___IsControlCreatedSuccess = false;
+                    switch (__element.___elementTagType)
+                    {
+                        case CHtmlElementType.TEXTAREA:
+
+                            System.Windows.Forms.TextBox ___textArea = new TextBox();
+                            ___textArea.WordWrap = true;
+                            ___textArea.ScrollBars = ScrollBars.None;
+                            ___textArea.Anchor = AnchorStyles.None;
+                            ___strText = commonHTML.GetElementInnerText(__element);
+                            ___textArea.Multiline = true;
+                            ___textArea.BackColor = ___ControlBackColor;
+                            ___textArea.ForeColor = ___ControlForeColor;
+
+
+
+
+
+                            if (__element.___attributes.ContainsKey("cols") == true)
+                            {
+                                ___textArea.Width = (int)getTextAreaColsRowsWith(__element, 2, commonTypeConverter.convertFontSpecToGDIFont(___doc.___HtmlGraphics.FontSpec));
+                            }
+                            else
+                            {
+                                ___textArea.Width = 800;
+                            }
+
+
+                            if (__element.___attributes.ContainsKey("rows") == true)
+                            {
+                                ___textArea.Height = (int)getTextAreaColsRowsWith(__element, 1, commonTypeConverter.convertFontSpecToGDIFont(___doc.___HtmlGraphics.FontSpec));
+                            }
+                            else
+                            {
+                                ___textArea.Height = 300;
+                            }
+
+                            ___textArea.Size = new Size(___ControlWidth, ___ControlHeight);
+                            if (___textArea.Height == 0)
+                            {
+                                ___textArea.Height = 300;
+
+                            }
+
+                            if (___textArea.Width == 0)
+                            {
+                                ___textArea.Width = 800;
+                            }
+                            //__textArea.Location = MeasureItemEventArgs.MinusPointReg;
+                            createCHtmlMultiversalRendererEventHandlerToControl(___textArea, this, __element);
+                            ___textArea.Tag = new System.WeakReference(__element, false);
+                            /*
+                            if (string.IsNullOrEmpty(___strText) == false)
+                            {
+                                ___textArea.Text = ___strText;
+                            }
+                            */
+                            __element.___ManagedControlWeakReference = new WeakReference(___textArea, false);
+                            this.Controls.Add(___textArea);
+
+
+
+                            ___IsControlCreatedSuccess = true;
+                            break;
+                        case CHtmlElementType.INPUT:
+                            if (string.Equals(__element.type, "hidden", StringComparison.OrdinalIgnoreCase) == true)
+                            {
+                                return;
+                            }
+                            else
+                            {
+                                ___strText = commonHTML.GetElementAttributeInString(__element, "value");
+                                switch (__element.type)
+                                {
+                                    case "button":
+                                    case "Button":
+                                    case "BUTTON":
+                                    case "reset":
+                                    case "submit":
+                                    case "Submit":
+                                    case "SUBMIT":
+                                        System.Windows.Forms.Button ___buttonInput = new Button();
+                                        ___buttonInput.BackColor = ___ControlBackColor;
+                                        ___buttonInput.ForeColor = ___ControlForeColor;
+                                        ___buttonInput.Width = ___ControlWidth;
+                                        ___buttonInput.Height = ___ControlHeight;
+                                        // ___buttonInput.Location = commonHTML.MinusPointReg;
+                                        createCHtmlMultiversalRendererEventHandlerToControl(___buttonInput, this, __element);
+
+                                        ___buttonInput.Tag = new System.WeakReference(__element, false);
+                                        if (string.IsNullOrEmpty(___strText) == false)
+                                        {
+                                            ___buttonInput.Text = ___strText;
+                                        }
+                                        else
+                                        {
+                                            ___buttonInput.Text = __element.type;
+                                        }
+                                        this.Controls.Add(___buttonInput);
+                                        __element.___ManagedControlWeakReference = new WeakReference(___buttonInput, false);
+                                        ___IsControlCreatedSuccess = true;
+                                        break;
+                                    /*
+                                    case "image":
+                                    case "Image":
+                                    case "IMAGE":
+                                        if (__element.___srcBase != null && string.IsNullOrEmpty(__element.___srcBase.___Href) == false)
+                                        {
+                                            // MCS.MCSDownloadImage ___mcsImage = commonMCS.MCSImageFdr.MCSDownloadManager.GetBlankMCSImageWithBTreeSearchByUrl(__element.___srcBase.___Href);
+                                            if (___mcsImage != null)
+                                            {
+                                                if (___mcsImage.FrameCount > 1)
+                                                {
+                                                    System.Drawing.Image ___Image = null;
+                                                    System.IO.MemoryStream memStream2 = null;
+                                                    try
+                                                    {
+                                                        ___doc.___images.TryGetValue(__element.___srcBase.Href, out ___Image);
+                                                        if (___Image == null)
+                                                        {
+                                                            System.IO.FileStream fileStream = new System.IO.FileStream(___mcsImage.FileLocation, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
+                                                            memStream2 = new System.IO.MemoryStream();
+                                                            memStream2.SetLength(fileStream.Length);
+                                                            fileStream.Read(memStream2.GetBuffer(), 0, (int)fileStream.Length);
+                                                            memStream2.Flush();
+                                                            if (memStream2.Length > 0 && commonHTML.IsImageContentType(___mcsImage.ContentType))
+                                                            {
+                                                                ___Image = Image.FromStream(memStream2, false, false);
+                                                            }
+                                                        }
+                                                        if (___Image != null)
+                                                        {
+                                                            System.Windows.Forms.PictureBox __picInput = new PictureBox();
+                                                            __picInput.Height = ___ControlWidth;
+                                                          

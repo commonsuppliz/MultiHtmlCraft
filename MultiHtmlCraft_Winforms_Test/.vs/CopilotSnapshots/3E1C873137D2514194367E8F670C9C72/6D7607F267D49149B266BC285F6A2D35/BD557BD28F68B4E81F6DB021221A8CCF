@@ -1,0 +1,90 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using MultiHtmlCraft.Interfaces;
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// JavaScript Fetch class 
+    /// </summary>
+    public class CHtmlFetch : ICHtmlFetchInterface
+    {
+        private static readonly HttpClient ___httpClient = CHtmlMultiversalWindow.getHttpClient();
+
+        // W3C property names (lowercase)
+        public string method => throw new NotImplementedException();
+        public Uri url => throw new NotImplementedException();
+        public IDictionary<string, string> headers => throw new NotImplementedException();
+        public object? body => throw new NotImplementedException();
+        public string? mode => throw new NotImplementedException();
+        public string? credentials => throw new NotImplementedException();
+        public string? cache => throw new NotImplementedException();
+        public string? redirect => throw new NotImplementedException();
+        public string? referrer => throw new NotImplementedException();
+        public string? referrerPolicy => throw new NotImplementedException();
+        public string? integrity => throw new NotImplementedException();
+        public string? destination => throw new NotImplementedException();
+        public bool? keepalive => throw new NotImplementedException();
+        public object? signal => throw new NotImplementedException();
+
+        // Response properties
+        public string type => throw new NotImplementedException();
+        public string urlResponse => throw new NotImplementedException();
+        public bool redirected => throw new NotImplementedException();
+        public int status => throw new NotImplementedException();
+        public bool ok => throw new NotImplementedException();
+        public string statusText => throw new NotImplementedException();
+        public IDictionary<string, string> responseHeaders => throw new NotImplementedException();
+        public bool bodyUsed => throw new NotImplementedException();
+        public object? bodyResponse => throw new NotImplementedException();
+
+        // Response methods
+        public Task<string> text() => throw new NotImplementedException();
+        public Task<object> json() => throw new NotImplementedException();
+        public Task<byte[]> arrayBuffer() => throw new NotImplementedException();
+        public Task<object> blob() => throw new NotImplementedException();
+        public Task<object> formData() => throw new NotImplementedException();
+        public ICHtmlFetchInterface clone() => throw new NotImplementedException();
+
+        /// <summary>
+        /// Fetch static method
+        /// </summary>
+        public static async Task<CHtmlFetchResponse> FetchAsync(string url)
+        {
+            var response = await ___httpClient.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+            return new CHtmlFetchResponse(response, content);
+        }
+    }
+
+    /// <summary>
+    /// fetch response
+    /// </summary>
+    public class CHtmlFetchResponse
+    {
+        private readonly HttpResponseMessage _response;
+        private readonly string _content;
+
+        public int Status => (int)_response.StatusCode;
+        public bool Ok => _response.IsSuccessStatusCode;
+        public string StatusText => _response.ReasonPhrase;
+
+        public CHtmlFetchResponse(HttpResponseMessage response, string content)
+        {
+            _response = response;
+            _content = content;
+        }
+
+        public Task<string> TextAsync()
+        {
+            return Task.FromResult(_content);
+        }
+
+        public Task<string> JsonAsync()
+        {
+            // 必要に応じてJSONパースも可能
+            return Task.FromResult(_content);
+        }
+    }
+}

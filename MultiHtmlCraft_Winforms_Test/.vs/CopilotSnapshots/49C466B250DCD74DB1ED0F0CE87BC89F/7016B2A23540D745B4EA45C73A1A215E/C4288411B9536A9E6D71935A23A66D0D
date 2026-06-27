@@ -1,0 +1,123 @@
+﻿using System;
+using System.Collections;
+using System.Text;
+namespace MultiHtmlCraft.Core
+{
+	/// <summary>
+	/// CHtmlScriptResult is similar to IHtmlScriptElement
+	/// Contains following Text
+	/// [SCRIPT LANGUAGE="JScript"]
+	///  **-- <= START
+    ///
+	///  **--> <=END
+	///	[/SCRIPT]
+	/// </summary>
+	public  class CHtmlScriptResult
+	{
+        public int ___DocumentElementIndex = -1;
+        public string text = null;
+		public bool IsCompiled = false;
+		public int result = -1;
+		public bool IsAsyncScript = false;
+        public bool IsDeferScript = false;
+		public string resultText = null;
+        public string errorDetail = null;
+		public string charset = null;
+		public string language = null;
+        internal string ___Url= null;
+        public System.WeakReference ElementReference = null;
+        public System.WeakReference sourceWeakReference = null;
+        public object source = null;
+        /// <summary>
+        /// This Url may not be normal url, it can be just string to indicate the script source.
+        /// </summary>
+        public string Href
+        {
+            get
+            {
+                if (___Url == null)
+                {
+                    return null;
+                }
+                return ___Url;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    ___Url = null;
+                }
+                else
+                {
+                    ___Url = value.Trim();
+                }
+            }
+        }
+        public string Url
+        {
+			get
+			{
+				if (___Url == null)
+				{
+					return null;
+				}
+				return ___Url;
+			}
+			set
+			{
+				if (value == null)
+				{
+					___Url = null;
+				}
+				else
+				{
+					___Url = value.Trim();
+				}
+			}
+        }
+
+        // スクリプトのURLを設定するメソッド
+        public void SetScriptUrl(string url)
+        {
+            this.___Url = url;
+        }
+
+        public CHtmlScriptResult()
+		{
+
+		}
+
+
+		#region ICloneable メンバ
+
+        public CHtmlScriptResult cloneScriptResult()
+		{
+			CHtmlScriptResult newScript = new CHtmlScriptResult();
+			newScript.___Url  = this.___Url;
+			newScript.result = this.result;
+			newScript.resultText = this.resultText;
+            if (string.IsNullOrEmpty(this.errorDetail) == false)
+            {
+                newScript.errorDetail = string.Copy(this.errorDetail);
+            }
+			newScript.IsCompiled = this.IsCompiled;
+            newScript.ElementReference = this.ElementReference;
+            newScript.___DocumentElementIndex = this.___DocumentElementIndex;
+            newScript.source = this.source;
+			return newScript;
+		}
+
+		#endregion
+	}
+
+    public class ExampleUsage
+    {
+        public void Demonstrate()
+        {
+            var scriptResult = new CHtmlScriptResult();
+            // Href プロパティでスクリプトのURLを設定
+            scriptResult.___Url = "https://example.com/script.js";
+
+        }
+    }
+}

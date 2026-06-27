@@ -1,0 +1,79 @@
+﻿// Static property dictionary for property name/index mapping
+public static readonly Dictionary<string, int> CHtmlCanvasContext2Dproperties = createCHtmlCanvasContext2Dproperties();
+
+private static Dictionary<string, int> createCHtmlCanvasContext2Dproperties()
+{
+    // Add main property names and their indices here
+    var dict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+    {
+        {"fillStyle", 1},
+        {"strokeStyle", 2},
+        {"lineWidth", 3},
+        {"lineCap", 4},
+        {"lineJoin", 5},
+        {"miterLimit", 6},
+        {"font", 7},
+        {"textAlign", 8},
+        {"textBaseline", 9},
+        {"shadowColor", 10},
+        {"shadowBlur", 11},
+        {"shadowOffsetX", 12},
+        {"shadowOffsetY", 13},
+        {"globalAlpha", 14},
+        {"globalCompositeOperation", 15},
+        {"imageSmoothingEnabled", 16},
+        {"width", 17},
+        {"height", 18},
+        // Add more as needed
+    };
+    return dict;
+}
+
+// Static method dictionary for method name/index mapping
+public static readonly Dictionary<string, int> CHtmlCanvasContext2Dmethods = createCHtmlCanvasContext2DMethods();
+
+private static Dictionary<string, int> createCHtmlCanvasContext2DMethods()
+{
+    var dict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+    {
+        {"fillRect", 1},
+        {"strokeRect", 2},
+        {"beginPath", 3},
+        {"moveTo", 4},
+        {"lineTo", 5},
+        {"arc", 6},
+        {"arcTo", 7},
+        {"bezierCurveTo", 8},
+        {"quadraticCurveTo", 9},
+        {"ellipse", 10},
+        {"rect", 11},
+        {"closePath", 12},
+        {"fill", 13},
+        {"stroke", 14},
+        {"clearRect", 15},
+        {"drawImage", 16},
+        {"save", 17},
+        {"restore", 18},
+        {"setTransform", 19},
+        {"resetTransform", 20},
+        {"translate", 21},
+        {"scale", 22},
+        {"rotate", 23},
+        {"getImageData", 24},
+        {"putImageData", 25},
+        {"createLinearGradient", 26},
+        {"createRadialGradient", 27},
+        {"createPattern", 28},
+        {"measureText", 29},
+        {"fillText", 30},
+        {"strokeText", 31},
+        {"getLineDash", 32},
+        {"setLineDash", 33},
+        {"clip", 34},
+        {"isPointInPath", 35},
+        {"flush", 36},
+        {"drawElements", 37},
+        // Add more as needed
+    };
+    return dict;
+}

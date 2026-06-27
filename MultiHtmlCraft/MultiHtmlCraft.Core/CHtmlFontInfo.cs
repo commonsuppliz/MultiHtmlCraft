@@ -1,0 +1,100 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+#if WINDOWS
+using System.Drawing;
+#endif
+using MultiHtmlCraft.Interfaces;
+
+namespace MultiHtmlCraft.Core
+{
+    public class CHtmlFontInfo
+    {
+        public float FontSize;
+        public string FontName;
+        public FontStyleSpec FontStyle;
+        internal bool ___isBold;
+        internal bool ___isItalic;
+        internal bool ___isStrikeout;
+        internal bool ___isUnderline;
+
+        public ColorSpec ForegroundColor = new ColorSpec(255, 0, 0, 0); // Black
+
+        public ColorSpec BackgroundColor = new ColorSpec(0, 0, 0, 0); //Transparent
+
+        public string SizeString;
+        /// <summary>
+        /// This field is used for FontCache.
+        /// </summary>
+
+        public string ___FontNameSizeStyleString;
+
+
+        public bool Bold
+        {
+            get { return this.___isBold; }
+        }
+
+        public bool Italic
+        {
+            get { return this.___isItalic; }
+        }
+
+        public bool Strikeout
+        {
+            get { return this.___isStrikeout; }
+        }
+
+        public bool Underline
+        {
+            get { return this.___isUnderline; }
+        }
+        public CHtmlFontInfo()
+        {
+            FontSize = 10;
+            FontName = "Microsoft Sans Serif";
+            SizeString = "";
+
+            this.___FontNameSizeStyleString = "";
+        }
+
+
+
+        public CHtmlFontInfo(string _FontName, float _Size)
+        {
+            this.FontName = _FontName;
+            this.FontSize = _Size;
+        }
+        public CHtmlFontInfo Clone()
+        {
+            var newInfo = new CHtmlFontInfo();
+            newInfo.FontName = this.FontName;
+            newInfo.FontSize = this.FontSize;
+            newInfo.FontStyle = this.FontStyle;
+            newInfo.BackgroundColor = this.BackgroundColor;
+            newInfo.ForegroundColor = this.ForegroundColor;
+            return newInfo;
+
+        }
+#if WINDOWS
+        public System.Drawing.Font ToFont()
+        {
+            System.Drawing.FontStyle style = System.Drawing.FontStyle.Regular;
+            if (this.___isBold) style |= System.Drawing.FontStyle.Bold;
+            if (this.___isItalic) style |= System.Drawing.FontStyle.Italic;
+            if (this.___isUnderline) style |= System.Drawing.FontStyle.Underline;
+            if (this.___isStrikeout) style |= System.Drawing.FontStyle.Strikeout;
+
+            return new System.Drawing.Font(this.FontName, this.FontSize, style);
+        }
+        public System.Drawing.Font ToHtmlRendererFont()
+        {
+            System.Drawing.Font gdiFont = new Font(this.FontName, this.FontSize);
+            return gdiFont;
+        }
+#endif
+
+    }
+
+
+}

@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>8.0</LangVersion>
+    <AssemblyName>MultiHtmlCraft.Interfaces</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ICHtmlNodeListInterface.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ICHtmlNodeListInterface.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ClearScript.Core" Version="7.5.1" />
+  </ItemGroup>
+
+</Project>

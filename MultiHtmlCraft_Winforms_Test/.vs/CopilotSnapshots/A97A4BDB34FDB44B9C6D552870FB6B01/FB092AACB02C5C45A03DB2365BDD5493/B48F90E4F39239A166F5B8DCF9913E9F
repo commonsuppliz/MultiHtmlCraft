@@ -1,0 +1,2949 @@
+﻿using Microsoft.ClearScript;
+using MultiHtmlCraft.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
+using System.Dynamic;
+using System.Linq.Expressions;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+#if WINDOWS
+using System.Windows.Forms;
+#endif
+using System.Xml.Linq;
+
+
+
+namespace MultiHtmlCraft.Core
+{
+
+    public  class CHtmlMultiversalWindow :  Interfaces.IMultiversalWindow, IDisposable
+    {
+        internal static readonly Dictionary<string, int> CHtmlMultiversalWindowProperties = InitializeCHtmlMultiversalWindowProperties();
+
+        private static Dictionary<string, int> InitializeCHtmlMultiversalWindowProperties()
+        {
+            Dictionary<string, int> chtmlMultiversalWindowProperties = new Dictionary<string, int>
+        {
+            { "availHeight", 0 },
+            { "availWidth", 1 },
+            { "bufferDepth", 2 },
+            { "colorDepth", 3 },
+            { "deviceXDPI", 4 },
+            { "deviceYDPI", 5 },
+            { "systemYDPI", 6 },
+            { "systemXDPI", 7 },
+            { "fontSmoothingEnabled", 8 },
+            { "height", 9 },
+            { "logicalXDPI", 10 },
+            { "logicalYDPI", 11 },
+            { "updateInterval", 12 },
+            { "width", 13 },
+            { "pixelDepth", 14 },
+            { "orientation", 15 },
+            { "mozOrientation", 16 },
+            { "msOrientation", 17 },
+            { "webkitOrientation", 18 }
+        };
+            return chtmlMultiversalWindowProperties;
+        }
+
+        private static HttpClient? ___httpClient = null;
+        public delegate void UrlEventHandler(object sender, string _url);
+        public event UrlEventHandler UrlChanged;
+        internal bool ___isWindowNavigating = false;
+        internal CHtmlMultiversalScriptsHost ___multiversalScriptsHost = null;
+        private bool ___IsDispoing = false;
+        /// <summary>
+        /// Window Level is used to determine the order of window navigation such as IFrame, Window, Popup, etc.
+        /// </summary>
+        public int ___WindowLevel = 1;
+        internal string ___id = null; // keep this field as null as defult value.
+        internal string ___name = null; // keep this field as null as defult value.
+        private static int MAX_WINDOW_LEVEL_PERFORM_NAVIGATE = 5;
+        internal int ___NavigateMethodCallCount;
+        private bool ___Disposing = false;
+        public string ___URL_WIP = null;
+        public string ___URL_Request_Current = null;
+        private System.WeakReference ___renderingTargetManagedControlWeakReference = null;
+
+        private IMultiversalWindowType ___multiversalWindowType = IMultiversalWindowType.NormalWindow;
+        private static System.Collections.Generic.SortedList<System.RuntimeTypeHandle, object> ___MultivarsalScopeTypes = new SortedList<System.RuntimeTypeHandle, object>(new RuntimeTypeHandleComparer());
+        private System.WeakReference ___TopMultiversalWindowWeakReference = null;
+        public  System.WeakReference ___parentMultiversalWindowWeakReference = null;
+        public System.WeakReference ___parentDocumentWeakReference = null;
+        public System.WeakReference ___ownerElementWeakReference = null;
+        public CHtmlWindowURL ___WindowURLObjectInstance = null;
+        internal System.DateTime ___windowAnimationStartTime = DateTime.Now;
+        public delegate IMultiversalScriptScope delegateCreateMultiversalScope(Interfaces.IMultiversalWindow multi);
+        private System.Collections.Generic.Dictionary<string, DateTime> ___multiversalRedirectURLList = new Dictionary<string, DateTime>();
+        /// <summary>
+        /// If there is no timer interval event but control needs to create
+        /// how long timer can be wait.
+        /// it is beyond this limit.
+        /// Timer should be disposed
+        /// </summary>
+        private static int[] ___MultiversalTimerControlIntervalArray = new int[] { 100, 250, 500, 3000, 5000, 10000, 15000 };
+        //private int ___TimerControlCreatingPendingCount = 0;
+        /// <summary>
+        /// Store properties for this window.
+        /// </summary>
+        internal Dictionary<string, object> ___properties = new Dictionary<string, object>();
+
+        internal System.WeakReference ___HiddenPanelControlReference = null;
+        /// <summary>
+        /// Stores Script Scope
+        /// </summary>
+        internal System.Collections.Generic.Dictionary<string, IMultiversalScriptScope> ___MultiversalScopeList;
+
+        private object ___WindowPropertiesLockingObject = new object();
+        internal System.Collections.Generic.SortedList<string, object> ___WindowsPropertiesList = new System.Collections.Generic.SortedList<string, object>(StringComparer.Ordinal);
+
+        private object ___PrototypeSampleObject = new object();
+        internal CHtmlLocationBase ___locationBase = null;
+        public delegate void MultiversalWindowNavigateDelegate2(string ___url, string ___referer);
+        public delegate void MultiversalWindowNavigateDelegate5(string ___url, string ___referer, string ___method, string ___data, bool ___asRedirect);
+        /// <summary>
+        /// Document to be parsed
+        /// </summary>
+        public CHtmlDocument ___document = null;
+
+        internal string ___windowName = null;
+
+        internal System.Collections.Generic.Dictionary<string, System.WeakReference> ___MultiversalCallingNameList = null;
+
+        internal IMultiversalScriptScope ___MultiversalScriptScopeDefaultLanguage = null;
+        /// <summary>
+        /// Counter keep traks how many redirected 
+        /// </summary>
+        public int ___RedirectCount = 0;
+
+        private static int HTTP_REDIRECT_LIMIT = 15;
+
+        private readonly object ___ChildWindowControlCreationPendingList_LockingObject = new object();
+        internal System.Threading.Timer ___multiHtmlCraftWindowTimer = null;
+        private object ___multiHtmlCraftWindowTimerLockingObject = new object();
+
+
+
+        #region WindowObjects
+        internal CHtmlConsole ___console = null;
+        internal CHtmlWindowExternal ___external = null;
+        internal CHtmlNavigator ___navigator = null;
+        internal CHtmlHistoryList ___history = null;
+        public CHtmlWindowEvent ___event = null;
+        internal CHtmlPerformance ___performance = null;
+
+        internal CHtmlWebSpeechSynthehesis ___speechSynthehesis = null;
+
+        public delegate void controlVoidDelegete();
+
+        internal CHtmlCrypto ___crypto = null;
+
+        internal CHtmlMultiversalRootNode ___WindowPrototypeRootNode = ___createMultiversalWindowStandardProtypeNode();
+        private string ___WindowStatusString = null;
+        private bool ___IsWindowClosed = false;
+        public static int ___MultiversalLockTimeout = 500;
+        internal static System.Collections.Generic.SortedList<System.RuntimeTypeHandle, string> ____FunctionTypeHandleList = new SortedList<System.RuntimeTypeHandle, string>(new RuntimeTypeHandleComparer());
+        internal System.Collections.ArrayList ___dynamicallyCreateObjectList = null;
+
+        internal static bool ___isActiveXObjectSupportedGlobal = false;
+        internal bool ___isActiveXObjectSupportedThisWindow = false;
+        internal ICHtmlMultiversalControlInterface? ___multiversalControl = null;
+        private class RuntimeTypeHandleComparer : System.Collections.Generic.IComparer<System.RuntimeTypeHandle>
+        {
+            public int Compare(System.RuntimeTypeHandle typeX, System.RuntimeTypeHandle typeY)
+            {
+                return (int)(typeX.Value.ToInt64() - typeY.Value.ToInt64());
+            }
+        }
+        #endregion
+        public CHtmlMultiversalWindow()
+            : this(null, true, IMultiversalWindowType.NormalWindow)
+        {
+        }
+        public bool hasHttpClient
+        {
+            get { if (___httpClient != null) return true;else return false; }
+        }
+        public static void setHttpClient(HttpClient client)
+        {
+            ___httpClient = client;
+        }
+        public static HttpClient getHttpClient()
+        {
+            return ___httpClient;
+        }
+       public void setMultiversalControl(Interfaces.ICHtmlMultiversalControlInterface multiversalControl)
+        {
+            this.___multiversalControl = multiversalControl;
+        }
+
+
+        public CHtmlMultiversalWindow(CHtmlMultiversalWindow parentMultiversalWindow, bool IsInitializeStandardObjects, IMultiversalWindowType ___windowType, params string[] args)
+        {
+            this.___multiversalWindowType = ___windowType;
+            this.___multiversalScriptsHost = new CHtmlMultiversalScriptsHost();
+            this.___locationBase = new CHtmlLocationBase();
+            this.___locationBase.ownerElement = this;
+            this.___console = new CHtmlConsole();
+            if (parentMultiversalWindow != null)
+            {
+                this.___parentMultiversalWindowWeakReference = new WeakReference(parentMultiversalWindow, false);
+                //parentMultiversalWindow.childMultiversalWindows[this.GetHashCode()] = new WeakReference(this, false);
+
+            }
+            switch(___windowType)
+            {
+                case IMultiversalWindowType.NormalWindow:
+                    this.___event = new CHtmlWindowEvent();
+                    break;
+
+                case IMultiversalWindowType.WorkerWindow: // Web Worker Window
+                case IMultiversalWindowType.SharedWorkerWindow: // Shared Worker Window
+
+                    break;
+            }
+
+            CHtmlMultiversalWindow topWidnow = this.___getTopMultiversalWindow();
+            if (topWidnow != null)
+            {
+                this.___TopMultiversalWindowWeakReference = new WeakReference(topWidnow, false);
+            }
+            this.___MultiversalScopeList = new Dictionary<string, IMultiversalScriptScope>(StringComparer.Ordinal);
+        }
+        public object document
+        {
+            get
+            {
+
+
+                return ___document;
+            }
+        }
+
+        internal int ___currentMinTimerInterval = 0;
+        internal int ___currentMaxTimerInterval = 0;
+        internal void ___resetWindowTimerInterval(int __StartupMilliseconds, int ___interval)
+        {
+            if (this.___multiHtmlCraftWindowTimer != null)
+            {
+
+                try
+                {
+                    if (___interval < 25)
+                    {
+                        ___interval = 25;
+                    }
+                    this.___multiHtmlCraftWindowTimer.Change(__StartupMilliseconds, ___interval);
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 30)
+                    {
+                        commonLog.LogEntry("Reset DocumentTimerInterval({0}, {1})", __StartupMilliseconds, ___interval);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                    {
+                        commonLog.LogEntry("ChangeDocumentTimerInterval Error : {0}. but it is ok.", ex.Message);
+                    }
+
+                }
+
+            }
+        }
+        internal void startMultiHtmlCraftWindowTimer(int _minInterval, int _maxInterval)
+        {
+            ___currentMaxTimerInterval = _maxInterval;
+            ___currentMinTimerInterval = _minInterval;
+            if (this.___multiHtmlCraftWindowTimer == null)
+            {
+                try
+                {
+
+                    if (System.Threading.Monitor.TryEnter(this.___multiHtmlCraftWindowTimerLockingObject) == true)
+                    {
+
+
+                            System.Threading.TimerCallback tb = new System.Threading.TimerCallback(this.MultiversalTimer_Elapsed);
+                            this.___multiHtmlCraftWindowTimer = new System.Threading.Timer(tb);
+                            this.___multiHtmlCraftWindowTimer.Change(_maxInterval, _minInterval);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("startMultiHtmlCraftWindowTimer() Exception. " + ex.Message);
+                    }
+                }
+                finally
+                {
+                    System.Threading.Monitor.Exit(this.___multiHtmlCraftWindowTimerLockingObject);
+                }
+
+            }
+        }
+
+
+
+        public CHtmlMultiversalWindow(CHtmlMultiversalWindow parentMultiversalWindow, bool IsInitializeStandardObjects)
+            : this(parentMultiversalWindow, IsInitializeStandardObjects, IMultiversalWindowType.NormalWindow)
+        {
+        }
+        public CHtmlMultiversalWindow(Interfaces.IMultiversalWindow parentMultiversalWindow, bool IsInitializeStandardObjects, IMultiversalWindowType ___windowType)
+        {
+            switch (___windowType)
+            {
+
+                case IMultiversalWindowType.NormalWindow:
+                    ___multiversalScriptsHost = new CHtmlMultiversalScriptsHost();
+                    ___multiHtmlCraftWindowTimer = null;
+                    break;
+                default:
+                    break;
+            }
+
+            this.___locationBase = new CHtmlLocationBase();
+            this.___locationBase.ownerElement = this;
+            this.___multiversalWindowType = ___windowType;
+            if (parentMultiversalWindow != null)
+            {
+                this.___parentMultiversalWindowWeakReference = new WeakReference(parentMultiversalWindow, false);
+
+                parentMultiversalWindow.___setChildMultiversalWindow(this);
+
+            }
+            CHtmlMultiversalWindow topWidnow = this.___getTopMultiversalWindow();
+            if (topWidnow != null)
+            {
+                this.___TopMultiversalWindowWeakReference = new WeakReference(topWidnow, false);
+            }
+            this.___MultiversalScopeList = new Dictionary<string, IMultiversalScriptScope>(StringComparer.Ordinal);
+
+
+            this.___MultiversalCallingNameList = new Dictionary<string, System.WeakReference>(StringComparer.OrdinalIgnoreCase);
+
+            this.___history = new CHtmlHistoryList();
+            this.___history.___ownerRendererWeakReference = new WeakReference(this, false);
+
+            if (this.___crypto == null)
+            {
+                this.___crypto = new CHtmlCrypto();
+            }
+            if (this.___console == null)
+            {
+                this.___console = new CHtmlConsole();
+            }
+            if (this.___external == null)
+            {
+                this.___external = new CHtmlWindowExternal();
+            }
+            if (this.___navigator == null)
+            {
+                this.___navigator = new CHtmlNavigator();
+            }
+
+            this.___WindowURLObjectInstance = new CHtmlWindowURL();
+            if (this.___event == null)
+            {
+                this.___event = new CHtmlWindowEvent();
+                this.___event.___isMultiversalMode = true;
+                this.___event.___ownerMultiversalWindowWeakReference = new WeakReference(this, false);
+                this.___event.___eventSourceType = CHtmlWindowEvent.CHtmlWindowEventEventType.staticwindow;
+                this.___event.___prototypeWeakReference = this.___WindowPrototypeRootNode.___EventPrototypeWeakReference;
+            }
+
+            if (this.___speechSynthehesis == null)
+            {
+                this.___speechSynthehesis = new CHtmlWebSpeechSynthehesis();
+            }
+            if (this.___performance == null)
+            {
+                this.___performance = new CHtmlPerformance();
+            }
+            else
+            {
+                if (this.___performance != null)
+                {
+                    if (this.___performance.timing != null)
+                    {
+                        // clear performance timing data now.
+                        this.___performance.timing.___clearCounterData();
+                    }
+                }
+            }
+
+
+        }
+        ~CHtmlMultiversalWindow()
+        {
+            this.___IsDispoing = true;
+            this.___CleanUp();
+        }
+        public int ___getScriptProcessorCount()
+        {
+            if (this.___MultiversalScopeList != null)
+            {
+                return this.___MultiversalScopeList.Count;
+            }
+            return 0;
+        }
+        public override string ToString()
+        {
+            if (this.___windowName == null || this.___windowName.Length == 0)
+            {
+                return "CHtmlMultiversalWindow(" + this.___WindowLevel.ToString() + ")";
+            }
+            else
+            {
+                return "CHtmlMultiversalWindow(" + this.___WindowLevel.ToString() + "    \'" + this.___windowName + "\')";
+            }
+        }
+        private void ___CleanUp()
+        {
+            try
+            {
+                if (this.___isWindowNavigating == false)
+                {
+                    this.___isWindowNavigating = true;
+                }
+                this.___setChildMultiversalWindowNavigatingStatus();
+                if (this.___document != null)
+                {
+                    this.___document.Dispose();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("CleanUp Timer Error. but cont...", ex.Message);
+                }
+            }
+        }
+
+        public object console
+        {
+            get
+            {
+                if (this.___console == null)
+                {
+                    this.___console = new CHtmlConsole();
+                }
+                return this.___console;
+            }
+        }
+        public object navigator
+        {
+            get
+            {
+                if (this.___navigator == null)
+                {
+                    this.___navigator = new CHtmlNavigator();
+                }
+                return this.___navigator;
+            }
+        }
+        public object location
+        {
+            get
+            {
+  
+                return this.___locationBase;
+            }
+        }
+        public object history
+        {
+            get
+            {
+                if (this.___history == null)
+                {
+                    this.___history = new CHtmlHistoryList();
+                }
+                return this.___history;
+            }
+        }
+
+
+
+
+
+        public static void registerFunctionObjectType(Type ___scriptableType, string ___callingName)
+        {
+            ____FunctionTypeHandleList[___scriptableType.TypeHandle] = ___callingName;
+        }
+        internal void ___clearWindowEvent()
+        {
+            if (this.___event != null)
+            {
+                this.___event.___resetToDefaults();
+            }
+        }
+        public void ___copyWindowEventValuesFromWindowEvent(CHtmlWindowEvent ___newEvent)
+        {
+            if (this.___event == null)
+            {
+                return;
+            }else 
+            {
+                this.___event.___resetToDefaults();
+
+            }
+            this.___event.___copyWindowEventValuesFromWindowEvent(___newEvent);
+        }
+        /*
+         internal void ___addChildMultiversalWindowToCreateControl(CHtmlMultiversalWindow ___childMultiversalWindow)
+         {
+             if (this.___ChildWindowControlCreationPendingList == null)
+             {
+                 this.___ChildWindowControlCreationPendingList = new List<WeakReference>();
+             }
+             if (System.Threading.Monitor.TryEnter(___ChildWindowControlCreationPendingList, 5000))
+             {
+                 this.___ChildWindowControlCreationPendingList.Add(new WeakReference(___childMultiversalWindow));
+                 System.Threading.Monitor.Exit(___ChildWindowControlCreationPendingList);
+             }
+             if (this.___multiHtmlCraftWindowTimer == null)
+             {
+                 System.Windows.Forms.MethodInvoker invoker = new System.Windows.Forms.MethodInvoker(this.___startCreationChildControlBaseduponPendingList);
+                 invoker.Invoke();
+             }
+         }
+
+         internal void ___startCreationChildControlBaseduponPendingList()
+         {
+
+             if (this.___multiHtmlCraftWindowTimer == null)
+             {
+                 if (System.Threading.Monitor.TryEnter(this.___multiHtmlCraftWindowTimerLockingObject, 1000) == true)
+                 {
+                     try
+                     {
+                         System.Threading.TimerCallback tb = new System.Threading.TimerCallback(this.___MultiversalTimerParentChildCreation_Tick);
+
+                         this.___multiHtmlCraftWindowTimer = new System.Threading.Timer(tb);
+                         this.___multiHtmlCraftWindowTimer.Change(250, 250);
+                     }
+                     catch (Exception ex)
+                     {
+                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                         {
+                             commonLog.LogEntry("___startCreationChildControlBaseduponPendingList() Exception. " + ex.Message);
+                         }
+                     }
+                     finally
+                     {
+                         System.Threading.Monitor.Exit(this.___multiHtmlCraftWindowTimerLockingObject);
+                     }
+                 }
+             }
+         }
+         */
+        public System.Collections.Generic.Dictionary<int, System.WeakReference> childMultiversalWindows = new Dictionary<int, WeakReference>();
+        private static CHtmlMultiversalRootNode ___createMultiversalWindowStandardProtypeNode()
+        {
+            CHtmlMultiversalRootNode rootPrototypeNode = new CHtmlMultiversalRootNode();
+            rootPrototypeNode.___IsPrototype = true;
+
+            CHtmlHistoryList ___historyPrototype = new CHtmlHistoryList();
+
+            ___historyPrototype.___IsPrototype = true;
+            //  ___historyPrototype.defineFunctionProperties(CHtmlHistoryList.___HistoryObjectFunctionPropertiesNames, typeof(CHtmlHistoryList), org.mozilla.javascript.ScriptableObject.DONTENUM);
+            rootPrototypeNode.___childNodes.Add(___historyPrototype);
+            rootPrototypeNode.___HistoryPrototypeWeakReference = new WeakReference(___historyPrototype, false);
+
+            CHtmlXPathResult ___xpathResultPrototype = new CHtmlXPathResult();
+            ___xpathResultPrototype.___IsPrototype = true;
+            ___xpathResultPrototype.setParentNode(rootPrototypeNode);
+            rootPrototypeNode.___XPathResultPrototypeWeakReference = new WeakReference(___xpathResultPrototype, false);
+            rootPrototypeNode.___childNodes.Add(___xpathResultPrototype);
+
+            CHtmlAttribute ___attrPrototype = new CHtmlAttribute();
+            ___attrPrototype.___multiversalClassType = IMutilversalObjectType.Attr;
+            ___attrPrototype.___IsPrototype = true;
+            ___attrPrototype.setParentNode(rootPrototypeNode);
+            rootPrototypeNode.___AttrProtoTypeWeakReference = new WeakReference(___attrPrototype, false);
+            rootPrototypeNode.___childNodes.Add(___attrPrototype);
+
+            CHtmlCanvasContext2D ___C2DPrototype = new CHtmlCanvasContext2D(true);
+            ___C2DPrototype.___IsPrototype = true;
+            ___C2DPrototype.___multiversalClassType = IMutilversalObjectType.CanvasRenderingContext2D;
+            ___C2DPrototype.___CanvasContextModeType = CanvasContextModeType.Canvas2DPrototype;
+            ___C2DPrototype.setParentNode(rootPrototypeNode);
+            rootPrototypeNode.___childNodes.Add(___C2DPrototype);
+            rootPrototypeNode.___CanvasContextPrototypeWeakReference = new WeakReference(___C2DPrototype, false);
+
+            CHtmlCanvasContext2D ___canvasWebGLPrototype = new CHtmlCanvasContext2D(true);
+            ___canvasWebGLPrototype.___IsPrototype = true;
+            ___canvasWebGLPrototype.___CanvasContextModeType = CanvasContextModeType.WebGLPrototype;
+            ___canvasWebGLPrototype.setParentNode(rootPrototypeNode);
+            rootPrototypeNode.___childNodes.Add(___canvasWebGLPrototype);
+            rootPrototypeNode.___CanvasWebGLRenderingContextPrototypeWeakReference = new WeakReference(___canvasWebGLPrototype, false);
+
+
+            CHtmlAudioContext ___canvasAudioContextPrototype = new CHtmlAudioContext(true);
+            ___canvasAudioContextPrototype.___multiversalClassType = IMutilversalObjectType.AudioContext;
+            ___canvasAudioContextPrototype.___IsPrototype = true;
+            ___canvasAudioContextPrototype.___CanvasContextModeType = CanvasContextModeType.CanvasAudioContextPrototype;
+            ___canvasAudioContextPrototype.setParentNode(rootPrototypeNode);
+            rootPrototypeNode.___childNodes.Add(___canvasAudioContextPrototype);
+            rootPrototypeNode.___AudioContextPrototypeWeakReference = new WeakReference(___canvasAudioContextPrototype, false);
+
+            CHtmlAudioBufferSourceNode ___audioBufferSouceNodePrototype = new CHtmlAudioBufferSourceNode();
+            ___audioBufferSouceNodePrototype.___IsPrototype = true;
+            ___audioBufferSouceNodePrototype.___multiversalClassType = IMutilversalObjectType.AudioBufferSourceNode;
+            ___audioBufferSouceNodePrototype.setParentNode(rootPrototypeNode);
+            rootPrototypeNode.___childNodes.Add(___audioBufferSouceNodePrototype);
+            rootPrototypeNode.___AudioBuuferSourceNodeWeakReference = new WeakReference(___audioBufferSouceNodePrototype, false);
+
+            CHtmlAudioOscillatorNode ___audioOscillatorNodeProtoType = new CHtmlAudioOscillatorNode();
+            ___audioOscillatorNodeProtoType.___IsPrototype = true;
+            ___audioOscillatorNodeProtoType.___multiversalClassType = IMutilversalObjectType.OscillatorNode;
+            ___audioOscillatorNodeProtoType.setParentNode(rootPrototypeNode);
+            rootPrototypeNode.___childNodes.Add(___audioOscillatorNodeProtoType);
+            rootPrototypeNode.___AudioOscillatorNodeWeakReference = new WeakReference(___audioOscillatorNodeProtoType);
+
+
+            CHtmlNavigator ___navigatorPrototype = new CHtmlNavigator();
+            ___navigatorPrototype.___multiversalClassType = IMutilversalObjectType.Navigator;
+            ___navigatorPrototype.___IsPrototype = true;
+            ___navigatorPrototype.setParentNode(rootPrototypeNode);
+
+            rootPrototypeNode.___childNodes.Add(___navigatorPrototype);
+            rootPrototypeNode.___NavigatorPrototypeWeakReference = new WeakReference(___navigatorPrototype, false);
+
+            CHtmlConsole ___consolePrototype = new CHtmlConsole();
+            ___consolePrototype.___multiversalClassType = IMutilversalObjectType.Console;
+            ___consolePrototype.___IsPrototype = true;
+            ___consolePrototype.setParentNode(rootPrototypeNode);
+            rootPrototypeNode.___childNodes.Add(___consolePrototype);
+            rootPrototypeNode.___ConsolePrototypeWeakReference = new WeakReference(___consolePrototype, false);
+
+            CHtmlWindowEvent ___keyboardEventPrototype = new CHtmlWindowEvent();
+            ___keyboardEventPrototype.___multiversalClassType = IMutilversalObjectType.KeyboardEvent;
+            ___keyboardEventPrototype.setParentNode(rootPrototypeNode);
+            rootPrototypeNode.___childNodes.Add(___keyboardEventPrototype);
+            rootPrototypeNode.___KeyboardEventWeakReference = new WeakReference(___keyboardEventPrototype, false);
+
+
+            /* HTMLCollection Prototype */
+            CHtmlCollection ___htmlCollectionPrototype = new CHtmlCollection();
+            ___htmlCollectionPrototype.___multiversalClassType = IMutilversalObjectType.HTMLCollection;
+            ___htmlCollectionPrototype.___IsPrototype = true;
+            ___htmlCollectionPrototype.___CollectionType = CHtmlHTMLCollectionType.HTMLCollectionPrototype;
+            rootPrototypeNode.___childNodes.Add(___htmlCollectionPrototype);
+            rootPrototypeNode.___HTMLCollectionPrototypeWeakReference = new WeakReference(___htmlCollectionPrototype, false);
+
+            /* NodeList Prototype */
+            CHtmlCollection ___nodeListPrototype = new CHtmlCollection();
+            ___nodeListPrototype.___multiversalClassType = IMutilversalObjectType.NodeList;
+            ___nodeListPrototype.___IsPrototype = true;
+            ___nodeListPrototype.___CollectionType = CHtmlHTMLCollectionType.NodeListPrototype;
+            rootPrototypeNode.___childNodes.Add(___nodeListPrototype);
+            rootPrototypeNode.___NodeListPrototypeWeakReference = new WeakReference(___nodeListPrototype, false);
+
+
+            CHtmlElement ___elementPrototype = new CHtmlElement();
+            ___elementPrototype.___multiversalClassType = IMutilversalObjectType.Element;
+            ___elementPrototype.___SetTagNameOnly("#ELEMENT_PROTOTYPE");
+            ___elementPrototype.___elementTagType = CHtmlElementType._ELEMENT_PROTOTYPE;
+            ___elementPrototype.___IsPrototype = true;
+            ___elementPrototype.setParentNode(rootPrototypeNode);
+            rootPrototypeNode.___childNodes.Add(___elementPrototype);
+
+            rootPrototypeNode.___ElementPrototypeWeakReference = new WeakReference(___elementPrototype, false);
+
+            CHtmlElement ___HTMLElementPrototype = new CHtmlElement();
+            ___HTMLElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLElement;
+            ___HTMLElementPrototype.___SetTagNameOnly("#HTMLELEMENT_PROTOTYPE");
+            ___HTMLElementPrototype.___elementTagType = CHtmlElementType._HTMLELEMENT_PROTOTYPE;
+            ___HTMLElementPrototype.___IsPrototype = true;
+            ___HTMLElementPrototype.setParentNode(___elementPrototype);
+            ___elementPrototype.___childNodes.Add(___HTMLElementPrototype);
+
+            rootPrototypeNode.___HTMLElementPrototypeWeakReference = new WeakReference(___HTMLElementPrototype, false);
+
+
+
+            CHtmlElement ___WindowHTMLCanvasElementPrototype = null;
+            CHtmlElement ___WindowHTMLHtmlElementPrototype = null;
+            CHtmlElement ___WindowHTMLIFrameElementPrototype = null;
+            CHtmlElement ___WindowHTMLFrameElementPrototype = null;
+            CHtmlElement ___WindowHTMLInputElementPrototype = null;
+            CHtmlElement ___WindowHTMLFormElementPrototype = null;
+            CHtmlMediaElement ___WindowHTMLVideoElementPrototype = null;
+            CHtmlMediaElement ___WindowHTMLAudioElementPrototype = null;
+            CHtmlElement ___WindowHTMLLinkElementPrototype = null;
+            CHtmlElement ___WindowHTMLAnchorElementPrototype = null;
+            CHtmlElement ___WindowHTMLScriptElementPrototype = null;
+            CHtmlElement ___WindowHTMLImageElementPrototype = null;
+
+
+            CHtmlWindowEvent ___WindowEventPrototype = null;
+            CHtmlWindowEvent ___WindowMouseEventPrototype = null;
+            CHtmlCSSStyleSheet ___WindowStylePrototype = null;
+            CHtmlCanvasContext2D ___WindowCanvasContextPrototype = null;
+            CHtmlCanvasContextExtenstionObject ___WindowCanvasExtenstionPrototype = null;
+            CHtmlCSSRule ___WindowCSSRulePrototype = null;
+            CHtmlCSSStyleSheet ___WindowCSSStyleSheetPrototype = null;
+
+
+            ___WindowHTMLCanvasElementPrototype = new CHtmlElement();
+            ___WindowHTMLCanvasElementPrototype.___SetTagNameOnly("CANVAS");
+            ___WindowHTMLCanvasElementPrototype.___elementTagType = CHtmlElementType.CANVAS;
+            ___WindowHTMLCanvasElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLCanvasElement;
+
+            ___WindowHTMLCanvasElementPrototype.___IsPrototype = true;
+            ___WindowHTMLCanvasElementPrototype.setParentNode ( ___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLCanvasElementPrototype);
+
+            rootPrototypeNode.___HTMLCanvasElementPrototypeWeakReference = new WeakReference(___WindowHTMLCanvasElementPrototype, false);
+
+
+            ___WindowHTMLAudioElementPrototype = new CHtmlMediaElement();
+            ___WindowHTMLAudioElementPrototype.___SetTagNameOnly("AUDIO");
+            ___WindowHTMLAudioElementPrototype.___elementTagType = CHtmlElementType.AUDIO;
+            ___WindowHTMLAudioElementPrototype.___IsPrototype = true;
+            ___WindowHTMLAudioElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___WindowHTMLAudioElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLAudioElement;
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLAudioElementPrototype);
+
+            rootPrototypeNode.___HTMLAudioElementPrototypeWeakReference = new WeakReference(___WindowHTMLAudioElementPrototype, false);
+
+
+            ___WindowHTMLVideoElementPrototype = new CHtmlMediaElement();
+            ___WindowHTMLVideoElementPrototype.___SetTagNameOnly("VIDEO");
+            ___WindowHTMLVideoElementPrototype.___elementTagType = CHtmlElementType.VIDEO;
+            ___WindowHTMLVideoElementPrototype.___IsPrototype = true;
+            ___WindowHTMLVideoElementPrototype.setParentNode( ___HTMLElementPrototype);
+            ___WindowHTMLVideoElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLVideoElement;
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLVideoElementPrototype);
+
+            rootPrototypeNode.___HTMLVideoElementPrototypeWeakReference = new WeakReference(___WindowHTMLVideoElementPrototype, false);
+
+
+            ___WindowHTMLInputElementPrototype = new CHtmlElement();
+
+            ___WindowHTMLInputElementPrototype.___SetTagNameOnly("INPUT");
+            ___WindowHTMLInputElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLInputElement;
+            ___WindowHTMLInputElementPrototype.___elementTagType = CHtmlElementType.INPUT;
+            ___WindowHTMLInputElementPrototype.___IsPrototype = true;
+            ___WindowHTMLInputElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLInputElementPrototype);
+
+            rootPrototypeNode.___HTMLInputElementPrototypeWeakReference = new WeakReference(___WindowHTMLInputElementPrototype, false);
+
+            ___WindowHTMLImageElementPrototype = new CHtmlElement();
+            ___WindowHTMLImageElementPrototype.___SetTagNameOnly("IMG");
+            ___WindowHTMLImageElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLImageElement;
+            ___WindowHTMLImageElementPrototype.___elementTagType = CHtmlElementType.IMG;
+            ___WindowHTMLImageElementPrototype.___IsPrototype = true;
+            ___WindowHTMLImageElementPrototype.setParentNode( ___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLImageElementPrototype);
+
+            rootPrototypeNode.___HTMLImageElementPrototypeWeakReference = new WeakReference(___WindowHTMLImageElementPrototype, false);
+
+
+            ___WindowHTMLHtmlElementPrototype = new CHtmlElement();
+            ___WindowHTMLHtmlElementPrototype.___SetTagNameOnly("HTML");
+            ___WindowHTMLHtmlElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLHtmlElement;
+            ___WindowHTMLHtmlElementPrototype.___elementTagType = CHtmlElementType.HTML;
+            ___WindowHTMLHtmlElementPrototype.___IsPrototype = true;
+            ___WindowHTMLHtmlElementPrototype.setParentNode( ___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLHtmlElementPrototype);
+
+            rootPrototypeNode.___HTMLHtmlElementPrototypeWeakReference = new WeakReference(___WindowHTMLHtmlElementPrototype, false);
+
+
+            ___WindowHTMLFormElementPrototype = new CHtmlElement();
+            ___WindowHTMLFormElementPrototype.___SetTagNameOnly("FORM");
+            ___WindowHTMLFormElementPrototype.___elementTagType = CHtmlElementType.FORM;
+            ___WindowHTMLFormElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLFormElement;
+            ___WindowHTMLFormElementPrototype.___IsPrototype = true;
+            ___WindowHTMLFormElementPrototype.setParentNode( ___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLFormElementPrototype);
+
+            rootPrototypeNode.___HTMLFormElementPrototypeWeakReference = new WeakReference(___WindowHTMLFormElementPrototype, false);
+
+
+            ___WindowHTMLIFrameElementPrototype = new CHtmlElement();
+            ___WindowHTMLIFrameElementPrototype.___SetTagNameOnly("IFRAME");
+            ___WindowHTMLIFrameElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLIFrameElement;
+            ___WindowHTMLIFrameElementPrototype.___elementTagType = CHtmlElementType.IFRAME;
+            ___WindowHTMLIFrameElementPrototype.___IsPrototype = true;
+            ___WindowHTMLIFrameElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLIFrameElementPrototype);
+
+            rootPrototypeNode.___HTMLIFrameElementPrototypeWeakReference = new WeakReference(___WindowHTMLIFrameElementPrototype, false);
+
+            ___WindowHTMLFrameElementPrototype = new CHtmlElement();
+            ___WindowHTMLFrameElementPrototype.___SetTagNameOnly("FRAME");
+            ___WindowHTMLFrameElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLFrameElement;
+            ___WindowHTMLFrameElementPrototype.___elementTagType = CHtmlElementType.FRAME;
+            ___WindowHTMLFrameElementPrototype.___IsPrototype = true;
+            ___WindowHTMLFrameElementPrototype.setParentNode( ___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLFrameElementPrototype);
+
+            rootPrototypeNode.___HTMLFrameElementPrototypeWeakReference = new WeakReference(___WindowHTMLFrameElementPrototype, false);
+
+
+
+            ___WindowHTMLLinkElementPrototype = new CHtmlElement();
+            ___WindowHTMLLinkElementPrototype.___SetTagNameOnly("LINK");
+            ___WindowHTMLLinkElementPrototype.___elementTagType = CHtmlElementType.LINK;
+            ___WindowHTMLLinkElementPrototype.___IsPrototype = true;
+            ___WindowHTMLLinkElementPrototype.setParentNode ( ___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLLinkElementPrototype);
+
+
+            rootPrototypeNode.___HTMLLinkElementPrototypeWeakReference = new WeakReference(___WindowHTMLLinkElementPrototype, false);
+
+            ___WindowHTMLAnchorElementPrototype = new CHtmlElement();
+            ___WindowHTMLAnchorElementPrototype.___SetTagNameOnly("A");
+            ___WindowHTMLAudioElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLAnchorElement;
+            ___WindowHTMLAnchorElementPrototype.___elementTagType = CHtmlElementType.A;
+            ___WindowHTMLAnchorElementPrototype.___IsPrototype = true;
+            ___WindowHTMLAnchorElementPrototype.setParentNode ( ___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLAnchorElementPrototype);
+
+            rootPrototypeNode.___HTMLAnchorElementPrototypeWeakReference = new WeakReference(___WindowHTMLAnchorElementPrototype, false);
+
+
+            ___WindowHTMLScriptElementPrototype = new CHtmlElement();
+            ___WindowHTMLScriptElementPrototype.___SetTagNameOnly("SCRIPT");
+            ___WindowHTMLScriptElementPrototype.___elementTagType = CHtmlElementType.SCRIPT;
+            ___WindowHTMLScriptElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLScriptElement;
+            ___WindowHTMLScriptElementPrototype.___IsPrototype = true;
+            ___WindowHTMLScriptElementPrototype.setParentNode ( ___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLScriptElementPrototype);
+            rootPrototypeNode.___HTMLScriptElementPrototypeWeakReference = new WeakReference(___WindowHTMLScriptElementPrototype, false);
+
+
+            CHtmlElement ___WindowOptionElementPrototype = new CHtmlElement();
+            ___WindowOptionElementPrototype.___SetTagNameOnly("OPTION");
+            ___WindowOptionElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLOptionElement;
+            ___WindowOptionElementPrototype.___elementTagType = CHtmlElementType.OPTION;
+            ___WindowOptionElementPrototype.___IsPrototype = true;
+            ___WindowOptionElementPrototype.setParentNode ( ___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowOptionElementPrototype);
+            rootPrototypeNode.___HTMLOptionElementPrototypeWeakReference = new WeakReference(___WindowOptionElementPrototype, false);
+
+            CHtmlElement ___WindowOptGroupElementPrototype = new CHtmlElement();
+            ___WindowOptGroupElementPrototype.___SetTagNameOnly("OPTGROUP");
+            ___WindowOptGroupElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLOptGroupElement;
+            ___WindowOptGroupElementPrototype.___elementTagType = CHtmlElementType.OPTGROUP;
+            ___WindowOptGroupElementPrototype.___IsPrototype = true;
+            ___WindowOptGroupElementPrototype.setParentNode ( ___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowOptGroupElementPrototype);
+            rootPrototypeNode.___HTMLOptGroupElementPrototypeWeakReference = new WeakReference(___WindowOptGroupElementPrototype, false);
+
+            CHtmlElement ___WindowSourceElementPrototype = new CHtmlElement();
+            ___WindowSourceElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLSourceElement;
+            ___WindowSourceElementPrototype.___SetTagNameOnly("SOURCE");
+            ___WindowSourceElementPrototype.___elementTagType = CHtmlElementType.SOURCE;
+            ___WindowSourceElementPrototype.___IsPrototype = true;
+            ___WindowSourceElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowSourceElementPrototype);
+            rootPrototypeNode.___HTMLSourceElementPrototypeWeakReference = new WeakReference(___WindowSourceElementPrototype, false);
+
+            CHtmlElement ___WindowHTMLButtonElementPrototype = new CHtmlElement();
+            ___WindowHTMLButtonElementPrototype.___SetTagNameOnly("BUTTON");
+            ___WindowHTMLButtonElementPrototype.___elementTagType = CHtmlElementType.BUTTON;
+            ___WindowHTMLButtonElementPrototype.___IsPrototype = true;
+            ___WindowHTMLButtonElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLButtonElement;
+            ___WindowHTMLButtonElementPrototype.setParentNode (___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLButtonElementPrototype);
+
+            rootPrototypeNode.___HTMLButtonElementPrototypeWeakReference = new WeakReference(___WindowHTMLButtonElementPrototype, false);
+
+
+
+            CHtmlElement ___WindowSelectElementPrototype = new CHtmlElement();
+            ___WindowSelectElementPrototype.___SetTagNameOnly("SELECT");
+            ___WindowSelectElementPrototype.___elementTagType = CHtmlElementType.SELECT;
+            ___WindowSelectElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLSelectElement;
+            ___WindowSelectElementPrototype.___IsPrototype = true;
+            ___WindowSelectElementPrototype.setParentNode (___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowSelectElementPrototype);
+
+            rootPrototypeNode.___HTMLSelectElementPrototypeWeakReference = new WeakReference(___WindowSelectElementPrototype, false);
+
+
+
+            CHtmlElement ___WindowTableElementPrototype = new CHtmlElement();
+            ___WindowTableElementPrototype.___SetTagNameOnly("TABLE");
+            ___WindowTableElementPrototype.___elementTagType = CHtmlElementType.TABLE;
+            ___WindowTableElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLTableElement;
+            ___WindowTableElementPrototype.___IsPrototype = true;
+            ___WindowTableElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowTableElementPrototype);
+            rootPrototypeNode.___HTMLTableElementPrototypeWeakReference = new WeakReference(___WindowTableElementPrototype, false);
+
+            CHtmlElement ___WindowTableSectionElementPrototype = new CHtmlElement();
+            ___WindowTableSectionElementPrototype.___SetTagNameOnly("THEAD");
+            ___WindowTableSectionElementPrototype.___elementTagType = CHtmlElementType.THEAD;
+            ___WindowTableSectionElementPrototype.___IsPrototype = true;
+            ___WindowTableSectionElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowTableSectionElementPrototype);
+            rootPrototypeNode.___HTMLTableSectionElementPrototypeWeakReference = new WeakReference(___WindowTableElementPrototype, false);
+
+
+            CHtmlElement ___WindowTableRowElementPrototype = new CHtmlElement();
+            ___WindowTableRowElementPrototype.___SetTagNameOnly("TR");
+            ___WindowTableRowElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLTableRowElement;
+            ___WindowTableRowElementPrototype.___elementTagType = CHtmlElementType.TR;
+            ___WindowTableRowElementPrototype.___IsPrototype = true;
+            ___WindowTableRowElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowTableRowElementPrototype);
+
+            rootPrototypeNode.___HTMLTableRowElementPrototypeWeakReference = new WeakReference(___WindowTableRowElementPrototype, false);
+
+            CHtmlElement ___WindowTableCellElementPrototype = new CHtmlElement();
+            ___WindowTableCellElementPrototype.___SetTagNameOnly("TD");
+            ___WindowTableCellElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLTableCellElement;
+            ___WindowTableCellElementPrototype.___elementTagType = CHtmlElementType.TD;
+            ___WindowTableCellElementPrototype.___IsPrototype = true;
+            ___WindowTableCellElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowTableCellElementPrototype);
+            rootPrototypeNode.___HTMLTableCellElementPrototypeWeakReference = new WeakReference(___WindowTableCellElementPrototype, false);
+
+            CHtmlElement ___WindowTableColElementPrototype = new CHtmlElement();
+            ___WindowTableColElementPrototype.___SetTagNameOnly("COL");
+            ___WindowTableColElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLTableColElement;
+            ___WindowTableColElementPrototype.___elementTagType = CHtmlElementType.COL;
+            ___WindowTableColElementPrototype.___IsPrototype = true;
+            ___WindowTableColElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowTableColElementPrototype);
+            rootPrototypeNode.___HTMLTableColElementPrototypeWeakReference = new WeakReference(___WindowTableColElementPrototype, false);
+
+            CHtmlElement ___WindowTextAreaElementPrototype = new CHtmlElement();
+            ___WindowTextAreaElementPrototype.___SetTagNameOnly("TEXTAREA");
+            ___WindowTextAreaElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLTextAreaElement;
+            ___WindowTextAreaElementPrototype.___elementTagType = CHtmlElementType.TEXTAREA;
+            ___WindowTextAreaElementPrototype.___IsPrototype = true;
+            ___WindowTextAreaElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowTextAreaElementPrototype);
+            rootPrototypeNode.___HTMLTextAreaElementPrototypeWeakReference = new WeakReference(___WindowTextAreaElementPrototype, false);
+
+            CHtmlElement ___WindowUListPrototype = new CHtmlElement();
+            ___WindowUListPrototype.___SetTagNameOnly("U");
+            ___WindowUListPrototype.___elementTagType = CHtmlElementType.U;
+            ___WindowUListPrototype.___IsPrototype = true;
+            ___WindowUListPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowUListPrototype.parentNode);
+            rootPrototypeNode.___HTMLUListElementPrototypeWeakReference = new WeakReference(___WindowUListPrototype.parentNode, false);
+
+            CHtmlElement ___WindowLIElementPrototype = new CHtmlElement();
+            ___WindowLIElementPrototype.___SetTagNameOnly("LI");
+            ___WindowLIElementPrototype.___elementTagType = CHtmlElementType.LI;
+            ___WindowLIElementPrototype.___IsPrototype = true;
+            ___WindowLIElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowLIElementPrototype.parentNode);
+            rootPrototypeNode.___HTMLIElementPrototypeWeakReference = new WeakReference(___WindowLIElementPrototype.parentNode, false);
+
+
+
+
+            CHtmlElement ___WindowBodyElementPrototype = new CHtmlElement();
+            ___WindowBodyElementPrototype.___SetTagNameOnly("BODY");
+            ___WindowBodyElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLBodyElement;
+            ___WindowBodyElementPrototype.___elementTagType = CHtmlElementType.BODY;
+            ___WindowBodyElementPrototype.___IsPrototype = true;
+            ___WindowBodyElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowBodyElementPrototype);
+            rootPrototypeNode.___HTMLBodyElementPrototypeWeakReference = new WeakReference(___WindowBodyElementPrototype, false);
+
+            CHtmlElement ___WindowHeadElementPrototype = new CHtmlElement();
+            ___WindowHeadElementPrototype.___SetTagNameOnly("HEAD");
+            ___WindowHeadElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLHeadElement;
+            ___WindowHeadElementPrototype.___elementTagType = CHtmlElementType.HEAD;
+            ___WindowHeadElementPrototype.___IsPrototype = true;
+            ___WindowHeadElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHeadElementPrototype);
+            rootPrototypeNode.___HTMLHeadElementPrototypeWeakReference = new WeakReference(___WindowHeadElementPrototype, false);
+
+
+            CHtmlElement ___WindowBaseElementPrototype = new CHtmlElement();
+            ___WindowBaseElementPrototype.___SetTagNameOnly("BASE");
+            ___WindowBaseElementPrototype.___elementTagType = CHtmlElementType.BASE;
+            ___WindowBaseElementPrototype.___IsPrototype = true;
+            ___WindowBaseElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowBaseElementPrototype);
+            rootPrototypeNode.___HTMLBaseElementPrototypeWeakReference = new WeakReference(___WindowBaseElementPrototype, false);
+
+            CHtmlElement ___WindowDivElementPrototype = new CHtmlElement();
+            ___WindowDivElementPrototype.___SetTagNameOnly("DIV");
+            ___WindowDivElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLDivElement;
+            ___WindowDivElementPrototype.___elementTagType = CHtmlElementType.DIV;
+            ___WindowDivElementPrototype.___IsPrototype = true;
+            ___WindowDivElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowDivElementPrototype);
+            rootPrototypeNode.___HTMLDivElementPrototypeWeakReference = new WeakReference(___WindowDivElementPrototype, false);
+
+            CHtmlElement ___WindowSpanElementPrototype = new CHtmlElement();
+            ___WindowSpanElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLSpanElement;
+            ___WindowSpanElementPrototype.___SetTagNameOnly("SPAN");
+            ___WindowSpanElementPrototype.___elementTagType = CHtmlElementType.SPAN;
+            ___WindowSpanElementPrototype.___IsPrototype = true;
+            ___WindowSpanElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowSpanElementPrototype);
+            rootPrototypeNode.___HTMLSpanElementPrototypeWeakReference = new WeakReference(___WindowSpanElementPrototype, false);
+
+            CHtmlElement ___WindowObjectElementPrototype = new CHtmlElement();
+            ___WindowObjectElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLObjectElement;
+            ___WindowObjectElementPrototype.___SetTagNameOnly("OBJECT");
+            ___WindowObjectElementPrototype.___elementTagType = CHtmlElementType.OBJECT;
+            ___WindowObjectElementPrototype.___IsPrototype = true;
+            ___WindowObjectElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowObjectElementPrototype);
+            rootPrototypeNode.___HTMLObjectElementPrototypeWeakReference = new WeakReference(___WindowObjectElementPrototype, false);
+
+            CHtmlElement ___WindowStyleElementPrototype = new CHtmlElement();
+            ___WindowStyleElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLStyleElement;
+            ___WindowStyleElementPrototype.___SetTagNameOnly("STYLE");
+            ___WindowStyleElementPrototype.___elementTagType = CHtmlElementType.STYLE;
+            ___WindowStyleElementPrototype.___IsPrototype = true;
+            ___WindowStyleElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowStyleElementPrototype);
+            rootPrototypeNode.___HTMLStyleElementPrototypeWeakReference = new WeakReference(___WindowStyleElementPrototype, false);
+
+            CHtmlElement ___WindowTemplateElementPrototype = new CHtmlElement();
+            ___WindowTemplateElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLTemplateElement;
+            ___WindowTemplateElementPrototype.___SetTagNameOnly("TEMPLATE");
+            ___WindowTemplateElementPrototype.___elementTagType = CHtmlElementType.TEMPLATE;
+            ___WindowTemplateElementPrototype.___IsPrototype = true;
+            ___WindowTemplateElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowTemplateElementPrototype);
+            rootPrototypeNode.___HTMLTemplateElementPrototypeWeakReference = new WeakReference(___WindowTemplateElementPrototype, false);
+
+            CHtmlElement ___WindowAreaElementPrototype = new CHtmlElement();
+            ___WindowAreaElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLAreaElement;
+            ___WindowAreaElementPrototype.___SetTagNameOnly("AREA");
+            ___WindowAreaElementPrototype.___elementTagType = CHtmlElementType.AREA;
+            ___WindowAreaElementPrototype.___IsPrototype = true;
+            ___WindowAreaElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowAreaElementPrototype);
+            rootPrototypeNode.___HTMLAreaElementPrototypeWeakReference = new WeakReference(___WindowAreaElementPrototype, false);
+
+            CHtmlSVGElement ___WindowSVGElementPrototype = new CHtmlSVGElement();
+            ___WindowSVGElementPrototype.___multiversalClassType = IMutilversalObjectType.SVGElement;
+            ___WindowSVGElementPrototype.___SetTagNameOnly("SVG");
+            ___WindowSVGElementPrototype.___elementTagType = CHtmlElementType.SVG;
+            ___WindowSVGElementPrototype.___IsPrototype = true;
+            ___WindowSVGElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowSVGElementPrototype);
+            rootPrototypeNode.___SVGElementPrototypeWeakReference = new WeakReference(___WindowSVGElementPrototype, false);
+
+            CHtmlElement ___WindowHTMLDatalistElementPrototype = new CHtmlElement();
+            ___WindowHTMLDatalistElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLDataListElement;
+            ___WindowHTMLDatalistElementPrototype.___SetTagNameOnly("DATALIST");
+            ___WindowHTMLDatalistElementPrototype.___elementTagType = CHtmlElementType.DATALIST;
+            ___WindowHTMLDatalistElementPrototype.___IsPrototype = true;
+            ___WindowHTMLDatalistElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLDatalistElementPrototype);
+            rootPrototypeNode.___HTMLDataListPrototypeWeakReference = new WeakReference(___WindowHTMLDatalistElementPrototype, false);
+
+            // HTMLPictureElement
+            CHtmlElement ___WindowHTMLPictureElementPrototype = new CHtmlElement();
+            ___WindowHTMLPictureElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLPictureElement;
+            ___WindowHTMLPictureElementPrototype.___SetTagNameOnly("PICTURE");
+            ___WindowHTMLPictureElementPrototype.___elementTagType = CHtmlElementType.PICTURE;
+            ___WindowHTMLPictureElementPrototype.___IsPrototype = true;
+            ___WindowHTMLPictureElementPrototype.setParentNode(___HTMLElementPrototype);
+            ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLPictureElementPrototype);
+            rootPrototypeNode.___HTMLPictureElementPrototypeWeakReference = new WeakReference(___WindowHTMLPictureElementPrototype, false);
+
+            ___WindowEventPrototype = new CHtmlWindowEvent();
+            ___WindowEventPrototype.___multiversalClassType = IMutilversalObjectType.Event;
+            ___WindowEventPrototype.___eventSourceType = CHtmlWindowEvent.CHtmlWindowEventEventType.prototype;
+            ___WindowEventPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___WindowEventPrototype);
+            rootPrototypeNode.___EventPrototypeWeakReference = new WeakReference(___WindowEventPrototype, false);
+
+            ___WindowMouseEventPrototype = new CHtmlWindowEvent();
+            ___WindowMouseEventPrototype.___multiversalClassType = IMutilversalObjectType.MouseEvent;
+            ___WindowMouseEventPrototype.___eventSourceType = CHtmlWindowEvent.CHtmlWindowEventEventType.prototypeMouseEvent;
+            ___WindowMouseEventPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___WindowMouseEventPrototype);
+            rootPrototypeNode.___MouseEventPrototypeWeakReference = new WeakReference(___WindowMouseEventPrototype, false);
+
+
+            ___WindowStylePrototype = new CHtmlCSSStyleSheet(CHtmlElementStyleType.Prototype);
+            ___WindowStyleElementPrototype.___multiversalClassType = IMutilversalObjectType.CSSStyleSheet;
+
+            ___WindowStylePrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___WindowStylePrototype);
+            rootPrototypeNode.___StyleSheetPrototypeWeakReference = new WeakReference(___WindowStylePrototype, false);
+
+
+            ___WindowCanvasContextPrototype = new CHtmlCanvasContext2D(true);
+            ___WindowCanvasContextPrototype.___multiversalClassType = IMutilversalObjectType.CanvasRenderingContext2D;
+
+            ___WindowCanvasContextPrototype.___IsPrototype = true;
+
+            rootPrototypeNode.___childNodes.Add(___WindowCanvasContextPrototype);
+            rootPrototypeNode.___CanvasContextPrototypeWeakReference = new WeakReference(___WindowCanvasContextPrototype, false);
+
+
+
+            ___WindowCanvasExtenstionPrototype = new CHtmlCanvasContextExtenstionObject(CanvasExtentionObjectType.UNKNOWN);
+            ___WindowCanvasExtenstionPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___WindowCanvasExtenstionPrototype);
+            ___WindowCSSRulePrototype = new CHtmlCSSRule(CHtmlElementStyleType.Prototype);
+            ___WindowCSSRulePrototype.___IsPrototype = true;
+
+            ___WindowCSSStyleSheetPrototype = new CHtmlCSSStyleSheet(CHtmlElementStyleType.Prototype);
+            ___WindowCSSStyleSheetPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___WindowCSSStyleSheetPrototype);
+            rootPrototypeNode.___CSSStyleSheetPrototypeWeakReference = new WeakReference(___WindowCSSRulePrototype, false);
+
+            CHtmlNativeArray ___arrayBufferPrototype = new CHtmlNativeArray(CHtmlNumericArrayType.ArrayBuffer, true);
+            ___arrayBufferPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___arrayBufferPrototype);
+            rootPrototypeNode.___ArrayBufferPrototypeWeakReference = new WeakReference(___arrayBufferPrototype, false);
+
+            CHtmlNativeArray ___typedArrayPrototype = new CHtmlNativeArray(CHtmlNumericArrayType.TypedArray, true);
+            ___typedArrayPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___typedArrayPrototype);
+            rootPrototypeNode.___TypedArrayPrototypeWeakReference = new WeakReference(___typedArrayPrototype, false);
+
+            CHtmlNativeArray ___float32ArrayPrototype = new CHtmlNativeArray(CHtmlNumericArrayType.Float32Array, true);
+            ___float32ArrayPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___float32ArrayPrototype);
+            rootPrototypeNode.___Float32ArrayPrototypeWeakReference = new WeakReference(___float32ArrayPrototype, false);
+
+            CHtmlNativeArray ___float64ArrayPrototype = new CHtmlNativeArray(CHtmlNumericArrayType.Float64Array, true);
+            ___float64ArrayPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___float64ArrayPrototype);
+            rootPrototypeNode.___Float64ArrayPrototypeWeakReference = new WeakReference(___float64ArrayPrototype, false);
+
+            CHtmlNativeArray ___int8ArrayPrototype = new CHtmlNativeArray(CHtmlNumericArrayType.Int8Array, true);
+            ___int8ArrayPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___int8ArrayPrototype);
+            rootPrototypeNode.___Int8ArrayPrototypeWeakReference = new WeakReference(___int8ArrayPrototype, false);
+
+            CHtmlNativeArray ___int16ArrayPrototype = new CHtmlNativeArray(CHtmlNumericArrayType.Int16Array, true);
+            ___int16ArrayPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___int16ArrayPrototype);
+            rootPrototypeNode.___Int16ArrayPrototypeWeakReference = new WeakReference(___int16ArrayPrototype, false);
+
+            CHtmlNativeArray ___int32ArrayPrototype = new CHtmlNativeArray(CHtmlNumericArrayType.Int32Array, true);
+            ___int32ArrayPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___int32ArrayPrototype);
+            rootPrototypeNode.___Int32ArrayPrototypeWeakReference = new WeakReference(___int32ArrayPrototype, false);
+
+            CHtmlNativeArray ___uint8ArrayPrototype = new CHtmlNativeArray(CHtmlNumericArrayType.Uint8Array, true);
+            ___uint8ArrayPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___uint8ArrayPrototype);
+            rootPrototypeNode.___Uint8ArrayPrototypeWeakReference = new WeakReference(___uint8ArrayPrototype, false);
+
+            CHtmlNativeArray ___uint16ArrayPrototype = new CHtmlNativeArray(CHtmlNumericArrayType.Uint16Array, true);
+            ___uint16ArrayPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___uint16ArrayPrototype);
+            rootPrototypeNode.___Uint16ArrayPrototypeWeakReference = new WeakReference(___uint16ArrayPrototype, false);
+
+            #region WebSpeechAPI
+            CHtmlNativeArray ___uint32ArrayPrototype = new CHtmlNativeArray(CHtmlNumericArrayType.Uint32Array, true);
+            ___uint32ArrayPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___uint32ArrayPrototype);
+            rootPrototypeNode.___Uint32ArrayPrototypeWeakReference = new WeakReference(___uint32ArrayPrototype, false);
+
+            CHtmlWebSpeechSynthesisUtterance ___speechSynthesisUtterance = new CHtmlWebSpeechSynthesisUtterance();
+            ___speechSynthesisUtterance.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___speechSynthesisUtterance);
+            rootPrototypeNode.___WebSpeechSynthesisUtterranceWeakReference = new WeakReference(___speechSynthesisUtterance, false);
+
+            CHtmlWebSpeechRecognition ___speechRecognition = new CHtmlWebSpeechRecognition();
+            ___speechRecognition.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___speechRecognition);
+            rootPrototypeNode.___WebSpeechRecognitionWeakReference = new WeakReference(___speechRecognition, false);
+
+            CHtmlWebSpeechRecognitionEvent ___speechRecognitionEvent = new CHtmlWebSpeechRecognitionEvent();
+            ___speechRecognitionEvent.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___speechRecognitionEvent);
+            rootPrototypeNode.___WebSpeechRecognitionEventWeakReference = new WeakReference(___speechRecognitionEvent, false);
+
+            CHtmlWebSpeechGrammar ___speechGrammar = new CHtmlWebSpeechGrammar();
+            ___speechGrammar.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___speechGrammar);
+            rootPrototypeNode.___WebSpeechGrammarWeakReference = new WeakReference(___speechGrammar, false);
+
+            CHtmlWebSpeechGrammarList ___speechGrammarList = new CHtmlWebSpeechGrammarList();
+            ___speechGrammar.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___speechGrammar);
+            rootPrototypeNode.___WebSpeechGrammarWeakReference = new WeakReference(___speechGrammar, false);
+
+            #endregion
+
+
+
+
+
+            CHtmlMultiversalLightweightPrototypeContainer ___windowPrototype = new CHtmlMultiversalLightweightPrototypeContainer();
+            ___windowPrototype.___prototypeName = "Window";
+            ___windowPrototype.___multiversalClassType = IMutilversalObjectType.Window;
+            ___windowPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___windowPrototype);
+            rootPrototypeNode.___WindowPrototypeWeakReference = new WeakReference(___windowPrototype, false);
+
+            CHtmlMultiversalLightweightPrototypeContainer ___windowDomStringMapPrototype = new CHtmlMultiversalLightweightPrototypeContainer();
+            ___windowDomStringMapPrototype.___prototypeName = "DOMStringMap";
+            ___windowDomStringMapPrototype.___multiversalClassType = IMutilversalObjectType.DOMStringMap;
+            ___windowDomStringMapPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___windowDomStringMapPrototype);
+            rootPrototypeNode.___DOMStringMapWeakReference = new WeakReference(___windowDomStringMapPrototype, false);
+
+            CHtmlDocument ___documentPrototype = new CHtmlDocument(CHtmlDomModeType.HTMLDOM_NoGUI);
+            ___documentPrototype.___IsPrototype = true;
+            ___documentPrototype.___multiversalClassType = IMutilversalObjectType.Document;
+            rootPrototypeNode.___childNodes.Add(___documentPrototype);
+            rootPrototypeNode.___DocumentPrototypeWeakReference = new WeakReference(___documentPrototype, false);
+
+
+            CHtmlMultiversalLightweightPrototypeContainer ___workerPrototype = new CHtmlMultiversalLightweightPrototypeContainer();
+            ___workerPrototype.___prototypeName = "Worker";
+            ___workerPrototype.___multiversalClassType = IMutilversalObjectType.Worker;
+            ___workerPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___workerPrototype);
+            rootPrototypeNode.___WorkerPrototypeWeakReference = new WeakReference(___workerPrototype, false);
+
+            CHtmlMultiversalLightweightPrototypeContainer ___sharedWorkerPrototype = new CHtmlMultiversalLightweightPrototypeContainer();
+            ___sharedWorkerPrototype.___prototypeName = "SharedWorker";
+            ___sharedWorkerPrototype.___multiversalClassType = IMutilversalObjectType.SharedWorker;
+            ___sharedWorkerPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___sharedWorkerPrototype);
+            rootPrototypeNode.___SharedWorkerPrototypeWeakReference = new WeakReference(___sharedWorkerPrototype, false);
+
+            CHtmlDomTokenList ___domtokenListPrototype = new CHtmlDomTokenList();
+            ___domtokenListPrototype.___IsPrototype = true;
+            ___domtokenListPrototype.___multiversalClassType = IMutilversalObjectType.DOMTokenList;
+            rootPrototypeNode.___childNodes.Add(___domtokenListPrototype);
+            rootPrototypeNode.___DOMTokenListWeakReference = new WeakReference(___domtokenListPrototype, false);
+
+            CHtmlElement ___activeXObjectPrototype = new CHtmlElement();
+            ___activeXObjectPrototype.___SetTagNameOnly("Object");
+            ___activeXObjectPrototype.___elementTagType = CHtmlElementType.OBJECT;
+            ___activeXObjectPrototype.___multiversalClassType = IMutilversalObjectType.HTMLObjectElement;
+            ___activeXObjectPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___activeXObjectPrototype);
+            rootPrototypeNode.___ActiveXObjectPrototypeWeakReference = new WeakReference(___activeXObjectPrototype, false);
+
+            CHtmlWebFile ___filePrototype = new CHtmlWebFile();
+
+            ___filePrototype.___IsPrototype = true;
+            ___filePrototype.___multiversalClassType = IMutilversalObjectType.File;
+            rootPrototypeNode.___childNodes.Add(___filePrototype);
+            rootPrototypeNode.___FilePrototypeWeakReference = new WeakReference(___filePrototype, false);
+
+            CHtmlFileReader ___fileReaderPrototype = new CHtmlFileReader();
+            ___fileReaderPrototype.___IsPrototype = true;
+            ___fileReaderPrototype.___multiversalClassType = IMutilversalObjectType.FileReader;
+            rootPrototypeNode.___childNodes.Add(___fileReaderPrototype);
+            rootPrototypeNode.___FileReaderPrototypeWeakReference = new WeakReference(___fileReaderPrototype, false);
+
+            CHtmlMultiversalLightweightPrototypeContainer timeRangesPrototype = new CHtmlMultiversalLightweightPrototypeContainer();
+            timeRangesPrototype.___multiversalClassType = IMutilversalObjectType.TimeRanges;
+            timeRangesPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(timeRangesPrototype);
+            rootPrototypeNode.___TimeRangesPrototypeWeakReference = new WeakReference(timeRangesPrototype, false);
+            CHtmlFileList ___fileListPrototype = new CHtmlFileList();
+            ___filePrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___filePrototype);
+            rootPrototypeNode.___FileListProtoTypeWeakReference = new WeakReference(___filePrototype, false);
+
+            CHtmlBlob ___blobPrototype = new CHtmlBlob();
+            ___blobPrototype.___multiversalClassType = IMutilversalObjectType.Blob;
+            ___blobPrototype.___IsPrototype = true;
+            rootPrototypeNode.___childNodes.Add(___blobPrototype);
+            rootPrototypeNode.___BlobPrototypeWeakReference = new WeakReference(___blobPrototype, false);
+
+            return rootPrototypeNode;
+        }
+        internal void ___assignElementPrototype(CHtmlElement ___element)
+        {
+            try
+            {
+                switch (___element.___elementTagType)
+                {
+
+                    case CHtmlElementType.AUDIO:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLAudioElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.VIDEO:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLVideoElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.CANVAS:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLCanvasElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.IMG:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLImageElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.TABLE:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLTableElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.TR:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLTableRowElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.TD:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLTableCellElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.HTML:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLHtmlElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.BODY:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLBodyElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.HEAD:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLHeadElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.LINK:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLLinkElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.A:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLAnchorElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.SCRIPT:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLScriptElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.IFRAME:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLIFrameElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.FORM:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLFormElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.DIV:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLDivElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.SPAN:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLSpanElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.TEXTAREA:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLTextAreaElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.INPUT:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLInputElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.OPTION:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLOptionElementPrototypeWeakReference;
+                        break;
+                    case CHtmlElementType.STYLE:
+                        ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLStyleElementPrototypeWeakReference;
+                        break;
+                }
+            }
+            catch
+            {
+                if (commonLog.LoggingEnabled)
+                {
+                    commonLog.LogEntry("BUGBUG! Can not assign prototoype {0}", ___element.___elementTagType);
+                }
+            }
+            if (___element.___prototypeWeakReference == null)
+            {
+                ___element.___prototypeWeakReference = this.___WindowPrototypeRootNode.___HTMLElementPrototypeWeakReference;
+            }
+        }
+
+
+        public CHtmlMultiversalScriptsHost MultiversalScriptsHost
+        {
+            get
+            {
+                if (___multiversalScriptsHost == null)
+                {
+                    ___multiversalScriptsHost = new CHtmlMultiversalScriptsHost();
+                }
+                return ___multiversalScriptsHost;
+            }
+        }
+
+#if DEBUG
+        private Stopwatch ___multiversalWindowTimerExuecteTimeStopwatch = new Stopwatch();
+        private Stopwatch ___multiversalWindowTimerElapsedTimeStopwatch = new Stopwatch();
+#endif 
+        private void MultiversalTimer_Elapsed(object _o)
+        {
+          
+            if (!System.Threading.Monitor.TryEnter(this.___multiHtmlCraftWindowTimerLockingObject))
+            {
+                return;
+            }
+            else
+            {
+                try
+                {
+                    if (System.Threading.Monitor.TryEnter(this.___multiHtmlCraftWindowTimerLockingObject, ___MultiversalLockTimeout))
+                    {
+                        try
+                        {
+                           
+                            this.___multiHtmlCraftWindowTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+
+
+                        }
+                        finally
+                        {
+                            System.Threading.Monitor.Exit(this.___multiHtmlCraftWindowTimerLockingObject);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                    {
+                        commonLog.LogEntry("___pauseMultiHtmlCraftWindowTimer Error: {0}. but it is ok.", ex.Message);
+                    }
+                }
+            }
+
+#if DEBUG
+            ___multiversalWindowTimerExuecteTimeStopwatch.Start();
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                ___multiversalWindowTimerElapsedTimeStopwatch.Stop();
+                if (___multiversalWindowTimerElapsedTimeStopwatch.ElapsedMilliseconds > 0)
+                {
+                    commonLog.LogEntry("MultiversalTimer Elapsed From Last Time Time: {0} ms", ___multiversalWindowTimerElapsedTimeStopwatch.ElapsedMilliseconds);
+                }
+            }
+#endif
+
+                bool ___isAnyCanvasDrawn = false;
+            uint ___nonPaintActivityPoint = 0;
+
+            int ValidScriptCount = 0;
+            DateTime ___dtStart = DateTime.Now;
+
+            try
+            {
+                if (this.___document == null || this.___document.___Disposing)
+                {
+                    if (this.___multiHtmlCraftWindowTimerLockingObject != null)
+                    {
+                        System.Threading.Monitor.Exit(this.___multiHtmlCraftWindowTimerLockingObject);
+                    }
+
+                    this.___multiHtmlCraftWindowTimer.Dispose();
+                    this.___multiHtmlCraftWindowTimer = null;
+                    return;
+                }
+
+
+                ValidScriptCount = 0;
+                ___dtStart = DateTime.Now;
+                if (this.___multiHtmlCraftWindowTimer == null)
+                {
+                    goto TimerProcessDone;
+                }
+                if (this.___document.___documentTimerTickCount >= int.MaxValue)
+                {
+                    this.___document.___documentTimerTickCount = 10000;
+                }
+                this.___document.___documentTimerTickCount++;
+
+                try
+                {
+
+                    // it may be enqueued scripts on queue which remains unprocessed status 
+                    // only runs if document.readystate = complete
+                    if (this.___document.___readyStateType == CHtmlReadytStateType.complete)
+                    {
+                        if (this.___document.___DeferredEnqueuedScriptCount > 0)
+                        {
+                            try
+                            {
+
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                                {
+                                    commonLog.LogEntry("DocumentTimer ___hasInner found Queued Script Process Now...");
+                                }
+                                //this.___processDocumentEnqueuedScripts(EnqeueStatus.ProcessQueue);
+                            }
+                            catch { }
+                        }
+                    }
+                    if (this.___document.___DocumentTimerBrandNewIDList != null && this.___document.___DocumentTimerBrandNewIDList.Count > 0)
+                    {
+                        this.___document.___DocumentTimerBrandNewIDList.Clear();
+                    }
+
+                    // [Do not use property value always use .Count
+                    //int __CurrentEventCount =  this.___CHtmlDocumentTimerList.Count;
+                    // 
+                    CHtmlEventInfo timerEvt = null;
+                    TimeSpan timerElapsed;
+                    for (int i = this.___document.___CHtmlDocumentTimerList.Count - 1; i >= 0; i--)
+                    {
+                        if (this == null || this.___document.___Disposing == true || this.___document.___IsThreadAbortOccurred)
+                        {
+                            try
+                            {
+                                if (this.___multiHtmlCraftWindowTimer != null)
+                                {
+                                    this.___multiHtmlCraftWindowTimer = null;
+                                }
+                            }
+                            catch { }
+
+
+                            goto TimerProcessDone;
+                        }
+                        int ___timerkey = this.___document.___CHtmlDocumentTimerList.Keys[i];
+                        if (this.___document.___DocumentTimerBrandNewIDList.ContainsKey(___timerkey))
+                        {
+                            // It is new created event list. do not execute one.
+                            continue;
+                        }
+
+                        this.___document.___CHtmlDocumentTimerList.TryGetValue(___timerkey, out timerEvt);
+                        bool ___IsInterval = false;
+                        bool ___IsTimeout = false;
+                        bool ___IsEventHasBeenFromLiveList = false;
+                        if (timerEvt == null || timerEvt.TimerType == -1)
+                            continue;
+                        else
+                        {
+                            if (timerEvt.TimerType == 10)
+                            {
+                                if (timerEvt.IsCompleted == false)
+                                {
+                                    ___IsTimeout = true;
+                                    ValidScriptCount++;
+                                }
+                            }
+                            else if (timerEvt.TimerType == 1)
+                            {
+                                if (timerEvt.IsCompleted == false)
+                                {
+                                    ___IsInterval = true;
+                                    ValidScriptCount++;
+                                }
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
+                        if (___IsTimeout == true && timerEvt.IsCompleted == false)
+                        {
+                            timerElapsed = DateTime.Now.Subtract(timerEvt.LastCallTime);
+                            if (Math.Abs(timerElapsed.TotalMilliseconds) > timerEvt.Timeout)
+                            {
+                                CHtmlScriptResult scriptResult = null;
+                                if (commonHTML.MAX_EVENT_RECORD_COUNT < this.___document.___scriptEventList.Count)
+                                {
+
+                                }
+                                else
+                                {
+
+
+                                    scriptResult = new CHtmlScriptResult();
+
+                                    scriptResult.text = string.Concat(timerEvt.Name, ' ', timerEvt, ' ', timerEvt.GetHashCode());
+                                }
+                                object objFunction = timerEvt.Function;
+                                try
+                                {
+                                    this.___processTimerEvent(timerEvt);
+                                    if (scriptResult != null)
+                                    {
+                                        scriptResult.result = 200;
+                                    }
+
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    if (scriptResult != null)
+                                    {
+                                        scriptResult.result = 500;
+
+                                        scriptResult.resultText = "Timer Function Error " + timerEvt.ToString() + " Compile Error " + ex.Message.ToString();
+                                        scriptResult.errorDetail = commonData.GetExceptionAsString(ex);
+
+                                    }
+                                }
+                                if (scriptResult != null)
+                                {
+                                    if (commonHTML.MAX_EVENT_RECORD_COUNT > this.___document.___scriptEventList.Count)
+                                    {
+                                        this.___document.___scriptEventList.Add(scriptResult);
+                                    }
+                                }
+                                else
+                                {
+
+                                }
+
+                                timerEvt.LastCallTime = DateTime.Now;
+                                timerEvt.IsCompleted = true;
+                                while (this.___document.___DocumentTimerCompleteList.Count > commonHTML.MAX_TIMER_COPLETE_RECORD_COUNT)
+                                {
+                                    this.___document.___DocumentTimerCompleteList.RemoveAt(0);
+                                }
+                                this.___document.___DocumentTimerCompleteList.Add(timerEvt);
+                                if (___IsTimeout == true)
+                                {
+                                    if (___IsEventHasBeenFromLiveList == false)
+                                    {
+                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 1000)
+                                        {
+                                            commonLog.LogEntry("DocumentTimerLiveList Removing : {0}", ___timerkey);
+                                        }
+
+                                        this.___document.___CHtmlDocumentTimerList.Remove(___timerkey);
+
+                                    }
+                                }
+
+                            }
+                            continue;
+                        }
+                        if (___IsInterval == true && timerEvt.IsCompleted == false)
+                        {
+                            timerElapsed = DateTime.Now.Subtract(timerEvt.LastCallTime);
+                            if (Math.Abs(timerElapsed.TotalMilliseconds) > timerEvt.Timeout)
+                            {
+                                bool __IntervalSuccess = false;
+                                CHtmlScriptResult scriptResult = null;
+                                if (commonHTML.MAX_EVENT_RECORD_COUNT < this.___document.___scriptEventList.Count)
+                                {
+
+                                }
+                                else
+                                {
+                                    scriptResult = new CHtmlScriptResult();
+                                    scriptResult.text = string.Concat(timerEvt.Name, ' ', timerEvt, ' ', timerEvt.GetHashCode());
+                                    scriptResult.Url = this.___document.___URL;
+                                }
+#if DEBUG
+                                Stopwatch? ___MultiversalFunctionExecuteTimerStopwatch = null;
+                                ___MultiversalFunctionExecuteTimerStopwatch  = new Stopwatch();
+                                ___MultiversalFunctionExecuteTimerStopwatch.Start();
+#endif
+                                object objFunction = timerEvt.Function;
+
+                                try
+                                {
+                                    if (objFunction != null)
+                                    {
+                                        switch (objFunction)
+                                        {
+                                            case Microsoft.ClearScript.ScriptObject jsV8Func:
+                                                {
+                                                    IMultiversalScriptScope multiversalScriptScope = this.MultiversalScriptsHost.defaultScriptScope;
+                                                    if(multiversalScriptScope != null)
+                                                    {
+                                                        IMultiversalScriptProcessor scriptProcessor = multiversalScriptScope.getMultiversalScriptProcessor();
+                                                        if(scriptProcessor != null)
+                                                        {
+                                                            // V8Function With no arguments
+                                                            scriptProcessor.callfunction(jsV8Func, null);
+                                                        }
+                                                        else
+                                                        {
+                                                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                            {
+                                                                commonLog.LogEntry("MultiversalScriptProcessor is null for ScriptObject {0} {1} {2}", timerEvt.Name, timerEvt.TimerType, timerEvt.GetHashCode());
+                                                            }
+                                                        }
+
+                                                    }
+
+                                                    __IntervalSuccess = true;
+                                                }
+                                                break;
+                                            case String objStringFunction:
+                        
+                                                {
+                                                    // It is string function
+                                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                    {
+                                                        commonLog.LogEntry("TODO: Processing Timer Event as string {0} {1} {2}", timerEvt.Name, timerEvt.TimerType, timerEvt.GetHashCode());
+                                                    }
+                                                }
+                                                break;
+                                            default:
+                                                {
+                                                    ___processFunctionObject(objFunction.GetType().FullName, objFunction);
+                                                    __IntervalSuccess = true;
+                                                }
+                                                break;
+                                        }
+                                        scriptResult.result = 200;
+
+
+
+                                    }
+                                    else
+                                    {
+                                        scriptResult.result = 500;
+                                        scriptResult.resultText = "Timer Function is null";
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    __IntervalSuccess = false;
+                                    if (scriptResult != null)
+                                    {
+                                        scriptResult.result = 500;
+
+
+                                        scriptResult.resultText = string.Format("Script Onload Segment '{0}' Compile Error {1}", timerEvt, ex.Message);
+
+                                    }
+                                }
+#if DEBUG
+                                ___MultiversalFunctionExecuteTimerStopwatch.Stop();
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry("MultiversalTimer Function Execute Elapsed Time: {0} ms", ___MultiversalFunctionExecuteTimerStopwatch.ElapsedMilliseconds);
+                                }
+#endif
+                                if (scriptResult != null)
+                                {
+                                    if (commonHTML.MAX_EVENT_RECORD_COUNT > this.___document.___scriptEventList.Count)
+                                    {
+                                        this.___document.___scriptEventList.Add(scriptResult);
+                                    }
+                                }
+
+                                if (__IntervalSuccess == true)
+                                {
+                                    timerEvt.LastCallTime = DateTime.Now;
+                                    // Do not set is Complete here because timer may cleared during script
+                                    //timerEvt.IsCompleted = false;
+                                }
+                                else
+                                {
+                                    // If it is unsuccessfull , it complete to true no more exection
+                                    timerEvt.LastCallTime = DateTime.Now;
+                                    timerEvt.IsCompleted = true;
+                                    while (this.___document.___DocumentTimerCompleteList.Count > commonHTML.MAX_TIMER_COPLETE_RECORD_COUNT)
+                                    {
+                                        this.___document.___DocumentTimerCompleteList.RemoveAt(0);
+                                    }
+                                    this.___document.___DocumentTimerCompleteList.Add(timerEvt);
+                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 1000)
+                                    {
+                                        commonLog.LogEntry("DocumentTimerLiveList Removing : {0}", ___timerkey);
+                                    }
+
+                                    this.___document.___CHtmlDocumentTimerList.Remove(___timerkey);
+                                }
+                            }
+                            continue;
+                        }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("DocumentTimer_Elapsed Error. ", ex);
+                    }
+                }
+
+                if (this.___document.___CanvasContextElement2DDrawingPendingList != null && this.___document.___CanvasContextElement2DDrawingPendingList.Count > 0)
+                {
+
+                    this.___drawCanvasCreatedElements(this.___document);
+                    ___isAnyCanvasDrawn = true;
+                    ___nonPaintActivityPoint++;
+                }
+
+
+                if (ValidScriptCount == 0)
+                {
+                    if (this.___document.___documentTimerTickCount >= 5)
+                    {
+                        if (this.___document.___CHtmlDocumentTimerList != null && this.___document.___CHtmlDocumentTimerList.Count > 0)
+                        {
+                            goto TimerProcessDone;
+                        }
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
+                        {
+                            commonLog.LogEntry("No Event DocumentTimer should process...");
+                        }
+                        if (this.___multiHtmlCraftWindowTimer != null)
+                        {
+                            this.___multiHtmlCraftWindowTimer.Dispose();
+                            this.___multiHtmlCraftWindowTimer = null;
+                        }
+                        this.___document.StoreCookieListIfUpdated();
+                        goto TimerProcessDone;
+                    }
+
+                }
+                else
+                {
+                    TimeSpan tpSpan = DateTime.Now.Subtract(___dtStart);
+                    if (tpSpan.TotalSeconds >= commonHTML.MAX_DOCUMENT_TIMER_TIMEOUT_SECONDS)
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("DocumentTimer tooks long to complete. Disable Doucument Timer From now on...");
+                        }
+
+                        try
+                        {
+
+                            if (this.___multiHtmlCraftWindowTimer != null)
+                            {
+                                this.___multiHtmlCraftWindowTimer.Dispose();
+                                this.___multiHtmlCraftWindowTimer = null;
+                            }
+                            this.___document.StoreCookieListIfUpdated();
+                        }
+                        catch { }
+
+                        goto TimerProcessDone;
+                    }
+                    else
+                    {
+                        // There is timer to process
+
+                    }
+                }
+                //WaitForNextLoop:
+                if (this == null || this.___IsDispoing == true || this.___document == null || this.___multiHtmlCraftWindowTimer == null)
+                {
+                    goto TimerProcessDone;
+                }
+
+
+
+
+            TimerProcessDone:
+                if (false) {; }
+            }
+            catch (System.Threading.ThreadAbortException)
+            {
+                // just cont
+
+            }
+            catch (Exception ex)
+            {
+                if (ex is System.Threading.ThreadAbortException)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 30)
+                    {
+                        commonLog.LogEntry("DocumentTimerThread_Elapsed Thread Abort. It is ok!");
+                    }
+
+                }
+                else if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                {
+                    commonLog.LogEntry("DocumentTimerThread_Elapsed", ex);
+                }
+            }
+            finally
+            {
+
+
+                System.Threading.Monitor.Exit(this.___multiHtmlCraftWindowTimerLockingObject);
+                if (this.___multiHtmlCraftWindowTimer != null)
+                {
+                    try
+                    {
+                        this.___multiHtmlCraftWindowTimer.Change(16, 16);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                        {
+                            commonLog.LogEntry("Error Changing Timer Interval", ex);
+                        }
+                    }
+                }
+
+#if DEBUG
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    ___multiversalWindowTimerExuecteTimeStopwatch.Stop();
+     
+                    if (___isAnyCanvasDrawn == true)
+                    {
+                        commonLog.LogEntry("MultiversalTimer Function Elapsed Execute With CanvasDrawn: Canvas Drawn {0} ms", ___multiversalWindowTimerExuecteTimeStopwatch.ElapsedMilliseconds);
+                    }
+                    else
+                    {
+                        commonLog.LogEntry("MultiversalTimer Function Execute Elapsed Time: {0} ms", ___multiversalWindowTimerExuecteTimeStopwatch.ElapsedMilliseconds);
+                    }
+                }
+                this.___multiversalWindowTimerElapsedTimeStopwatch.Reset();
+                this.___multiversalWindowTimerElapsedTimeStopwatch.Start();
+#endif
+            }
+        }
+        private void ___processFunctionObject(string funcTimerObjectFullName, object funcObject)
+        {
+            bool ___isFunctionInvoked = false;
+            switch (funcTimerObjectFullName)
+            {
+
+                case "Microsoft.ClearScript.V8.V8ScriptItem+V8ScriptObject":
+                    {
+                        dynamic jsV8Func = funcObject;
+                        try
+                        {
+                            // V8Function With no arguments
+                            jsV8Func();
+                            ___isFunctionInvoked = true;
+                            // Incase of V8ScriptObject, you can pass arguments like this:
+                            // jsV8Func(arg1, arg2, ...);
+                        }
+                        catch (Exception ex)
+                        {
+                            
+                            if (commonLog.LoggingEnabled)
+                                commonLog.LogEntry("V8ScriptObject invoke error: " + ex.Message);
+                        }
+                    }
+
+                    break;
+                case "NiL.JS.Core.Functions.SimpleFunction":
+                case "NiL.JS.Core.Functions.Function":
+                case "NiL.JS.Core.Functions.MethodGroup":
+                    {
+                        try
+                        {
+                          
+                            IMultiversalScriptScope multiversalScriptScope = this.MultiversalScriptsHost.defaultScriptScope;
+                            if (multiversalScriptScope != null)
+                            {
+                                IMultiversalScriptProcessor scriptProcessor = multiversalScriptScope.getMultiversalScriptProcessor();
+                                if (scriptProcessor != null)
+                                {
+                                    
+                                    scriptProcessor.callfunction(funcObject, new object[0]);
+                                    ___isFunctionInvoked = true;
+                                }
+                                else
+                                {
+                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                    {
+                                        commonLog.LogEntry("MultiversalScriptProcessor is null for NiL.JS function {0}", funcObject);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                {
+                                    commonLog.LogEntry("MultiversalScriptScope is null for NiL.JS function {0}", funcObject);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("NiL.JS function invoke error: {0}", ex.Message);
+                            }
+                        }
+                        break;
+                    }
+                case "NiL.JS.Core.JSValue":
+                    {
+                        try
+                        {
+                            NiL.JS.Core.JSValue jsValue = funcObject as NiL.JS.Core.JSValue;
+                            object objValue = jsValue.Value;
+                            string strValueFunc = funcObject.ToString();
+                      
+                            IMultiversalScriptScope multiversalScriptScope = this.MultiversalScriptsHost.defaultScriptScope;
+                            if (multiversalScriptScope != null)
+                            {
+                                IMultiversalScriptProcessor scriptProcessor = multiversalScriptScope.getMultiversalScriptProcessor();
+                                if (scriptProcessor != null)
+                                {
+                                    if(objValue != null)
+                                    {
+                                        switch (objValue.GetType().FullName)
+                                        {
+                                            case "NiL.JS.Core.Functions.SimpleFunction":
+                                            case "NiL.JS.Core.Functions.Function":
+                                            case "NiL.JS.Core.Functions.MethodGroup":
+                                                scriptProcessor.callfunction(objValue);
+                                                ___isFunctionInvoked = true;
+                                                break;
+                                        }
+                                     }
+                                    if(___isFunctionInvoked == false)
+                                    {
+                                        // try to invoke as string function name
+                                        scriptProcessor.callfunction(strValueFunc, new object[0]);
+                                        ___isFunctionInvoked = true;
+                                    }
+
+                                }
+                                else
+                                {
+                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                    {
+                                        commonLog.LogEntry("MultiversalScriptProcessor is null for NiL.JS Value {0}", funcObject);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                {
+                                    commonLog.LogEntry("MultiversalScriptScope is null for NiL.JS Value {0}", funcObject);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("NiL.JS JSValue invoke error: {0}", ex.Message);
+                            }
+                        }
+                    }
+                    break;
+
+            }
+        }
+
+        private void ___processTimerEvent(CHtmlEventInfo timerEvt)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("entering Processing Timer Event {0} hash : {1}  ManagedThreadID : {2}", timerEvt.Name, timerEvt.GetHashCode(), System.Threading.Thread.CurrentThread.ManagedThreadId);
+            }
+            try
+            {
+
+                if (timerEvt == null || timerEvt.Function == null)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                    {
+                        commonLog.LogEntry("Timer Event is null or Function is null. {0} hash : {1}", timerEvt.Name, timerEvt.GetHashCode());
+                    }
+                    return;
+                }
+                else
+                {
+                    var funcTimerObjectFullName = timerEvt.Function.GetType().FullName;
+                    if (timerEvt.Function is string)
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                        {
+                            commonLog.LogEntry("TODO: Processing Timer Event as string {0} {1} {2}", timerEvt.Name, timerEvt.TimerType, timerEvt.GetHashCode());
+                        }
+                    }
+                    else {
+
+                        ___processFunctionObject(funcTimerObjectFullName, timerEvt.Function);
+                    }
+                }
+            
+            }
+
+                
+            
+
+
+
+
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                {
+                    commonLog.LogEntry("Error Processing Timer Event {0} {1}", timerEvt.Name, timerEvt.GetHashCode(), ex);
+                }
+                throw ex;
+
+            }
+        }
+
+        /// <summary>
+        /// Set true to support ActiveXObject for IE.
+        /// default: false
+        /// </summary>
+        /// <param name="___enabled"></param>
+        public static void ___enableActiveXObjectSupportAsGlobal(bool ___enabled)
+        {
+            ___isActiveXObjectSupportedGlobal = ___enabled;
+        }
+        public void ___enableActiveXObjectSupportThisWindow(bool ___enabled)
+        {
+            this.___isActiveXObjectSupportedThisWindow = ___enabled;
+        }
+        /*
+        private void ___MultiversalTimerParentChildCreation_Tick(object ___object)
+        {
+            if (this.___multiHtmlCraftWindowTimer == null)
+            {
+                return;
+            }
+            bool ___IsDocumentStatusNotReadyYet = false;
+            bool ___IsOperationOnlyCreateControl = true;
+            bool ___NeedsDiposeTimerAndExit = false;
+            int ___SuccessControlCreateCount = 0;
+            if (System.Threading.Monitor.TryEnter(this.___multiHtmlCraftWindowTimerLockingObject, 500) == true)
+            {
+                try
+                {
+
+                    this.___multiHtmlCraftWindowTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+
+
+                    if (this.___IsDispoing == true)
+                    {
+                        ___NeedsDiposeTimerAndExit = true;
+                    }
+                    System.Windows.Forms.Control ___currentRenderingManagedControl = null;
+                    if (this.___renderingTargetManagedControlWeakReference != null)
+                    {
+                        ___currentRenderingManagedControl = this.___renderingTargetManagedControlWeakReference.Target as System.Windows.Forms.Control;
+                        if (___currentRenderingManagedControl != null)
+                        {
+                            if (___currentRenderingManagedControl.Disposing == true)
+                            {
+                                ___NeedsDiposeTimerAndExit = true;
+                            }
+                        }
+                    }
+                    try
+                    {
+                        if (___NeedsDiposeTimerAndExit == true)
+                        {
+                            if (this.___multiHtmlCraftWindowTimer != null)
+                            {
+                                this.___multiHtmlCraftWindowTimer.Dispose();
+                                this.___multiHtmlCraftWindowTimer = null;
+                            }
+                            return;
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        if (commonLog.LoggingEnabled)
+                        {
+                           commonLog.LogEntry("CHtmlMultiversalWinow Timer Dispose", ex);
+                        }
+                    }
+                    int ___pendingCount = 0;
+
+                    try
+                    {
+                        if (this.___ChildWindowControlCreationPendingList != null)
+                        {
+                            ___TimerControlCreatingPendingCount++;
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry("There are {0} multiversal windows needs to be created", this.___ChildWindowControlCreationPendingList.Count);
+                            }
+                            Multiversal.IMultiversalHostingControlInterface ___targetRenderer = this.___renderingTargetManagedRendererStrongReference;
+                            if (___targetRenderer == null && this.___renderingTargetManagedControlWeakReference != null)
+                            {
+                                ___targetRenderer = this.___renderingTargetManagedControlWeakReference.Target as Multiversal.IMultiversalHostingControlInterface;
+                            }
+                            if (___targetRenderer != null)
+                            {
+                                if (System.Threading.Monitor.TryEnter(this.___ChildWindowControlCreationPendingList, 5000))
+                                {
+                                    try
+                                    {
+                                        ___pendingCount = this.___ChildWindowControlCreationPendingList.Count;
+
+                                        for (int i = ___pendingCount - 1; i >= 0; i--)
+                                        {
+                                            try
+                                            {
+                                                System.WeakReference ___chidWindowWeakRef = this.___ChildWindowControlCreationPendingList[i];
+                                                if (___chidWindowWeakRef != null)
+                                                {
+                                                    CHtmlMultiversalWindow ___childMultiversalWindow = ___chidWindowWeakRef.Target as CHtmlMultiversalWindow;
+                                                    if (___childMultiversalWindow != null)
+                                                    {
+                                                        if (___childMultiversalWindow.___ownerElementWeakReference != null)
+                                                        {
+                                                            CHtmlElement ___iframeElement = ___childMultiversalWindow.___ownerElementWeakReference.Target as CHtmlElement;
+                                                            
+                                                            if (___iframeElement != null)
+                                                            {
+                                                                if (___iframeElement.___IsDisposing == true)
+                                                                {
+                                                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                                    {
+                                                                        commonLog.LogEntry("child element is disposing {0}. skipping now.", ___iframeElement);
+                                                                    }
+                                                                    this.___ChildWindowControlCreationPendingList.RemoveAt(i);
+                                                                    continue;
+                                                                }
+                                                                if (___iframeElement.___Document != null && ___iframeElement.___Document.___readyStateType != CHtmlReadytStateType.complete && ___iframeElement.___Document.___DocumentPaintedCount < 1)
+                                                                {
+                                                                    ___IsDocumentStatusNotReadyYet = true;
+                                                                    break;
+                                                                }
+
+                                                                Multiversal.createControlOnMultiversalWindowRendererDelegate createDelegate = new createControlOnMultiversalWindowRendererDelegate(___targetRenderer.createControl);
+                                                                System.IAsyncResult __asyncResult = ((System.Windows.Forms.Control)___targetRenderer).BeginInvoke(createDelegate, new object[] { typeof(CHtmlMultiversalRenderer), "", (int)___iframeElement.offsetWidth, (int)___iframeElement.offsetHeight, ___iframeElement.___style.___BackgroundSysColor, ___iframeElement.___style.___ForegroundSysColor, true, true, false == ___iframeElement.___IsElementVisible, false });
+
+                                                                object ___controlResult = ((System.Windows.Forms.Control)___targetRenderer).EndInvoke(__asyncResult);
+                                                                if (___controlResult != null)
+                                                                {
+                                                                    ___SuccessControlCreateCount++;
+
+                                                                    this.___ChildWindowControlCreationPendingList.RemoveAt(i);
+                                                                    ___childMultiversalWindow.___renderingTargetManagedRendererStrongReference = ___controlResult as CHtmlMultiversalRenderer;
+                                                                    ___childMultiversalWindow.___renderingTargetManagedControlWeakReference = new WeakReference(___controlResult, false);
+                                                                    ___iframeElement.___ManagedControlWeakReference = new WeakReference(___controlResult, false);
+
+                                                                    if (___childMultiversalWindow.___renderingTargetManagedRendererStrongReference != null)
+                                                                    {
+                                                                        ___childMultiversalWindow.___renderingTargetManagedRendererStrongReference.setMultiversalWindow(___childMultiversalWindow);
+                                                                    }
+                                                                    if (___controlResult is CHtmlMultiversalRenderer)
+                                                                    {
+                                                                        CHtmlMultiversalRenderer ___renderer = ___controlResult as CHtmlMultiversalRenderer;
+                                                                        // ==============================================
+                                                                        // Now Target Child Renderer (Iframe is created)
+                                                                        // If document is complete. Create Child Control
+                                                                        // ==============================================
+                                                                        if (___renderer != null)
+                                                                        {
+                                                                            if (___childMultiversalWindow.___document != null)
+                                                                            {
+                                                                                CHtmlDocument ___doc = ___childMultiversalWindow.___document;
+                                                                                if (___doc.___IsThreadAbortOccurred == false && ___doc.___Disposing == false && ___doc.___IsOnLoadWindowDocumentCompletedCalled == true)
+                                                                                {
+                                                                                    if (___doc.___ManagedControlPendingElementList != null && ___doc.___ManagedControlPendingElementList.Count > 0)
+                                                                                    {
+                                                                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                                                        {
+                                                                                            commonLog.LogEntry("IFrame Window is created for {0} contains document {1} needs to create sub controls {2}", ___childMultiversalWindow, ___doc, ___doc.___ManagedControlPendingElementList.Count);
+                                                                                        }
+                                                                                        CHtmlMultiversalRenderer.CreateControlWithDocumentDelegate ___createControlInvoker = new CHtmlMultiversalRenderer.CreateControlWithDocumentDelegate(___renderer.createControlFromDocument);
+                                                                                        ___renderer.BeginInvoke(___createControlInvoker, new object[] { ___doc });
+                                                                                        // ___renderer.EndInvoke(___controlAsync);
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                        }
+                                                                    }
+
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                            }
+                                            catch (Exception exControlAdd)
+                                            {
+                                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                                                {
+                                                    commonLog.LogEntry("MultiversalTimer_Tick Control Add Operation Exception", exControlAdd);
+                                                    // it may failed to next operation. so remove it from list
+                                                 
+                                                 
+                                                }
+                                                this.___ChildWindowControlCreationPendingList.RemoveAt(i);
+                                                continue;
+
+                                            }
+
+
+                                        }
+                                    }
+
+                                    catch (Exception exLoop)
+                                    {
+                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                                        {
+                                            commonLog.LogEntry("MultiversalTimer_Tick Control Add Loop Exception", exLoop);
+                                            // it may failed to next operation. so remove it from list
+
+                                        }
+                                    }
+                                    finally
+                                    {
+                                        System.Threading.Monitor.Exit(this.___ChildWindowControlCreationPendingList_LockingObject);
+                                    }
+                                }
+                            }
+                            if (___SuccessControlCreateCount == ___pendingCount)
+                            {
+                                this.___ChildWindowControlCreationPendingList = null;
+                                ___NeedsDiposeTimerAndExit = true;
+                            }
+                        }
+
+                        if (___currentRenderingManagedControl != null)
+                        {
+
+                        }
+
+                    }
+
+                    catch
+                    { }
+                    finally
+                    {
+                        if (this.___multiHtmlCraftWindowTimer != null)
+                        {
+                            if (___NeedsDiposeTimerAndExit == true)
+                            {
+                                this.___multiHtmlCraftWindowTimer.Dispose();
+                                this.___multiHtmlCraftWindowTimer = null;
+                            }
+                            if (this.___multiHtmlCraftWindowTimer != null)
+                            {
+
+                                if (___TimerControlCreatingPendingCount > CHtmlMultiversalWindow.___MultiversalTimerControlIntervalArray.Length - 1)
+                                {
+
+                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                                    {
+                                        commonLog.LogEntry("Multiversal Control Create Timer ___hasInner been expired. Dispose Timer...");
+                                        // it may failed to next operation. so remove it from list
+
+                                    }
+                                    this.___multiHtmlCraftWindowTimer.Dispose();
+                                    this.___multiHtmlCraftWindowTimer = null;
+
+                                }
+                                else
+                                {
+                                    if (___IsDocumentStatusNotReadyYet == true)
+                                    {
+                                        this.___multiHtmlCraftWindowTimer.Change(1000, 1000);
+                                    }
+                                    else
+                                    {
+                                        if (___IsOperationOnlyCreateControl == true)
+                                        {
+                                            this.___multiHtmlCraftWindowTimer.Change(250, CHtmlMultiversalWindow.___MultiversalTimerControlIntervalArray[___TimerControlCreatingPendingCount]);
+                                        }
+                                        else
+                                        {
+                                            this.___multiHtmlCraftWindowTimer.Change(250, 250);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                catch (Exception exFinal)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                    {
+                        commonLog.LogEntry("Multiversal Control Create Timer final exception. ", exFinal);
+                        // it may failed to next operation. so remove it from list
+
+                    }
+                }
+                finally
+                {
+                    System.Threading.Monitor.Exit(this.___multiHtmlCraftWindowTimerLockingObject);
+                }
+            }
+        }
+
+        public void ___resetParentMultiversalWindow(Interfaces.IMultiversalWindow ___parentWindow)
+        {
+
+            if (this.___parentMultiversalWindowWeakReference != null)
+            {
+                CHtmlMultiversalWindow __oldWindow = this.___parentMultiversalWindowWeakReference.Target as CHtmlMultiversalWindow;
+                if (__oldWindow != null)
+                {
+                    if (__oldWindow.childMultiversalWindows.ContainsKey(this.GetHashCode()) == true)
+                    {
+                        __oldWindow.childMultiversalWindows.Remove(this.GetHashCode());
+                    }
+                }
+                this.___parentMultiversalWindowWeakReference = null;
+            }
+            if (___parentWindow != null)
+            {
+                this.___parentMultiversalWindowWeakReference = new WeakReference(___parentWindow, false);
+                ___parentWindow.___setChildMultiversalWindow(this);
+                this.___WindowLevel = ___parentWindow.MultiverseWindowLevel + 1;
+            }
+            this.___TopMultiversalWindowWeakReference = null;
+            CHtmlMultiversalWindow topWidnow = this.___getTopMultiversalWindow();
+            if (topWidnow != null)
+            {
+                this.___TopMultiversalWindowWeakReference = new WeakReference(topWidnow, false);
+            }
+        }
+        public CHtmlMultiversalWindow getTopMultiversalWindow()
+        {
+            if (this.___TopMultiversalWindowWeakReference != null)
+            {
+                return this.___TopMultiversalWindowWeakReference.Target as CHtmlMultiversalWindow;
+            }
+            else
+            {
+                CHtmlMultiversalWindow topWidnow = this.___getTopMultiversalWindow();
+                if (topWidnow != null)
+                {
+                    this.___TopMultiversalWindowWeakReference = new WeakReference(topWidnow, false);
+                    return this.___TopMultiversalWindowWeakReference.Target as CHtmlMultiversalWindow;
+                }
+            }
+            return this;
+        }
+        /// <summary>
+        /// Recalucutate Top Multiversal Window based upon parentMultiversal Winow
+        /// </summary>
+        /// <returns>Top Multiversal Widnow (may be this)</returns>
+        private CHtmlMultiversalWindow ___getTopMultiversalWindow()
+        {
+            if (this.___parentMultiversalWindowWeakReference != null)
+            {
+                CHtmlMultiversalWindow ___parentWindow = this.___parentMultiversalWindowWeakReference.Target as CHtmlMultiversalWindow;
+                if (___parentWindow == null)
+                {
+                    return this;
+                }
+                else
+                {
+                    int ___LookupCount = 0;
+                    while (___parentWindow != null)
+                    {
+                        ___LookupCount++;
+                        if (___LookupCount > 16)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel > 0)
+                            {
+                                commonLog.LogEntry("there is top Multiversal Widnow may be too deep. returns {0}", ___parentWindow);
+                            }
+                            return ___parentWindow;
+                        }
+                        if (___parentWindow.___parentMultiversalWindowWeakReference != null)
+                        {
+                            ___parentWindow = ___parentWindow.___parentMultiversalWindowWeakReference.Target as CHtmlMultiversalWindow;
+                            continue;
+                        }
+                        else
+                        {
+                            // Top Window is normally does not change.
+                            // We should create weak reference for next search.
+
+                            return ___parentWindow;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+#if use_rhino
+        /// <summary>
+        /// This function is copy interpreted function property 
+        /// specially used for setting 'caller' in Jquery 1.7.2 StorageManager
+        /// </summary>
+        /// <param name="___originProperty"></param>
+        /// <param name="___targetProperty"></param>
+        /// <param name="___interpretedFunction"></param>
+        private void ___copyCallerToFunctionInstanceSpecial(string ___originProperty, string ___targetProperty, org.mozilla.javascript.Function ___interpretedFunction)
+        {
+            try
+            {
+                object objCaller = ___interpretedFunction.get(___targetProperty, ___interpretedFunction);
+                object objGetInstance = ___interpretedFunction.get(___originProperty, ___interpretedFunction);
+                if (objCaller == org.mozilla.javascript.UniqueTag.NOT_FOUND && objGetInstance is org.mozilla.javascript.Function)
+                {
+                    ___interpretedFunction.put(___targetProperty, ___interpretedFunction, objGetInstance);
+                    if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                    {
+                       commonLog.LogEntry("performed ___copyCallerToFunctionInstanceSpecial({0}, {1}, {2})  ", ___originProperty, ___targetProperty, objGetInstance);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                {
+                   commonLog.LogEntry("___copyCallerToFunctionInstanceSpecial() Exception.  ", ex);
+                }
+            }
+        }
+#endif
+        public object get(string ___name)
+        {
+
+            object __objectInList;
+
+#if DEBUG
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 50)
+            {
+                commonLog.LogEntry("CHtmlMultiversalWindow entering {0}.___getInner(\'{1}\')", this, ___name);
+
+            }
+#endif
+
+            try
+            {
+                if (this.___WindowsPropertiesList != null && this.___WindowsPropertiesList.TryGetValue(___name, out __objectInList) == true)
+                {
+
+                    /*
+                        if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 1000)
+                        {
+                           commonLog.LogEntry("{0}.___getInner(\'{1}\') found {2}", this, ___name, __objectInList);
+                        }
+                        if (___name.Length == 14 && string.Equals(___name, "StorageManager", StringComparison.Ordinal) == true)
+                        {
+                            if ((__objectInList is org.mozilla.javascript.Undefined) == false)
+                            {
+                                ___copyCallerToFunctionInstanceSpecial("getInstance", "caller", __objectInList as org.mozilla.javascript.Function);
+                            }
+                        }
+                    */
+                    return __objectInList;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
+                {
+                    commonLog.LogEntry("CHtmlMultiversalWindow ___getInner error ", ex);
+                }
+            }
+
+
+            // CHtmlMultiversalRenderer ___currentRenderer = null;
+
+            // ============================
+            // final values check.
+            // ============================
+
+            switch (___name)
+            {
+                case "id":
+                    if (string.IsNullOrEmpty(this.___id) == false)
+                    {
+                        return this.___id;
+                    }
+                    else
+                    {
+                        return "";
+                    }
+                case "execScript": // IE11 depriciated window.execScript(). IE Only old feature
+                case "nodeType":
+                    return MultiHtmlCraft.Interfaces.MultiversalUniqueTag.UniqueType.Undefined;
+                case "name":
+                    if (string.IsNullOrEmpty(this.___name) == false)
+                    {
+                        return this.___name;
+                    }
+                    else
+                    {
+                        return "";
+                    }
+
+
+                //   case "History":
+                //         return this.___WindowPrototypeRootNode.___HistoryPrototypeWeakReference.Target;
+                // case "Event":
+                //    return this.___WindowPrototypeRootNode.___EventPrototypeWeakReference.Target;
+                //case "Screen":
+                //   return this.___WindowPrototypeRootNode.___ScreenPrototypeWeakReference.Target;
+                // case "Element":
+                //    return this.___WindowPrototypeRootNode.___ElementPrototypeWeakReference.Target;
+                //   case "Navigator":
+                //        return this.___WindowPrototypeRootNode.___NavigatorPrototypeWeakReference.Target;
+                //   case "Console":
+                //       return this.___WindowPrototypeRootNode.___ConsolePrototypeWeakReference.Target;
+                //   case "Clipboard":
+                //       return this.___WindowPrototypeRootNode.___ClipboardWeakReference.Target;
+                //  case "Node":
+                //     return this.___WindowPrototypeRootNode;
+                case "XPathResult":
+                    return this.___WindowPrototypeRootNode.___XPathResultPrototypeWeakReference.Target;
+                case "StyleSheet":
+                    return this.___WindowPrototypeRootNode.___StyleSheetPrototypeWeakReference.Target;
+                case "CSSStyleSheet":
+                    return this.___WindowPrototypeRootNode.___CSSStyleSheetPrototypeWeakReference.Target;
+                case "clipboardData":
+                    return null;
+                case "devicePixelRatio":
+                    return (double)0.85;
+                case "status":
+                case "defaultStatus":
+                    return this.___WindowStatusString;
+                case "top":
+                    if (this.___TopMultiversalWindowWeakReference != null)
+                    {
+                        return this.___TopMultiversalWindowWeakReference.Target as CHtmlMultiversalWindow;
+                    }
+                    else
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel > 1000)
+                        {
+                            commonLog.LogEntry("BUGBUG! there is no top Multiversal Widnow. Return this as ad hoc.");
+                        }
+                        return this;
+                    }
+                case "document":
+                    return this.___document;
+                case "location":
+                    return this.___locationBase;
+
+                case "length":
+                    if (this.___document != null)
+                    {
+                        return ___document.___get_window_length_count_viaWidow();
+                    }
+                    return 0;
+                case "frames":
+                    if (this.___document != null)
+                    {
+                        return this.___document.___get_window_frames_viaWindow();
+                    }
+                    return MultiHtmlCraft.Interfaces.MultiversalUniqueTag.UniqueType.Undefined;
+                case "screen":
+                    return null;
+                case "speechSynthesis":
+                    return this.___speechSynthehesis;
+                case "navigator":
+                case "clientInformation":
+                    return this.___navigator;
+                case "external":
+                    return this.___external;
+                case "crypto":
+                    return this.___crypto;
+                case "closed":
+                    return this.___IsWindowClosed;
+                case "history":
+                    return this.___history;
+                case "applicationCache":
+                    return null;
+                case "offscreenBuffering":
+                    return true;
+                case "parent":
+                case "parentWindow":
+                    if (this.___parentMultiversalWindowWeakReference != null)
+                    {
+                        return this.___parentMultiversalWindowWeakReference.Target;
+                    }
+                    // if there is no parent explicitly set. returns current Window.
+                    return this;
+                case "statusbars":
+                    return null;
+                case "localStorage":
+                    if (this.___document != null)
+                    {
+                        return this.___document.___get_localStorage_viaWindow();
+                    }
+                    return MultiHtmlCraft.Interfaces.MultiversalUniqueTag.UniqueType.Undefined;
+                case "sessionStorage":
+                    if (this.___document != null)
+                    {
+                        return this.___document.___get_sessionStorage_viaWindow();
+                    }
+                    return MultiHtmlCraft.Interfaces.MultiversalUniqueTag.UniqueType.Undefined;
+                case "screenX":
+                case "screenY":
+                case "screenLeft":
+                case "screenTop":
+                    return (double)0;
+                case "scrollX":
+                    {
+                        return 0;
+                    }
+                case "scrollY":
+                    {
+                        return 0;
+                    }
+                case "pageYOffset":
+                    {
+                        return 0;
+                    }
+                //break;
+                case "pageXOffset":
+                    {
+                        return 0;
+                    }
+                //break;
+                case "outerHeight":
+                    return 0;
+
+                case "outerWidth":
+
+                    return 0;
+
+
+                case "innerHeight":
+                    return 0;
+
+
+
+                case "innerWidth":
+                    return 0;
+
+                case "opener":
+                    if (this.___parentMultiversalWindowWeakReference != null)
+                    {
+                        return 0;
+                    }
+                    return MultiHtmlCraft.Interfaces.MultiversalUniqueTag.UniqueType.Undefined;
+                case "frameElement":
+                    if (this.___parentMultiversalWindowWeakReference != null)
+                    {
+                        return 0;
+                    }
+                    return null;
+                case "personalbar":
+                case "statusbar":
+                case "toolbar":
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("TODO: CHtmlMutiversalWindow {0}.___getInner(\'{1}\') returns null", this, ___name);
+                    }
+                    return MultiHtmlCraft.Interfaces.MultiversalUniqueTag.UniqueType.Undefined;
+                case commonHTML.ENGINE_SHUTDOWN_STRING:
+                    return this.___IsDispoing;
+                case "event":
+                    return this.___event;
+                case "URL":
+                    return this.___WindowURLObjectInstance;
+                case "performance":
+                case "mozPerformance":
+                case "msPerformance":
+                case "webkitPerformance":
+                case "oPerformance":
+                    return this.___performance;
+                case "exports":
+                    if (this.___WindowsPropertiesList.ContainsKey("exports") == true)
+                    {
+                        return this.___WindowsPropertiesList["exports"];
+                    }
+                    else
+                    {
+                        return MultiHtmlCraft.Interfaces.MultiversalUniqueTag.UniqueType.Undefined;
+                    }
+                /*
+                case "orientation":
+                    return Multiversal.UniqueTag.Undefined;
+                 */
+                case "animationStartTime":
+                case "mozAnimationStartTime":
+                case "msAnimationStartTime":
+                case "webKitAnimationStartTime":
+                    return this.___windowAnimationStartTime;
+                case "undefined":
+                    return MultiHtmlCraft.Interfaces.MultiversalUniqueTag.UniqueType.Undefined;
+            }
+            if (this.___document != null)
+            {
+                CHtmlElement ___elementInDocID = null;
+                if (this.___document.___DocumentElementIDList != null && this.___document.___DocumentElementIDList.Count > 0 && this.___document.___DocumentElementIDList.TryGetValue(___name, out ___elementInDocID) == true)
+                {
+
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("window {0}.___getInner(\'{1}\') found {2} in document", this, ___name, ___elementInDocID);
+                    }
+                    return ___elementInDocID;
+                }
+            }
+
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("called {0}.___getInner(\'{1}\') returns null...", this, ___name);
+            }
+            return MultiversalUniqueTag.UniqueType.Not_Found;
+        }
+        public object get(int ___index)
+        {
+            if (___index >= 0 && this.___WindowsPropertiesList.Count > ___index)
+            {
+                return this.___WindowsPropertiesList.Values[___index];
+            }
+
+            return MultiversalUniqueTag.UniqueType.Not_Found;
+        }
+        public void Dispose()
+        {
+            this.___IsDispoing = true;
+            this.___CleanUp();
+            GC.SuppressFinalize(this);
+        }
+        public void delete(string ___name)
+        {
+            try
+            {
+                if (this.___WindowsPropertiesList != null)
+                {
+                    this.___WindowsPropertiesList.Remove(___name);
+                }
+                else
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("CHtmlMultiversalWindow.delete({0}) skip because there is no container.", ___name);
+                    }
+                }
+            }
+            catch (Exception exDelete)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("CHtmlMultiversalWindow.delete() exception", exDelete);
+                }
+            }
+
+        }
+        public void delete(int ___index)
+        {
+            bool ___isDeleteByIndexSuccess = false;
+            try
+            {
+                if (this.___WindowsPropertiesList != null)
+                {
+                    if (___index >= 0 && this.___WindowsPropertiesList.Count > ___index)
+                    {
+                        this.___WindowsPropertiesList.RemoveAt(___index);
+                        ___isDeleteByIndexSuccess = true;
+                    }
+                }
+            }
+            catch (Exception exDelete)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("CHtmlMultiversalWindow.delete() exception", exDelete);
+                }
+            }
+            if (___isDeleteByIndexSuccess == false)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("CHtmlMultiversalWindow.delete({0}) skipped.", ___index);
+                }
+            }
+        }
+        public object hasOwnProperty(object[] args)
+        {
+            int argsLen = 0;
+            if (args != null)
+            {
+                argsLen = args.Length;
+            }
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("CHtmlMultiversalWindow.hasOwnProperty({0}:len:{1}) called", args, argsLen);
+            }
+
+            return (object)this.has(___name);
+        }
+        public void ___executeEventFunction(string __eventName, CHtmlElement ___element, object ___objFunction, object[] ___args, int ___souceType)
+        {
+
+            this.___executeEventFunction(__eventName, ___element, ___objFunction, ___args, ___souceType, null);
+        }
+        public void ___executeDocumentEventFunction(string __eventName, object ___objFunction, object[] ___args)
+        {
+            this.___executeEventFunction(__eventName, null, ___objFunction, ___args, 10);
+        }
+
+        // New: execute function with explicit this object (for non-Element sources like XHR)
+        internal void ___executeEventFunctionWithThis(string __eventName, object __thisObj, object ___objFunction, object[] ___args, int ___souceType)
+        {
+            if (this.___IsDispoing == true || this.isWindowNavigating == true)
+            {
+                return;
+            }
+            // Best-effort event wiring
+            this.___setEventSrcElement(this.___event, null, null);
+
+            if (___objFunction == null)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel > 8)
+                {
+                    commonLog.LogEntry("executeEventFunctionWithThis: function is null for {0}", __eventName);
+                }
+                return;
+            }
+            CHtmlScriptResult ___scriptResult = null;
+            try
+            {
+                if (this.___document != null && this.___document.___scriptEventList != null)
+                {
+                    ___scriptResult = new CHtmlScriptResult();
+                    ___scriptResult.Url = __eventName + " : " + ___objFunction.ToString();
+                    this.___document.___scriptEventList.Add(___scriptResult);
+                }
+
+                if (commonHTML.IsObjectStringType(___objFunction) == true)
+                {
+                    var ___strFunction = commonHTML.GetStringValue(___objFunction);
+                    IMultiversalScriptProcessor ___processorStr = this.___multiversalScriptsHost.defaultScriptScope.getMultiversalScriptProcessor();
+                    if (___processorStr != null)
+                    {
+                        ___processorStr.execute(___strFunction);
+                    }
+                }
+                else
+                {
+                    IMultiversalScriptProcessor ___processor = this.___multiversalScriptsHost.GetMultiversalScriptProcessor("javascript");
+                    if (___processor != null)
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel > 8)
+                        {
+                            commonLog.LogEntry(" executeEventFunctionWithThis() is executing {0} this={1}", ___objFunction, __thisObj);
+                        }
+                        // Important: pass explicit this object
+                        if (___args == null)
+                        {
+                            ___args = new object[] { this.___event };
+                        }
+                        ___processor.callfunction(___objFunction, ___processor.multiversalscope, __thisObj, ___args);
+                    }
+                }
+                if (___scriptResult != null)
+                {
+                    ___scriptResult.result = 200;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (___scriptResult != null)
+                {
+                    ___scriptResult.resultText = __eventName + " execution error";
+                    ___scriptResult.result = 500;
+                    ___scriptResult.errorDetail = commonData.GetExceptionAsString(ex);
+                }
+                if (commonLog.LoggingEnabled)
+                {
+                    if (commonLog.LogLevel <= 3)
+                    {
+                        commonLog.LogEntry("executeEventFunctionWithThis() exception: " + ex.Message);
+                    }
+                    else
+                    {
+                        commonLog.LogEntry("executeEventFunctionWithThis({0}) Exception", __eventName, ex);
+                    }
+                }
+            }
+            finally
+            {
+                this.___event.___resetToDefaults();
+            }
+        }
+
+        // ...rest of existing code...
+    }
+
+}

@@ -1,0 +1,388 @@
+﻿using ClearScriptProcessor;
+using Microsoft.ClearScript;
+using Microsoft.ClearScript.V8;
+using MultiHtmlCraft.Interfaces;
+using NiL.JS.BaseLibrary;
+using NilJsProcessor;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Schema;
+using static System.Formats.Asn1.AsnWriter;
+using MultiHtmlCraft.Core; // ensure MutationObserver visible
+
+namespace MultiHtmlCraft.Core
+{
+    public class CHtmlMultiversalScriptsHost : List<IMultiversalScriptScope> , IDisposable
+    {
+        internal Dictionary<string, MultiHtmlCraft.Interfaces.IMultiversalScriptProcessor> ___HostScriptProcessors = null;
+
+        internal IMultiversalScriptScope ___defaultScriptScope = null;
+
+        public CHtmlMultiversalScriptsHost()
+        {
+            ___HostScriptProcessors = new Dictionary<string, IMultiversalScriptProcessor>();
+      
+        }
+        public IMultiversalScriptScope defaultScriptScope
+        {
+            get
+            {
+                return ___defaultScriptScope;
+            }
+        }
+
+
+        public void Add(IMultiversalScriptScope scriptScope)
+        {
+            try
+            {
+                base.Add(scriptScope);
+
+                if(scriptScope.isDefaultMultiversalProcessor())
+                {
+                    if (___defaultScriptScope != null)
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                        {
+                            commonLog.LogEntry($"MultiversalScriptsHost default script processor already set, replacing with new one : {scriptScope}");
+                        }
+                    }else
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                        {
+                            commonLog.LogEntry($"MultiversalScriptsHost setting default script processor :{scriptScope}");
+                        }
+                    }
+                    ___defaultScriptScope = scriptScope;
+                }
+                switch (scriptScope)
+                {
+                    case ClearScriptProcessorScope v8Scope:
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                            {
+                                commonLog.LogEntry("entering MultiversalScriptsHost register classes {0}", v8Scope.GetType().ToString() );
+                            }
+                        }
+                        try
+                        {
+                            v8Scope.AddHostType("Node", typeof(CHtmlNode));
+                            v8Scope.AddHostType("Document", typeof(CHtmlDocument));
+                            v8Scope.AddHostType("Image", typeof(CHtmlImage));
+                            v8Scope.AddHostType("XMLHttpRequest", typeof(CHtmlXMLHttpRequest));
+                            v8Scope.AddHostType("Request", typeof(CHtmlRequest));
+
+
+                            // AddHostTypeXMLHttpRequestCalled?.Invoke(this, EventArgs.Empty);
+                            v8Scope.AddHostType("URL", typeof(CHtmlWindowURL));
+              
+                            v8Scope.AddHostType("Element", typeof(CHtmlElement));
+                            v8Scope.AddHostType("HTMLElement", typeof(CHtmlElement));
+                            v8Scope.AddHostType("HTMLIFrameElement", typeof(CHtmlElement));
+                            v8Scope.AddHostType("HTMLDivElement", typeof(CHtmlElement));
+                            v8Scope.AddHostType("HTMLInputElement", typeof(CHtmlInputElement));
+                            v8Scope.AddHostType("HTMLButtonElement", typeof(CHtmlElement));
+                            v8Scope.AddHostType("SVGElement", typeof(CHtmlSVGElement));
+                            v8Scope.AddHostType("Worker", typeof(CHtmlWorkerWindow));
+                            v8Scope.AddHostType("SharedWorker", typeof(CHtmlSharedWorkerWindow));
+
+
+                            v8Scope.AddHostType("URLSearchParams", typeof(CHtmlURLSearchParams));
+                        
+
+                      
+                            v8Scope.AddHostType("FontFace", typeof(CHtmlFontFace));
+                            // Register MutationObserver so scripts can use `new MutationObserver()`
+                            // v8Scope.AddHostType("MutationObserver", typeof(CHtmlMutationObserver));
+                            /*
+                              v8Scope.engine.Execute(@"
+     console.log('1. start');
+     console.log('2. MutationObserver =', MutationObserver);
+     console.log('3. new MutationObserver =', new MutationObserver(() => {}));
+     console.log('4. instanceof =', new MutationObserver(() => {}) instanceof MutationObserver);
+     console.log('5. end');
+ ");
+                            */
+                            // create observer without passing ScriptObject to constructor (safer)
+                            v8Scope.AddHostObject("___createMutationObserver", new Func<object>(() =>
+                            {
+                                return new MultiHtmlCraft.Core.CHtmlMutationObserver();
+                            }));
+
+                            // register function to set ScriptObject callback from the V8 context
+                            v8Scope.AddHostObject("___registerMutationObserverCallback", new Action<object, object>((observerObj, callbackObj) =>
+                            {
+                                try
+                                {
+                                    if (observerObj != null && callbackObj is Microsoft.ClearScript.ScriptObject so)
+                                    {
+                                        var obsInstance = observerObj;
+                                        var mi = obsInstance.GetType().GetMethod("SetScriptCallback", new Type[] { typeof(Microsoft.ClearScript.ScriptObject) });
+                                        if (mi != null)
+                                        {
+                                            mi.Invoke(obsInstance, new object[] { so });
+                                        }
+                                        else
+                                        {
+                                            // fallback: attempt dynamic invocation
+                                            try { ((dynamic)obsInstance).SetScriptCallback(so); } catch { }
+                                        }
+                                    }
+                                }
+                                catch { }
+                            }));
+
+                            try
+                            {
+                                if (v8Scope.engine == null)
+                                {
+                                    System.Diagnostics.Debug.WriteLine("MutationObserver JS init skipped: engine is null");
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine("MutationObserver JS init: executing wrapper script");
+                                    // probe engine responsiveness first
+                                    try
+                                    {
+                                        v8Scope.engine.Execute("0;");
+                                        System.Diagnostics.Debug.WriteLine("MutationObserver JS init: probe execute returned");
+                                    }
+                                    catch (Exception exProbe)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine("MutationObserver JS probe error: " + exProbe);
+                                    }
+
+                                    // Executing the wrapper here has caused V8 to hang in some
+                                    // environments (likely due to ClearScript/V8 host type
+                                    // registration interactions). Skip executing the wrapper
+                                    // during registration. The host objects
+                                    // ___createMutationObserver and
+                                    // ___registerMutationObserverCallback are available; if
+                                    // scripts need a MutationObserver constructor they can
+                                    // define it at runtime from JS using these host objects.
+                                    System.Diagnostics.Debug.WriteLine("MutationObserver JS init: skipped wrapper execute to avoid hang");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine("MutationObserver JS init error: " + ex);
+                            }
+                            System.Diagnostics.Debug.WriteLine("JS実行完了");  
+                                                  
+                            /*
+
+                            dynamic setupHasInstance = v8Scope.engine.Evaluate("""
+    (
+    function(obj, host, engine){
+    Symbol.hasInstance ??= Symbol("Symbol.hasInstance");
+
+    Object.defineProperty(Object.getPrototypeOf(obj), Symbol.hasInstance, {
+        value: function(instance) {
+            if (instance == null) return false;
+            const genericType = host.type(host.typeOf(this));
+            return host.isType(genericType, instance);
+        },
+        writable: true,
+        configurable: true
+    });
+    )
+    """)
+                            */
+                            ;
+
+
+
+                            HostFunctions host = new HostFunctions();
+                            ExtendedHostFunctions exHost = new ExtendedHostFunctions();
+                            /*
+                            setupHasInstance(host, exHost, v8Scope.engine);
+                            setupHasInstance(new Action(() => { }), exHost, v8Scope.engine);
+                            setupHasInstance(new PropertyBag(), exHost, v8Scope.engine);
+                            */
+
+
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                            {
+                                commonLog.LogEntry(" MultiversalScriptsHost register classes sucess for ClearScriptProcessorScope ");
+                            }
+                        } catch (Exception ex)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                            {
+                                commonLog.LogEntry(" MultiversalScriptsHost register classes error for ClearScriptProcessorScope ", ex);
+                            }
+                        }
+                        break;
+                    case NilJsProcessor.NilJsScope niljsscope:
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                            {
+                                commonLog.LogEntry("entering MultiversalScriptsHost register classes {0} for NilJsScope", niljsscope.GetType().ToString());
+                            }
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                            {
+                                commonLog.LogEntry(" MultiversalScriptsHost register classes sucess for NilJsScope ");
+                            }
+                        }
+                        try
+                        {
+                            // Register essential constructors so scripts can use e.g. new Image(), new XMLHttpRequest(), etc.
+                            niljsscope.defineConstructor(typeof(CHtmlNode), "Node");
+                            niljsscope.defineConstructor(typeof(CHtmlDocument), "Document");
+                            niljsscope.defineConstructor(typeof(CHtmlImage), "Image");
+                            niljsscope.defineConstructor(typeof(CHtmlXMLHttpRequest), "XMLHttpRequest");
+                            niljsscope.defineConstructor(typeof(CHtmlRequest), "Request");
+                            niljsscope.defineConstructor(typeof(CHtmlWindowURL), "URL");
+                            niljsscope.defineConstructor(typeof(CHtmlElement), "Element");
+                            niljsscope.defineConstructor(typeof(CHtmlElement), "HTMLElement");
+                            niljsscope.defineConstructor(typeof(CHtmlElement), "HTMLIFrameElement");
+                            niljsscope.defineConstructor(typeof(CHtmlElement), "HTMLDivElement");
+                            niljsscope.defineConstructor(typeof(CHtmlInputElement), "HTMLInputElement");
+                            niljsscope.defineConstructor(typeof(CHtmlElement), "HTMLButtonElement");
+                            niljsscope.defineConstructor(typeof(CHtmlSVGElement), "SVGElement");
+                            niljsscope.defineConstructor(typeof(CHtmlWorkerWindow), "Worker");
+                            niljsscope.defineConstructor(typeof(CHtmlSharedWorkerWindow), "SharedWorker");
+                            niljsscope.defineConstructor(typeof(CHtmlURLSearchParams), "URLSearchParams");
+                            niljsscope.defineConstructor(typeof(CHtmlFontFace), "FontFace");
+                            // Register MutationObserver constructor for NilJs
+                            niljsscope.defineConstructor(typeof(CHtmlMutationObserver), "MutationObserver");
+                            // Do not define MutationObserver here so window.___createObject will be used instead.
+                        }
+                        catch (Exception ex)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                            {
+                                commonLog.LogEntry(" MultiversalScriptsHost register classes error for NilJsScope", ex);
+                            }
+                        }
+
+                        break;
+                    default:
+                        {
+                            string unkownsciptScpope = scriptScope.GetType().ToString();
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                            {
+                                commonLog.LogEntry("MultiversalScriptsHost calling unkownsciptScpope : {0}", unkownsciptScpope);
+                            }
+                            // Add Dynamic Type from Assembly for Custom ScriptScope
+                            try
+                            {
+
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                                {
+                                    commonLog.LogEntry(" MultiversalScriptsHost register classes sucess for unkownsciptScpope ");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                                {
+                                    commonLog.LogEntry(" MultiversalScriptsHost register classes error for unkownsciptScpope ", ex);
+                                }
+                            }
+
+                        }
+                        break;
+                }
+
+                foreach (string s in scriptScope.getMultiversalInvokeScriptNames())
+                {
+
+                    ___HostScriptProcessors[s] = scriptScope.getMultiversalScriptProcessor();
+
+                }
+            }
+            catch (Exception e)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel < 10)
+                {
+                    commonLog.LogEntry("ScriptHost.Add() Error.", this);
+                }
+            }
+        }
+
+  
+
+        public MultiHtmlCraft.Interfaces.IMultiversalScriptProcessor GetMultiversalScriptProcessor(string scriptName)
+        {
+            IMultiversalScriptProcessor scriptProcessor = null;
+            try
+            {
+                if (___HostScriptProcessors.TryGetValue(scriptName, out scriptProcessor))
+                {
+
+                    return scriptProcessor;
+                }
+
+                else return ___defaultScriptScope.getMultiversalScriptProcessor();
+
+
+            }
+            catch (Exception e)
+            {
+                {
+                    return null;
+                }
+
+            }
+        }
+
+        public MultiHtmlCraft.Interfaces.IMultiversalScriptProcessor GetMultiversalScriptProcessor(Type scriptType)
+        {
+            IMultiversalScriptProcessor scriptProcessor = null;
+            try
+            {
+                foreach (var kvp in ___HostScriptProcessors)
+                {
+                    if (kvp.Value.GetType() == scriptType)
+                    {
+                        scriptProcessor = kvp.Value;
+                        return scriptProcessor;
+                    }
+                }
+                return ___defaultScriptScope.getMultiversalScriptProcessor();
+            }
+            catch (Exception e)
+            {
+                {
+                    return null;
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                foreach (var scriptScope in this)
+                {
+                    if (commonHTML.isObjectNullOrUndefined(scriptScope) && scriptScope is IDisposable)
+                    {
+                        IDisposable disposableHost = scriptScope as IDisposable;
+                        disposableHost.Dispose();
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+            }
+        }
+
+        public void Remove(IMultiversalScriptProcessor scriptProcessor)
+        {
+            this.Remove(scriptProcessor);
+        }
+        public IMultiversalScriptScope GetScriptScope(string scriptType)
+        {
+            return this.FirstOrDefault(x => x.GetType().Name == scriptType);
+        }
+
+    }
+}

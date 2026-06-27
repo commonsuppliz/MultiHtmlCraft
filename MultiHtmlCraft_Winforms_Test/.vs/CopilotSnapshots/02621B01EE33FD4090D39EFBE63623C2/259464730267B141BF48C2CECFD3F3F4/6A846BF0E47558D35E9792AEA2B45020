@@ -1,0 +1,182 @@
+﻿using MultiHtmlCraft.Core;
+using MultiHtmlCraft.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MultiHtmlCraft
+{
+    public class CHtmlWorkerWindow : CHtmlMultiversalWindow, ICHtmlWorker
+    {
+        public static event EventHandler? InstanceCreated;
+        public string baseUrl
+        {
+            get; set;
+        }
+        /// <summary>
+        /// Worker Window Constructor
+        /// </summary>
+        /// <param name="args"></param>
+        public CHtmlWorkerWindow(params string[] args)
+    : base(null, true, IMultiversalWindowType.WorkerWindow, args)
+        {
+            if (InstanceCreated != null)
+            {
+                InstanceCreated?.Invoke(this, EventArgs.Empty);
+            }
+            /*
+            if (this.___parentMultiversalWindowWeakReference?.Target is CHtmlMultiversalWindow parentWindow)
+            {
+                baseUrl = parentWindow.___getCurrentUrl();
+            }
+            */
+
+            if (!string.IsNullOrEmpty(baseUrl) && args != null && args.Length > 0 && !string.IsNullOrEmpty(args[0]))
+            {
+                string fullUrl = new Uri(new Uri(baseUrl), args[0]).ToString();
+                this.___navigateUrl(fullUrl, null);
+            }
+            else if (args != null && args.Length > 0 && !string.IsNullOrEmpty(args[0]))
+            {
+                this.___navigateUrl(args[0], null);
+            }
+
+            var _curUrl = base.___getCurrentUrl();
+
+
+        }
+        public void addEventListener(string type, EventHandler handler)
+        {
+            base.addEventListener(type, handler);
+        }
+        public void removeEventListener(string type, EventHandler handler)
+        {
+            base.removeEventListener(type, handler);
+        }
+        private object _onMessageHandler;
+        public object OnMessageHandler
+        {
+            get => _onMessageHandler;
+            set
+            {
+                _onMessageHandler = value;
+                // WorkerWindow の onmessage を V8ScriptObject で正しく呼び出す
+                if (value != null && value.GetType().Name.Contains("V8ScriptObject"))
+                {
+                    // V8ScriptObject の場合はイベント発火時に直接呼び出す
+                    base.___set_onfunction_property("onmessage", value);
+                }
+                else
+                {
+                    base.___set_onfunction_property("onmessage", value);
+                }
+            }
+        }
+        public void SetOnMessage(object handler)
+        {
+            OnMessageHandler = handler;
+        }
+        // WorkerWindow で message イベントを受信した際に V8ScriptObject を呼び出す
+        public void HandleWorkerMessage(object messageEvent)
+        {
+            if (_onMessageHandler != null && _onMessageHandler.GetType().Name.Contains("V8ScriptObject"))
+            {
+                try
+                {
+                    dynamic v8Func = _onMessageHandler;
+                    v8Func(messageEvent); // messageEvent を引数として呼び出す
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled)
+                        commonLog.LogEntry("V8ScriptObject onmessage invoke error: " + ex.Message);
+                }
+            }
+        }
+        public bool dispatchEvent(object evt)
+        {
+            var result = base.dispatchEvent(new object[] { evt });
+            return result is bool b ? b : false;
+        }
+        #region IDyamicMetaObjectProvider support to get and set properties
+        public DynamicMetaObject GetMetaObject(System.Linq.Expressions.Expression parameter)
+        {
+            return new CHtmlDynamicMetaObject<CHtmlDocument>(parameter, this);
+        }
+        public object GetDynamicMember(string name)
+        {
+            object objValue = null;
+
+            return objValue;
+        }
+        public void SetDynamicMember(string name, object value)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("{0}.SettDynamicMember({1} is called value: {2}", this, name, value);
+            }
+
+        }
+        public IEnumerable<string> GetDynamicMemberNames()
+        {
+
+            List<string> members = new List<string>();
+            return members;
+        }
+        #endregion
+    }
+    public class CHtmlSharedWorkerWindow : CHtmlMultiversalWindow
+    {
+        public string baseUrl
+        {
+            get; set;
+        }
+        public static event EventHandler? InstanceCreated;
+        /// <summary>
+        /// Worker Window Constructor
+        /// </summary>
+        /// <param name="args"></param>
+        public CHtmlSharedWorkerWindow(params string[] args)
+    : base(null, true, IMultiversalWindowType.SharedWorkerWindow, args)
+        {
+            if (InstanceCreated != null)
+            {
+                InstanceCreated?.Invoke(this, EventArgs.Empty);
+            }
+            var _curUrl = base.___getCurrentUrl();
+        }
+        #region IDyamicMetaObjectProvider support to get and set properties
+        public DynamicMetaObject GetMetaObject(System.Linq.Expressions.Expression parameter)
+        {
+            return new CHtmlDynamicMetaObject<CHtmlDocument>(parameter, this);
+        }
+        public object GetDynamicMember(string name)
+        {
+            object objValue = null;
+            //this.___properties.TryGetValue(name, out objValue);
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("{0}.GetDynamicMember({1} returns : {2}", this, name, objValue);
+            }
+            return objValue;
+        }
+        public void SetDynamicMember(string name, object value)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("{0}.SettDynamicMember({1} is called value: {2}", this, name, value);
+            }
+
+        }
+        public IEnumerable<string> GetDynamicMemberNames()
+        {
+            List<string> members = new List<string>();
+
+            return members;
+        }
+        #endregion
+    }
+}

@@ -1,0 +1,4 @@
+﻿#if (OSX || MACCATALYST || IOS)
+using System.Runtime.InteropServices.Swift;
+#endif
+// ...existing code...

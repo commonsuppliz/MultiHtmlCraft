@@ -1,0 +1,256 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Text;
+using MultiHtmlCraft.Interfaces;
+using System.Linq.Expressions;
+using Microsoft.ClearScript;
+
+namespace MultiHtmlCraft.Core
+{
+	/// <summary>
+	/// CHtmlConsole 
+	/// console class
+	/// </summary>
+	
+	public sealed class CHtmlConsole : CHtmlNode, ICommonObjectInterface, IDynamicMetaObjectProvider
+    {
+        public CHtmlConsole()
+		{
+            this.___multiversalClassType = IMutilversalObjectType.Console;
+            // Register console methods into base property bag used by dynamic binder
+            this.___properties["log"] = new Action<object>(this.___log_inner);
+            this.___properties["warn"] = new Action<object>(o => this.___warn_inner(commonHTML.GetStringValue(o)));
+            this.___properties["error"] = new Action<object>(o => this.___error_inner(commonHTML.GetStringValue(o)));
+            this.___properties["debug"] = new Action<object>(o => this.___debug_inner(commonHTML.GetStringValue(o)));
+        }
+
+        private void ___log_inner(object obj)
+        {
+            string str = commonHTML.GetStringValue(obj);
+            if (commonLog.LoggingEnabled || System.Diagnostics.Debugger.IsAttached)
+            {
+                commonLog.LogEntry(string.Concat("console.log('", str, "')"));
+            }
+        }
+
+        public void log(params object[] args)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (object arg in args)
+            {
+                sb.Append(commonHTML.GetStringValue(arg));
+                sb.Append(", ");
+            }
+            this.___log_inner(sb.ToString());
+        }
+
+        #region warn
+        private void ___warn_inner(string str)
+        {
+            if (commonLog.LoggingEnabled)
+            {
+               commonLog.LogEntry(string.Concat("console.warn('", str, "')"));
+            }
+        }
+        public void warn(params object[] args)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            foreach(object arg in args)
+            {
+                sb.Append(commonHTML.GetStringValue(arg));
+            }
+            this.___warn_inner(sb.ToString());
+        }
+        #endregion
+
+        #region debug_method
+        private void ___debug_inner(string str)
+        {
+            if (commonLog.LoggingEnabled)
+            {
+               commonLog.LogEntry(string.Concat("console.debug('", str, "')"));
+            }
+        }
+        public void error(params object[] args)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            foreach (object arg in args)
+            {
+                sb.Append(commonHTML.GetStringValue(arg));
+            }
+            this.___error_inner(sb.ToString());
+        }
+        private void ___error_inner(string str)
+        {
+            if (commonLog.LoggingEnabled)
+            {
+                commonLog.LogEntry(string.Concat("console.error('", str, "')"));
+            }
+        }
+
+        public void debug(params object[] args)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            foreach (object arg in args)
+            {
+                sb.Append(commonHTML.GetStringValue(arg));
+            }
+            this.___debug_inner(sb.ToString());
+        }
+        #endregion
+
+        // ICommonObjectInterface implementation
+        public void ___setPropertyByName(string name, object val)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___setPropertyByName needs to be implemetented");
+            }
+        }
+        public void ___setPropertyByIndex(int ___index, object val)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___setPropertyByIndex needs to be implemetented");
+            }
+        }
+        public object ___getPropertyByName(string name)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___getPropertyByName needs to be implemetented");
+            }
+            return null;
+        }
+        public object ___getPropertyByIndex(int ___index)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___getPropertyByIndex needs to be implemetented");
+            }
+            return null;
+        }
+        public bool ___hasPropertyByName(string name)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___hasPropertyByName needs to be implemetented");
+            }
+            return false;
+        }
+        public bool ___hasPropertyByIndex(int ___index)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___hasPropertyByIndex needs to be implemetented");
+            }
+            return false;
+        }
+        public void ___deleteByIndex(int ___index)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___deleteByIndex needs to be implemetented");
+            }
+        }
+        public void ___deleteByName(string ___Name)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___deleteByName needs to be implemetented");
+            }
+        }
+        public object[] ___getByIds()
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___getByIds needs to be implemetented");
+            }
+            return null;
+        }
+        public object ___getDefaultValue()
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___getDefaultValue needs to be implemetented");
+            }
+            return null;
+        }
+        public object ___getProtoType()
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___getProtoType needs to be implemetented");
+            }
+            return null;
+        }
+        public void ___setProtoType(object __object)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___setProtoType needs to be implemetented");
+            }
+        }
+        public void ___setParentScope(object __object)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___setParentScope needs to be implemetented");
+            }
+        }
+        public object ___getParentScope()
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___getParentScope needs to be implemetented");
+            }
+            return null;
+        }
+        public string ___getClassName()
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___getClassName needs to be implemetented");
+            }
+            return nameof(CHtmlConsole);
+        }
+        public bool ___hasInstance(object __object)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___hasInstance needs to be implemetented");
+            }
+            return false;
+        }
+        public bool ___instanceEquals(object __object)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___instanceEquals needs to be implemetented");
+            }
+            return object.ReferenceEquals(this, __object);
+        }
+        public object ___common_object_clone()
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"TODO: ___common_object_clone needs to be implemetented");
+            }
+            return this;
+        }
+        public IMutilversalObjectType multiversalClassType => this.___multiversalClassType;
+
+        public IEnumerable<string> GetDynamicMemberNames()
+        {
+            // expose base property bag keys (log, warn, error, debug)
+            return this.___properties.Keys;
+        }
+
+        public DynamicMetaObject GetMetaObject(Expression parameter)
+        {
+            return new CHtmlClearScriptDynamicMetaObject<CHtmlConsole>(parameter, this);
+        }
+    }
+}

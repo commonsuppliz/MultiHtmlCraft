@@ -1,0 +1,88 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+namespace MultiHtmlCraft.Core
+{
+    internal class CHtmlMultiversalContentData
+    {
+        public string? Url { get; set; }
+        public string? FileLocation { get; set; }
+        public string? ContentType { get; set; }
+        public DateTimeOffset? LastModified { get; set; }
+        public string? Authority { get; set; }
+        public string? HtmlContent { get; set; }
+        public string? Charset { get; set; }
+        public long ContentLength { get; set; }
+        public string? ContentEncoding { get; set; }
+        public byte[]? RawData { get; set; }
+        public CHtmlMultiversalContentData() { }
+
+        /// <summary>
+        /// HTMLのbyte配列から<head>～</head>内のcharsetを抽出する。見つからなければnullを返す。
+        /// </summary>
+        /// <param name="htmlBytes">HTMLファイルのbyte配列</param>
+        /// <returns>charset値、またはnull</returns>
+        public static string? GetCharsetFromHtmlHeader(byte[] htmlBytes)
+        {
+            // ASCIIで"<head"と"</head>"をbyte配列として検索
+            byte[] headStartBytes = Encoding.ASCII.GetBytes("<head");
+            byte[] headEndBytes = Encoding.ASCII.GetBytes("</head>");
+
+            int headStart = IndexOfBytes(htmlBytes, headStartBytes, 0, true);
+            if (headStart < 0) headStart = 0;
+            int headEnd = IndexOfBytes(htmlBytes, headEndBytes, headStart, true);
+            if (headEnd < 0) return null;
+
+            int headLength = headEnd - headStart;
+            if (headLength <= 0) return null;
+            byte[] headContentBytes = new byte[headLength];
+            Array.Copy(htmlBytes, headStart, headContentBytes, 0, headLength);
+
+            // headContentBytesをASCII文字列化して正規表現検索
+            string headContent = Encoding.ASCII.GetString(headContentBytes);
+            var match = Regex.Match(headContent, "charset\\s*=\\s*['\"']?([a-zA-Z0-9\\-]+)", RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+            return null;
+        }
+
+        // byte配列内でパターンを検索（大文字小文字無視）
+        private static int IndexOfBytes(byte[] haystack, byte[] needle, int startIndex, bool ignoreCase)
+        {
+            for (int i = startIndex; i <= haystack.Length - needle.Length; i++)
+            {
+                bool found = true;
+                for (int j = 0; j < needle.Length; j++)
+                {
+                    byte b1 = haystack[i + j];
+                    byte b2 = needle[j];
+                    if (ignoreCase)
+                    {
+                        b1 = ToLowerAscii(b1);
+                        b2 = ToLowerAscii(b2);
+                    }
+                    if (b1 != b2)
+                    {
+                        found = false;
+                        break;
+                    }
+                }
+                if (found) return i;
+            }
+            return -1;
+        }
+
+        private static byte ToLowerAscii(byte b)
+        {
+            if (b >= 0x41 && b <= 0x5A) // 'A'-'Z'
+                return (byte)(b + 0x20);
+            return b;
+        }
+    }
+}

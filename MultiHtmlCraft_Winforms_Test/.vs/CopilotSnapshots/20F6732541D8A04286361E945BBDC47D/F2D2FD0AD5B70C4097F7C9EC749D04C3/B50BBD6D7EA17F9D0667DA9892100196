@@ -1,0 +1,458 @@
+﻿using System;
+using System.Linq;
+using System.Reflection;
+
+namespace MultiHtmlCraft.Core
+{
+    // Lightweight proxy to expose stable CLR methods to ClearScript (avoid dynamic binding paths)
+    public class CHtmlClearScriptCanvasContextHostProxy
+    {
+        private readonly CHtmlCanvasContext2D _canvas;
+
+        public CHtmlClearScriptCanvasContextHostProxy(CHtmlCanvasContext2D canvas)
+        {
+            _canvas = canvas ?? throw new ArgumentNullException(nameof(canvas));
+        }
+
+        private static object? Unwrap(object? v)
+        {
+            if (v == null) return null;
+            try
+            {
+                var t = v.GetType();
+                // Use manual property resolution to avoid AmbiguousMatchException
+                var props = t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                foreach (var pn in new[] { "Value", "value", "Target", "UnderlyingObject", "Underlying", "WrappedObject" })
+                {
+                    try
+                    {
+                        var p = props.FirstOrDefault(pi => string.Equals(pi.Name, pn, StringComparison.OrdinalIgnoreCase));
+                        if (p != null)
+                        {
+                            try
+                            {
+                                var val = p.GetValue(v);
+                                if (val != null) return val;
+                            }
+                            catch { }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+            return v;
+        }
+
+        private static bool TryToDouble(object? v, out double result)
+        {
+            result = 0.0;
+            if (v == null) return false;
+            var u = Unwrap(v) ?? v;
+            try
+            {
+                if (u is double d) { result = d; return true; }
+                if (u is float f) { result = f; return true; }
+                if (u is int i) { result = i; return true; }
+                if (u is long l) { result = l; return true; }
+                if (u is short s) { result = s; return true; }
+                if (u is string str && double.TryParse(str, out var p)) { result = p; return true; }
+                result = Convert.ToDouble(u);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        // Use reflection to invoke canvas methods to avoid compile-time binding issues
+        private object? InvokeMethod(string methodName, params object[] args)
+        {
+            try
+            {
+                var methods = _canvas.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .Where(m => string.Equals(m.Name, methodName, StringComparison.OrdinalIgnoreCase)).ToArray();
+                if (methods.Length == 0) return null;
+
+                // unwrap arguments
+                var unwrapped = args?.Select(a => Unwrap(a) ?? a).ToArray() ?? Array.Empty<object?>();
+
+                // try exact parameter count matching with conversion
+                foreach (var m in methods)
+                {
+                    var ps = m.GetParameters();
+                    if (ps.Length != unwrapped.Length) continue;
+                    var converted = new object?[ps.Length];
+                    var ok = true;
+                    for (int i = 0; i < ps.Length; i++)
+                    {
+                        var pt = ps[i].ParameterType;
+                        var val = unwrapped[i];
+                        if (val == null)
+                        {
+                            converted[i] = pt.IsValueType ? Activator.CreateInstance(pt) : null;
+                            continue;
+                        }
+                        try
+                        {
+                            if (pt == typeof(double))
+                            {
+                                if (!TryToDouble(val, out var d)) { ok = false; break; }
+                                converted[i] = d;
+                            }
+                            else if (pt == typeof(float))
+                            {
+                                if (!TryToDouble(val, out var d)) { ok = false; break; }
+                                converted[i] = (float)d;
+                            }
+                            else if (pt.IsAssignableFrom(val.GetType()))
+                            {
+                                converted[i] = val;
+                            }
+                            else
+                            {
+                                converted[i] = Convert.ChangeType(val, pt);
+                            }
+                        }
+                        catch { ok = false; break; }
+                    }
+                    if (!ok) continue;
+                    return m.Invoke(_canvas, converted);
+                }
+
+                // try first overload with fewer params by filling defaults
+                var candidate = methods.OrderBy(m => Math.Abs(m.GetParameters().Length - unwrapped.Length)).First();
+                var cparams = candidate.GetParameters();
+                var cargs = new object[cparams.Length];
+                for (int i = 0; i < cparams.Length; i++)
+                {
+                    if (i < unwrapped.Length && unwrapped[i] != null)
+                    {
+                        try { cargs[i] = Convert.ChangeType(unwrapped[i], cparams[i].ParameterType); } catch { cargs[i] = unwrapped[i]; }
+                    }
+                    else
+                    {
+                        cargs[i] = cparams[i].HasDefaultValue ? cparams[i].DefaultValue : (cparams[i].ParameterType.IsValueType ? Activator.CreateInstance(cparams[i].ParameterType) : null);
+                    }
+                }
+                return candidate.Invoke(_canvas, cargs);
+            }
+            catch (TargetInvocationException tex)
+            {
+                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5) commonLog.LogEntry("Proxy Invoke TargetInvocationException: {0}", tex.InnerException?.ToString() ?? tex.ToString()); } catch { }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5) commonLog.LogEntry("Proxy Invoke exception: {0}", ex.ToString()); } catch { }
+                return null;
+            }
+        }
+
+        // Exposed convenience methods - implement common ones directly to avoid reflection and ClearScript dynamic helper issues
+        public void moveTo(object x, object y)
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                {
+                    commonLog.LogEntry("Proxy.moveTo called with ({0},{1})", x?.GetType().FullName ?? "<null>", y?.GetType().FullName ?? "<null>");
+                    commonLog.LogEntry("Canvas state: Width={0}, Height={1}", _canvas.Width, _canvas.Height);
+                }
+                if (TryToDouble(x, out var dx) && TryToDouble(y, out var dy))
+                {
+                    _canvas.moveTo(dx, dy);
+                }
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.moveTo exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void lineTo(object x, object y)
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.lineTo called with ({0},{1})", x?.GetType().FullName ?? "<null>", y?.GetType().FullName ?? "<null>");
+                if (TryToDouble(x, out var dx) && TryToDouble(y, out var dy))
+                {
+                    _canvas.lineTo(dx, dy);
+                }
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.lineTo exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void stroke()
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.stroke called");
+                _canvas.stroke();
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.stroke exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void beginPath()
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.beginPath called");
+                _canvas.beginPath();
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.beginPath exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void clearRect(object x, object y, object w, object h)
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.clearRect called with types ({0},{1},{2},{3})", x?.GetType().FullName ?? "<null>", y?.GetType().FullName ?? "<null>", w?.GetType().FullName ?? "<null>", h?.GetType().FullName ?? "<null>");
+                if (TryToDouble(x, out var dx) && TryToDouble(y, out var dy) && TryToDouble(w, out var dw) && TryToDouble(h, out var dh))
+                {
+                    _canvas.clearRect(dx, dy, dw, dh);
+                }
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.clearRect exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void closePath()
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.closePath called");
+                _canvas.closePath();
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.closePath exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void fill()
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.fill called");
+                _canvas.fill();
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.fill exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void translate(object x, object y)
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.translate called with ({0},{1})", x?.GetType().FullName ?? "<null>", y?.GetType().FullName ?? "<null>");
+                if (TryToDouble(x, out var dx) && TryToDouble(y, out var dy))
+                {
+                    _canvas.translate(dx, dy);
+                }
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.translate exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void rotate(object angle)
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.rotate called with ({0})", angle?.GetType().FullName ?? "<null>");
+                if (TryToDouble(angle, out var a))
+                {
+                    _canvas.rotate(a);
+                }
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.rotate exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void fillRect(object x, object y, object w, object h)
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.fillRect called with types ({0},{1},{2},{3})", x?.GetType().FullName ?? "<null>", y?.GetType().FullName ?? "<null>", w?.GetType().FullName ?? "<null>", h?.GetType().FullName ?? "<null>");
+                if (TryToDouble(x, out var dx) && TryToDouble(y, out var dy) && TryToDouble(w, out var dw) && TryToDouble(h, out var dh))
+                {
+                    _canvas.fillRect(dx, dy, dw, dh);
+                }
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.fillRect exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void strokeRect(object x, object y, object w, object h)
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.strokeRect called with types ({0},{1},{2},{3})", x?.GetType().FullName ?? "<null>", y?.GetType().FullName ?? "<null>", w?.GetType().FullName ?? "<null>", h?.GetType().FullName ?? "<null>");
+                if (TryToDouble(x, out var dx) && TryToDouble(y, out var dy) && TryToDouble(w, out var dw) && TryToDouble(h, out var dh))
+                {
+                    _canvas.strokeRect(dx, dy, dw, dh);
+                }
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.strokeRect exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        public void arc(object x, object y, object radius, object startAngle, object endAngle, object anticlockwise = null)
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.arc called");
+                if (TryToDouble(x, out var dx) && TryToDouble(y, out var dy) && TryToDouble(radius, out var dr) && TryToDouble(startAngle, out var ds) && TryToDouble(endAngle, out var de))
+                {
+                    _canvas.arc(dx, dy, dr, ds, de, anticlockwise != null && Convert.ToBoolean(anticlockwise));
+                }
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.arc exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+            }
+        }
+
+        // Expose gradient creation methods so they appear as functions to ClearScript/JS
+        public object? createRadialGradient(object x0, object y0, object r0, object x1, object y1, object r1)
+        {
+            try
+            {
+                if (TryToDouble(x0, out var dx0) && TryToDouble(y0, out var dy0) && TryToDouble(r0, out var dr0) && TryToDouble(x1, out var dx1) && TryToDouble(y1, out var dy1))
+                {
+                    if (TryToDouble(r1, out var dr1))
+                    {
+                        return _canvas.createRadialGradient(dx0, dy0, dr0, dx1, dy1, dr1);
+                    }
+                    // fallback to reflection so overloads that accept object work
+                    return InvokeMethod("createRadialGradient", dx0, dy0, dr0, dx1, dy1, r1 ?? 0);
+                }
+                return InvokeMethod("createRadialGradient", x0 ?? 0, y0 ?? 0, r0 ?? 0, x1 ?? 0, y1 ?? 0, r1 ?? 0);
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.createRadialGradient exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+                return null;
+            }
+        }
+
+        public object? createLinearGradient(object x0, object y0, object x1, object y1, object p5 = null, object p6 = null)
+        {
+            try
+            {
+                if (TryToDouble(x0, out var dx0) && TryToDouble(y0, out var dy0) && TryToDouble(x1, out var dx1) && TryToDouble(y1, out var dy1))
+                {
+                    if (p5 == null && p6 == null)
+                    {
+                        return _canvas.createLinearGradient(dx0, dy0, dx1, dy1);
+                    }
+                    if (p5 != null && TryToDouble(p5, out var dp5) && p6 == null)
+                    {
+                        return _canvas.createLinearGradient(dx0, dy0, dx1, dy1, dp5);
+                    }
+                    if (p5 != null && p6 != null && TryToDouble(p5, out var dp5b) && TryToDouble(p6, out var dp6b))
+                    {
+                        return _canvas.createLinearGradient(dx0, dy0, dx1, dy1, dp5b, dp6b);
+                    }
+                    return InvokeMethod("createLinearGradient", dx0, dy0, dx1, dy1, p5 ?? 0, p6 ?? 0);
+                }
+                return InvokeMethod("createLinearGradient", x0 ?? 0, y0 ?? 0, x1 ?? 0, y1 ?? 0, p5 ?? 0, p6 ?? 0);
+            }
+            catch (Exception ex)
+            {
+                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.createLinearGradient exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
+                return null;
+            }
+        }
+
+        // Fallback: reflection-based invoke for less-common methods
+        public object? Invoke(string methodName, params object[] args) => InvokeMethod(methodName, args);
+
+        public object? strokeStyle
+        {
+            get
+            {
+                try
+                {
+                    var prop = _canvas.GetType().GetProperty("strokeStyle", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    return prop?.GetValue(_canvas);
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled)
+                        commonLog.LogEntry("Proxy.strokeStyle getter exception: {0}\n{1}", ex.Message, ex.ToString());
+                    return null;
+                }
+            }
+            set
+            {
+                try
+                {
+                    var prop = _canvas.GetType().GetProperty("strokeStyle", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (prop != null && prop.CanWrite)
+                    {
+                        prop.SetValue(_canvas, value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled)
+                        commonLog.LogEntry("Proxy.strokeStyle setter exception: {0}\n{1}", ex.Message, ex.ToString());
+                }
+            }
+        }
+
+        public object? lineWidth
+        {
+            get
+            {
+                try
+                {
+                    var prop = _canvas.GetType().GetProperty("lineWidth", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    return prop?.GetValue(_canvas);
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled)
+                        commonLog.LogEntry("Proxy.lineWidth getter exception: {0}\n{1}", ex.Message, ex.ToString());
+                    return null;
+                }
+            }
+            set
+            {
+                try
+                {
+                    var prop = _canvas.GetType().GetProperty("lineWidth", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (prop != null && prop.CanWrite)
+                    {
+                        prop.SetValue(_canvas, value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (commonLog.LoggingEnabled)
+                        commonLog.LogEntry("Proxy.lineWidth setter exception: {0}\n{1}", ex.Message, ex.ToString());
+                }
+            }
+        }
+    }
+}

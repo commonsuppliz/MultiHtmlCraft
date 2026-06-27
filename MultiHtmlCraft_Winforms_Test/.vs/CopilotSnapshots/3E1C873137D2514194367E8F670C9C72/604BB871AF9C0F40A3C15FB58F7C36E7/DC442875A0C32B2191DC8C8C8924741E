@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace MultiHtmlCraft.Interfaces
+{
+    /// <summary>
+    /// C#版 Fetch Standard Request インターフェイス
+    /// </summary>
+    public interface ICHtmlFetchInterface
+    {
+        // プロパティ
+        string Method { get; }
+        Uri Url { get; }
+        IDictionary<string, string> Headers { get; }
+        object? Body { get; }
+        string? Mode { get; }
+        string? Credentials { get; }
+        string? Cache { get; }
+        string? Redirect { get; }
+        string? Referrer { get; }
+        string? ReferrerPolicy { get; }
+        string? Integrity { get; }
+        string? Destination { get; }
+        bool? Keepalive { get; }
+        object? Signal { get; }
+
+       
+    }
+}

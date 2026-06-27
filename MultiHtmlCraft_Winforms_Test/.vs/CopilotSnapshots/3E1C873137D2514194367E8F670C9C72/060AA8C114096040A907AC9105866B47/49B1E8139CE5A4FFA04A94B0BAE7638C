@@ -1,0 +1,85 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using MultiHtmlCraft.Interfaces;
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// JavaScript Fetch class 
+    /// </summary>
+    public class CHtmlFetch : ICHtmlFetchInterface
+    {
+        private static readonly HttpClient ___httpClient = CHtmlMultiversalWindow.getHttpClient();
+
+        string ICHtmlFetchInterface.Method => throw new NotImplementedException();
+
+        Uri ICHtmlFetchInterface.Url => throw new NotImplementedException();
+
+        IDictionary<string, string> ICHtmlFetchInterface.Headers => throw new NotImplementedException();
+
+        object? ICHtmlFetchInterface.Body => throw new NotImplementedException();
+
+        string? ICHtmlFetchInterface.Mode => throw new NotImplementedException();
+
+        string? ICHtmlFetchInterface.Credentials => throw new NotImplementedException();
+
+        string? ICHtmlFetchInterface.Cache => throw new NotImplementedException();
+
+        string? ICHtmlFetchInterface.Redirect => throw new NotImplementedException();
+
+        string? ICHtmlFetchInterface.Referrer => throw new NotImplementedException();
+
+        string? ICHtmlFetchInterface.ReferrerPolicy => throw new NotImplementedException();
+
+        string? ICHtmlFetchInterface.Integrity => throw new NotImplementedException();
+
+        string? ICHtmlFetchInterface.Destination => throw new NotImplementedException();
+
+        bool? ICHtmlFetchInterface.Keepalive => throw new NotImplementedException();
+
+        object? ICHtmlFetchInterface.Signal => throw new NotImplementedException();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="url">URL</param>
+        /// <returns>CHtmlFetchResponse</returns>
+        public static async Task<CHtmlFetchResponse> FetchAsync(string url)
+        {
+            var response = await ___httpClient.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+            return new CHtmlFetchResponse(response, content);
+        }
+    }
+
+    /// <summary>
+    /// fetch response
+    /// </summary>
+    public class CHtmlFetchResponse
+    {
+        private readonly HttpResponseMessage _response;
+        private readonly string _content;
+
+        public int Status => (int)_response.StatusCode;
+        public bool Ok => _response.IsSuccessStatusCode;
+        public string StatusText => _response.ReasonPhrase;
+
+        public CHtmlFetchResponse(HttpResponseMessage response, string content)
+        {
+            _response = response;
+            _content = content;
+        }
+
+        public Task<string> TextAsync()
+        {
+            return Task.FromResult(_content);
+        }
+
+        public Task<string> JsonAsync()
+        {
+            // 必要に応じてJSONパースも可能
+            return Task.FromResult(_content);
+        }
+    }
+}

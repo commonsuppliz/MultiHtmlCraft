@@ -1,0 +1,59 @@
+﻿using System;
+using System.Collections.Generic;
+using MultiHtmlCraft.Interfaces;
+
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// Implementation of ICHtmlRequestInterface based on W3C Fetch API Request.
+    /// </summary>
+    public class CHtmlRequest : ICHtmlRequestInterface
+    {
+        public string Method { get; private set; }
+        public Uri Url { get; private set; }
+        public IDictionary<string, string> Headers { get; private set; }
+        public object? Body { get; private set; }
+        public string? Mode { get; private set; }
+        public string? Credentials { get; private set; }
+        public string? Cache { get; private set; }
+        public string? Redirect { get; private set; }
+        public string? Referrer { get; private set; }
+        public string? ReferrerPolicy { get; private set; }
+        public string? Integrity { get; private set; }
+        public string? Destination { get; private set; }
+        public bool? Keepalive { get; private set; }
+        public object? Signal { get; private set; }
+
+        public CHtmlRequest(
+            string method,
+            Uri url,
+            IDictionary<string, string>? headers = null,
+            object? body = null,
+            string? mode = null,
+            string? credentials = null,
+            string? cache = null,
+            string? redirect = null,
+            string? referrer = null,
+            string? referrerPolicy = null,
+            string? integrity = null,
+            string? destination = null,
+            bool? keepalive = null,
+            object? signal = null)
+        {
+            Method = method;
+            Url = url;
+            Headers = headers ?? new Dictionary<string, string>();
+            Body = body;
+            Mode = mode;
+            Credentials = credentials;
+            Cache = cache;
+            Redirect = redirect;
+            Referrer = referrer;
+            ReferrerPolicy = referrerPolicy;
+            Integrity = integrity;
+            Destination = destination;
+            Keepalive = keepalive;
+            Signal = signal;
+        }
+    }
+}

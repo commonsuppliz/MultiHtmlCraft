@@ -1,0 +1,69 @@
+﻿'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: DefaultDomain): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Private.CoreLib.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\MultiHtmlCraaft.AvaloniaControl_Tesst.dll' が読み込まれました。シンボルが読み込まれました。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'c:\program files\microsoft visual studio\18\community\common7\ide\extensions\microsoft\managedprojectsystem\HotReload\net6.0\Microsoft.Extensions.DotNetDeltaApplier.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Linq.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.Loader.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Console.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Collections.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.InteropServices.RuntimeInformation.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Collections.Concurrent.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.IO.Pipes.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Threading.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.InteropServices.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Threading.Overlapped.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Security.AccessControl.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Security.Principal.Windows.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Security.Claims.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Controls.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Base.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.ObjectModel.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\PrivateAssemblies\Runtime\Microsoft.VisualStudio.Debugger.Runtime.NetCoreApp.dll' が読み込まれました。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Desktop.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Fonts.Inter.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Win32.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\MicroCom.Runtime.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Numerics.Vectors.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Skia.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.ComponentModel.Primitives.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Private.Uri.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Memory.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\SkiaSharp.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.OpenGL.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\Microsoft.Win32.Primitives.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.ComponentModel.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Threading.Thread.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Vulkan.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.MicroCom.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\netstandard.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Markup.Xaml.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Metal.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.ComponentModel.TypeConverter.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Themes.Fluent.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Dialogs.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\HarfBuzzSharp.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\CommunityToolkit.Mvvm.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\MultiHtmlCraft.Core.dll' が読み込まれました。シンボルが読み込まれました。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Drawing.Primitives.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\MultiHtmlCraft.Interfaces.dll' が読み込まれました。シンボルが読み込まれました。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Win32.Automation.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Diagnostics.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Diagnostics.DiagnosticSource.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Markup.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\MultiHtmlCraft.AvaroniaControl.dll' が読み込まれました。シンボルが読み込まれました。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Linq.Expressions.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\System.Drawing.Common.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\System.Private.Windows.Core.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Collections.NonGeneric.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\NLog.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Diagnostics.StackTrace.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+navigator.userAgent : 'Chorome/1.0 (Windows NT 10.0; Win64; x64) MultiHtmlCraft 1.2.3.0  (KHTML, like Gecko) Chorome/1.0.0.0 Safari/537.36'
+Platform Graphic API is set : "Avalonia"
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Text.Encoding.CodePages.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+Application Started : MultiHtmlCraft .Net: 9.0.5 GraphicAPI: Avalonia ScriptEngines: Unknown Managed Thread ID 1
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.Intrinsics.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+スレッド '.NET TP Worker' (16904) はコード 0 (0x0) で終了しました。
+スレッド '.NET TP Worker' (11720) はコード 0 (0x0) で終了しました。
+スレッド '.NET TP Worker' (19312) はコード 0 (0x0) で終了しました。
+'MultiHtmlCraaft.AvaloniaControl_Tesst.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.IO.FileSystem.Watcher.dll' が読み込まれました。含める/除外するの設定でシンボルの読み込みが無効になっています。
+プログラム '[13948] MultiHtmlCraaft.AvaloniaControl_Tesst.exe' はコード 0 (0x0) で終了しました。

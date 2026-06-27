@@ -1,0 +1,101 @@
+﻿using System;
+using System.Collections.Generic;
+using MultiHtmlCraft.Interfaces;
+
+namespace MultiHtmlCraft.Core
+{
+    /// <summary>
+    /// Implementation of ICHtmlRequestInterface based on W3C Fetch API Request.
+    /// </summary>
+    public class CHtmlRequest : ICHtmlRequestInterface
+    {
+        public string Method { get; private set; }
+        public Uri Url { get; private set; }
+        public IDictionary<string, string> Headers { get; private set; }
+        public object? Body { get; private set; }
+        public string? Mode { get; private set; }
+        public string? Credentials { get; private set; }
+        public string? Cache { get; private set; }
+        public string? Redirect { get; private set; }
+        public string? Referrer { get; private set; }
+        public string? ReferrerPolicy { get; private set; }
+        public string? Integrity { get; private set; }
+        public string? Destination { get; private set; }
+        public bool? Keepalive { get; private set; }
+        public object? Signal { get; private set; }
+
+        public CHtmlRequest(params object[] args)
+        {
+            // 安全な引数チェックとUri生成
+            string method = "GET";
+            Uri url = null;
+            var headers = new Dictionary<string, string>();
+
+            if (args != null && args.Length > 0 && args[0] != null)
+                method = args[0].ToString();
+
+            if (args != null && args.Length > 1 && args[1] != null)
+            {
+                if (!Uri.TryCreate(args[1].ToString(), UriKind.Absolute, out url))
+                {
+                    // 無効なURLの場合は空のUriをセット（またはnullで例外回避）
+                    url = new Uri("about:blank");
+                }
+            }
+            else
+            {
+                url = new Uri("about:blank");
+            }
+
+            // ヘッダーや追加パラメータのパース（必要に応じて拡張）
+            // 例: new CHtmlRequest("GET", "http://example.com", "Content-Type", "application/json")
+            if (args != null && args.Length > 2)
+            {
+                for (int i = 2; i + 1 < args.Length; i += 2)
+                {
+                    string key = args[i]?.ToString() ?? string.Empty;
+                    string value = args[i + 1]?.ToString() ?? string.Empty;
+                    if (!string.IsNullOrEmpty(key))
+                        headers[key] = value;
+                }
+            }
+
+            Method = method;
+            Url = url;
+            Headers = headers;
+            // 他のプロパティはデフォルト値
+        }
+
+        private CHtmlRequest(
+            string method,
+            Uri url,
+            IDictionary<string, string>? headers = null,
+            object? body = null,
+            string? mode = null,
+            string? credentials = null,
+            string? cache = null,
+            string? redirect = null,
+            string? referrer = null,
+            string? referrerPolicy = null,
+            string? integrity = null,
+            string? destination = null,
+            bool? keepalive = null,
+            object? signal = null)
+        {
+            Method = method;
+            Url = url;
+            Headers = headers ?? new Dictionary<string, string>();
+            Body = body;
+            Mode = mode;
+            Credentials = credentials;
+            Cache = cache;
+            Redirect = redirect;
+            Referrer = referrer;
+            ReferrerPolicy = referrerPolicy;
+            Integrity = integrity;
+            Destination = destination;
+            Keepalive = keepalive;
+            Signal = signal;
+        }
+    }
+}

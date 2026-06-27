@@ -1,0 +1,72 @@
+﻿using MultiHtmlCraft.Core;
+using MultiHtmlCraft.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MultiHtmlCraft
+{
+    public class CHtmlWorkerWindow : CHtmlMultiversalWindow
+    {
+        public static event EventHandler? InstanceCreated;
+        public string baseUrl
+        {
+            get; set;
+        }
+        /// <summary>
+        /// Worker Window Constructor
+        /// </summary>
+        /// <param name="args"></param>
+        public CHtmlWorkerWindow(params string[] args)
+    : base(null, true, IMultiversalWindowType.WorkerWindow, args)
+        {
+            if (InstanceCreated != null)
+            {
+                InstanceCreated?.Invoke(this, EventArgs.Empty);
+            }
+            /*
+            if (this.___parentMultiversalWindowWeakReference?.Target is CHtmlMultiversalWindow parentWindow)
+            {
+                baseUrl = parentWindow.___getCurrentUrl();
+            }
+            */
+      
+            if (!string.IsNullOrEmpty(baseUrl) && args != null && args.Length > 0 && !string.IsNullOrEmpty(args[0]))
+            {
+                string fullUrl = new Uri(new Uri(baseUrl), args[0]).ToString();
+                this.___navigateUrl(fullUrl, null);
+            }
+            else if (args != null && args.Length > 0 && !string.IsNullOrEmpty(args[0]))
+            {
+                this.___navigateUrl(args[0], null);
+            }
+
+            var _curUrl = base.___getCurrentUrl();
+
+
+        }
+    }
+    public class CHtmlSharedWorkerWindow : CHtmlMultiversalWindow
+    {
+        public string baseUrl
+        {
+            get; set;
+        }
+        public static event EventHandler? InstanceCreated;
+        /// <summary>
+        /// Worker Window Constructor
+        /// </summary>
+        /// <param name="args"></param>
+        public CHtmlSharedWorkerWindow(params string[] args)
+    : base(null, true, IMultiversalWindowType.SharedWorkerWindow, args)
+        {
+            if (InstanceCreated != null)
+            {
+                InstanceCreated?.Invoke(this, EventArgs.Empty);
+            }
+            var _curUrl = base.___getCurrentUrl();
+        }
+    }
+}

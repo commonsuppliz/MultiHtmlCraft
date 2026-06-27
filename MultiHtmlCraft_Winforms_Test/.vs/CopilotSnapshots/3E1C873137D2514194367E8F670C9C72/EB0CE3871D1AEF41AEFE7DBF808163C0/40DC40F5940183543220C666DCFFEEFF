@@ -1,0 +1,48 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace MultiHtmlCraft.Interfaces
+{
+    /// <summary>
+    /// C#版 Fetch Standard Request インターフェイス
+    /// </summary>
+    public interface ICHtmlFetchInterface
+    {
+        // プロパティ
+        string Method { get; }
+        Uri Url { get; }
+        IDictionary<string, string> Headers { get; }
+        object? Body { get; }
+        string? Mode { get; }
+        string? Credentials { get; }
+        string? Cache { get; }
+        string? Redirect { get; }
+        string? Referrer { get; }
+        string? ReferrerPolicy { get; }
+        string? Integrity { get; }
+        string? Destination { get; }
+        bool? Keepalive { get; }
+        object? Signal { get; }
+
+        // Response properties (W3C Fetch API)
+        string Type { get; } // basic, cors, default, error, opaque, opaqueredirect
+        string ResponseUrl { get; } // response.url
+        bool Redirected { get; } // response.redirected
+        int Status { get; } // response.status
+        bool Ok { get; } // response.ok
+        string StatusText { get; } // response.statusText
+        IDictionary<string, string> ResponseHeaders { get; } // response.headers
+        bool BodyUsed { get; } // response.bodyUsed
+        object? BodyObject { get; } // response.body
+
+        // Response methods
+        Task<string> TextAsync();
+        Task<object> JsonAsync();
+        Task<byte[]> ArrayBufferAsync();
+        Task<object> BlobAsync();
+        Task<object> FormDataAsync();
+        ICHtmlFetchInterface Clone();
+    }
+}
