@@ -16,6 +16,8 @@ using System.Net.Http;
 using System.Net;
 using System.Text.RegularExpressions;
 using NiL.JS.Statements;
+using NLog;
+using ManagedBass.DirectX8;
 
 namespace MultiHtmlCraft.Core
 {
@@ -319,27 +321,185 @@ namespace MultiHtmlCraft.Core
             CHtmlMultiversalContentData result = null;
             string? ___currentEncodingString = null;
             System.Text.Encoding? ___currentEncoding = null;
+            System.Net.Http.HttpMethod ___httpMethod  = HttpMethod.Get;
+            string postDataAsString = null;
+            string strMethodString = null;
+            HttpContent? sendMesasgeContent = null;
+            if (_requestData != null && _requestData.fields.Count >= 0)
+            {
 
+                if (_requestData.fields.TryGetValue("Method", out strMethodString)) ;
+                {
+                    switch (strMethodString.ToUpper())
+                    {
+
+                        case "GET":
+                            ___httpMethod = HttpMethod.Get;
+                            strMethodString = "GET";
+                            break;
+                        case "POST":
+                            ___httpMethod = HttpMethod.Post;
+                            strMethodString = "POST";
+                            break;
+                        case "DELETE":
+                            ___httpMethod = HttpMethod.Delete;
+                            strMethodString = "DELETE";
+                            break;
+                        case "PUT":
+                            ___httpMethod = HttpMethod.Put;
+                            strMethodString = "PUT";
+                            break;
+                        case "PATCH":
+                            ___httpMethod = HttpMethod.Patch;
+                            strMethodString = "PATCH";
+                            break;
+                        case "HEAD":
+                            ___httpMethod = HttpMethod.Head;
+                            strMethodString = "HEAD";
+                            break;
+                        case "OPTIONS":
+                            ___httpMethod = HttpMethod.Options;
+                            strMethodString = "OPTIONS";
+                            break;
+                        case "TRACE":
+                            ___httpMethod = HttpMethod.Trace;
+                            strMethodString = "TRACE";
+                            break;
+                        case "CONNECT":
+                            ___httpMethod = HttpMethod.Connect;
+                            strMethodString = "CONNECT";
+                            break;
+                        /// WebDav Methods
+                        case "PROPPFIND":
+                            strMethodString = "PROPFIND";
+                            break;
+                        case "PROPPACTCH":
+                            strMethodString = "PROPPACTCH";
+                            break;
+
+                        case "MKCOL":
+                            strMethodString = "MKCOL";
+                            break;
+                        case "COPY":
+                            strMethodString = "COPY";
+                            break;
+                        case "MOVE":
+                            strMethodString = "MOVE";
+                            break;
+                        case "LOCK":
+                            strMethodString = "LOCK";
+                            break;
+                        case "UNLOCK":
+                            strMethodString = "UNLOCK";
+                            break;
+                        default:
+                            ___httpMethod = HttpMethod.Get;
+                            strMethodString = "GET";
+                            break;
+
+
+                    }
+
+                }
+                if (_requestData.fields.TryGetValue("PostData", out postDataAsString))
+                {
+                    //sendMesasgeContent = new HttpContent(postDataAsString);
+                }
+                ;
+            }
             lock (WebCacheLock)
             {
-                if (CacheData.TryGetValue(normalizedUrl, out multivasalContentData) == true)
+                if (strMethodString == "GET")
                 {
-                    multivasalContentData = CloneContentData(multivasalContentData);
+                    if (CacheData.TryGetValue(normalizedUrl, out multivasalContentData) == true)
+                    {
+                        multivasalContentData = CloneContentData(multivasalContentData);
+                    }
                 }
             }
-            if (multivasalContentData != null)
+
+
+            if (multivasalContentData == null)
             {
                 var httpClient = CHtmlMultiversalWindow.getHttpClient() ?? CreateFallbackHttpClient();
-                
-               
-                var request = new HttpRequestMessage(HttpMethod.Get, _url);
-                if (multivasalContentData.LastModified.HasValue)
+
+
+
+
+
+
+                var httpFormServerSendingMessage = new HttpRequestMessage(___httpMethod, _url);
+                HttpContent? httpFormServerSendingContent = null;
+                if (___httpMethod == HttpMethod.Post || ___httpMethod == HttpMethod.Patch || ___httpMethod == HttpMethod.Put)
                 {
-                    request.Headers.IfModifiedSince = multivasalContentData.LastModified.Value;
+                    if (!string.IsNullOrEmpty(postDataAsString))
+                    {
+                        string[] postDataBaseSplit= postDataAsString.Split("&");
+
+
+
+
+                        var httpFormDataParameters = new List<KeyValuePair<string, string>>();
+
+                        if(postDataBaseSplit.Length >= 0)
+                        {
+                            foreach (var postDataEach in postDataBaseSplit)
+                            {
+                                int posEqual = postDataEach.IndexOf('=');
+                                string? paramName = null;
+                                string? paramValue = null;
+                                if (posEqual == -1)
+                                {
+                                    paramName = postDataEach;
+                                }
+                                else
+                                {
+                                    paramName = postDataEach.Substring(0, posEqual);
+                                    paramValue = postDataEach.Substring(posEqual + 1);
+                                }
+                                httpFormDataParameters.Add(new KeyValuePair<string, string>(paramName, paramValue));
+                            }
+
+             
+
+                        
+                        }
+
+                        httpFormServerSendingContent = new FormUrlEncodedContent(httpFormDataParameters);
+
+
+
+
+                    }
+
                 }
+
+
                 try
                 {
-                    var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                    HttpResponseMessage? response = null;
+
+                    switch (strMethodString)
+                    {
+                        case "GET":
+                            response = await httpClient.SendAsync(httpFormServerSendingMessage, HttpCompletionOption.ResponseHeadersRead);
+                            break;
+                        case "POST":
+                            response = await httpClient.PostAsync(normalizedUrl, httpFormServerSendingContent);
+                            break;
+                        case "PUT":
+                            response = await httpClient.PutAsync(normalizedUrl, new StringContent(postDataAsString));
+                            break;
+                        case "DELETE":
+                            response = await httpClient.DeleteAsync(normalizedUrl);
+                            break;
+                        default:
+                            response = await httpClient.SendAsync(httpFormServerSendingMessage, HttpCompletionOption.ResponseHeadersRead);
+                            break;
+                    }
+                    
+                
+              
                     if (response.StatusCode == HttpStatusCode.NotModified)
                     {
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
@@ -384,8 +544,13 @@ namespace MultiHtmlCraft.Core
                         newContentData.LastModified = response.Content.Headers.LastModified;
                         newContentData.ContentType = response.Content.Headers.ContentType?.ToString() ?? _contentType;
                         newContentData.Url = _url;
-                        newContentData.Authority = multivasalContentData.Authority;
-                        var _fileLocation = newContentData.FileLocation;
+                        string? _fileLocation = null;
+                        if (multivasalContentData != null)
+                        {
+                            newContentData.Authority = multivasalContentData.Authority;
+                      
+                        }
+                        _fileLocation = newContentData.FileLocation;
                         var _directory = System.IO.Path.GetDirectoryName(_fileLocation);
 
                         
@@ -482,11 +647,34 @@ namespace MultiHtmlCraft.Core
                             if (commonHTML.isContentTypePlainText(_task.ContentType) == true)
                             {
                                 System.Text.Encoding? _encoding = null;
-                                
-                                switch (_task.ContentType)
+                                string responseContentType = _task.ContentType;
+                                string? _strEncodingFromResponse = "";
+                                    if(!string.IsNullOrEmpty(responseContentType))
+                                {
+                                    var pos = responseContentType.IndexOf(";");
+                                    if(pos > 0)
+                                    {
+
+                                        _strEncodingFromResponse = responseContentType.Substring(pos + 1);
+                                        _strEncodingFromResponse = _strEncodingFromResponse.Replace("charset=", "");
+                                        responseContentType = responseContentType.Substring(0, pos);
+                                    }
+
+                                    
+
+                                    
+                                }
+
+                                switch (responseContentType)
                                 {
                                     case "text/html":
-                                        ___currentEncodingString = CHtmlMultiversalContentData.GetCharsetFromHtmlHeader(_task.RawData, _fileLocationElse) ?? ___currentEncodingString;
+                                        if (string.IsNullOrEmpty(_strEncodingFromResponse))
+                                        {
+                                            ___currentEncodingString = CHtmlMultiversalContentData.GetCharsetFromHtmlHeader(_task.RawData, _fileLocationElse) ?? ___currentEncodingString;
+                                         } else
+                                        {
+                                            ___currentEncodingString = _strEncodingFromResponse;
+                                        }
                                         break;
                                     case "text/javascript":
                                     case "application/javascript":

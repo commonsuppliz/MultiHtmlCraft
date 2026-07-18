@@ -10,7 +10,7 @@ namespace MultiHtmlCraft.Core
     /// <summary>
     /// Input Element ___hasInner select() method. this is special 
     /// </summary>
-    public class CHtmlInputElement : CHtmlElement, System.IDisposable
+    public class CHtmlInputElement : CHtmlElement, System.IDisposable,ICHtmlNodeInterface, IDynamicMetaObjectProvider
     {
         public new void Dispose()
         {

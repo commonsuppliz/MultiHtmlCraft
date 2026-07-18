@@ -1056,7 +1056,7 @@ namespace MultiHtmlCraft.Core
                                         CHtmlElement ___canvasSVGElement = ___svgContext.___parentElementWeakReference.Target as CHtmlElement;
                                         if (___canvasSVGElement != null)
                                         {
-                                            CHtmlCollection list = commonHTML.GetQuerySelectorListProcessorInner(___canvasSVGElement, strInnerUrl, CHtmlQuerySelectorType.element_querySelector);
+                                            CHtmlCollection list = commonHTML.___getQuerySelectorListProcessorInner(___canvasSVGElement, strInnerUrl, CHtmlQuerySelectorType.element_querySelector);
                                             if (list.Count > 0)
                                             {
                                                 CHtmlSVGElement ___targetSVGFillElement = list.__GetByIndex(0) as CHtmlSVGElement;

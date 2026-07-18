@@ -887,6 +887,7 @@ namespace MultiHtmlCraft.Core
                 if (value is CHtmlCanvasContextExtenstionObject)
                 {
                     this.___CanvasSkiaFillPaint = null;
+                    this.___createBrushFromFillStyleObject(Color.Transparent);
                 }
                 else
                 {
@@ -3840,6 +3841,15 @@ namespace MultiHtmlCraft.Core
 #if !WINDOWS
             if (this.___contextFillStyleAsObject is CHtmlCanvasContextExtenstionObject grad)
             {
+                if (grad.___ContextGraphicsObjectType == CanvasExtentionObjectType.LinerGradient || grad.___ContextGraphicsObjectType == CanvasExtentionObjectType.RadialGradient)
+                {
+
+    
+                
+                    
+                   
+
+                
                 if (grad.___ColorStopList != null && grad.___ColorStopList.Count > 0)
                 {
                     var colors = new List<SKColor>();
@@ -3871,8 +3881,34 @@ namespace MultiHtmlCraft.Core
                         this.___CanvasSkiaFillPaint = new SKPaint { Shader = shader, Style = SKPaintStyle.Fill, IsAntialias = true };
                         return;
                     }
+                    }
                 }
-            }
+                else if(grad.___ContextGraphicsObjectType == CanvasExtentionObjectType.CanvasPattern)
+                    {
+                        
+                        CHtmlElement patternElement = grad.canvasPatternCanvas;
+                        if (patternElement != null)
+                        {
+                        
+                                 if (patternElement.___canvasContextCurrent2D != null && patternElement.___canvasContextCurrent2D.___CanvasSkiaBitmapWeakReference?.Target is SKBitmap patternBitmap)
+                                {
+                                    SKShader shader = SKShader.CreateBitmap(patternBitmap, SKShaderTileMode.Repeat, SKShaderTileMode.Repeat);
+                                    this.___CanvasSkiaFillPaint = new SKPaint { Shader = shader, Style = SKPaintStyle.Fill, IsAntialias = true };
+                                    return;
+                                }
+                                
+                        }
+                        else
+                        {
+                                  this.___CanvasSkiaFillPaint = new SKPaint { Color = new SKColor(colorFallback.R, colorFallback.G, colorFallback.B, colorFallback.A), Style = SKPaintStyle.Fill, IsAntialias = true };
+                        return;
+                        }
+
+            
+
+              
+                        }
+                   }
 
             string colorStr = commonHTML.GetStringValue(this.___contextFillStyleAsObject);
             if (string.IsNullOrEmpty(colorStr)) 
@@ -3899,6 +3935,11 @@ namespace MultiHtmlCraft.Core
             {
                 this.___CanvasSkiaFillPaint = new SKPaint { Color = new SKColor(colorFallback.R, colorFallback.G, colorFallback.B, colorFallback.A), Style = SKPaintStyle.Fill, IsAntialias = true };
             }
+            
+            
+              
+            
+
 #endif
         }
 
@@ -4020,9 +4061,20 @@ namespace MultiHtmlCraft.Core
                 throw;
             }
         }
-        
 
-        
+        public  object createPattern(object _canvasElementPattern, object repeatArg)
+        {
+            CHtmlCanvasContextExtenstionObject pattern = new CHtmlCanvasContextExtenstionObject(CanvasExtentionObjectType.CanvasPattern);
+            pattern.canvasPatternCanvas = _canvasElementPattern as CHtmlElement;
+            pattern.repeatPatternArg = commonHTML.GetStringValue(repeatArg);
+
+
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"{this}: createPattern() called with {_canvasElementPattern} , {repeatArg} ");
+            }
+            return pattern;
+        }
     }
 
 

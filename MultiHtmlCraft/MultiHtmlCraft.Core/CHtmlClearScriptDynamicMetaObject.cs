@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using static System.Net.Mime.MediaTypeNames;
 
 
@@ -28,6 +29,7 @@ namespace MultiHtmlCraft.Core
     {
         private static readonly ConcurrentDictionary<(Type, string, Type[] parameterTypes), MethodInfo> ClearScriptMetaObjectMethodCache = new();
         private static readonly ConcurrentDictionary<(Type, string), PropertyInfo> ClearScriptMetaObjectPropertyCache = new();
+      
 
         // Method to get MethodInfo from cache or add it if not present
         private static MethodInfo? GetCachedMethod(Type type, string methodName, Type[] parameterTypes)
@@ -1005,9 +1007,16 @@ namespace MultiHtmlCraft.Core
                     case CHtmlNativeArray nativeArray:
                         {
                             var props = CHtmlNativeArray.CHtmlNativeArrayProperties?.Keys ?? Enumerable.Empty<string>(); 
+                            
                             return props;
                         }
-
+                    case CHtmlCollection chtmlCol:
+                        {
+                            var props = CHtmlCollection.CHtmlCollectionProperties.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlCollection.CHtmlCollectionMethods.Keys ?? Enumerable.Empty<string>(); 
+                            return props.Concat(methods);  
+                            
+                        }
                     default:
                         var obj = this.Value;
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
@@ -2121,29 +2130,82 @@ namespace MultiHtmlCraft.Core
                     case CHtmlCollection collection:
                         {
                             var selfCol = collection;
-                            if (string.Equals(binder.Name, "length", StringComparison.OrdinalIgnoreCase))
+                            switch (binder.Name)
                             {
-                                return new DynamicMetaObject(
-                                    Expression.Constant(selfCol.length, typeof(int)),
-                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
-                                );
-                            }
+                                case "length":
+                                    return new DynamicMetaObject(
+             Expression.Constant(selfCol.length, typeof(int)),
+             BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+         );
+                                    break;
+                                case "toArray":
+                                case "toDataArray":
+                                    Func<object[]> del = () =>
+                                    {
+                                        try { return selfCol.toArray(); } catch { return System.Array.Empty<object>(); }
+                                    };
+                                    return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
 
-                            if (string.Equals(binder.Name, "toArray", StringComparison.OrdinalIgnoreCase) ||
-                                string.Equals(binder.Name, "toDataArray", StringComparison.OrdinalIgnoreCase))
-                            {
-                                Func<object[]> del = () =>
-                                {
-                                    try { return selfCol.toArray(); } catch { return System.Array.Empty<object>(); }
-                                };
-                                return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
-                            }
+                                    break;
+                                case "forEach":
+                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                                    {
+                                        commonLog.LogEntry("CHtmlCollection.forEach has been called by BindGetMember");
+                                    }
 
-                            if (string.Equals(binder.Name, "toString", StringComparison.OrdinalIgnoreCase))
-                            {
-                                Func<string> delToString = () => selfCol.ToString();
-                                return new DynamicMetaObject(Expression.Constant(delToString), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
-                            }
+                                    Action<object> forEachFunc = (jsCallback) =>
+                                    {
+                                        if (jsCallback == null) return;
+
+                                        for (int i = 0; i < selfCol.Count; i++)
+                                        {
+                                            var item = selfCol[i];
+
+                                            try
+                                            {
+                                                if (jsCallback is Delegate del)
+                                                {
+                                                    del.DynamicInvoke(item, i, selfCol);   
+                                                }
+                                                else if (jsCallback is System.Dynamic.IDynamicMetaObjectProvider)
+                                                {
+                                                    
+                                                    dynamic dyn = jsCallback;
+                                                    dyn(item, i, selfCol);
+                                                }
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                if (commonLog.LoggingEnabled)
+                                                    commonLog.LogEntry($"CHtmlCollection.forEach error at [{i}]: {ex.Message}");
+                                            }
+                                        }
+                                    };
+
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(forEachFunc),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                    break;
+                            
+                     
+
+
+
+
+                             
+
+                                case "toString":
+                                    break;
+
+
+                            };
+                            
+                                 
+                            
+
+
+ 
 
                             try
                             {
@@ -2838,6 +2900,7 @@ namespace MultiHtmlCraft.Core
             // 必ず有効な DynamicMetaObject を返す（base にフォールバック）
             return base.BindGetIndex(binder, indexes);
         }
+
 
         // Helper invoked by bound call sites to safely invoke methods on target via reflection without causing binding exceptions
         private static object? SafeInvoke(object target, string methodName, object[] args)

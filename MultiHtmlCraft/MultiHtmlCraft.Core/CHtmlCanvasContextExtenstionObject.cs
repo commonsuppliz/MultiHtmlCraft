@@ -51,10 +51,38 @@ namespace MultiHtmlCraft.Core
         /// </summary>
         public bool ___IsPrototype = false;
 
-        internal System.WeakReference ___grapicPathWeakRef = null;
+
+        public CHtmlElement ___canvasPatternCanvas = null;
+        
+
+        internal string ___repeatPatternArg = null;
+        internal WeakReference ___grapicPathWeakRef;
+
+        public string repeatPatternArg
+        {
+            get
+            {
+                return this.___repeatPatternArg;
+            }
+            set
+            {
+                this.___repeatPatternArg = value;
+            }
+        }
+        public CHtmlElement canvasPatternCanvas
+        {
+            get
+            {
+                return this.___canvasPatternCanvas;
+            }
+            set
+            {
+                this.___canvasPatternCanvas = value;
+            }
+        }
 
 
-		public CHtmlCanvasContextExtenstionObject(CanvasExtentionObjectType __extentionType) 
+        public CHtmlCanvasContextExtenstionObject(CanvasExtentionObjectType __extentionType) 
 		{
 
             this.___ContextGraphicsObjectType = __extentionType;

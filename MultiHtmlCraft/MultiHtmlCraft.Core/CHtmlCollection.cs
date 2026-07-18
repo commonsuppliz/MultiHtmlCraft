@@ -6,6 +6,7 @@ using System.Dynamic;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using System.Reflection;
+using NiL.JS.Statements;
 namespace MultiHtmlCraft.Core
 {
     /// <summary>
@@ -25,7 +26,13 @@ namespace MultiHtmlCraft.Core
             {"toString", 6 },
             {"toArray", 7 },
             {"toDataArray", 8 },
-            {"QueryString", 9 },
+            {"QueryString", 9 }
+          
+
+        };
+        internal static Dictionary<string, int> CHtmlCollectionMethods = new Dictionary<string, int>()
+        {
+            {"forEach", 1 },
 
         };
         internal IMutilversalObjectType ___multiversalClassType;
@@ -57,7 +64,7 @@ namespace MultiHtmlCraft.Core
 
         internal System.WeakReference ___prototypeWeakReference = null;
         internal readonly object ___collectionLockingObject = new object();
-
+        internal readonly Action<object> _forEachDelegate;
 
         public CHtmlCollection()
         {
@@ -65,7 +72,31 @@ namespace MultiHtmlCraft.Core
             this.IsEnumByIndex = false;
             this._Z_ClearTime = DateTime.Now;
             this.___properties = new System.Collections.Generic.Dictionary<string, object>(StringComparer.Ordinal);
+            _forEachDelegate = (jsCallback) => ExecuteForEach(jsCallback);
         }
+        private void ExecuteForEach(object jsCallback)
+        {
+            if (jsCallback == null) return;
+
+            for (int i = 0; i < this.Count; i++)
+            {
+                var item = this[i];
+                try
+                {
+                    if (jsCallback is Delegate del)
+                        del.DynamicInvoke(item, i, this);
+
+                }
+                catch (Exception ex)
+                {
+                    // ƒƒO
+                }
+            }
+        }
+
+
+
+
         ~CHtmlCollection()
         {
             this.CleanUp();
@@ -995,6 +1026,7 @@ namespace MultiHtmlCraft.Core
         {
             List<string> members = new List<string>();
             members.AddRange(CHtmlCollectionProperties.Keys);
+            members.AddRange(CHtmlCollectionMethods.Keys);
             if (this.___properties.Count > 0)
             {
                 members.AddRange(this.___properties.Keys);
@@ -1013,8 +1045,9 @@ namespace MultiHtmlCraft.Core
         {
             return GetEnumerator();
         }
-        
+
         #endregion
+
 
         // ICHtmlCollectionInterface implementation
         object ICHtmlCollectionInterface.item(int index) => this.item(index);

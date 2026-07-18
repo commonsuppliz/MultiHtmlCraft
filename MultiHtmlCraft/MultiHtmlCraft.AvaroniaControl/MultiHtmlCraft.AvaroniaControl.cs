@@ -1,27 +1,39 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+
+using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Remote.Protocol.Input;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using MultiHtmlCraft.Core;
 using MultiHtmlCraft.Interfaces;
+using NiL.JS.Expressions;
 using System;
 using System.Diagnostics;
+using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml.Linq;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace MultiHtmlCraft.AvaroniaControl
 {
-    public class MultiversalAvaroniaControl : Control, ICHtmlMultiversalControlInterface, ILogicalScrollable
+    public class MultiversalAvaroniaControl : Avalonia.Controls.Control, ICHtmlMultiversalControlInterface, ILogicalScrollable
     {
         // Cache SKFont / SKPaint per typeface+size to avoid repeated allocations and reflection
         private static readonly object _skCacheLock = new object();
         private static readonly System.Collections.Generic.Dictionary<(SkiaSharp.SKTypeface, float), SkiaSharp.SKFont> _skFontCache = new System.Collections.Generic.Dictionary<(SkiaSharp.SKTypeface, float), SkiaSharp.SKFont>();
         private static readonly System.Collections.Generic.Dictionary<(SkiaSharp.SKTypeface, float), SkiaSharp.SKPaint> _skPaintCache = new System.Collections.Generic.Dictionary<(SkiaSharp.SKTypeface, float), SkiaSharp.SKPaint>();
         CHtmlGraphicContainer? _avaloniaGraphicContainer = null;
+
+
+        private readonly Canvas _canvas;
+
 
         private static SkiaSharp.SKFont GetOrCreateSkFont(SkiaSharp.SKTypeface tf, float size)
         {
@@ -83,7 +95,7 @@ namespace MultiHtmlCraft.AvaroniaControl
             try
             {
                 ___multiversalWindow = new MultiHtmlCraft.Core.CHtmlMultiversalWindow(null, true, IMultiversalWindowType.NormalWindow);
-
+                
                 if (___multiversalWindow != null)
                 {
                     ___multiversalWindow.setMultiversalControl(this);
@@ -127,15 +139,60 @@ namespace MultiHtmlCraft.AvaroniaControl
                     commonLog.LogEntry("MultiversalAvaroniaControl constructor exception: {0}", e);
                 }
             }
+            this._canvas = new Canvas();
+
+            var scrollViewer = new ScrollViewer
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                Content = _canvas
+            };
+
+            // スクロール値が変更されたときのイベントハンドラーを登録
+            scrollViewer.PropertyChanged += CachedScrollViewer_PropertyChanged;
+
+            VisualChildren.Add(scrollViewer);
+            LogicalChildren.Add(scrollViewer);
+
+            // キャッシュに登録
+            _cachedScrollViewer = scrollViewer;
+            _isScrollViewerCacheValid = true;
+
+
+            this.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+            this.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
+
 
             this.AttachedToVisualTree += MultiversalAvaroniaControl_AttachedToVisualTree;
             this.DetachedFromVisualTree += MultiversalAvaroniaControl_DetachedFromVisualTree;
         }
 
+        // 削除: ScrollViewer_PropertyChanged メソッド（CachedScrollViewer_PropertyChanged に統合）
+
+        event EventHandler? ILogicalScrollable.ScrollInvalidated
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         private void MultiversalAvaroniaControl_AttachedToVisualTree(object? sender, Avalonia.VisualTreeAttachmentEventArgs e)
         {
             Debug.WriteLine($"Attached. Bounds={Bounds}");
-            FindAndCacheScrollViewer();
+
+            // 内部で作成した ScrollViewer がある場合はそれを使用
+            // 外部の ScrollViewer は探さない
+            if (_cachedScrollViewer == null || !_isScrollViewerCacheValid)
+            {
+                FindAndCacheScrollViewer();
+            }
+
             CacheRenderScaling();
             InvalidateVisual();
         }
@@ -189,6 +246,27 @@ namespace MultiHtmlCraft.AvaroniaControl
                 // call into core to create document
                 var requestData = (args != null && args.Length > 0 && args[0] is CHtmlRequestData rd) ? rd : null;
                 ___document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, ___multiversalWindow, requestData);
+                int iControlCount = 0;
+
+                if (___document != null)
+                {
+                    if (___document.___ManagedControlPendingElementList != null)
+                    {
+                        iControlCount = ___document.___ManagedControlPendingElementList.Count;
+                        if (iControlCount >= 0)
+                        {
+                            createAvaloniaControlFromDocument(___document);
+                        }
+                    }
+                    if (___document.body != null)
+                    {
+                        CHtmlElement _body = ___document.body as CHtmlElement;
+                        var bodyBounds = _body.offsetScreenBounds;
+                        setScrollViewerSize(bodyBounds);
+                    }
+                }
+
+
 
                 // notify listeners that a document was loaded
                 DocumentLoaded?.Invoke(this, EventArgs.Empty);
@@ -202,6 +280,461 @@ namespace MultiHtmlCraft.AvaroniaControl
                 throw;
             }
         }
+
+        internal void setScrollViewerSize(RectangleFSpec rectSpec)
+        {
+            if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+            {
+                MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl.setScrollViewerSize: {rectSpec.X}, {rectSpec.Y}, {rectSpec.Width}, {rectSpec.Height}");
+            }
+
+            // VisualTree が確立されるまで遅延
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (_cachedScrollViewer == null)
+                {
+                    FindAndCacheScrollViewer();
+                }
+
+                if (_cachedScrollViewer != null)
+                {
+                    // Canvas のサイズを設定
+                    if (rectSpec.Width > 0 && rectSpec.Height > 0)
+                    {
+                        _canvas.Width = rectSpec.Width;
+                        _canvas.Height = rectSpec.Height;
+                        _extent = new Avalonia.Size(rectSpec.Width, rectSpec.Height);
+                    }
+
+                    // スクロールバーの表示設定
+                    _cachedScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                    _cachedScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+
+                    // レイアウトを無効化して再計算を強制
+                    _cachedScrollViewer.InvalidateMeasure();
+                    _cachedScrollViewer.InvalidateArrange();
+                    InvalidateMeasure();
+                    InvalidateArrange();
+
+                    if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+                    {
+                        MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: Canvas size set to {rectSpec.Width}x{rectSpec.Height}, ScrollBars - Vertical: {_cachedScrollViewer.VerticalScrollBarVisibility}, Horizontal: {_cachedScrollViewer.HorizontalScrollBarVisibility}");
+                    }
+                }
+            }, Avalonia.Threading.DispatcherPriority.Normal);
+        }
+        internal void createAvaloniaControlFromDocument(CHtmlDocument ___doc)
+        {
+            bool isAvaloniaControlCreationSuccess = false;
+            int iContolCont = ___doc.___ManagedControlPendingElementList.Count;
+
+            try
+            {
+                for (int i = 0; i < iContolCont; i++)
+                {
+                    if (i >= ___doc.___ManagedControlPendingElementList.Count)
+                    {
+                        break;
+                    }
+                    int __oid = ___doc.___ManagedControlPendingElementList.Keys[i];
+                    CHtmlElement __element = ___doc.___ManagedControlPendingElementList.Values[i];
+                    if (__element != null)
+                    {
+                        if (___doc.___isElementParentTraceableToDocument(__element) == true)
+                        {
+                            createAvaloniaControlFromDocumentForElement(___doc, __element);
+                        }
+                        else
+                        {
+                            if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+                            {
+                                MultiHtmlCraft.Core.commonLog.LogEntry("Control creation is skipped...");
+                            }
+                        }
+                    }
+                    ___doc.___ManagedControlPendingElementList.RemoveAt(i);
+                    if (i >= 0 && ___doc.___ManagedControlPendingElementList.Count > 0)
+                    {
+                        i--;
+                    }
+                    if (___doc.___ManagedControlJobDoneList != null)
+                    {
+                        ___doc.___ManagedControlJobDoneList[__oid] = __element;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+                {
+                    MultiHtmlCraft.Core.commonLog.LogEntry("createAvaloniaControlFromDocument error: {0}", ex.Message);
+                }
+                isAvaloniaControlCreationSuccess = false;
+                return;
+            }
+            isAvaloniaControlCreationSuccess = true;
+            if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+            {
+                MultiHtmlCraft.Core.commonLog.LogEntry("createAvaloniaControlFromDocument success");
+            }
+            return;
+        }
+        public void AddControl(Avalonia.Controls.Control control, double left = 0, double top = 0)
+        {
+            Canvas.SetLeft(control, left);
+            Canvas.SetTop(control, top);
+            _canvas.Children.Add(control);
+
+            InvalidateVisual();
+            InvalidateMeasure();
+            InvalidateArrange();
+
+
+        }
+        internal void createAvaloniaControlFromDocumentForElement(CHtmlDocument ___document, CHtmlElement __element)
+        {
+            if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+            {
+                MultiHtmlCraft.Core.commonLog.LogEntry($"{this}.createAvaloniaControlFromDocumentForElement {__element}");
+            }
+
+            Avalonia.Controls.Control? avaloniaControl = null;
+
+            switch (__element.___elementTagType)
+            {
+                case CHtmlElementType.BUTTON:
+                    {
+                        var buttonControl = new Avalonia.Controls.Button();
+                        buttonControl.Content = __element.textContent ?? "Button";
+                        buttonControl.Width = 200;
+                        buttonControl.Height = 100;
+
+                        buttonControl.Background = Avalonia.Media.Brush.Parse("#B0B0B0");
+                        buttonControl.Resources["ButtonBackground"] = Avalonia.Media.Brush.Parse("#B0B0B0");
+
+
+
+                        buttonControl.Resources["ButtonBackgroundPressed"] = Avalonia.Media.Brush.Parse("#707070");
+
+
+                        buttonControl.Resources["ButtonBackgroundFocused"] = Avalonia.Media.Brush.Parse("#707070");
+
+                        
+
+                        createEventForAvaloniaControl(buttonControl, __element);
+
+
+                        avaloniaControl = buttonControl;
+                        break;
+                    }
+
+                case CHtmlElementType.INPUT:
+                    {
+                        var typeAttr = __element.getAttribute("type");
+                        var inputType = ((typeAttr ?? "text") as string).ToLower().Trim();
+
+                        if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+                        {
+                            MultiHtmlCraft.Core.commonLog.LogEntry($"INPUT element: type attribute = '{typeAttr}', normalized type = '{inputType}'");
+                        }
+
+                        switch (inputType)
+                        {
+                            case "text":
+                                var inputTextBox = new Avalonia.Controls.TextBox();
+                                createEventForAvaloniaControl(inputTextBox, __element);
+
+
+                                avaloniaControl = inputTextBox; 
+
+                                break;
+                            case "password":
+                                var passwordBox = new Avalonia.Controls.TextBox();
+                                passwordBox.PasswordChar = '*';
+                                createEventForAvaloniaControl(passwordBox, __element);
+                                avaloniaControl = passwordBox;
+                                break;
+
+
+                            case "checkbox":
+                                var checkboxPanel  = new Avalonia.Controls.StackPanel();
+                                checkboxPanel.Width = 300;
+                                checkboxPanel.Height = 100;
+                                var chekedBtn = new Avalonia.Controls.CheckBox();
+                                createEventForAvaloniaControl(chekedBtn, __element);
+                                chekedBtn.Content = __element.innerText;
+                                checkboxPanel.Children.Add(chekedBtn);
+                                avaloniaControl = checkboxPanel;
+                                break;
+
+                            case "radio":
+                                var radioBtnPanel = new Avalonia.Controls.StackPanel();
+                                radioBtnPanel.Orientation = Avalonia.Layout.Orientation.Horizontal;
+                                radioBtnPanel.Spacing = 20;
+                                radioBtnPanel.Width =  300;
+                                radioBtnPanel.Height = 150;
+                                radioBtnPanel.Background = Avalonia.Media.Brush.Parse("#B0B0B0");
+
+                            
+                                var radioBtn = new Avalonia.Controls.RadioButton();
+                                radioBtn.Width = 300;
+                                radioBtn.Height = 150;
+                                radioBtn.Content = "RADIO";
+                                createEventForAvaloniaControl(radioBtn, __element);
+                                radioBtn.Content = __element.innerText;
+                                radioBtnPanel.Children.Add(radioBtn);
+                                avaloniaControl = radioBtnPanel;
+                                break;
+                            case "submit":
+                                var btnSubmit = new Avalonia.Controls.Button();
+                                btnSubmit.Content = "Submit";
+                                btnSubmit.Height = 150;
+                                avaloniaControl = btnSubmit;
+                                break;
+                            case "reset":
+                                var btnReset = new Avalonia.Controls.Button();
+                                btnReset.Content = "Reset";
+                                avaloniaControl = btnReset;
+                                break;
+                            case "file":
+                                var btnFile = new Avalonia.Controls.Button();
+                                btnFile.Content = "Choose File";
+                                avaloniaControl = btnFile;
+                                break;
+                            case "hidden":
+                             
+                                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+                                {
+                                    MultiHtmlCraft.Core.commonLog.LogEntry($"Hidden input field skipped");
+                                }
+                                return;
+                            case "button":
+                                var btn = new Avalonia.Controls.Button();
+                                btn.Content = "Button";
+                                avaloniaControl = btn;
+                                break;
+                            case "image":
+                                var btnImage = new Avalonia.Controls.Button();
+                                btnImage.Content = "Choose Image";
+                                avaloniaControl = btnImage;
+                                break;
+                            case "color":
+                                var btnColor = new Avalonia.Controls.Button();
+                                btnColor.Content = "Choose Color";
+                                avaloniaControl = btnColor;
+                                break;
+                            case "date":
+                                var btnDate = new Avalonia.Controls.DatePicker();
+                                btnDate.Width = 400;
+                                btnDate.Height = 300;
+                                btnDate.SelectedDateChanged += (s, e) => OnControlDateTimePickerDateSelectedInternal(btnDate);
+                                avaloniaControl = btnDate;
+                                break;
+                            case "datetime-local":
+                                var btnDateTime = new Avalonia.Controls.DatePicker();
+                                btnDateTime.Width = 400;
+                                btnDateTime.Height = 100; 
+                   
+                                avaloniaControl = btnDateTime;
+                                break;
+                            case "email":
+                                var emailBox = new Avalonia.Controls.TextBox();
+                                emailBox.Watermark = "Enter email";
+                                avaloniaControl = emailBox;
+                                break;
+                            case "month":
+                                var btnMonth = new Avalonia.Controls.Button();
+                                btnMonth.Content = "Choose Month";
+                                avaloniaControl = btnMonth;
+                                break;
+                            case "number":
+                                var numberBox = new Avalonia.Controls.NumericUpDown();
+                                avaloniaControl = numberBox;
+                                break;
+                            case "range":
+                                var slider = new Avalonia.Controls.Slider();
+                                slider.Minimum = 0;
+                                slider.Maximum = 100;
+                                avaloniaControl = slider;
+                                break;
+                            case "search":
+                                var searchBox = new Avalonia.Controls.TextBox();
+                                searchBox.Watermark = "Search...";
+                                avaloniaControl = searchBox;
+                                break;
+                            case "tel":
+                                var telBox = new Avalonia.Controls.TextBox();
+                                telBox.Watermark = "Enter phone";
+                                avaloniaControl = telBox;
+                                break;
+                            case "time":
+                                var btnTime = new Avalonia.Controls.Button();
+                                btnTime.Content = "Choose Time";
+                                avaloniaControl = btnTime;
+                                break;
+                            case "url":
+                                var urlBox = new Avalonia.Controls.TextBox();
+                                urlBox.Watermark = "Enter URL";
+                                avaloniaControl = urlBox;
+                                break;
+                            case "week":
+                                var btnWeek = new Avalonia.Controls.Button();
+                                btnWeek.Content = "Choose Week";
+                                avaloniaControl = btnWeek;
+                                break;
+                            default:
+                                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+                                {
+                                    MultiHtmlCraft.Core.commonLog.LogEntry($"Unknown INPUT type: '{inputType}', creating TextBox as fallback");
+                                }
+                                avaloniaControl = new Avalonia.Controls.TextBox();
+                                break;
+                        }
+                        break;
+                    }
+
+                case CHtmlElementType.SELECT:
+                    {
+                        var comboBox = new Avalonia.Controls.ComboBox();
+                        comboBox.Width = 200;
+                        comboBox.Height = 30;
+                        comboBox.Background = Avalonia.Media.Brush.Parse("#DD5733");
+                        avaloniaControl = comboBox;
+                        break;
+                    }
+
+                case CHtmlElementType.TEXTAREA:
+                    {
+                        var textArea = new Avalonia.Controls.TextBox();
+                        textArea.Width = 200;
+                        textArea.Height = 60;
+                        textArea.AcceptsReturn = true;
+                        avaloniaControl = textArea;
+                        break;
+                    }
+
+                default:
+                    {
+                        if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+                        {
+                            MultiHtmlCraft.Core.commonLog.LogEntry($"{this}.createAvaloniaControlFromDocumentForElement - No control created for element type: {__element.___elementTagType}");
+                        }
+                        break;
+                    }
+            }
+
+            if (avaloniaControl != null)
+            {
+                // デフォルトサイズを設定
+                if (avaloniaControl.Width == 0 || double.IsNaN(avaloniaControl.Width))
+                {
+                    // CheckBox/RadioButtonは小さく、他はデフォルト100
+                    if (avaloniaControl is Avalonia.Controls.CheckBox || avaloniaControl is Avalonia.Controls.RadioButton)
+                        avaloniaControl.Width = 20;
+                    else
+                        avaloniaControl.Width = 100;
+                }
+
+                if (avaloniaControl.Height == 0 || double.IsNaN(avaloniaControl.Height))
+                {
+                    // CheckBox/RadioButtonは小さく、他はデフォルト30
+                    if (avaloniaControl is Avalonia.Controls.CheckBox || avaloniaControl is Avalonia.Controls.RadioButton)
+                        avaloniaControl.Height = 20;
+                    else
+                        avaloniaControl.Height = 30;
+                }
+
+                avaloniaControl.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
+                avaloniaControl.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+
+                __element.___ManagedControlWeakReference = new WeakReference(avaloniaControl);
+                AddControl(avaloniaControl, __element.___offsetScreenBounds.Left, __element.___offsetScreenBounds.Top);
+
+                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+                {
+                    MultiHtmlCraft.Core.commonLog.LogEntry($"Control created: {avaloniaControl.GetType().Name} Size=({avaloniaControl.Width}x{avaloniaControl.Height}) at ({__element.___offsetScreenBounds.Left}, {__element.___offsetScreenBounds.Top})");
+                }
+            }
+        }
+
+        private void OnControlDateTimePickerDateSelectedInternal(DatePicker btnDate)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void createEventForAvaloniaControl(Avalonia.Controls.Control avaloniaControl, CHtmlElement element)
+        {
+            string strElementInputAttributeTypeValue = null;
+            CHtmlElement ownerFornElemenent = null;
+            bool IsAvalonivaOwnerFormElementFound = false;
+            if (avaloniaControl != null && element != null)
+            {
+                avaloniaControl.Tag = element;
+
+
+                switch(element.___elementTagType)
+                {
+           
+                    case CHtmlElementType.BUTTON:
+                        var buttonControl = avaloniaControl as Avalonia.Controls.Button;
+                        buttonControl.Click += (s, e) => OnControlClickInternal(e);
+                        buttonControl.PointerPressed += (s, e) => OnControlPointerPressedInternal(e);
+                        buttonControl.PointerReleased += (s, e) => OnControlPointerReleasedInternal(e);
+                        buttonControl.PointerMoved += (s, e) => OnControlPointerMovedInternal(e);
+
+                        CHtmlAttribute elementInputAttributeType = null;
+                        if (element.___attributes.TryGetValue("type", out elementInputAttributeType))
+                        {
+                            strElementInputAttributeTypeValue = elementInputAttributeType.value.ToString();
+                        }
+                        break;
+                    case CHtmlElementType.TEXTAREA:
+                        break;
+
+                    case CHtmlElementType.INPUT:
+                        var elementInputType = String.Format("{0}", element.getAttribute("type")).ToLower();
+                        switch(elementInputType)
+                        {
+                            case "text":
+                                var txtBox = avaloniaControl as Avalonia.Controls.TextBox;
+                                txtBox.TextChanged += (s, e) => OnControlTextChangedInternal(e);
+                                break;
+                            case "password":
+                                var txtPasswordBox = avaloniaControl as Avalonia.Controls.TextBox;
+                                txtPasswordBox.TextChanged += (s, e) => OnControlTextChangedInternal(e);
+                                break;
+                            case "checkbox":
+                                break;
+                            case "radio":
+                                break;
+                            case "number":
+                                break;
+                            case "color":
+                                break;
+                            case "range":
+                                break;
+                            case "file":
+                                break;
+                            case "button":
+                                break;
+                            case "date":
+                                var datePicker = avaloniaControl as Avalonia.Controls.DatePicker;
+                                datePicker.SelectedDateChanged += (s, e) => OnControlDateTimePickerDateSelectedInternal(datePicker);
+                                break;
+                                
+                        }
+                        break;
+                }
+
+
+
+
+
+
+            }
+            return;
+        }
+
 
         // synchronous helper
         public void NavigateSync(string URL)
@@ -269,7 +802,32 @@ namespace MultiHtmlCraft.AvaroniaControl
 
         private static readonly Random _rand = new Random();
 
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            // 無限サイズは有限値に制限
+            var constrainedSize = new Size(
+                double.IsInfinity(availableSize.Width) ? 800 : availableSize.Width,
+                double.IsInfinity(availableSize.Height) ? 600 : availableSize.Height
+            );
 
+            // ScrollViewer に利用可能なサイズを渡す
+            if (_cachedScrollViewer != null)
+            {
+                _cachedScrollViewer.Measure(constrainedSize);
+                return constrainedSize;
+            }
+            return constrainedSize;
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            // ScrollViewer を最終サイズに配置
+            if (_cachedScrollViewer != null)
+            {
+                _cachedScrollViewer.Arrange(new Rect(0, 0, finalSize.Width, finalSize.Height));
+            }
+            return finalSize;
+        }
 
         public override void Render(DrawingContext context)
         {
@@ -291,7 +849,16 @@ namespace MultiHtmlCraft.AvaroniaControl
                 ___document.drawRootElementRecursively(documentRootElement, ref grCon);
 
             }
+            base.Render(context);
+#if !WINDOWS
+
+            if (___document != null)
+            {
+                ___document.ApplyPendingAvaloniaRelocations();
+            }
+#endif
         }
+
 
         private CHtmlGraphicContainer? CreateGraphicContainer(DrawingContext context)
         {
@@ -440,13 +1007,13 @@ namespace MultiHtmlCraft.AvaroniaControl
             ScrollInvalidated?.Invoke(this, e);
         }
 
-        public Control? GetControlInDirection(NavigationDirection direction, Control? from)
+        public Avalonia.Controls.Control? GetControlInDirection(NavigationDirection direction, Avalonia.Controls.Control from)
         {
             // Default: no logical navigation support
             return null;
         }
 
-        public bool BringIntoView(Control control, Avalonia.Rect rect)
+        public bool BringIntoView(Avalonia.Controls.Control control, Avalonia.Rect rect)
         {
             // No special bring-into-view handling; return false to indicate not handled.
             return false;
@@ -460,6 +1027,21 @@ namespace MultiHtmlCraft.AvaroniaControl
             set => _offset = value;
         }
         public Avalonia.Size Viewport => _viewport;
+
+        bool ILogicalScrollable.CanHorizontallyScroll { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        bool ILogicalScrollable.CanVerticallyScroll { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        bool ILogicalScrollable.IsLogicalScrollEnabled => throw new NotImplementedException();
+
+        Size ILogicalScrollable.ScrollSize => throw new NotImplementedException();
+
+        Size ILogicalScrollable.PageScrollSize => throw new NotImplementedException();
+
+        Size IScrollable.Extent => throw new NotImplementedException();
+
+        Vector IScrollable.Offset { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        Size IScrollable.Viewport => throw new NotImplementedException();
 
         // キャッシュ関連メソッド
         // RenderScaling をキャッシュするメソッド（リフレクションなし）
@@ -540,9 +1122,14 @@ namespace MultiHtmlCraft.AvaroniaControl
 
         private void CachedScrollViewer_PropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
         {
-            if (e.Property.Name == "Offset" && sender is ScrollViewer sv)
+            if ((e.Property.Name == nameof(ScrollViewer.Offset) || e.Property.Name == "Offset") && sender is ScrollViewer sv)
             {
                 _cachedScrollOffset = sv.Offset;
+
+                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                {
+                    MultiHtmlCraft.Core.commonLog.LogEntry($"ScrollViewer Offset changed: X={sv.Offset.X}, Y={sv.Offset.Y}");
+                }
 
                 InvalidateVisual();
             }
@@ -603,9 +1190,9 @@ namespace MultiHtmlCraft.AvaroniaControl
             _isRenderScalingCacheValid = false;
             CacheRenderScaling();
         }
-        protected override void OnKeyDown(KeyEventArgs e)
+        protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
         {
-     
+
             bool isShift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
 
 
@@ -637,10 +1224,10 @@ namespace MultiHtmlCraft.AvaroniaControl
                 ___fireWindoworDocumentEvent("keydown", null, keyboardEventArgsSpec);
             }
         }
-        protected override void OnKeyUp(KeyEventArgs e)
+        protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
         {
             base.OnKeyUp(e);
-            bool isShift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+            bool isShift = e.KeyModifiers.HasFlag(Avalonia.Input.KeyModifiers.Shift);
 
 
             bool isCtrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
@@ -670,14 +1257,14 @@ namespace MultiHtmlCraft.AvaroniaControl
 
 
                 };
-                
-                
-               ___fireWindoworDocumentEvent("keyup", null, keyboardEventArgsSpec);   
+
+
+                ___fireWindoworDocumentEvent("keyup", null, keyboardEventArgsSpec);
             }
 
 
         }
-        
+
 
         private void ___fireWindoworDocumentEvent(string eventName, CHtmlMultiversalMouseEventArgsSpec? mouseArgSpec)
         {
@@ -703,7 +1290,7 @@ namespace MultiHtmlCraft.AvaroniaControl
                 {
                     commonLog.LogEntry($"{logPrefix}");
                 }
-                    switch (eventName)
+                switch (eventName)
                 {
                     case "mousemove":
                     case "mousedown":
@@ -746,7 +1333,7 @@ namespace MultiHtmlCraft.AvaroniaControl
             }
             return;
         }
-        
+
         private void ___executeWindowDocumentEventFunction(string eventType, object eventObj)
         {
 
@@ -765,7 +1352,7 @@ namespace MultiHtmlCraft.AvaroniaControl
                     break;
                 case "keydown":
 
-                     winFunc = doc.___WindowKeyDownFunctionWeakReference != null ? doc.___WindowKeyDownFunctionWeakReference.Target : null;
+                    winFunc = doc.___WindowKeyDownFunctionWeakReference != null ? doc.___WindowKeyDownFunctionWeakReference.Target : null;
                     if (winFunc == null)
                     {
                         winFunc = doc.___WindowKeyDownFunctionStrongRef;
@@ -864,11 +1451,11 @@ namespace MultiHtmlCraft.AvaroniaControl
             mouseArg.Y = (int)Math.Round(pos.Y);
 
 
-            if (this.___multiversalWindow != null && this.___multiversalWindow.document != null &&      
+            if (this.___multiversalWindow != null && this.___multiversalWindow.document != null &&
               this.___multiversalWindow.___document.___WindowMouseMoveFunctionWeakReference != null)
             {
                 ___fireWindoworDocumentEvent("mousemove", mouseArg);
-            
+
             }
         }
         protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
@@ -904,27 +1491,29 @@ namespace MultiHtmlCraft.AvaroniaControl
         protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
             base.OnPointerPressed(e);
-            
+
             this.Focus();
-             CHtmlMultiversalMouseEventArgsSpec mouseArg = new CHtmlMultiversalMouseEventArgsSpec();
+            CHtmlMultiversalMouseEventArgsSpec mouseArg = new CHtmlMultiversalMouseEventArgsSpec();
             var mouseInfo = e.GetCurrentPoint(this);
             mouseArg.X = (int)mouseInfo.Position.X;
             mouseArg.Y = (int)mouseInfo.Position.Y;
-            if(mouseInfo.Properties.IsLeftButtonPressed)
+            if (mouseInfo.Properties.IsLeftButtonPressed)
             {
-                   mouseArg.Button = 0;
-            }else if(mouseInfo.Properties.IsMiddleButtonPressed)
-            {
-                    mouseArg.Button = 1;
+                mouseArg.Button = 0;
             }
-            else if(mouseInfo.Properties.IsRightButtonPressed)
+            else if (mouseInfo.Properties.IsMiddleButtonPressed)
             {
-                    mouseArg.Button = 2;
+                mouseArg.Button = 1;
+            }
+            else if (mouseInfo.Properties.IsRightButtonPressed)
+            {
+                mouseArg.Button = 2;
             }
 
             ___fireWindoworDocumentEvent("mousedown", mouseArg);
 
         }
+
 
 
         public static int ToJavaScriptKeyCode(Avalonia.Input.Key key)
@@ -1021,21 +1610,261 @@ namespace MultiHtmlCraft.AvaroniaControl
                 Avalonia.Input.Key.LeftAlt => "AltLeft",
                 Avalonia.Input.Key.RightAlt => "AltRight",
 
-               
+
                 _ when key >= Avalonia.Input.Key.D0 && key <= Avalonia.Input.Key.D9
                     => $"Digit{key.ToString().Substring(1)}",
 
-     
+
                 _ when key >= Avalonia.Input.Key.A && key <= Avalonia.Input.Key.Z
                     => $"Key{key}",
 
-               
+
                 _ when key >= Avalonia.Input.Key.NumPad0 && key <= Avalonia.Input.Key.NumPad9
                     => key.ToString().Replace("NumPad", "Numpad"),
 
-               
+
                 _ => key.ToString()
             };
         }
+
+        bool ILogicalScrollable.BringIntoView(Avalonia.Controls.Control target, Rect targetRect)
+        {
+            throw new NotImplementedException();
+        }
+
+        Avalonia.Controls.Control? ILogicalScrollable.GetControlInDirection(NavigationDirection direction, Avalonia.Controls.Control? from)
+        {
+            throw new NotImplementedException();
+        }
+
+        void ILogicalScrollable.RaiseScrollInvalidated(EventArgs e)
+        {
+            throw new NotImplementedException();
+
+
+
+        }
+        #region  AvaloniaControl Events
+        internal void OnControlPointerPressedInternal(PointerPressedEventArgs e)
+        {
+            OnPointerPressed(e);
+        }
+        internal void OnControlPointerReleasedInternal(PointerReleasedEventArgs e)
+        {
+            OnPointerReleased(e);
+        }
+        internal void OnControlTextChangedInternal(TextChangedEventArgs e)
+        {
+            var source = e.Source;
+            if (source != null)
+            {
+                var control = source as Avalonia.Controls.TextBox;
+                var element = control.Tag as MultiHtmlCraft.Core.CHtmlElement;
+                var textContent = control.Text ?? string.Empty;
+                if (String.IsNullOrEmpty(textContent) == false)
+                {
+                    element.setAttribute("value", textContent);
+
+                };
+            }
+        }
+        internal void OnControlDateTimePickerDateSelectedInternal(DatePicker datePicker, DateTimeOffset? selectedDate)
+        {
+            if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+            {
+                MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlDateTimePickerDateSelectedInternal - Selected Date: {selectedDate}");
+            }
+            if (selectedDate.HasValue)
+            {
+                // Handle the selected date as needed
+                // For example, you might want to update a bound property or trigger an event
+            }
+        }
+        internal void OnControlPointerMovedInternal(PointerEventArgs e)
+        {
+            OnPointerMoved(e);
+        }
+        internal void OnControlPointerWheelChangedInternal(PointerWheelEventArgs e)
+        {
+            OnPointerWheelChanged(e);
+        }
+        internal void OnControlPointerEnteredInternal(PointerEventArgs e)
+        {
+            OnPointerEntered(e);
+        }   
+        internal void OnControlDateTimePickerDateSelectedInternal(DateTimeOffset? selectedDate)
+        {
+            if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+            {
+                MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlDateTimePickerDateSelectedInternal - Selected Date: {selectedDate}");
+            }
+            if (selectedDate.HasValue)
+            {
+                // Handle the selected date as needed
+                // For example, you might want to update a bound property or trigger an event
+            }
+        }
+        internal  async Task OnControlClickInternal(Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            var source = e.Source; 
+            if (source != null)
+            {
+                var control = source as Avalonia.Controls.Control;
+                var element = control.Tag as MultiHtmlCraft.Core.CHtmlElement;
+                if(element != null)
+                {
+                    if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                    {
+                        MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Element: {element.toLogString()}, ID: {element.id}");
+                    }
+                    var ownerForm = commonHTML.GetParentElementFromElement(element, CHtmlElementType.FORM, 3);
+                    if(ownerForm != null)
+                    {
+                        if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                        {
+                            MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Found parent form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
+                        }
+                        var elementType = String.Format("{0}", element.getAttribute("type"));
+
+                        switch (elementType.ToLower())
+                        {
+
+                            case "reset":
+                                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                                {
+                                    MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Resetting form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
+                                }
+                                //ownerForm.reset();
+                                break;
+                            case "submit":
+                            default:
+                                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                                {
+                                    MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Submitting form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
+                                }
+                                var formMethod = String.Format("{0}", ownerForm.getAttribute("method"));
+                                var formAction = String.Format("{0}", ownerForm.getAttribute("action")) ;
+                                string strUrl = commonHTML.GetAbsoluteUri(___document.___URL , null, formAction);
+                                StringBuilder sbPostData = new StringBuilder();
+
+                                commonHTML.createFormPostData(ownerForm, ref sbPostData);
+                                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                                {
+                                    MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Form Post Data: {sbPostData.ToString()} for {strUrl} with method {formMethod}");
+                                }
+                                CHtmlMultiversalWebHistory historyItem = new CHtmlMultiversalWebHistory();
+                                historyItem.Url = formAction;
+                                historyItem.FileLocation = null;
+                                historyItem.ContentType = "application/x-www-form-urlencoded";
+                                historyItem.LastModified = DateTimeOffset.Now;
+                                historyItem.Window = this.___multiversalWindow;
+                                historyItem.Document = this.Document;
+                                if(this.___multiversalWindow != null && this.___multiversalWindow.___document != null)
+                                {
+                                    historyItem.Document = this.___multiversalWindow.___document;
+                                };
+
+
+                                CHtmlMultiversalHistoryList.CHtmlMultiversalWebHistoryCache[new DateTimeOffset()] = historyItem;
+                                resetMultiversalWindow();
+
+
+                                var requestData = new CHtmlRequestData();
+                                requestData.fields.Add("Method", formMethod); 
+                                requestData.fields.Add("PostData", sbPostData.ToString());
+                                requestData.fields.Add("ContentType", "application/x-www-form-urlencoded");
+                                this._canvas.Children.Clear();
+
+
+                                ___document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, ___multiversalWindow, requestData);
+
+
+
+                                break;
+                        }
+
+                    }
+                   
+                }
+            }
+        }
+        internal void resetMultiversalWindow()
+        {
+            ___multiversalWindow = new MultiHtmlCraft.Core.CHtmlMultiversalWindow(null, true, IMultiversalWindowType.NormalWindow);
+
+            if (___multiversalWindow != null)
+            {
+                ___multiversalWindow.setMultiversalControl(this);
+                setMultiversalScriptScriptEngineType(IMultiversalScriptScriptEngineType.ClearScriptV8);
+            }
+            this.___document = null;
+        }
+        private async Task<DateTimeOffset?> ShowDynamicDateDialogAsync(Window parentWindow)
+        {
+            // 1. ダイアログ用のウィンドウを動的に作成
+            var dialog = new Window
+            {
+                Title = "日付の選択",
+                Width = 300,
+                Height = 150,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                CanResize = false,
+                SizeToContent = SizeToContent.Height // コンテンツに合わせて高さを自動調整
+            };
+
+            // 2. コントロールの配置と設定
+            var stackPanel = new StackPanel { Margin = new Avalonia.Thickness(20), Spacing = 15 };
+            var textBlock = new TextBlock { Text = "日付を入力してください:" };
+
+            // DatePicker の生成
+            var datePicker = new DatePicker
+            {
+                SelectedDate = DateTimeOffset.Now // 初期値を今日に設定
+            };
+
+            // ボタンエリアの作成
+            var buttonPanel = new StackPanel
+            {
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                Spacing = 10
+            };
+
+            var okButton = new Avalonia.Controls.Button
+            { Content = "OK", IsDefault = true };
+            var cancelButton = new Avalonia.Controls.Button 
+            { Content = "Cancel", IsCancel = true };
+
+            // 3. イベントハンドラーの登録（戻り値をセットして閉じる）
+            DateTimeOffset? selectedDate = null;
+
+            okButton.Click += (s, e) =>
+            {
+                selectedDate = datePicker.SelectedDate;
+                dialog.Close();
+            };
+
+            cancelButton.Click += (s, e) =>
+            {
+                dialog.Close(); // selectedDate は null のまま閉じる
+            };
+
+            // 4. レイアウトの組み立て
+            buttonPanel.Children.Add(okButton);
+            buttonPanel.Children.Add(cancelButton);
+
+            stackPanel.Children.Add(textBlock);
+            stackPanel.Children.Add(datePicker);
+            stackPanel.Children.Add(buttonPanel);
+
+            dialog.Content = stackPanel;
+
+            // 5. モーダルダイアログとして表示し、閉じるのを待つ
+            await dialog.ShowDialog(parentWindow);
+
+            return selectedDate;
+        }
+
+        #endregion 
     }
 }

@@ -313,6 +313,21 @@ namespace MultiHtmlCraft.Core
                 try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Proxy.fill exception: {0}\n{1}", ex.Message, ex.ToString()); } catch { }
             }
         }
+        public object createPattern(params object[] args)
+        {
+
+
+            if (args == null || args.Length < 2)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5) commonLog.LogEntry("Proxy.createPattern called with insufficient arguments");
+                return null;
+            } else
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8) commonLog.LogEntry("Proxy.createPattern called with {0} arguments", args?.Length ?? 0);
+            }
+            return _canvas.createPattern(args[0], args[1]);
+
+        }
 
         public void putImageData(params object[] args)
         {

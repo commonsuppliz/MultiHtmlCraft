@@ -40,13 +40,15 @@ using NiL.JS.Extensions;
 using NiL.JS.Core;
 using Svg;
 using System.Linq;
-using ExCSS;
+
 
 // Ensure unqualified references to 'Color' and 'Point' resolve to System.Drawing types
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
 using Newtonsoft.Json.Serialization;
 using Microsoft.ClearScript;
+using Avalonia.Controls;
+using Avalonia;
 
 namespace MultiHtmlCraft.Core
 {
@@ -205,6 +207,7 @@ namespace MultiHtmlCraft.Core
         };
             return docProperties;
         }
+        internal List<Action> ___pendingAvaloniaControlRqRelocations = new();
 
 
         internal bool ___IsMultiversalDocument = false;
@@ -1055,7 +1058,7 @@ namespace MultiHtmlCraft.Core
         {
 
             // var contentData = await CHmlMultiversalWebCache.getMultiversalContentData(url, string.Empty).ConfigureAwait(false);
-            var contentData = await CHmlMultiversalWebCache.getMultiversalContentData(url, string.Empty);
+            var contentData = await CHmlMultiversalWebCache.getMultiversalContentData(url, string.Empty, string.Empty, _requestData);
             Stopwatch? stopwatch = null;
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
             {
@@ -1286,9 +1289,9 @@ namespace MultiHtmlCraft.Core
                     this.___cssRuleGroundList = new CHtmlCSSRuleGroundList();
                     this.___documentMemStream = new System.IO.MemoryStream();
 #if WINDOWS
-                    this.___imageRawConcurrentDictionaryForGdi = new System.Collections.Concurrent.ConcurrentDictionary<string, Image>(StringComparer.Ordinal);
+                    this.___imageRawConcurrentDictionaryForGdi = new System.Collections.Concurrent.ConcurrentDictionary<string, System.Drawing.Image>(StringComparer.Ordinal);
 #else
-                    switch(commonHTML.GraphicApiType)
+                    switch (commonHTML.GraphicApiType)
                     {
                         case GraphicAPIType.Avalonia:
                         case GraphicAPIType.SkiaSharp:
@@ -1353,7 +1356,7 @@ namespace MultiHtmlCraft.Core
                     this.___BadImageSizeLookupList = new System.Collections.Generic.Dictionary<string, string>(StringComparer.Ordinal);
                     this.___LinkDisabledHerfList = new System.Collections.Generic.Dictionary<string, string>(StringComparer.Ordinal);
 
-                    this.___imageSizeQuickLookupSucessList = new System.Collections.Generic.Dictionary<string, Size>(StringComparer.Ordinal);
+                    this.___imageSizeQuickLookupSucessList = new System.Collections.Generic.Dictionary<string, System.Drawing.Size>(StringComparer.Ordinal);
                     this.___CSSSearchDeepPendingElementList = new System.Collections.Generic.SortedList<int, WeakReference>();
                     break;
                 case CHtmlDomModeType.XMLDOM:
@@ -2116,7 +2119,7 @@ namespace MultiHtmlCraft.Core
         public CHtmlCollection querySelectorAll(object queryValue)
         {
             string sQuery = commonHTML.GetStringValue(queryValue);
-            CHtmlCollection arReturn = commonHTML.GetQuerySelectorListProcessorInner(this, sQuery, CHtmlQuerySelectorType.document_querySelectorAll);
+            CHtmlCollection arReturn = commonHTML.___getQuerySelectorListProcessorInner(this, sQuery, CHtmlQuerySelectorType.document_querySelectorAll);
             if (this.___IsMultiversalDocument == true)
             {
                 this.___assignHTMLCollectionPrototype(ref arReturn);
@@ -2127,7 +2130,7 @@ namespace MultiHtmlCraft.Core
         public CHtmlElement querySelector(object queryValue)
         {
             string sQuery = commonHTML.GetStringValue(queryValue);
-            CHtmlCollection list = commonHTML.GetQuerySelectorListProcessorInner(this, sQuery, CHtmlQuerySelectorType.document_querySelector);
+            CHtmlCollection list = commonHTML.___getQuerySelectorListProcessorInner(this, sQuery, CHtmlQuerySelectorType.document_querySelector);
             if (list.Count > 0)
             {
                 return list[0] as CHtmlElement;
@@ -9583,7 +9586,7 @@ namespace MultiHtmlCraft.Core
                                                                     try
                                                                     {
 
-                                                                        Image imgBase64 = null;// commonGraphics.ConvertBase64ToImage(DataString);
+                                                                        System.Drawing.Image imgBase64 = null;// commonGraphics.ConvertBase64ToImage(DataString);
                                                                         if (imgBase64 != null)
                                                                         {
                                                                             bool __ImageEntered = false;
@@ -9628,7 +9631,7 @@ namespace MultiHtmlCraft.Core
                                                                 {
                                                                     if (tagElement.___style.___styleSizeMode == CHtmlSizeModeType.Undefined)
                                                                     {
-                                                                        Image imgBase64 = null;
+                                                                        System.Drawing.Image imgBase64 = null;
                                                                         this.___imageRawConcurrentDictionaryForGdi.TryGetValue(__srcUrl, out imgBase64);
                                                                         if (imgBase64 != null)
                                                                         {
@@ -9787,7 +9790,7 @@ namespace MultiHtmlCraft.Core
 
                                                                                     goto LineContinueAnalysis;
                                                                                 }
-                                                                                Image ___imgCache = null;
+                                                                                 System.Drawing.Image ___imgCache = null;
                                                                                 this.___imageRawConcurrentDictionaryForGdi.TryGetValue(__srcFullUrl, out ___imgCache);
                                                                                 if (___imgCache != null)
                                                                                 {
@@ -10945,6 +10948,11 @@ namespace MultiHtmlCraft.Core
                         object documentOnloadEventFunctionObject = searchOnloadFunctionFromScriptHost();
                         if (documentOnloadEventFunctionObject != null)
                         {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
+                            {
+                                commonLog.LogEntry("CHtmlDocument: Executing window.onload function");
+                            }
+                            System.Diagnostics.Debug.WriteLine("CHtmlDocument: Executing window.onload function");
                             this.___PerformDocumentOrWindowEventFunction(documentOnloadEventFunctionObject, "Load", null, this.___event, false, "window load");
                             __MethodCalled++;
                             goto LoadFucntionDone;
@@ -12363,10 +12371,10 @@ namespace MultiHtmlCraft.Core
                         try
                         {
 
-                            Image img = null;
+                             System.Drawing.Image img = null;
                             if (commonHTML.IsContentTypeValidWinFormsImage(_contentType))
                             {
-                                img = Image.FromStream(stream);
+                                img =  System.Drawing.Image.FromStream(stream);
                             }
                             else if (commonHTML.IsContentTypeSVG(_contentType))
                             {
@@ -12394,7 +12402,7 @@ namespace MultiHtmlCraft.Core
 
                     }
 #else
-                    switch(commonHTML.GraphicApiType)
+                    switch (commonHTML.GraphicApiType)
                     {
 
                         case GraphicAPIType.Avalonia:
@@ -12613,26 +12621,55 @@ namespace MultiHtmlCraft.Core
 
 
 
-        internal static void ___resetElementSizeByImageSize(CHtmlElement ___tagElement, Image __Image)
-        {
-            ___resetElementSizeByImageSize(___tagElement, __Image, Size.Empty);
-        }
-
-        internal static void ___resetElementSizeByImageSize(CHtmlElement ___tagElement, Image __Image, Size ___Size)
+        internal static void ___resetElementSizeByImageSize(CHtmlElement ___tagElement, System.Drawing.Image? ___gdiImage)
         {
             if (___tagElement == null)
-                return;
-            int __ImageWidth = 0;
-            int __ImageHeight = 0;
-            if (__Image != null)
             {
-                __ImageHeight = __Image.Height;
-                __ImageWidth = __Image.Width;
+                return;
             }
+            var ___skiaImageSize = new SizeFSpec(0, 0);
+
+            if (___gdiImage !=  null)
+            {
+                var ___gdiImageSizeSpec = new SizeFSpec(___gdiImage.Width, ___gdiImage.Height);
+                ___resetElementSizeByImageSize(___tagElement, ___gdiImageSizeSpec);
+
+
+            }
+
+        }
+        internal static void ___resetElementSizeByImageSize(CHtmlElement ___tagElement, SkiaSharp.SKBitmap __skiaImage)
+        {
+            var ___skiaImageSize = new SizeFSpec(0, 0);
+            if (___tagElement == null)
+                return;
+            if(__skiaImage == null)
+                return;
             else
             {
-                __ImageWidth = ___Size.Width;
-                __ImageHeight = ___Size.Height;
+                ___skiaImageSize = new SizeFSpec(__skiaImage.Width, __skiaImage.Height);
+            }
+
+
+            ___resetElementSizeByImageSize(___tagElement, ___skiaImageSize);
+        }
+
+        internal static void ___resetElementSizeByImageSize(CHtmlElement ___tagElement, SizeFSpec ___sizeFSpec)
+        {
+            int __ImageWidth = 0;
+            int __ImageHeight = 0;
+            if (___tagElement == null)
+                return;
+
+
+
+
+
+
+            else
+            {
+                __ImageWidth = (int) ___sizeFSpec.Width;
+                __ImageHeight = (int)___sizeFSpec.Height;
             }
             if (___tagElement.___elementTagType == CHtmlElementType.IMG || ___tagElement.___elementTagType == CHtmlElementType.INPUT)
             {
@@ -14195,7 +14232,7 @@ namespace MultiHtmlCraft.Core
                 ___textElementParentElement.parentBlockElement.___InlineCornorPoint = PointF.Empty;
 
             }
-            if (commonHTML.IsElemeneITextOrIDraw(textElement) == true && ___TextPriorElementPositionUsed != Size.Empty)
+            if (commonHTML.IsElemeneITextOrIDraw(textElement) == true && ___TextPriorElementPositionUsed != System.Drawing.Size.Empty)
             {
                 textElement.___ElementInlineShifted = true;
                 // -----------------------------------------------------------------------------------------------
@@ -15787,7 +15824,7 @@ namespace MultiHtmlCraft.Core
                                                     }
                                                     else
                                                     {
-                                                        Image _imageCached = null;
+                                                        System.Drawing.Image _imageCached = null;
                                                         this.___imageRawConcurrentDictionaryForGdi.TryGetValue(tagElement.___style.___IMG_FullURL, out _imageCached);
                                                         if (_imageCached != null)
                                                         {
@@ -17853,12 +17890,13 @@ namespace MultiHtmlCraft.Core
             }
             ___tagElement.___BaseControlDisplayRectangle = _grCon.PaintRectangle;
             RectangleF elementBounds = commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen());
+
 #if WINDOWS
             System.Windows.Forms.Control ___managedControl = null;
 
             if (___tagElement.___ManagedControlWeakReference != null)
             {
-                ___managedControl = ___tagElement.___ManagedControlWeakReference.Target as Control;
+                ___managedControl = ___tagElement.___ManagedControlWeakReference.Target as  System.Windows.Forms.Control;
             }
             if (___managedControl == null && ___tagElement.___ManagedControlHandle != IntPtr.Zero)
             {
@@ -17880,6 +17918,28 @@ namespace MultiHtmlCraft.Core
                 }
 
             }
+#else
+            switch (commonHTML.GraphicApiType)
+            {
+                case GraphicAPIType.SkiaSharp:
+                case GraphicAPIType.Avalonia:
+                    if (___tagElement.___ManagedControlWeakReference != null)
+                    {
+                        var AvaloniaControl = ___tagElement.___ManagedControlWeakReference.Target as Avalonia.Controls.Control;
+            
+         
+
+            
+                    if (_grCon.AvaloniaDrawingContext != null)
+                    {
+                        LocateManagedAvaloniaControlForDrawingElement(elementBounds, AvaloniaControl, ___tagElement);
+                    }
+                    }
+                    
+            
+                        break;
+            }
+    
 #endif
             if (___tagElement.___IsDrawDone == false)
             {
@@ -17924,6 +17984,57 @@ namespace MultiHtmlCraft.Core
 #endif
         }
 
+        public void LocateManagedAvaloniaControlForDrawingElement(RectangleF elementBounds, Avalonia.Controls.Control avaloniaControl, CHtmlElement ___tagElement)
+        {
+
+            if (avaloniaControl == null) return;
+
+            PointF location = new PointF(elementBounds.X, elementBounds.Y);
+            Avalonia.Size size = new Avalonia.Size(elementBounds.Width, elementBounds.Height);
+            
+
+
+                this.___pendingAvaloniaControlRqRelocations.Add(() =>
+            {
+                try
+                {
+                    if (avaloniaControl.Parent is Avalonia.Controls.Canvas canvas)
+                    {
+                        Avalonia.Controls.Canvas.SetLeft(avaloniaControl, location.X);
+                        Avalonia.Controls.Canvas.SetTop(avaloniaControl, location.Y);
+                    }
+
+                    avaloniaControl.Width = size.Width;
+                    avaloniaControl.Height = size.Height;
+
+                    if (___tagElement?.___IsElementVisible == true && !avaloniaControl.IsVisible)
+                    {
+                        avaloniaControl.IsVisible = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // デバッグ用（本番では削除可）
+                    System.Diagnostics.Debug.WriteLine($"Avalonia relocation error: {ex.Message}");
+                }
+            });
+        }
+
+
+        public void ApplyPendingAvaloniaRelocations()
+        {
+            if (___pendingAvaloniaControlRqRelocations.Count == 0) return;
+
+            var actions = ___pendingAvaloniaControlRqRelocations.ToList();
+
+            ___pendingAvaloniaControlRqRelocations.Clear();
+
+            Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                foreach (var action in actions)
+                    action();
+            }, Avalonia.Threading.DispatcherPriority.Render);
+        }   
 
 
 
@@ -18091,11 +18202,50 @@ namespace MultiHtmlCraft.Core
                     {
                         if (processor != null)
                         {
+                            // Try to get the window object from global scope and then access its onload property
+                            try
+                            {
+                                object windowObject = processor.get("window");
+                                if (windowObject != null && !(windowObject is Microsoft.ClearScript.Undefined))
+                                {
+                                    object onloadFunction = null;
 
-                            object onloadFunction = processor.get("html/javascript");
-                            if (onloadFunction != null)
-                                hasOnloadExecuteted = true;
-                            return onloadFunction;
+                                    // For ClearScript ScriptObject, use GetProperty method
+                                    if (windowObject is Microsoft.ClearScript.ScriptObject scriptObj)
+                                    {
+                                        try
+                                        {
+                                            onloadFunction = scriptObj.GetProperty("onload");
+                                        }
+                                        catch { }
+                                    }
+                                    else
+                                    {
+                                        // Try dynamic access for other object types
+                                        try
+                                        {
+                                            dynamic dynWindow = windowObject;
+                                            onloadFunction = dynWindow.onload;
+                                        }
+                                        catch { }
+                                    }
+
+                                    if (onloadFunction != null && !(onloadFunction is Microsoft.ClearScript.Undefined))
+                                    {
+                                        hasOnloadExecuteted = true;
+                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
+                                        {
+                                            commonLog.LogEntry("searchOnloadFunctionFromScriptHost: window.onload function found and will be executed.");
+                                        }
+                                        System.Diagnostics.Debug.WriteLine("searchOnloadFunctionFromScriptHost: window.onload function found and will be executed.");
+                                        return onloadFunction;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"searchOnloadFunctionFromScriptHost: Error accessing window.onload: {ex.Message}");
+                            }
                         }
                         continue;
 
@@ -27564,7 +27714,9 @@ namespace MultiHtmlCraft.Core
                         _grCon.TotalOffsetTop -= (float)___tagElement.___offsetTop;
                         break;
                 }
+
             }
+
         }
 
 
@@ -28352,7 +28504,7 @@ namespace MultiHtmlCraft.Core
 
                                             if (___multiData != null && _grCon.Graphic != null)
                                             {
-                                                var scaledImage = ___multiData.backgroundImage_WeakReference.Target as Image;
+                                                var scaledImage = ___multiData.backgroundImage_WeakReference.Target as  System.Drawing.Image;
                                                 var textureBrush = new System.Drawing.TextureBrush(scaledImage, System.Drawing.Drawing2D.WrapMode.Tile);
                                                 textureBrush.TranslateTransform(elementBounds.X - ___imageCSSBackgroundPosition.X, elementBounds.Y - ___imageCSSBackgroundPosition.Y);
                                                 if (___imageCSSBackgroundSize != System.Drawing.SizeF.Empty)
@@ -28373,7 +28525,7 @@ namespace MultiHtmlCraft.Core
                                             }
                                         }
 #else
-                                        switch(commonHTML.GraphicApiType)
+                                            switch (commonHTML.GraphicApiType)
                                         {
                                             case GraphicAPIType.Avalonia:
                                             case GraphicAPIType.SkiaSharp:
@@ -28548,10 +28700,10 @@ namespace MultiHtmlCraft.Core
                 if (string.IsNullOrEmpty(imgUrl) == false)
                 {
 #if WINDOWS
-                    Image __img = null;
+                    System.Drawing.Image __img = null;
                     if (___IsImageFromImgTag == true && styleSelected.___IMG_ImageWeakReference != null)
                     {
-                        __img = styleSelected.___IMG_ImageWeakReference.Target as Image;
+                        __img = styleSelected.___IMG_ImageWeakReference.Target as  System.Drawing.Image;
                     }
 
 
@@ -28589,12 +28741,12 @@ namespace MultiHtmlCraft.Core
 
                         if (styleSelected.___OpacityPasedValue > 0 && styleSelected.___OpacityPasedValue < 1)
                         {
-                            Image __originalImageClone = null;
+                             System.Drawing.Image __originalImageClone = null;
                             try
                             {
                                 if (this.___OpacityChangeFailedUrlSortedList != null && this.___OpacityChangeFailedUrlSortedList.ContainsKey(imgUrl) == false)
                                 {
-                                    Image __imgOpacity = null;
+                                     System.Drawing.Image __imgOpacity = null;
 
                                     CHtmlOpacityImageInfo __curOpacityInfo = new CHtmlOpacityImageInfo(imgUrl, (float)styleSelected.___OpacityPasedValue);
                                     if (this.___DocumentOpacityChangedImageStrongReferenceList != null)
@@ -28676,7 +28828,7 @@ namespace MultiHtmlCraft.Core
                                     goto ListStyleSection;
                                 }
                             }
-                            Size imgSize = __img.Size;
+                            System.Drawing.Size imgSize = __img.Size;
                             imgRectangle = new Rectangle(0, 0, imgSize.Width, imgSize.Height);
                         }
                         catch
@@ -28885,7 +29037,7 @@ namespace MultiHtmlCraft.Core
                     }
 
 #else
-                switch(commonHTML.GraphicApiType)
+                    switch (commonHTML.GraphicApiType)
                 {
                     case GraphicAPIType.SkiaSharp:
                     case GraphicAPIType.Avalonia:
@@ -29012,13 +29164,13 @@ namespace MultiHtmlCraft.Core
                 {
                     CHtmlStyleElementMultpleImageData ___imageData = styleSelected.___multipleBackgroundImageDataSet[0];
 
-                    Image __imgListItem = null;
+                    System.Drawing.Image __imgListItem = null;
                     if (___imageData != null && string.IsNullOrEmpty(___imageData.liststyle_image_fullUrl) == false)
                     {
                         bool IsImageSearchedOutofList = false;
                         if (___imageData.liststyleImage_WeakReference != null)
                         {
-                            __imgListItem = ___imageData.liststyleImage_WeakReference.Target as Image;
+                            __imgListItem = ___imageData.liststyleImage_WeakReference.Target as System.Drawing.Image;
                         }
                         if (__imgListItem == null)
                         {
@@ -29035,7 +29187,7 @@ namespace MultiHtmlCraft.Core
                         }
                         if (__imgListItem != null)
                         {
-                            Size itemSize = __imgListItem.Size;
+                            System.Drawing.Size itemSize = __imgListItem.Size;
                             if (itemSize.Width > commonHTML.ListImageSizeMaxWidth)
                             {
 
@@ -29301,7 +29453,7 @@ namespace MultiHtmlCraft.Core
             }
         }
 
-        private void RoundedRectangle(Graphics grfx, Pen pen, Rectangle rect, Size size)
+        private void RoundedRectangle(Graphics grfx, Pen pen, Rectangle rect, System.Drawing.Size size)
         {
             grfx.DrawLine(pen, rect.Left + size.Width / 2, rect.Top,
                 rect.Right - size.Width / 2, rect.Top);
@@ -30204,7 +30356,7 @@ namespace MultiHtmlCraft.Core
                                     {
                                         try
                                         {
-                                            Image imageFrom64 = commonHTML.ConvertIBase64ImageToImage(__srcUri.href) as Image;
+                                            System.Drawing.Image imageFrom64 = commonHTML.ConvertIBase64ImageToImage(__srcUri.href) as System.Drawing.Image;
                                             if (imageFrom64 != null)
                                             {
                                                 if (System.Threading.Monitor.TryEnter(this.___ImageRawListLockingObject, 100))

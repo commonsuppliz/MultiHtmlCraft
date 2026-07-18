@@ -20,6 +20,8 @@ using NiL.JS.Expressions;
 using NTextCat;
 using System.Linq.Expressions;
 using Microsoft.VisualBasic;
+using ManagedBass;
+
 
 
 
@@ -1811,7 +1813,7 @@ namespace MultiHtmlCraft.Core
 
         GetImageData = 100,
         CreateImageData = 101,
-        CanvasPattern = 102
+        CanvasPattern = 102,
     }
 
     public enum MediaQueryOwnerElementType : byte
@@ -10267,7 +10269,7 @@ namespace MultiHtmlCraft.Core
         }
         #region QuerySelectorMatesSelector
 
-        internal static CHtmlCollection GetQuerySelectorListProcessorInner(object element, string query, CHtmlQuerySelectorType ___querySelectorType)
+        internal static CHtmlCollection ___getQuerySelectorListProcessorInner(object element, string query, CHtmlQuerySelectorType ___querySelectorType)
         {
 
             CHtmlCollection result = new CHtmlCollection();
@@ -10275,9 +10277,13 @@ namespace MultiHtmlCraft.Core
             {
                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
                 {
-                    commonLog.LogEntry("BUGUBUG!!! querySelectorProcessorInner() is called unkown queryType {1}", ___querySelectorType);
+                    commonLog.LogEntry("BUGUBUG!!! __getQuerySelectorListProcessorInner() is called unkown queryType {1}", ___querySelectorType);
                 }
                 return result;
+            }
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"___getQuerySelectorListProcessorInner {element} {query}, {___querySelectorType}");
             }
             result.___CollectionType = CHtmlHTMLCollectionType.QuerySelectorset;
             CHtmlCollection __baseLookupElementList = null;
@@ -11703,28 +11709,28 @@ namespace MultiHtmlCraft.Core
 
                 }
                 goto KnownColorSection;
-            /*
-            switch (_ColorValue)
-            {
-                case null:
-                case "":
-                    return Color.Transparent;
-                case "initial":
-                case "INITAL":
-                case "inital":
-                case "none":
-                case "None":
-                case "NONE":
-                case "no":
-                case "NO":
-                    return Color.Transparent;
-                case "inherit":
-                    return Color.Transparent;
-                default:
-                    // HSL and RGB and RBA Section should ___hasInner been jumped 
-                    goto KnownColorSection;
-            }
-            */
+                /*
+                switch (_ColorValue)
+                {
+                    case null:
+                    case "":
+                        return Color.Transparent;
+                    case "initial":
+                    case "INITAL":
+                    case "inital":
+                    case "none":
+                    case "None":
+                    case "NONE":
+                    case "no":
+                    case "NO":
+                        return Color.Transparent;
+                    case "inherit":
+                        return Color.Transparent;
+                    default:
+                        // HSL and RGB and RBA Section should ___hasInner been jumped 
+                        goto KnownColorSection;
+                }
+                */
             SharpSection:
                 if (_ColorValueArray[0] == '#')
                 {
@@ -12158,28 +12164,28 @@ namespace MultiHtmlCraft.Core
 
                 }
                 goto KnownColorSection;
-            /*
-            switch (_ColorValue)
-            {
-                case null:
-                case "":
-                    return Color.Transparent;
-                case "initial":
-                case "INITAL":
-                case "inital":
-                case "none":
-                case "None":
-                case "NONE":
-                case "no":
-                case "NO":
-                    return Color.Transparent;
-                case "inherit":
-                    return Color.Transparent;
-                default:
-                    // HSL and RGB and RBA Section should ___hasInner been jumped 
-                    goto KnownColorSection;
-            }
-            */
+                /*
+                switch (_ColorValue)
+                {
+                    case null:
+                    case "":
+                        return Color.Transparent;
+                    case "initial":
+                    case "INITAL":
+                    case "inital":
+                    case "none":
+                    case "None":
+                    case "NONE":
+                    case "no":
+                    case "NO":
+                        return Color.Transparent;
+                    case "inherit":
+                        return Color.Transparent;
+                    default:
+                        // HSL and RGB and RBA Section should ___hasInner been jumped 
+                        goto KnownColorSection;
+                }
+                */
             SharpSection:
                 if (_ColorValueArray[0] == '#')
                 {
@@ -14778,34 +14784,34 @@ namespace MultiHtmlCraft.Core
                                                         ___lastString = true;
                                                     }
                                                     else
-                                                    if (s + Font_Face_Whitespace_Margin > srcLen)
-                                                    {
-
-                                                        for (int test = s + 1; test < srcLen; test++)
+                                                        if (s + Font_Face_Whitespace_Margin > srcLen)
                                                         {
-                                                            char ctest = srcArray[test];
-                                                            if (IsCharWhiteSpaceLimited(ctest) == true)
+
+                                                            for (int test = s + 1; test < srcLen; test++)
                                                             {
-                                                                continue;
-                                                            }
-                                                            else if (ctest == ';')
-                                                            {
-                                                                ___lastString = true;
-                                                                break;
-                                                            }
-                                                            else
-                                                            {
-                                                                ___lastString = false;
-                                                                break;
+                                                                char ctest = srcArray[test];
+                                                                if (IsCharWhiteSpaceLimited(ctest) == true)
+                                                                {
+                                                                    continue;
+                                                                }
+                                                                else if (ctest == ';')
+                                                                {
+                                                                    ___lastString = true;
+                                                                    break;
+                                                                }
+                                                                else
+                                                                {
+                                                                    ___lastString = false;
+                                                                    break;
+                                                                }
+
                                                             }
 
                                                         }
-
-                                                    }
-                                                    else
-                                                    {
-                                                        ___lastString = false;
-                                                    }
+                                                        else
+                                                        {
+                                                            ___lastString = false;
+                                                        }
                                                     if (___lastString == true)
                                                     {
                                                         if (___valueDictionary.Count > 0)
@@ -21340,7 +21346,64 @@ namespace MultiHtmlCraft.Core
 
             return newFont;
         }
+        public static CHtmlElement? GetParentElementFromElement(CHtmlElement ___currentElement, CHtmlElementType parentTagType, int lookupDepth)
+        {
+            if (___currentElement == null)
+            {
+                return null;
+            } else
+            {
+                if (lookupDepth < 0)
+                {
+                    lookupDepth = 16;
+                }
+                int i = 0;
+                CHtmlElement ___parentElement = ___currentElement.___getParentElement();
+                while (___parentElement != null && i < lookupDepth)
+                {
+                    if (i > lookupDepth)
+                    {
+                        break;
+                    }
 
+
+                    if (___parentElement.___elementTagType == parentTagType)
+                    {
+                        return ___parentElement;
+                    }
+
+
+                    ___parentElement = ___parentElement.___getParentElement();
+                    i++;
+                }
+            }
+            return null;
+        }
+
+
+        public static List<CHtmlElement> createChildInputElementList(CHtmlElement ownerFormElement)
+        {
+            List<CHtmlElement> list = new List<CHtmlElement>();
+            foreach (CHtmlNode childNode in ownerFormElement.___childNodes)
+            {
+                if (childNode is CHtmlElement childElement)
+                {
+                    if (childElement.___elementTagType == CHtmlElementType.INPUT || childElement.___elementTagType == CHtmlElementType.SELECT || childElement.___elementTagType == CHtmlElementType.TEXTAREA || childElement.___elementTagType == CHtmlElementType.BUTTON)
+                    {
+                        list.Add(childElement);
+                    }
+                    else
+                    {
+                        List<CHtmlElement> subList = createChildInputElementList(childElement);
+                        if (subList.Count > 0)
+                        {
+                            list.AddRange(subList);
+                        }
+                    }
+                }
+            }
+            return list;
+        }
 
 
         public static bool IsProhibittedScriptUrl(string ___url)
@@ -21971,9 +22034,9 @@ namespace MultiHtmlCraft.Core
                     CHtmlElement childInput = _currentIFormElement.___childNodes[i] as CHtmlElement;
                     if (childInput.___elementTagType == CHtmlElementType.INPUT || childInput.___elementTagType == CHtmlElementType.TEXTAREA || childInput.___elementTagType == CHtmlElementType.SELECT)
                     {
-                        if (!string.IsNullOrEmpty(childInput.id) && childInput.type != "submit")
+                        if (!string.IsNullOrEmpty(childInput.name) && childInput.type != "submit")
                         {
-                            _inputDataBuilder.Append(childInput.id);
+                            _inputDataBuilder.Append(childInput.name);
                             _inputDataBuilder.Append("=");
                             _inputDataBuilder.Append(childInput.value);
                             _inputDataBuilder.Append("&");

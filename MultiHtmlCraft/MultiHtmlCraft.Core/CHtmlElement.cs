@@ -25,7 +25,7 @@ namespace MultiHtmlCraft.Core
 	/// </summary>
 	[ComVisible(true)]
 	
-	public class CHtmlElement : CHtmlBase, ICommonObjectInterface, ICHtmlElementInterface  , ICHtmlNodeInterface, IDynamicMetaObjectProvider
+	public class CHtmlElement : CHtmlBase, ICommonObjectInterface, ICHtmlElementInterface  
 	{
         public static readonly Dictionary<string, int> CHtmlElementProperties = InitalizeCHtmlElementPropertiyNames();
 
@@ -346,8 +346,18 @@ namespace MultiHtmlCraft.Core
             {"shadowRoot", 310 },
             {"className", 311 },
             {"class", 312 },
-            {"complete",313 }
-            };
+            {"complete",313 },
+            {"input", 314 },
+            {"output", 315 },
+            {"progress", 316 },
+            {"change", 317  },
+            {"click", 318  },
+            {"files" , 319   }
+               
+
+
+
+            }; 
 
 
 
@@ -2934,7 +2944,7 @@ namespace MultiHtmlCraft.Core
             string sQuery = commonHTML.GetStringValue(queryValueObject);
 			try
 			{
-				CHtmlCollection arReturn = commonHTML.GetQuerySelectorListProcessorInner(this, sQuery, CHtmlQuerySelectorType.element_querySelectorAll);
+				CHtmlCollection arReturn = commonHTML.___getQuerySelectorListProcessorInner(this, sQuery, CHtmlQuerySelectorType.element_querySelectorAll);
                 if (this.___Document != null && this.___Document.___IsMultiversalDocument)
                 {
                     this.___Document.___assignHTMLCollectionPrototype(ref arReturn);
@@ -2956,7 +2966,7 @@ namespace MultiHtmlCraft.Core
             string sQuery = commonHTML.GetStringValue(queryValueObject);
 			try
 			{
-				CHtmlCollection list = commonHTML.GetQuerySelectorListProcessorInner(this, sQuery, CHtmlQuerySelectorType.element_querySelector);
+				CHtmlCollection list = commonHTML.___getQuerySelectorListProcessorInner(this, sQuery, CHtmlQuerySelectorType.element_querySelector);
 				if(list.Count > 0)
 				{
 					return list[0] as CHtmlElement;
@@ -14149,9 +14159,9 @@ namespace MultiHtmlCraft.Core
 
         public virtual object ___getPropertyByName(string ___name)
 		{
-			if(commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+			if(commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
 			{
-               commonLog.LogEntry($"entering {this.GetType().FullName}.___getPropertyByName({___name})");
+               commonLog.LogEntry($"entering {this.toLogString()}.___getPropertyByName({___name})");
 			}
             if (string.IsNullOrEmpty(___name))
             {
