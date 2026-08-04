@@ -255,6 +255,8 @@ namespace ClearScriptProcessor
                 {
                     // AllowReflection true to improve interop with hosted dynamic objects (reduces DynamicHelpers errors)
                     AllowReflection = true,
+                    DisableExtensionMethods = true,
+                    
 
                 };
 
@@ -1286,7 +1288,7 @@ namespace ClearScriptProcessor
             /*                         JQuery Bypass Script                                         */
             /*======================================================================================*/
             _v8Engine.Execute(@"
-// jQuery互換性のための document スタブ（window.addEventListener の後に安全に定義）
+
 if (typeof document === 'undefined' || document === null) {
     document = {
         createElement: function(tag) {

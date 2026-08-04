@@ -1494,7 +1494,7 @@ namespace MultiHtmlCraft.Core
                                                 try
                                                 {
                                                     var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
-                                                    var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                                    var handler = handlerArg;
                                                     if (!string.IsNullOrEmpty(nameStr))
                                                     {
                                                         try { self.addEventListener(nameStr, handler); } catch { }
@@ -1503,7 +1503,100 @@ namespace MultiHtmlCraft.Core
                                                 catch { }
                                             };
                                             return new DynamicMetaObject(Expression.Constant(addEl, typeof(Action<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                                            /*
+
+                                            Func<object[], object> addEl = (args) =>
+                                            {
+                                                try
+                                                {
+                                                    var nameArg = args.Length > 0 ? args[0] : null;
+                                                    var handlerArg = args.Length > 1 ? args[1] : null;
+                                                    var optionsArg = args.Length > 2 ? args[2] : null;
+
+                                                    var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+
+                                                    // JSの関数 (() => {}) は ScriptObject として引き渡される
+                                                    object handler = handlerArg;
+                                                    if (handler is Microsoft.ClearScript.ScriptObject scriptObj)
+                                                    {
+                                                        handler = scriptObj;
+                                                    }
+
+                                                    if (!string.IsNullOrEmpty(nameStr) && handler != null)
+                                                    {
+                                                        bool capture = false;
+                                                        if (optionsArg != null && !(optionsArg is Microsoft.ClearScript.Undefined))
+                                                        {
+                                                            if (optionsArg is bool b) capture = b;
+                                                            else capture = commonData.convertObjectToBoolean(optionsArg);
+                                                        }
+
+                                                        // C# 側の Element に渡す
+                                                        self.addEventListener(nameStr, handler, capture);
+                                                    }
+                                                }
+                                                catch { }
+
+                                                return null; // JS 側には undefined を返す
+                                            };
+                                          
+
+                                            // Func<object[], object> を型指定してバインドする
+                                            return new DynamicMetaObject(
+                                                Expression.Constant(addEl, typeof(Func<object[], object>)),
+                                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            );
+                                              */
+                                            // C# 側の self.addEventListener メソッドを取得
+                                            // (引数が 2 つ、または 3 つのオーバーロードに対応)
+                                            /*
+                                            var elementmethodInfo = typeof(CHtmlElement).GetMethod(
+                                                      "addEventListener",
+                                                      new[] { typeof(string), typeof(object), typeof(object) }
+                                                  ) ?? typeof(CHtmlElement).GetMethod(
+                                                      "addEventListener",
+                                                      new[] { typeof(string), typeof(object) }
+                                                  );
+
+                                            if (elementmethodInfo != null)
+                                            {
+                                                Action<object, object, object> delegateAction = (a1, a2, a3) =>
+                                                {
+                                                    var nameStr = UnwrapValue(a1)?.ToString() ?? string.Empty;
+                                                    var handler = UnwrapValue(a2) ?? a2;
+
+                                                    if (!string.IsNullOrEmpty(nameStr) && handler != null)
+                                                    {
+                                                        // a3 が Missing や Undefined でなければ 3 引数版、それ以外は 2 引数版を呼び出す
+                                                        if (a3 != null && !(a3 is Microsoft.ClearScript.Undefined) && !(a3 is System.Reflection.Missing))
+                                                        {
+                                                            self.addEventListener(nameStr, handler, a3);
+                                                        }
+                                                        else
+                                                        {
+                                                            self.addEventListener(nameStr, handler);
+                                                        }
+                                                    }
+                                                };
+
+                                                // 式木(Expression)としてメソッド・アクションをバインド
+                                                var targetExpr = Expression.Constant(delegateAction);
+                                                 
+                                            return new DynamicMetaObject(
+                                                    targetExpr,
+                                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                                );
+                                            */
+
+
                                         }
+
+
+                                
+                                        break;
+                                           
+
                                     case "removeEventListener":
                                         {
                                             // Use 2-arg delegate to match addEventListener pattern

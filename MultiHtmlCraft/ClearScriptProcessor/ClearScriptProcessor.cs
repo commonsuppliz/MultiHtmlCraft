@@ -4,7 +4,9 @@ using MultiHtmlCraft.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -77,7 +79,7 @@ namespace ClearScriptProcessor
             if (t.IndexOf("V8Function", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 t.IndexOf("V8ScriptFunction", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 t.IndexOf("V8ScriptObject", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                t.IndexOf("V8ObjectImpl", StringComparison.OrdinalIgnoreCase) >= 0 || // 追加: 内部実装クラス
+                t.IndexOf("V8ObjectImpl", StringComparison.OrdinalIgnoreCase) >= 0 || 
                 t.IndexOf("ScriptFunctionProxy", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 t.IndexOf("ClearScriptProcessorScope+HandlerWrapper", StringComparison.OrdinalIgnoreCase) >= 0)
             {
@@ -160,6 +162,7 @@ namespace ClearScriptProcessor
                             if (f.apply && (typeof f.apply === 'function')) {
                                 try { return f.apply(null, args || []); } catch(e) {}
                             }
+                            
                             throw new Error('Target is not a function. type=' + (typeof f) + ' hasInvoke=' + (!!f.Invoke));
                         };
                     })(globalThis);
@@ -168,15 +171,47 @@ namespace ClearScriptProcessor
             catch (Exception ex)
             {
                 Debug.WriteLine($"EnsureUniversalApplyFunction Error: {ex.Message}");
-                // 失敗しても処理を続ける（フォールバック呼び出しで対応）
+             
             }
         }
+
+        internal static bool IsFunctionBridgeDefined = false;
+
+        // #region agent log
+        private static void AgentDebugLog(string hypothesisId, string location, string message, object? data = null)
+        {
+            try
+            {
+                var payload = new Dictionary<string, object?>
+                {
+                    ["sessionId"] = "b0830d",
+                    ["hypothesisId"] = hypothesisId,
+                    ["location"] = location,
+                    ["message"] = message,
+                    ["data"] = data,
+                    ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                };
+                var line = JsonSerializer.Serialize(payload) + Environment.NewLine;
+                var candidates = new[]
+                {
+                    Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "debug-b0830d.log")),
+                    Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "debug-b0830d.log")),
+                    @"C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\debug-b0830d.log"
+                };
+                foreach (var logPath in candidates.Distinct())
+                {
+                    try { File.AppendAllText(logPath, line); break; } catch { }
+                }
+            }
+            catch { }
+        }
+        // #endregion
 
         private object CallFunctionInternal(object functionobject, object[] args)
         {
             if (functionobject == null) return null;
-
-            // ClearScript の Undefined を早期に無視する
+            dynamic? ___dynamicFunctionObject = null;
+            ScriptObject? ___scriptObject = null;
             if (functionobject is Microsoft.ClearScript.Undefined)
             {
                 Debug.WriteLine("CallFunctionInternal: functionobject is ClearScript.Undefined - skipping invocation.");
@@ -187,6 +222,16 @@ namespace ClearScriptProcessor
             try
             {
                 Debug.WriteLine($"CallFunctionInternal: functionobject type = {functionobject.GetType().FullName} Thread ID :{System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+                // #region agent log
+                AgentDebugLog("A", "CallFunctionInternal:entry", "callfunction entry", new
+                {
+                    typeName = functionobject.GetType().FullName,
+                    isScriptObject = functionobject is ScriptObject,
+                    threadId = System.Threading.Thread.CurrentThread.ManagedThreadId,
+                    argCount = args?.Length ?? 0
+                });
+                // #endregion
 
                 if (functionobject is Microsoft.ClearScript.ScriptObject scriptObject)
                 {
@@ -208,15 +253,10 @@ namespace ClearScriptProcessor
 
 
                 ___callfunctionStage = 2;
-                //DumpProxyInfo(functionobject);
-
-                // 2. V8ObjectImpl などの内部オブジェクトの場合
-                // Avoid dynamic binder: use reflection-based invocation for fallback
-                // var dynFunc = functionobject; // removed dynamic usage
 
                 var engine = this._v8ScriptEngine;
 
-                // --- 追加: まずこのオブジェクトが JS の "function" か判定する ---
+
                 bool isFunction = false;
                 try
                 {
@@ -228,7 +268,12 @@ namespace ClearScriptProcessor
                         if (okVal != null)
                         {
                             if (okVal.ToString().IndexOf("Function", StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
                                 isFunction = true;
+                                ___dynamicFunctionObject = functionobject;
+                                ___scriptObject = functionobject as ScriptObject;
+
+                            }
                         }
                     }
                 }
@@ -237,40 +282,156 @@ namespace ClearScriptProcessor
                     Debug.WriteLine($"CallFunctionInternal: ObjectKind check failed: {ex.Message}");
                 }
 
-                // --- 重要: 非公開の内部実装を直接リフレクションで呼ぶのは危険なので Public メソッドのみ選ぶ ---
+                // #region agent log
+                AgentDebugLog("B", "CallFunctionInternal:objectKind", "ObjectKind check result", new
+                {
+                    isFunction,
+                    hasScriptObjectCast = ___scriptObject != null,
+                    stage = ___callfunctionStage
+                });
+                // #endregion
+
+           
                 try
                 {
+                    
                     var t = functionobject.GetType();
-                    // 非公開メソッドも含めて探索していたが、内部ネイティブ呼び出しでアクセス違反が発生するケースがあるため
-                    // ここでは明示的に公開メソッド（IsPublic）に限定する。
+
                     var methods = t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
+                    
                     var directInvoke = methods.FirstOrDefault(m =>
                     {
                         var ps = m.GetParameters();
-                        // 変更点: m.IsPublic を追加して、ClearScript の内部ネイティブ呼び出しを誤って直接呼ばないようにする
+ 
                         return m.Name == "Invoke"
                             && m.IsPublic
                             && ps.Length == 2
                             && ps[0].ParameterType == typeof(bool)
                             && (ps[1].ParameterType == typeof(object[]) || ps[1].ParameterType == typeof(System.Array));
                     });
+                    
 
                     if (directInvoke != null)
                     {
+                        // #region agent log
+                        AgentDebugLog("C", "CallFunctionInternal:directInvoke", "directInvoke found", new
+                        {
+                            methodName = directInvoke.Name,
+                            isPublic = directInvoke.IsPublic,
+                            argCount = (args ?? Array.Empty<object>()).Length
+                        });
+                        // #endregion
                         try
                         {
                             var invokeArgs = args ?? Array.Empty<object>();
-                            // 重要: ClearScript の内部 Invoke(bool asConstructor, object[] args) の第1引数は
-                            // コンストラクターとして呼ぶかどうかのフラグです。通常の関数呼び出しなので false   を渡します。
+
+
                             var param0 = false;
                             var param1 = invokeArgs.Length == 0 ? null : (object)invokeArgs;
-                            return directInvoke.Invoke(functionobject, new object[] { param0, param1 });
+
+                            if (IsFunctionBridgeDefined == false)
+                            {
+
+                                _v8ScriptEngine.Execute(@"
+            if (typeof __callTargetFunction !== 'function') {
+                globalThis.__callTargetFunction = function(fn, args) {
+                    if (!fn) return;
+
+                    var realArgs = (args && args.length === 1 && Array.isArray(args[0])) ? args[0] : args;
+
+                    // パターン 1: 通常の関数、または typeof が object だが呼び出し可能なもの
+                    try {
+                        return Function.prototype.apply.call(fn, null, realArgs);
+                    } catch (e1) {
+                        // パターン 2: EventListener インターフェース ({ handleEvent: function(e) {} })
+                        if (fn && typeof fn.handleEvent === 'function') {
+                            return fn.handleEvent.apply(fn, realArgs);
+                        }
+                        
+                        // パターン 3: handleEvent もプロキシされている可能性がある場合
+                        if (fn && fn.handleEvent) {
+                            try {
+                                return Function.prototype.apply.call(fn.handleEvent, fn, realArgs);
+                            } catch (e2) {}
+                        }
+
+                        // パターン 4: 直接実行 (V8ObjectImpl のプロキシ関数)
+                        if (typeof fn === 'object') {
+                            try {
+                                return fn(...realArgs);
+                            } catch (e3) {}
+                        }
+
+                        console.error('[Bridge] Failed to execute object:', fn, e1);
+                    }
+                };
+            }
+        ");
+                                IsFunctionBridgeDefined = true;
+                            }
+                            var safeArgs = args ?? new object[0];
+                           
+                            Action action = () =>
+                            {
+                                if (functionobject is ScriptObject scriptFunc)
+                                {
+                                    scriptFunc.Invoke(false, safeArgs);
+                                }
+                                else if (_v8ScriptEngine.Script is ScriptObject global)
+                                {
+                                    global.InvokeMethod("__callTargetFunction", functionobject, safeArgs);
+                                }
+                            };
+
+                            // #region agent log
+                            AgentDebugLog("C", "CallFunctionInternal:bridgeAction", "bridge action created but not yet invoked", new
+                            {
+                                willUseScriptObject = functionobject is ScriptObject,
+                                hasGlobalScript = _v8ScriptEngine?.Script is ScriptObject
+                            });
+                            // #endregion
+                            
+                            //___dynamicFunctionObject.apply(args);
+
+                            //_v8ScriptEngine.ca(action);
+
+
+
+
+
+                            /*
+                            if(___scriptObject != null)
+                            {
+                                ___scriptObject.Invoke( param0, param1);
+                            }
+                            
+                            if (___dynamicFunctionObject != null)
+                            {
+                                
+                                
+                                _v8ScriptEngine.Script.callJsFunc = ___dynamicFunctionObject;
+                                
+                                return directInvoke.Invoke(_v8ScriptEngine.Script.callJsFunc, new object[] { param0, new object[]{ param1 } });
+                                
+
+                            }
+                            ;
+                            */
+
+
+                            // return directInvoke.Invoke(functionobject, invokeArgs);// X
+                            //GC.KeepAlive(param0);
+                            //GC.KeepAlive(param1);
+
+
+
+                            //return directInvoke.Invoke(functionobject, new object[] {param0 , param1});
                         }
                         catch (TargetInvocationException tie)
                         {
                             Debug.WriteLine($"CallFunctionInternal directInvoke TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
-                            // fallthrough -> 次の手段へ
+             
                         }
                         catch (Exception ex)
                         {
@@ -283,7 +444,7 @@ namespace ClearScriptProcessor
                     Debug.WriteLine($"CallFunctionInternal: direct Invoke(bool,object[]) check failed: {ex.Message}");
                 }
 
-                // engine.Invoke を使うのは最終手段にする（ネイティブで例外を起こす危険があるため））
+                
                 if (engine != null)
                 {
                     if (isFunction)
@@ -292,17 +453,30 @@ namespace ClearScriptProcessor
 
                         try
                         {
+                            // #region agent log
+                            AgentDebugLog("D", "CallFunctionInternal:universalApply", "attempting engine.Invoke ___universalApply", new { argCount = args?.Length ?? 0 });
+                            // #endregion
                             // 第二引数に args 配列を渡す（JS 側で配列として受け取る）
-                            return engine.Invoke("___universalApply", functionobject, args ?? Array.Empty<object>());
+                            var uaResult = engine.Invoke("___universalApply", functionobject, args ?? Array.Empty<object>());
+                            // #region agent log
+                            AgentDebugLog("D", "CallFunctionInternal:universalApply:ok", "___universalApply succeeded", null);
+                            // #endregion
+                            return uaResult;
                         }
                         catch (Microsoft.ClearScript.ScriptEngineException sex)
                         {
                             Debug.WriteLine($"CallFunctionInternal ScriptEngineException: {sex.ErrorDetails ?? sex.Message}");
+                            // #region agent log
+                            AgentDebugLog("D", "CallFunctionInternal:universalApply:fail", "___universalApply ScriptEngineException", new { error = sex.Message });
+                            // #endregion
                             // fallthrough -> 下のフォールバックを試す
                         }
                         catch (Exception ex)
                         {
                             Debug.WriteLine($"CallFunctionInternal Critical (engine.Invoke): {ex.Message}");
+                            // #region agent log
+                            AgentDebugLog("D", "CallFunctionInternal:universalApply:critical", "___universalApply critical exception", new { error = ex.GetType().Name, message = ex.Message });
+                            // #endregion
                             // fallthrough -> 下のフォールバックを試す
                         }
                     }
@@ -312,9 +486,7 @@ namespace ClearScriptProcessor
                     }
                 }
 
-                // --- 追加の安全対策 ---
-                // ClearScript の内部プロキシ型が渡っている可能性がある場合は、リフレクションで非公開メソッドを呼ばないよう
-                // public メソッド限定のフォールバック、かつエンジン側の universalApply を先に試す。
+ 
 
                 if (engine != null)
                 {
@@ -361,6 +533,9 @@ namespace ClearScriptProcessor
                                 && (pars[0].ParameterType == typeof(object[]) || pars[0].ParameterType == typeof(System.Array)))
                             {
                                 var param0 = invokeArgs.Length == 0 ? null : (object)invokeArgs;
+                                // #region agent log
+                                AgentDebugLog("E", "CallFunctionInternal:reflection", "attempting reflection Invoke(object[])", new { method = mi.ToString() });
+                                // #endregion
                                 return mi.Invoke(functionobject, new object[] { param0 });
                             }
 
@@ -467,14 +642,17 @@ namespace ClearScriptProcessor
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"CallFunctionInternal Critical: {ex.Message}");
+                // #region agent log
+                AgentDebugLog("F", "CallFunctionInternal:outerCatch", "outer exception", new { error = ex.GetType().Name, message = ex.Message });
+                // #endregion
             }
+            // #region agent log
+            AgentDebugLog("F", "CallFunctionInternal:exitNull", "returning null - all paths failed", new { stage = ___callfunctionStage });
+            // #endregion
             return null;
         }
 
-        // プロキシを再帰的にアンラップして実体を返す。深さ制限あり。
 
-
-        // デバッグ用：プロキシの型、メソッド、フィールド、プロパティを出力する
         private void DumpProxyInfo(object obj)
         {
             // Guard null

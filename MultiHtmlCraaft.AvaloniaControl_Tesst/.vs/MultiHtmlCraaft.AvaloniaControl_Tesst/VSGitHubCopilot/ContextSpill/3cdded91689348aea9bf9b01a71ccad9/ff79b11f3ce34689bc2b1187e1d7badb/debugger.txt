@@ -1,0 +1,708 @@
+﻿## EXCEPTION
+Exception Type: System.ExecutionEngineException
+Exception Message: 型 'System.ExecutionEngineException' のハンドルされていない例外が ClearScript.V8.dll で発生しました
+The callstack context, if included, corresponds to the thread where this exception occurred. There is no need to identify this thread by other means.
+The top most frame in the callstack context should correspond to the place the exception message was thrown from. Code may or may not have been provided for it but can be requested.
+
+## CALLSTACK
+Thread ID: 25596
+[1] [外部コード]
+[2] ClearScriptProcessor.dll!ClearScriptProcessor.ClearScriptProcessor.CallFunctionInternal
+This is the current user focused stack frame. The provided locals context corresponds to this stack frame, but you may evaluate expressions and retrieve code for any frame.
+Code for the stack frame:
+```csharp MultiHtmlCraft\ClearScriptProcessor\ClearScriptProcessor.cs
+175:         private object CallFunctionInternal(object functionobject, object[] args)
+176:         {
+177:             if (functionobject == null) return null;
+178: 
+179:             // ClearScript の Undefined を早期に無視する
+180:             if (functionobject is Microsoft.ClearScript.Undefined)
+181:             {
+182:                 Debug.WriteLine("CallFunctionInternal: functionobject is ClearScript.Undefined - skipping invocation.");
+183:                 return null;
+184:             }
+185: 
+186:             int ___callfunctionStage = -1;
+187:             try
+188:             {
+189:                 Debug.WriteLine($"CallFunctionInternal: functionobject type = {functionobject.GetType().FullName} Thread ID :{System.Threading.Thread.CurrentThread.ManagedThreadId}");
+190: 
+191:                 if (functionobject is Microsoft.ClearScript.ScriptObject scriptObject)
+192:                 {
+193:                     ___callfunctionStage = 1;
+194:                     try
+195:                     {
+196: #if DEBUG
+197: 
+198:                         Debug.WriteLine("CallFunctionInternal: Detected ScriptObject, invoking directly.");
+199: #endif
+200:                         return scriptObject.InvokeAsFunction(args ?? Array.Empty<object>());
+201: 
+202:                     }
+203:                     catch (Exception ex){
+204:                         Debug.WriteLine(ex.Message);
+205:                     }
+206: 
+207:                 }
+208: 
+209: 
+210:                 ___callfunctionStage = 2;
+211:                 //DumpProxyInfo(functionobject);
+212: 
+213:                 // 2. V8ObjectImpl などの内部オブジェクトの場合
+214:                 // Avoid dynamic binder: use reflection-based invocation for fallback
+215:                 // var dynFunc = functionobject; // removed dynamic usage
+216: 
+217:                 var engine = this._v8ScriptEngine;
+218: 
+219:                 // --- 追加: まずこのオブジェクトが JS の "function" か判定する ---
+220:                 bool isFunction = false;
+221:                 try
+222:                 {
+223:                     var tcheck = functionobject.GetType();
+224:                     var okProp = tcheck.GetProperty("ObjectKind", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+225:                     if (okProp != null)
+226:                     {
+227:                         var okVal = okProp.GetValue(functionobject);
+228:                         if (okVal != null)
+229:                         {
+230:                             if (okVal.ToString().IndexOf("Function", StringComparison.OrdinalIgnoreCase) >= 0)
+231:                                 isFunction = true;
+232:                         }
+233:                     }
+234:                 }
+235:                 catch (Exception ex)
+236:                 {
+237:                     Debug.WriteLine($"CallFunctionInternal: ObjectKind check failed: {ex.Message}");
+238:                 }
+239: 
+240:                 // --- 重要: 非公開の内部実装を直接リフレクションで呼ぶのは危険なので Public メソッドのみ選ぶ ---
+241:                 try
+242:                 {
+243:                     var t = functionobject.GetType();
+244:                     // 非公開メソッドも含めて探索していたが、内部ネイティブ呼び出しでアクセス違反が発生するケースがあるため
+245:                     // ここでは明示的に公開メソッド（IsPublic）に限定する。
+246:                     var methods = t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+247: 
+248:                     var directInvoke = methods.FirstOrDefault(m =>
+249:                     {
+250:                         var ps = m.GetParameters();
+251:  
+252:                         return m.Name == "Invoke"
+253:                             && m.IsPublic
+254:                             && ps.Length == 2
+255:                             && ps[0].ParameterType == typeof(bool)
+256:                             && (ps[1].ParameterType == typeof(object[]) || ps[1].ParameterType == typeof(System.Array));
+257:                     });
+258: 
+259:                     if (directInvoke != null)
+260:                     {
+261:                         try
+262:                         {
+263:                             var invokeArgs = args ?? Array.Empty<object>();
+264: 
+265:                             var param0 = false;
+266:                             var param1 = invokeArgs.Length == 0 ? null : (object)invokeArgs;
+267:                             return directInvoke.Invoke(functionobject, new object[] { param0, param1 });
+268:                         }
+269:                         catch (TargetInvocationException tie)
+270:                         {
+271:                             Debug.WriteLine($"CallFunctionInternal directInvoke TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
+272:              
+273:                         }
+274:                         catch (Exception ex)
+275:                         {
+276:                             Debug.WriteLine($"CallFunctionInternal directInvoke failed: {ex.Message}");
+277:                         }
+278:                     }
+279:                 }
+280:                 catch (Exception ex)
+281:                 {
+282:                     Debug.WriteLine($"CallFunctionInternal: direct Invoke(bool,object[]) check failed: {ex.Message}");
+283:                 }
+284: 
+285:                 // engine.Invoke を使うのは最終手段にする（ネイティブで例外を起こす危険があるため））
+286:                 if (engine != null)
+287:                 {
+288:                     if (isFunction)
+289:                     {
+290:                         EnsureUniversalApplyFunction(engine);
+291: 
+292:                         try
+293:                         {
+294:                             // 第二引数に args 配列を渡す（JS 側で配列として受け取る）
+295:                             return engine.Invoke("___universalApply", functionobject, args ?? Array.Empty<object>());
+296:                         }
+297:                         catch (Microsoft.ClearScript.ScriptEngineException sex)
+298:                         {
+299:                             Debug.WriteLine($"CallFunctionInternal ScriptEngineException: {sex.ErrorDetails ?? sex.Message}");
+300:                             // fallthrough -> 下のフォールバックを試す
+301:                         }
+302:                         catch (Exception ex)
+303:                         {
+304:                             Debug.WriteLine($"CallFunctionInternal Critical (engine.Invoke): {ex.Message}");
+305:                             // fallthrough -> 下のフォールバックを試す
+306:                         }
+307:                     }
+308:                     else
+309:                     {
+310:                         Debug.WriteLine("CallFunctionInternal: target is not a JS function according to ObjectKind - skip engine.Invoke to avoid ClearScript errors.");
+311:                     }
+312:                 }
+313: 
+314:                 // --- 追加の安全対策 ---
+315:                 // ClearScript の内部プロキシ型が渡っている可能性がある場合は、リフレクションで非公開メソッドを呼ばないよう
+316:                 // public メソッド限定のフォールバック、かつエンジン側の universalApply を先に試す。
+317: 
+318:                 if (engine != null)
+319:                 {
+320:                     try
+321:                     {
+322:                         var typeName = functionobject.GetType().FullName ?? string.Empty;
+323:                         if ((typeName.IndexOf("V8", StringComparison.OrdinalIgnoreCase) >= 0 || typeName.IndexOf("SplitProxy", StringComparison.OrdinalIgnoreCase) >= 0))
+324:                         {
+325:                             EnsureUniversalApplyFunction(engine);
+326:                             try
+327:                             {
+328:                                 return engine.Invoke("___universalApply", functionobject, args ?? Array.Empty<object>());
+329:                             }
+330:                             catch (Exception ex)
+331:                             {
+332:                                 Debug.WriteLine($"CallFunctionInternal engine.Invoke fallback failed: {ex.Message}");
+333:                                 // fallthrough -> reflection fallback
+334:                             }
+335:                         }
+336:                     }
+337:                     catch (Exception ex)
+338:                     {
+339:                         Debug.WriteLine($"CallFunctionInternal: engine proxy check failed: {ex.Message}");
+340:                     }
+341:                 }
+342: 
+343:                 // ここから従来の reflection / dynamic フォールバック処理
+344:                 try
+345:                 {
+346:                     var invokeArgs = args ?? Array.Empty<object>();
+347: 
+348:                     var t = functionobject.GetType();
+349:                     // 変更: public メソッドのみ対象にする（内部ネイティブの非公開 Invoke を呼ばないように）
+350:                     var invokeMethods = t.GetMethods(BindingFlags.Instance | BindingFlags.Public)
+351:                                          .Where(m => string.Equals(m.Name, "Invoke", StringComparison.Ordinal))
+352:                                          .ToArray();
+353: 
+354:                     foreach (var mi in invokeMethods)
+355:                     {
+356:                         var pars = mi.GetParameters();
+357:                         try
+358:                         {
+359:                             if (pars.Length == 1
+360:                                 && (pars[0].ParameterType == typeof(object[]) || pars[0].ParameterType == typeof(System.Array)))
+361:                             {
+362:                                 var param0 = invokeArgs.Length == 0 ? null : (object)invokeArgs;
+363:                                 return mi.Invoke(functionobject, new object[] { param0 });
+364:                             }
+365: 
+366:                             if (pars.Length == 0)
+367:                             {
+368:                                 return mi.Invoke(functionobject, null);
+369:                             }
+370:                         }
+371:                         catch (TargetParameterCountException)
+372:                         {
+373:                             Debug.WriteLine($"CallFunctionInternal reflection overload parameter mismatch for {mi}.");
+374:                         }
+375:                         catch (TargetInvocationException tie)
+376:                         {
+377:                             Debug.WriteLine($"CallFunctionInternal reflection target invocation exception: {tie.InnerException?.Message ?? tie.Message}");
+378:                         }
+379:                         catch (Exception ex)
+380:                         {
+381:                             Debug.WriteLine($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+382:                         }
+383:                     }
+384: 
+385:                     // シンプルに公開メソッドを探す
+386:                     var miSimple = GetBestMethod(functionobject.GetType(), "Invoke", BindingFlags.Instance | BindingFlags.Public, -1, false);
+387:                     if (miSimple != null)
+388:                     {
+389:                         try
+390:                         {
+391:                             return miSimple.Invoke(functionobject, invokeArgs.Length == 0 ? null : new object[] { invokeArgs });
+392:                         }
+393:                         catch (TargetParameterCountException)
+394:                         {
+395:                             try
+396:                             {
+397:                                 return miSimple.Invoke(functionobject, invokeArgs);
+398:                             }
+399:                             catch (Exception ex)
+400:                             {
+401:                                 Debug.WriteLine($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+402:                             }
+403:                         }
+404:                         catch (Exception ex)
+405:                         {
+406:                             Debug.WriteLine($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+407:                         }
+408:                     }
+409: 
+410:                     // Reflection-based fallback: try 'apply' or 'call' methods if available
+411:                     try
+412:                     {
+413:                         var tFallback = functionobject.GetType();
+414:                         // try apply(thisArg, args)
+415:                         var miApply = GetBestMethod(tFallback, "apply", BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase, -1, true);
+416:                         if (miApply != null)
+417:                         {
+418:                             try
+419:                             {
+420:                                 return miApply.Invoke(functionobject, new object[] { null, invokeArgs });
+421:                             }
+422:                             catch (TargetInvocationException tie)
+423:                             {
+424:                                 Debug.WriteLine($"CallFunctionInternal apply TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
+425:                             }
+426:                             catch (Exception ex)
+427:                             {
+428:                                 Debug.WriteLine($"CallFunctionInternal apply invoke failed: {ex.Message}");
+429:                             }
+430:                         }
+431: 
+432:                         // try call(thisArg, ...args) - need to expand args into parameter list
+433:                         var miCall = GetBestMethod(tFallback, "call", BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase, -1, true);
+434:                         if (miCall != null)
+435:                         {
+436:                             try
+437:                             {
+438:                                 // build parameters: first is thisArg (null), then each arg
+439:                                 var callParams = new object[(invokeArgs?.Length ?? 0) + 1];
+440:                                 callParams[0] = null;
+441:                                 if (invokeArgs != null && invokeArgs.Length > 0) Array.Copy(invokeArgs, 0, callParams, 1, invokeArgs.Length);
+442:                                 return miCall.Invoke(functionobject, callParams);
+443:                             }
+444:                             catch (TargetInvocationException tie)
+445:                             {
+446:                                 Debug.WriteLine($"CallFunctionInternal call TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
+447:                             }
+448:                             catch (Exception ex)
+449:                             {
+450:                                 Debug.WriteLine($"CallFunctionInternal call invoke failed: {ex.Message}");
+451:                             }
+452:                         }
+453: 
+454:                         // As last resort, if no apply/call, and no args, try parameterless Invoke method already handled above; nothing more to try.
+455:                     }
+456:                     catch (Exception ex)
+457:                     {
+458:                         Debug.WriteLine($"CallFunctionInternal reflection fallback failed: {ex.Message}");
+459:                     }
+460:                 }
+461:                 catch (Exception ex)
+462:                 {
+463:                     Debug.WriteLine($"CallFunctionInternal fallback failed: {ex.Message}");
+464:                 }
+465:             }
+466:             catch (Exception ex)
+467:             {
+468:                 System.Diagnostics.Debug.WriteLine($"CallFunctionInternal Critical: {ex.Message}");
+469:             }
+470:             return null;
+471:         }
+```
+Current statement: line 267
+[3] ClearScriptProcessor.dll!ClearScriptProcessor.ClearScriptProcessor.callfunction
+Code for the stack frame:
+```csharp MultiHtmlCraft\ClearScriptProcessor\ClearScriptProcessor.cs
+60:         public object callfunction(object functionobject, object[] args)
+61:         {
+62:             return CallFunctionInternal(functionobject, args);
+63:         }
+```
+Current statement: line 62
+[4] MultiHtmlCraft.Core.dll!MultiHtmlCraft.Core.CHtmlMultiversalWindow.___executeEventFunction
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.Core\CHtmlMultiversalWindow.cs
+3920:         public void ___executeEventFunction(string __eventName, CHtmlElement ___element, object ___objFunction, object[] ___args, int ___souceType)
+3921:         {
+3922:             CHtmlMultiversalKeyboardEventArgsSpec? ___keyboardEventArgs = null;
+3923:             CHtmlMultiversalMouseEventArgsSpec? ___mouseEventArgs = null;
+3924:             if (this.___IsDispoing == true)
+3925:             {
+3926:                 return;
+3927:             }
+3928:             if (this.isWindowNavigating == true)
+3929:             {
+3930:                 return;
+3931:             }
+3932:             if(___args != null && ___args.Length > 0)
+3933:             {
+3934:                 switch(___args[0])
+3935:                 {
+3936:                     case CHtmlMultiversalMouseEventArgsSpec mouseEventArgsSpec:
+3937:                         {     this.___event.___initMouseEventArgs(mouseEventArgsSpec); }
+3938:                         break;
+3939: 
+3940:                     case CHtmlMultiversalKeyboardEventArgsSpec keyboardEventArgsSpec:
+3941:                         {  
+3942:                             if(keyboardEventArgsSpec.KeyCode == 40 || keyboardEventArgsSpec.KeyCode == 38 || keyboardEventArgsSpec.KeyCode == 39 || keyboardEventArgsSpec.KeyCode == 37)
+3943:                             {
+3944:                                 if(commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+3945:                                 {
+3946:                                     commonLog.LogEntry($"__executeEventFunction is called with Keyboard Event Args Spec KeyCode : {keyboardEventArgsSpec.KeyCode} detected for event {__eventName}");
+3947:                                 }
+3948:                             }
+3949:                             this.___event.___initKeyboardEventArgs(keyboardEventArgsSpec);
+3950:                         }
+3951: 
+3952:                         break;
+3953:                 }
+3954:             }
+3955:             ___setEventSrcElement(this.___event, ___element, ___element);
+3956:             if (___objFunction == null)
+3957:             {
+3958:                 if (commonLog.LoggingEnabled &&commonLog.LogLevel > 8)
+3959:                 {
+3960:                    commonLog.LogEntry("strange... executeEventFunction() is entered, but function is null. {0} escaping.... ", ___objFunction);
+3961:                 }
+3962:                 return;
+3963:             }
+3964:             CHtmlScriptResult ___scriptResult = null;
+3965:             try
+3966:             {
+3967:                 if (this.___document != null && this.___document.___scriptEventList != null)
+3968:                 {
+3969:                     ___scriptResult = new CHtmlScriptResult();
+3970:                     ___scriptResult.Url = __eventName + " : " + ___objFunction.ToString();
+3971:                     this.___document.___scriptEventList.Add(___scriptResult);
+3972:                 }
+3973:                 if (commonHTML.IsObjectStringType(___objFunction) == true)
+3974:                 {
+3975:                     string ___strFunction = commonHTML.GetStringValue(___objFunction);
+3976:                     int posColon = ___strFunction.IndexOf(':');
+3977:                     bool ___HasScriptName = false;
+3978:                     if (___HasScriptName) {; }
+3979:                     string ___strScriptTypeName = null;
+3980:                     if (posColon > -1)
+3981:                     {
+3982:                         ___strScriptTypeName = ___strFunction.Substring(0, posColon).Trim();
+3983:                         int ___strScriptTypeNameLength = ___strScriptTypeName.Length;
+3984:                         if (string.IsNullOrEmpty(___strScriptTypeName) == false)
+3985:                         {
+3986:                             for (int i = 0; i < ___strScriptTypeNameLength; i++)
+3987:                             {
+3988:                                 if (char.IsLetterOrDigit(___strScriptTypeName[i]) == false)
+3989:                                 {
+3990:                                     ___HasScriptName = false;
+3991:                                     ___strScriptTypeName = null;
+3992:                                     goto ExecuteStringFunction;
+3993:                                 }
+3994:                             }
+3995:                         }
+3996:                         ___HasScriptName = true;
+3997:                         ___strFunction = ___strFunction.Substring(posColon + 1);
+3998: 
+3999:                     }
+4000:                 ExecuteStringFunction:
+4001:                     if (string.IsNullOrEmpty(___strFunction) == false)
+4002:                     {
+4003:                         if (commonLog.LoggingEnabled && commonLog.LogLevel > 8)
+4004:                         {
+4005:                             commonLog.LogEntry(" executeEventFunction() is executing {0} {1}  for {2}", ___strFunction, ___strScriptTypeName, ___element);
+4006:                         }
+4007:                         /*
+4008:                         this.___multiversalWindow.execute(___strFunction, ___strScriptTypeName);
+4009:                         */
+4010:                         IMultiversalScriptProcessor ___processor = this.___multiversalScriptsHost.defaultScriptScope.getMultiversalScriptProcessor();
+4011:                         if (___processor != null)
+4012:                         {
+4013:                             if (commonLog.LoggingEnabled && commonLog.LogLevel > 8)
+4014:                             {
+4015:                                 commonLog.LogEntry(" executeEventFunction() is executing {0} {1}  for {2}", ___objFunction, ___args, ___element);
+4016:                             }
+4017:                             ___processor.execute(___objFunction.ToString());
+4018: 
+4019:                         }
+4020: 
+4021:                     }
+4022: 
+4023: 
+4024: 
+4025: 
+4026:                 }
+4027:                 else
+4028:                 {
+4029:                     IMultiversalScriptProcessor ___processor = this.___multiversalScriptsHost.GetMultiversalScriptProcessor("javascript");
+4030:                     if (___processor != null)
+4031:                     {
+4032:                         if (commonLog.LoggingEnabled && commonLog.LogLevel > 8)
+4033:                         {
+4034:                             commonLog.LogEntry(" executeEventFunction() is executing {0} {1}  for {2}", ___objFunction, ___args, ___element);
+4035:                         }
+4036:                         
+4037:                         if (___args == null && ___element == null)
+4038:                         {
+4039:                             ___processor.callfunction(___objFunction);
+4040:                         }else if (___args != null)
+4041:                         {
+4042:                                 ___processor.callfunction(___objFunction, new Object[] { this.___event });
+4043:                         }
+4044:                         else
+4045:                         {
+4046:                             ___processor.callfunction(___objFunction, ___processor.multiversalscope, ___element, new Object[] { this.___event });
+4047:                         }
+4048:                         
+4049:                     
+4050:                  
+4051:                     }
+4052:                 }
+4053:             }
+4054:             catch (Exception ex)
+4055:             {
+4056:                 if (___scriptResult != null)
+4057:                 {
+4058:                     ___scriptResult.resultText = __eventName + " execution error";
+4059:                     ___scriptResult.result = 500;
+4060:                     ___scriptResult.errorDetail =commonData.GetExceptionAsString(ex);
+4061:                 }
+4062:                 if (commonLog.LoggingEnabled)
+4063:                 {
+4064:                     if (commonLog.LogLevel <= 3)
+4065:                     {
+4066:                        commonLog.LogEntry("executeEventFunction()  ___hasInner an exception : " + ex.Message);
+4067:                     }
+4068:                     else
+4069:                     {
+4070:                         if (___scriptResult == null)
+4071:                         {
+4072:                            commonLog.LogEntry(string.Format("calling executeEventFunction({0}, {1}, {2}, {3}, {4}) Exception", __eventName, ___element, ___objFunction, ___args, ___souceType), ex);
+4073:                         }
+4074:                         else
+4075:                         {
+4076:                            commonLog.LogEntry(___scriptResult.errorDetail);
+4077:                         }
+4078:                     }
+4079:                 }
+4080:             }
+4081:             this.___event.___resetToDefaults();
+4082:         }
+```
+Current statement: line 4042
+[5] MultiHtmlCraft.Core.dll!MultiHtmlCraft.Core.CHtmlMultiversalWindow.___executeElementEventFunction
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.Core\CHtmlMultiversalWindow.cs
+3868:         public void ___executeElementEventFunction(string __eventName, CHtmlElement ___element, object ___objFunction, object[] ___args)
+3869:         {
+3870: 
+3871:             this.___executeEventFunction(__eventName, ___element, ___objFunction, ___args, 1);
+3872:         }
+```
+Current statement: line 3871
+[6] MultiHtmlCraft.AvaroniaControl.dll!MultiHtmlCraft.AvaroniaControl.MultiversalAvaroniaControl.OnControlClickInternal
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.AvaroniaControl\MultiHtmlCraft.AvaroniaControl.cs
+1707:         internal  async Task OnControlClickInternal(Avalonia.Interactivity.RoutedEventArgs e)
+1708:         {
+1709:             var source = e.Source; 
+1710:             if (source != null)
+1711:             {
+1712:                 var control = source as Avalonia.Controls.Control;
+1713:                 var element = control.Tag as MultiHtmlCraft.Core.CHtmlElement;
+1714:                 if(element != null)
+1715:                 {
+1716:                     if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+1717:                     {
+1718:                         MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Element: {element.toLogString()}, ID: {element.id}");
+1719:                     }
+1720:                     if(element.___elementTagType == CHtmlElementType.INPUT)
+1721:                     { 
+1722:                         var ownerForm = commonHTML.GetParentElementFromElement(element, CHtmlElementType.FORM, 3);
+1723:                         if (ownerForm != null)
+1724:                         {
+1725:                             if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+1726:                             {
+1727:                                 MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Found parent form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
+1728:                             }
+1729:                             var elementType = String.Format("{0}", element.getAttribute("type"));
+1730: 
+1731:                             switch (elementType.ToLower())
+1732:                             {
+1733: 
+1734:                                 case "reset":
+1735:                                     if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+1736:                                     {
+1737:                                         MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Resetting form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
+1738:                                     }
+1739:                                     //ownerForm.reset();
+1740:                                     break;
+1741:                                 case "submit":
+1742:                                 default:
+1743:                                     if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+1744:                                     {
+1745:                                         MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Submitting form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
+1746:                                     }
+1747:                                     var formMethod = String.Format("{0}", ownerForm.getAttribute("method"));
+1748:                                     var formAction = String.Format("{0}", ownerForm.getAttribute("action"));
+1749:                                     string strUrl = commonHTML.GetAbsoluteUri(___document.___URL, null, formAction);
+1750:                                     StringBuilder sbPostData = new StringBuilder();
+1751: 
+1752:                                     commonHTML.createFormPostData(ownerForm, ref sbPostData);
+1753:                                     if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+1754:                                     {
+1755:                                         MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Form Post Data: {sbPostData.ToString()} for {strUrl} with method {formMethod}");
+1756:                                     }
+1757:                                     CHtmlMultiversalWebHistory historyItem = new CHtmlMultiversalWebHistory();
+1758:                                     historyItem.Url = formAction;
+1759:                                     historyItem.FileLocation = null;
+1760:                                     historyItem.ContentType = "application/x-www-form-urlencoded";
+1761:                                     historyItem.LastModified = DateTimeOffset.Now;
+1762:                                     historyItem.Window = this.___multiversalWindow;
+1763:                                     historyItem.Document = this.Document;
+1764:                                     if (this.___multiversalWindow != null && this.___multiversalWindow.___document != null)
+1765:                                     {
+1766:                                         historyItem.Document = this.___multiversalWindow.___document;
+1767:                                     }
+1768:                                     ;
+1769: 
+1770: 
+1771:                                     CHtmlMultiversalHistoryList.CHtmlMultiversalWebHistoryCache[new DateTimeOffset()] = historyItem;
+1772:                                     resetMultiversalWindow();
+1773: 
+1774: 
+1775:                                     var requestData = new CHtmlRequestData();
+1776:                                     requestData.fields.Add("Method", formMethod);
+1777:                                     requestData.fields.Add("PostData", sbPostData.ToString());
+1778:                                     requestData.fields.Add("ContentType", "application/x-www-form-urlencoded");
+1779:                                     this._canvas.Children.Clear();
+1780: 
+1781: 
+1782:                                     ___document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, ___multiversalWindow, requestData);
+1783: 
+1784: 
+1785: 
+1786:                                     break;
+1787:                             }
+1788:                         }
+1789: 
+1790:                     }
+1791:                     else
+1792:                     {
+1793:                         switch (element.___elementTagType)
+1794:                         {
+1795:                             case CHtmlElementType.BUTTON:
+1796:                                 if (element.___ElementClickFunctionWeakReference != null)
+1797:                                 {
+1798:                                     var objClickFunction = element.___ElementClickFunctionWeakReference.Target;
+1799:                                     this.___multiversalWindow.___executeElementEventFunction("click", element, objClickFunction, new object[] { });
+1800:                                 }
+1801:                                 break;
+1802:                         }
+1803:                     }
+1804: 
+1805:                 }
+1806: 
+1807:             }
+1808:         }
+```
+Current statement: line 1799
+[7] MultiHtmlCraft.AvaroniaControl.dll!MultiHtmlCraft.AvaroniaControl.MultiversalAvaroniaControl.createEventForAvaloniaControl.AnonymousMethod__30_0
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.AvaroniaControl\MultiHtmlCraft.AvaroniaControl.cs
+665:         private void createEventForAvaloniaControl(Avalonia.Controls.Control avaloniaControl, CHtmlElement element)
+666:         {
+667:             string strElementInputAttributeTypeValue = null;
+668:             CHtmlElement ownerFornElemenent = null;
+669:             bool IsAvalonivaOwnerFormElementFound = false;
+670:             if (avaloniaControl != null && element != null)
+671:             {
+672:                 avaloniaControl.Tag = element;
+673: 
+674: 
+675:                 switch(element.___elementTagType)
+676:                 {
+677:            
+678:                     case CHtmlElementType.BUTTON:
+679:                         var buttonControl = avaloniaControl as Avalonia.Controls.Button;
+680:                         buttonControl.Click += (s, e) => OnControlClickInternal(e);
+681:                         buttonControl.PointerPressed += (s, e) => OnControlPointerPressedInternal(e);
+682:                         buttonControl.PointerReleased += (s, e) => OnControlPointerReleasedInternal(e);
+683:                         buttonControl.PointerMoved += (s, e) => OnControlPointerMovedInternal(e);
+684: 
+685:                         CHtmlAttribute elementInputAttributeType = null;
+686:                         if (element.___attributes.TryGetValue("type", out elementInputAttributeType))
+687:                         {
+688:                             strElementInputAttributeTypeValue = elementInputAttributeType.value.ToString();
+689:                         }
+690:                         break;
+691:                     case CHtmlElementType.TEXTAREA:
+692:                         break;
+693: 
+694:                     case CHtmlElementType.INPUT:
+695:                         var elementInputType = String.Format("{0}", element.getAttribute("type")).ToLower();
+696:                         switch(elementInputType)
+697:                         {
+698:                             case "text":
+699:                                 var txtBox = avaloniaControl as Avalonia.Controls.TextBox;
+700:                                 txtBox.TextChanged += (s, e) => OnControlTextChangedInternal(e);
+701:                                 break;
+702:                             case "password":
+703:                                 var txtPasswordBox = avaloniaControl as Avalonia.Controls.TextBox;
+704:                                 txtPasswordBox.TextChanged += (s, e) => OnControlTextChangedInternal(e);
+705:                                 break;
+706:                             case "checkbox":
+707:                                 break;
+708:                             case "radio":
+709:                                 break;
+710:                             case "number":
+711:                                 break;
+712:                             case "color":
+713:                                 break;
+714:                             case "range":
+715:                                 break;
+716:                             case "file":
+717:                                 break;
+718:                             case "button":
+719:                                 break;
+720:                             case "date":
+721:                                 var datePicker = avaloniaControl as Avalonia.Controls.DatePicker;
+722:                                 datePicker.SelectedDateChanged += (s, e) => OnControlDateTimePickerDateSelectedInternal(datePicker);
+723:                                 break;
+724:                                 
+725:                         }
+726:                         break;
+727:                 }
+728: 
+729: 
+730: 
+731: 
+732: 
+733: 
+734:             }
+735:             return;
+736:         }
+```
+Current statement: line 680 (`OnControlClickInternal(e)`)
+[8] [外部コード]
+[9] MultiHtmlCraft.AvaloniaControl_Test.dll!MultiHtmlCraaft.AvaloniaControl_Tesst.Program.Main
+Code for the stack frame:
+```csharp MultiHtmlCraaft.AvaloniaControl_Tesst\Program.cs
+12:         [STAThread]
+13:         public static void Main(string[] args) => BuildAvaloniaApp()
+14:             .StartWithClassicDesktopLifetime(args);
+```
+Current statement: lines 13-14
+
+## LOCALS
+Variable: 'this' of type 'ClearScriptProcessor.ClearScriptProcessor' is a complex object with child properties and has value: {ClearScriptProcessor.ClearScriptProcessor}
+Variable: 'functionobject' of type 'object {Microsoft.ClearScript.V8.SplitProxy.V8ObjectImpl}' is a complex object with child properties and has value: {Microsoft.ClearScript.V8.SplitProxy.V8ObjectImpl}
+Variable: 'args' of type 'object[]' is a complex object with child properties and has value: {object[1]}
+Variable: '___callfunctionStage' of type 'int' has value: 2
+Variable: 'scriptObject' of type 'Microsoft.ClearScript.ScriptObject' has value: null
+Variable: 'engine' of type 'Microsoft.ClearScript.V8.V8ScriptEngine' is a complex object with child properties and has value: {Microsoft.ClearScript.V8.V8ScriptEngine}
+Variable: 'isFunction' of type 'bool' has value: true
+Variable: 't' of type 'System.Type {System.RuntimeType}' is a complex object with child properties and has value: {Name = このコンテキストでは、型 System.Type のデバッグ対象内のオブジェクトの状態は検査できません。 FullName = このコンテキストでは、型 System.Type のデバッグ対象内のオブジェクトの状態は検査できません。}
+Variable: 'methods' of type 'System.Reflection.MethodInfo[]' is a complex object with child properties and has value: {System.Reflection.MethodInfo[35]}
+Variable: 'directInvoke' of type 'System.Reflection.MethodInfo {System.Reflection.RuntimeMethodInfo}' is a complex object with child properties and has value: {System.Reflection.RuntimeMethodInfo}
+Variable: 'invokeArgs' of type 'object[]' is a complex object with child properties and has value: {object[1]}
+Variable: 'param0' of type 'bool' has value: false
+Variable: 'param1' of type 'object {object[]}' is a complex object with child properties and has value: {object[1]}
+

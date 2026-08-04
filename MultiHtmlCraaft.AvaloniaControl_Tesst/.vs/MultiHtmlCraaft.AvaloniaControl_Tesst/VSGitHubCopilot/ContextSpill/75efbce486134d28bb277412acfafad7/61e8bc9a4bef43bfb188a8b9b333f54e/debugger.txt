@@ -1,0 +1,183 @@
+﻿## CALLSTACK
+Thread ID: 11112
+[1] MultiHtmlCraft.AvaroniaControl.dll!MultiHtmlCraft.AvaroniaControl.MultiversalAvaroniaControl.FindAndCacheScrollViewer
+This is the current user focused stack frame. The provided locals context corresponds to this stack frame, but you may evaluate expressions and retrieve code for any frame.
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.AvaroniaControl\MultiHtmlCraft.AvaroniaControl.cs
+938:         private void FindAndCacheScrollViewer()
+939:         {
+940:             try
+941:             {
+942:                 Visual? parent = this.GetVisualParent();
+943:                 while (parent != null)
+944:                 {
+945:                     if (parent is ScrollViewer sv)
+946:                     {
+947:                         // 前のScrollViewerからイベントハンドラを削除
+948:                         if (_cachedScrollViewer != null)
+949:                         {
+950:                             _cachedScrollViewer.PropertyChanged -= CachedScrollViewer_PropertyChanged;
+951:                         }
+952: 
+953:                         _cachedScrollViewer = sv;
+954:                         _cachedScrollOffset = sv.Offset;
+955:                         _isScrollViewerCacheValid = true;
+956: 
+957:                         // Offsetの変更を監視
+958:                         _cachedScrollViewer.PropertyChanged += CachedScrollViewer_PropertyChanged;
+959: 
+960:                         if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+961:                         {
+962:                             MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: ScrollViewer cached with offset {_cachedScrollOffset}");
+963:                         }
+964:                         return;
+965:                     }
+966:                     parent = parent.GetVisualParent();
+967:                 }
+968: 
+969:                 // ScrollViewer が見つからなかった場合
+970:                 ClearScrollViewerCache();
+971:             }
+972:             catch (Exception ex)
+973:             {
+974:                 if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+975:                 {
+976:                     MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: Error caching ScrollViewer: {ex.Message}");
+977:                 }
+978:                 ClearScrollViewerCache();
+979:             }
+980:         }
+```
+Current statement: line 967
+[2] MultiHtmlCraft.AvaroniaControl.dll!MultiHtmlCraft.AvaroniaControl.MultiversalAvaroniaControl.setScrollViewerSize
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.AvaroniaControl\MultiHtmlCraft.AvaroniaControl.cs
+272:         internal void setScrollViewerSize(RectangleFSpec rectSpec)
+273:         {
+274:             if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >=10)
+275:             {
+276:                 MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl.setScrollViewerSize: {rectSpec.X}, {rectSpec.Y}, {rectSpec.Width} ,{rectSpec.Height} ");
+277:             }
+278: 
+279: 
+280:             // ScrollViewer がキャッシュされていることを確認
+281:             if (_cachedScrollViewer == null)
+282:             {
+283:                 FindAndCacheScrollViewer();
+284:             }
+285: 
+286:             if (_cachedScrollViewer != null)
+287:             {
+288:                 // スクロールバーの表示設定
+289:                 _cachedScrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+290:                 _cachedScrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+291: 
+292:                 // コンテンツのサイズを設定（必要に応じて）
+293:                 if (rectSpec.Width > 0 && rectSpec.Height > 0)
+294:                 {
+295:                     _extent = new Avalonia.Size(rectSpec.Width, rectSpec.Height);
+296:                 }
+297:             }
+298:         }
+```
+Current statement: line 283
+[3] MultiHtmlCraft.AvaroniaControl.dll!MultiHtmlCraft.AvaroniaControl.MultiversalAvaroniaControl.navigate
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.AvaroniaControl\MultiHtmlCraft.AvaroniaControl.cs
+194:         public async Task navigate(string URL, params object[] args)
+195:         {
+196:             if (string.IsNullOrWhiteSpace(URL))
+197:                 throw new ArgumentException("URL is null or empty", nameof(URL));
+198: 
+199:             string strUrl = URL.Trim();
+200:             if (!strUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+201:             {
+202:                 // not throwing here to be tolerant, but log if available
+203:                 if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+204:                 {
+205:                     MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl.navigate: invalid url {strUrl}");
+206:                 }
+207:                 return;
+208:             }
+209: 
+210:             if (___multiversalWindow == null)
+211:             {
+212:                 ___multiversalWindow = new MultiHtmlCraft.Core.CHtmlMultiversalWindow(null, true, IMultiversalWindowType.NormalWindow);
+213:                 ___multiversalWindow.setMultiversalControl(this);
+214:             }
+215: 
+216:             // preserve last requested url
+217:             ___multiversalWindow.___URL_Request_Current = URL;
+218: 
+219:             // ensure shared HttpClient is initialized similar to WinForms control behavior
+220:             if (___multiversalWindow.hasHttpClient == false)
+221:             {
+222:                 var handler = new System.Net.Http.HttpClientHandler
+223:                 {
+224:                     AutomaticDecompression = System.Net.DecompressionMethods.All
+225:                 };
+226:                 var httpClient = new System.Net.Http.HttpClient(handler);
+227:                 commonHTML.setHttpClientDefalutRequestHeaders(httpClient);
+228:                 httpClient.Timeout = TimeSpan.FromMilliseconds(30000);
+229:                 MultiHtmlCraft.Core.CHtmlMultiversalWindow.setHttpClient(httpClient);
+230:             }
+231: 
+232:             try
+233:             {
+234:                 // call into core to create document
+235:                 var requestData = (args != null && args.Length > 0 && args[0] is CHtmlRequestData rd) ? rd : null;
+236:                 ___document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, ___multiversalWindow, requestData);
+237:                 int iControlCount = 0;
+238: 
+239:                 if (___document != null)
+240:                 {
+241:                     if (___document.___ManagedControlPendingElementList != null)
+242:                     {
+243:                         iControlCount = ___document.___ManagedControlPendingElementList.Count;
+244:                         if (iControlCount >= 0)
+245:                         {
+246:                             createAvaloniaControlFromDocument(___document);
+247:                         }
+248:                     }
+249:                     if(___document.body!= null)
+250:                     {
+251:                         CHtmlElement _body = ___document.body as CHtmlElement;
+252:                         var bodyBounds = _body.offsetScreenBounds;
+253:                         setScrollViewerSize(bodyBounds);
+254:                     }
+255:                 }
+256: 
+257:         
+258: 
+259:                 // notify listeners that a document was loaded
+260:                 DocumentLoaded?.Invoke(this, EventArgs.Empty);
+261:             }
+262:             catch (Exception ex)
+263:             {
+264:                 if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+265:                 {
+266:                     MultiHtmlCraft.Core.commonLog.LogEntry("MultiversalAvaroniaControl.navigate exception: {0}", ex);
+267:                 }
+268:                 throw;
+269:             }
+270:         }
+```
+Current statement: line 253
+[4] [非同期メソッドを再開しています]
+[5] [外部コード]
+[6] MultiHtmlCraft.AvaloniaControl_Test.dll!MultiHtmlCraaft.AvaloniaControl_Tesst.Program.Main
+Code for the stack frame:
+```csharp MultiHtmlCraaft.AvaloniaControl_Tesst\Program.cs
+12:         [STAThread]
+13:         public static void Main(string[] args) => BuildAvaloniaApp()
+14:             .StartWithClassicDesktopLifetime(args);
+```
+Current statement: lines 13-14
+[7] [外部コード]
+
+## LOCALS
+Variable: 'Avalonia.VisualTree.VisualExtensions.GetVisualParent が返されました' of type 'Avalonia.Controls.Panel' is a complex object with child properties and has value: 評価がタイムアウトしました
+Variable: 'this' of type 'MultiHtmlCraft.AvaroniaControl.MultiversalAvaroniaControl' is a complex object with child properties and has value: 評価がタイムアウトしました
+Variable: 'parent' of type 'Avalonia.Visual {Avalonia.Controls.Panel}' is a complex object with child properties and has value: 評価がタイムアウトしました
+Variable: 'sv' of type 'Avalonia.Controls.ScrollViewer' is a complex object with child properties and has value: null
+

@@ -58,7 +58,7 @@ namespace MultiHtmlCraaft.AvaloniaControl_Tesst.Views
                 // txt.Text = "http://localhost/jstest/KeyDownTest1.html"; // KeyDown Test 
                 // txt.Text = "http://localhost/jstest/DocumentAddEventListerTest1.html";//
                 // txt.Text = "http://localhost/canvas/canvasEllpseTest1.html"; // Canvas Ellipse Test OK
-                //txt.Text = "http://localhost/canvas/CanvasGradius3.html"; // Space Harior Javascript Canvas Test 
+                // txt.Text = "http://localhost/canvas/CanvasGradius3.html"; // Space Harior Javascript Canvas Test 
                 ///txt.Text = "http://localhost/canvas/CanvasMouseMoveTest1.html"; //
                 // txt.Text = "http://localhost/jstest/SimpleMouseMoveTest1.html"; // Simple Mouse Move Test
                 // txt.Text = "http://localhost/jstest/SimpleMouseDownTest1.html";// Simple Mouse Down Test
@@ -73,11 +73,22 @@ namespace MultiHtmlCraaft.AvaloniaControl_Tesst.Views
                 // txt.Text = "http://localhost/jstest/jqueryTest/JQuwey4_4_0_0_Test1.html"; // JQuery 4.0.0 Test matches Error
                 //txt.Text = "http://localhost/jstest/jqueryTest/SimpleMatchesTest1.html";// elementMatches Test
                 //txt.Text = "http://localhost/jstest/WindowDocumentAddEventListenerTesst1.html"; // Window Document AddEventListener Test OK
-                 //txt.Text = "http://localhost/canvas/CanvasBackBufferTest1.html";// Canvas Back Buffer Test 1 OK
-                 // txt.Text = "http://localhost/canvas/CanvasBackBufferTest3.html";// Canvas Back Buffer Test 3 OK
+                //txt.Text = "http://localhost/canvas/CanvasBackBufferTest1.html";// Canvas Back Buffer Test 1 OK
+                // txt.Text = "http://localhost/canvas/CanvasBackBufferTest3.html";// Canvas Back Buffer Test 3 OK
                 //txt.Text = "http://localhost/mariohtml5-master/minTest_NonJquery.html"; // Mario HTML5 Test Non JQuery Test 
-                //txt.Text = "https://www.joshuakgoldberg.com/FullScreenMario/Source/"; // Canvas Fill Style Test OKÔΩìÔΩÑ
-                txt.Text = "http://localhost/jstest/AudioPlayTest1.html"; // Audio Play Test 1 OK
+                //txt.Text = "https://www.joshuakgoldberg.com/FullScreenMario/Source/"; // Canvas Fill Style Test OKÅEìÔΩÅE
+                //txt.Text = "http://localhost/jstest/AudioPlayTest1.html"; // Audio Play Test 1 OK
+                //  txt.Text = "http://localhost/html/HtmlControlTest1.html"; // Html Control Test 1 OK
+                //txt.Text = "http://localhost/html/QuerySelectorAllTest1.html";//
+                //txt.Text = "http://localhost/canvas/CanvasGradius4.html";// Canvas Gradius 4 Test OK
+                //txt.Text = "http://localhost/canvas/WindowOnloadTest1.html"; // Window onload Test
+                //txt.Text = "http://localhost/canvas/CanvasBrushTest1.html"; // Canvas Brush Test 1 OK
+                //txt.Text = "http://localhost/canvas/CanvasCreatePatternTest1.html";//
+                // txt.Text = "http://localhost/html/HtmlControlTest1.html"; // Html Post Test 1
+                // txt.Text = "http://localhost/html/HtmlPostTest2.html"; // Html Post Test 2 OK
+                // txt.Text = "http://localhost/html/FetchTest1.html"; // HTML Fetch Test
+                //txt.Text = "http://localhost/html/FetchTest2NoArrowFunction.html"; // HTML Fetch Test
+                txt.Text = "http://localhost/html/DocumentFunctionTest1.html"; // HTML Fetch Test  
             }
 
             if (btnGo != null && txt != null && _multiView != null)

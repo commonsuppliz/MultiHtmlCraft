@@ -1717,75 +1717,113 @@ namespace MultiHtmlCraft.AvaroniaControl
                     {
                         MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Element: {element.toLogString()}, ID: {element.id}");
                     }
-                    var ownerForm = commonHTML.GetParentElementFromElement(element, CHtmlElementType.FORM, 3);
-                    if(ownerForm != null)
-                    {
-                        if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                    if(element.___elementTagType == CHtmlElementType.INPUT)
+                    { 
+                        var ownerForm = commonHTML.GetParentElementFromElement(element, CHtmlElementType.FORM, 3);
+                        if (ownerForm != null)
                         {
-                            MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Found parent form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
-                        }
-                        var elementType = String.Format("{0}", element.getAttribute("type"));
+                            if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                            {
+                                MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Found parent form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
+                            }
+                            var elementType = String.Format("{0}", element.getAttribute("type"));
 
-                        switch (elementType.ToLower())
-                        {
+                            switch (elementType.ToLower())
+                            {
 
-                            case "reset":
-                                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
-                                {
-                                    MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Resetting form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
-                                }
-                                //ownerForm.reset();
-                                break;
-                            case "submit":
-                            default:
-                                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
-                                {
-                                    MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Submitting form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
-                                }
-                                var formMethod = String.Format("{0}", ownerForm.getAttribute("method"));
-                                var formAction = String.Format("{0}", ownerForm.getAttribute("action")) ;
-                                string strUrl = commonHTML.GetAbsoluteUri(___document.___URL , null, formAction);
-                                StringBuilder sbPostData = new StringBuilder();
+                                case "reset":
+                                    if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                                    {
+                                        MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Resetting form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
+                                    }
+                                    //ownerForm.reset();
+                                    break;
+                                case "submit":
+                                default:
+                                    if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                                    {
+                                        MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Submitting form: {ownerForm.toLogString()}, ID: {ownerForm.id}");
+                                    }
+                                    var formMethod = String.Format("{0}", ownerForm.getAttribute("method"));
+                                    var formAction = String.Format("{0}", ownerForm.getAttribute("action"));
+                                    string strUrl = commonHTML.GetAbsoluteUri(___document.___URL, null, formAction);
+                                    StringBuilder sbPostData = new StringBuilder();
 
-                                commonHTML.createFormPostData(ownerForm, ref sbPostData);
-                                if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
-                                {
-                                    MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Form Post Data: {sbPostData.ToString()} for {strUrl} with method {formMethod}");
-                                }
-                                CHtmlMultiversalWebHistory historyItem = new CHtmlMultiversalWebHistory();
-                                historyItem.Url = formAction;
-                                historyItem.FileLocation = null;
-                                historyItem.ContentType = "application/x-www-form-urlencoded";
-                                historyItem.LastModified = DateTimeOffset.Now;
-                                historyItem.Window = this.___multiversalWindow;
-                                historyItem.Document = this.Document;
-                                if(this.___multiversalWindow != null && this.___multiversalWindow.___document != null)
-                                {
-                                    historyItem.Document = this.___multiversalWindow.___document;
-                                };
-
-
-                                CHtmlMultiversalHistoryList.CHtmlMultiversalWebHistoryCache[new DateTimeOffset()] = historyItem;
-                                resetMultiversalWindow();
-
-
-                                var requestData = new CHtmlRequestData();
-                                requestData.fields.Add("Method", formMethod); 
-                                requestData.fields.Add("PostData", sbPostData.ToString());
-                                requestData.fields.Add("ContentType", "application/x-www-form-urlencoded");
-                                this._canvas.Children.Clear();
+                                    commonHTML.createFormPostData(ownerForm, ref sbPostData);
+                                    if (MultiHtmlCraft.Core.commonLog.LoggingEnabled && MultiHtmlCraft.Core.commonLog.LogLevel >= 10)
+                                    {
+                                        MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl: OnControlClickInternal - Form Post Data: {sbPostData.ToString()} for {strUrl} with method {formMethod}");
+                                    }
+                                    CHtmlMultiversalWebHistory historyItem = new CHtmlMultiversalWebHistory();
+                                    historyItem.Url = formAction;
+                                    historyItem.FileLocation = null;
+                                    historyItem.ContentType = "application/x-www-form-urlencoded";
+                                    historyItem.LastModified = DateTimeOffset.Now;
+                                    historyItem.Window = this.___multiversalWindow;
+                                    historyItem.Document = this.Document;
+                                    if (this.___multiversalWindow != null && this.___multiversalWindow.___document != null)
+                                    {
+                                        historyItem.Document = this.___multiversalWindow.___document;
+                                    }
+                                    ;
 
 
-                                ___document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, ___multiversalWindow, requestData);
+                                    CHtmlMultiversalHistoryList.CHtmlMultiversalWebHistoryCache[new DateTimeOffset()] = historyItem;
+                                    resetMultiversalWindow();
+
+
+                                    var requestData = new CHtmlRequestData();
+                                    requestData.fields.Add("Method", formMethod);
+                                    requestData.fields.Add("PostData", sbPostData.ToString());
+                                    requestData.fields.Add("ContentType", "application/x-www-form-urlencoded");
+                                    this._canvas.Children.Clear();
+
+
+                                    ___document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, ___multiversalWindow, requestData);
 
 
 
-                                break;
+                                    break;
+                            }
                         }
 
                     }
-                   
+                    else
+                    {
+                        switch (element.___elementTagType)
+                        {
+                            case CHtmlElementType.BUTTON:
+                                if (element.___ElementClickFunctionWeakReference != null)
+                                {
+
+                                    try
+                                    {
+                                        /*
+                                        var objClickFunction = element.___ElementClickFunctionWeakReference.Target;
+                                        this.___multiversalWindow.___executeElementEventFunction("click", element, objClickFunction, new object[] { });7
+                                        */
+                                        
+                                        var objClickFunction = element.___ElementClickFunctionWeakReference.Target;
+                                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                                        {
+                                            this.___multiversalWindow.___executeElementEventFunction("click", element, objClickFunction, new object[] { });
+                                        });
+                                        
+
+                                    } catch(Exception exClick)
+                                    {
+                                        if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                        {
+                                            commonLog.LogEntry($"{this}. click exception {exClick}");
+                                        }
+                                    }
+                                }
+                                break;
+                        }
+                    }
+
                 }
+
             }
         }
         internal void resetMultiversalWindow()

@@ -8388,10 +8388,38 @@ namespace MultiHtmlCraft.Core
         }
         internal void ___addEventListenerInner(string __evtName, object ___function, bool ___bool)
         {
-            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
                 commonLog.LogEntry($"enter {this}.___addEventListenerInner({__evtName}, {___function}, {___bool})");
             }
+            // #region agent log
+            try
+            {
+                var payload = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
+                {
+                    ["sessionId"] = "b0830d",
+                    ["hypothesisId"] = "E",
+                    ["location"] = "CHtmlElement:___addEventListenerInner",
+                    ["message"] = "handler registered",
+                    ["data"] = new Dictionary<string, object?>
+                    {
+                        ["evtName"] = __evtName,
+                        ["handlerType"] = ___function?.GetType().FullName,
+                        ["isScriptObject"] = ___function is Microsoft.ClearScript.ScriptObject,
+                        ["element"] = this.ToString()
+                    },
+                    ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                }) + Environment.NewLine;
+                var logPaths = new[]
+                {
+                    System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "debug-b0830d.log")),
+                    System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "debug-b0830d.log")),
+                    @"C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\debug-b0830d.log"
+                };
+                foreach (var p in logPaths) { try { System.IO.File.AppendAllText(p, payload); break; } catch { } }
+            }
+            catch { }
+            // #endregion
             if (this.___IsPrototype == true)
             {
                 goto AttributeSection;
