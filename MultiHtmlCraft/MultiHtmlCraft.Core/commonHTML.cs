@@ -91,7 +91,7 @@ namespace MultiHtmlCraft.Core
         /// </summary>
         hoststore
     }
-    public enum CHtmlEnqeueStatusType : byte { UNKNOWN = 0, ProcessQueue = 9, Template = 10, BodyElement = 100 };
+    public enum CHtmlEnqeueStatusType : byte { UNKNOWN = 0, ProcessQueueAsync = 9, ProcessQueueDefer= 10, ProcessQueueModule = 11, Template = 12 };
 
     public enum CHtmlWebProxyType : byte { UseDirect = 0, UseIE = 1, UseCustom = 2 };
 

@@ -399,6 +399,9 @@ namespace MultiHtmlCraft.Core
         private object ___DeferEnqueueProcessEnqueuedLockingObject = new object();
         private System.Collections.Generic.List<CHtmlScriptResult> ___EnqueuedScriptList = null;
         internal string ___contentType;
+        private int ___ExpectedDeferScriptCount = 0;
+        private TaskCompletionSource<bool> ___AllDeferScriptsLoadedTcs
+            = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public string ___rawHttpHeaders = null;
 
@@ -1565,7 +1568,7 @@ namespace MultiHtmlCraft.Core
                     {
                         if (this.___BadQueryList.Count == 10 || this.___BadQueryList.Count == 20 || this.___BadQueryList.Count == 30)
                         {
-                            this.___processDocumentEnqueuedScripts(CHtmlEnqeueStatusType.ProcessQueue);
+                            this.___processDocumentEnqueuedScripts(CHtmlEnqeueStatusType.ProcessQueueAsync);
                         }
                     }
                     if (this.___BadQueryList.Count > 50)
@@ -10072,6 +10075,7 @@ namespace MultiHtmlCraft.Core
                                                                                             }
                                                                                             else if (cscriptElement.___attributes.ContainsKey("defer"))
                                                                                             {
+                                                                                                ___ExpectedDeferScriptCount++;
                                                                                                 httpAsyncMode = commonHTML.HttpAsyncDeferMode.Defer;
                                                                                                 isAsyncOrDeferScript = true;
                                                                                             }
@@ -10151,8 +10155,15 @@ namespace MultiHtmlCraft.Core
                                                                                                             deferScript.IsDeferScript = true;
                                                                                                             deferScript.text = _sbStyleOrScriptTextBuilderPartial.ToString();
                                                                                                             deferScript.IsCompiled = false;
-                                                                                                            this.___EnqueuedScriptList.Add(deferScript);
-                                                                                                            this.___DeferredEnqueuedScriptCount += 1;
+                                                                                                            lock (this.___EnqueuedScriptList)
+                                                                                                            {
+                                                                                                                this.___EnqueuedScriptList.Add(deferScript);
+                                                                                                                this.___DeferredEnqueuedScriptCount++;
+                                                                                                                if (this.___DeferredEnqueuedScriptCount >= this.___ExpectedDeferScriptCount)
+                                                                                                                {
+                                                                                                                    ___AllDeferScriptsLoadedTcs.TrySetResult(true);
+                                                                                                                }
+                                                                                                            }
                                                                                                             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                                                                                                             {
 
@@ -10780,16 +10791,20 @@ namespace MultiHtmlCraft.Core
 
                         if (commonHTML.CompileAsyncScriptAtDoucmentLoaded == true)
                         {
-                            if (this.___DeferredEnqueuedScriptCount > 0)
+                            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry("There is defer scripts needs to process : {0} : Expected : {1}", this.___DeferredEnqueuedScriptCount, this.___ExpectedDeferScriptCount);
+                            }
+                            if (this.___ExpectedDeferScriptCount     > 0)
                             {
 
-                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
-                                {
-                                    commonLog.LogEntry("There is defer scripts needs to process : {0}", this.___DeferredEnqueuedScriptCount);
-                                }
                                 try
                                 {
-                                    this.___processDocumentEnqueuedScripts(CHtmlEnqeueStatusType.ProcessQueue);
+                                    await this.___AllDeferScriptsLoadedTcs.Task;
+
+                                    
+                                    Debug.WriteLine($"待機後 Count = {this.___EnqueuedScriptList.Count}");
+                                    this.___processDocumentEnqueuedScripts(CHtmlEnqeueStatusType.ProcessQueueDefer);
                                 }
                                 catch { }
                             }

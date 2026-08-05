@@ -4681,6 +4681,7 @@ namespace MultiHtmlCraft.Core
                     base.___src = base.___src.Replace("\\/", "/");
                 }
 
+                /*
                 if (this.___attributes.ContainsKey("src") == false)
                 {
                     CHtmlAttribute srcAttribute = new CHtmlAttribute();
@@ -4710,8 +4711,21 @@ namespace MultiHtmlCraft.Core
                         }
                     }
                 }
+                */
+                CHtmlAttribute srcAttribute = new CHtmlAttribute();
+                srcAttribute.name = "src";
+                srcAttribute.setParentNode(this);
+                if (string.IsNullOrEmpty(base.___src) == false)
+                {
+                    srcAttribute.value = base.___src;
+                }
+                else
+                {
+                    srcAttribute.value = "";
+                }
+                this.___attributes["src"] = srcAttribute;
                 // it src is "#" it does not process any more
-                if(string.IsNullOrEmpty(base.___src) == false && base.___src.Length == 1 && base.___src[0] == '#')
+                if (string.IsNullOrEmpty(base.___src) == false && base.___src.Length == 1 && base.___src[0] == '#')
                 {
                     if (this.___srcBase != null && string.IsNullOrEmpty(this.___srcBase.Href) == false)
                     {
@@ -7582,7 +7596,7 @@ namespace MultiHtmlCraft.Core
 			set{this.___ScreenRectangle.Y  = (float)value;}
 		}
 		/// <summary>
-		/// エレメントの左端部と現在見えているエレメントの最左端部との間の距離をピクセル単位で設定したり、設定を読み出す。これは、エレメントのコンテントを水平方向にスクロールした距離に等しい。 
+		/// エレメント�E左端部と現在見えてぁE��エレメント�E最左端部との間�E距離をピクセル単位で設定したり、設定を読み出す。これ�E、エレメント�EコンチE��トを水平方向にスクロールした距離に等しぁE��E
         /// Chrome and IE only documentElement or Body returns proper value
 		/// </summary>
 		public double scrollLeft
@@ -14183,7 +14197,7 @@ namespace MultiHtmlCraft.Core
         }
 
         #endregion
-        #region IPropertBox メンバ
+        #region IPropertBox メンチE
 
         public virtual object ___getPropertyByName(string ___name)
 		{
@@ -14474,7 +14488,7 @@ namespace MultiHtmlCraft.Core
 						return this.___offsetWidth;
 					case "offsettop":
                     case "offsetTop":
-                        // 要素が存在し、有効な状態かチェック
+                        // 要素が存在し、有効な状態かチェチE��
                         if (this.___HasElementRemoved || this.___IsDisposing)
                         {
                             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
@@ -14484,7 +14498,7 @@ namespace MultiHtmlCraft.Core
                             return 0;
                         }
 
-                        // 親要素の存在をチェック
+                        // 親要素の存在をチェチE��
                         if (this.___parentWeakRef != null)
                         {
                             var parent = this.___parentWeakRef.Target;
