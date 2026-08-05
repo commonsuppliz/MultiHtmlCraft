@@ -1605,7 +1605,7 @@ namespace MultiHtmlCraft.Core
                                                 try
                                                 {
                                                     var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
-                                                    var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                                    var handler = handlerArg;
                                                     if (!string.IsNullOrEmpty(nameStr))
                                                     {
                                                         try { self.removeEventListener(nameStr, handler); } catch { }
@@ -1623,7 +1623,7 @@ namespace MultiHtmlCraft.Core
                                                 try
                                                 {
                                                     var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
-                                                    var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                                    var handler = handlerArg;
                                                     if (!string.IsNullOrEmpty(nameStr))
                                                     {
                                                         try { self.attachEvent(nameStr, handler); } catch { }
@@ -1641,7 +1641,7 @@ namespace MultiHtmlCraft.Core
                                                 try
                                                 {
                                                     var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
-                                                    var handler = UnwrapValue(handlerArg) ?? handlerArg;
+                                                    var handler = handlerArg;
                                                     if (!string.IsNullOrEmpty(nameStr))
                                                     {
                                                         try { self.detachEvent(nameStr, handler); } catch { }
@@ -2041,20 +2041,19 @@ namespace MultiHtmlCraft.Core
                                     case "addEventListener":
                                         {
                                             var name = binder.Name;
-                                            Action<object[]> addEventListenerDel = (args) =>
+                                            Action<object, object> addEventListenerDel = (nameValue, funcObj) =>
                                             {
                                                 try
                                                 {
-                                                    if (args != null && args.Length >= 2)
-                                                    {
-                                                        string nameStr = UnwrapValue(args[0])?.ToString() ?? string.Empty;
-                                                        var handler = UnwrapValue(args[1]) ?? args[1];
-                                                        object optionsArg = args.Length >= 3 ? args[2] : null;
+                     
+                                                        string nameStr = UnwrapValue(nameValue)?.ToString() ?? string.Empty;
+                                                        var handler = funcObj;
+                                                       // object optionsArg = args.Length >= 3 ? args[2] : null;
                                                         if (!string.IsNullOrEmpty(nameStr))
                                                         {
-                                                            self.addEventListener((string)nameStr, handler, optionsArg);
+                                                            self.addEventListener((string)nameStr, handler);
                                                         }
-                                                    }
+                                                    
                                                 }
                                                 catch (Exception ex)
                                                 {
@@ -2080,7 +2079,7 @@ namespace MultiHtmlCraft.Core
                                                     if (args != null && args.Length >= 2)
                                                     {
                                                         var nameStr = UnwrapValue(args[0])?.ToString() ?? string.Empty;
-                                                        var handler = UnwrapValue(args[1]) ?? args[1];
+                                                        var handler = args[1];
                                                         object optionsArg = args.Length >= 3 ? args[2] : null;
                                                         if (!string.IsNullOrEmpty(nameStr))
                                                         {

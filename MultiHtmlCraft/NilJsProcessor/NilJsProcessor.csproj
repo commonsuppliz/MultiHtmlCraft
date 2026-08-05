@@ -7,7 +7,11 @@
 	<WarningLevel>0</WarningLevel>
 	<NoWarn>414;1701;1702;618;8600;8602;8603;8625</NoWarn>
   </PropertyGroup>
-
+  <PropertyGroup>
+       <AssemblyVersion>2.1.1</AssemblyVersion>
+       <FileVersion>2.1.1</FileVersion>
+       <Version>2.1.1</Version>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NiL.JS" Version="2.6.1700" />
   </ItemGroup>

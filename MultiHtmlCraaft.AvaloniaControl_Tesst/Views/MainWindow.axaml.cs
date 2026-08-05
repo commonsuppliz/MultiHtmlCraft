@@ -88,7 +88,8 @@ namespace MultiHtmlCraaft.AvaloniaControl_Tesst.Views
                 // txt.Text = "http://localhost/html/HtmlPostTest2.html"; // Html Post Test 2 OK
                 // txt.Text = "http://localhost/html/FetchTest1.html"; // HTML Fetch Test
                 //txt.Text = "http://localhost/html/FetchTest2NoArrowFunction.html"; // HTML Fetch Test
-                txt.Text = "http://localhost/html/DocumentFunctionTest1.html"; // HTML Fetch Test  
+                //txt.Text = "http://localhost/html/DocumentFunctionTest1.html"; // HTML Fetch Test  OK
+                txt.Text = "http://localhost/html/DeferScriptTest.html"; // defer script Test
             }
 
             if (btnGo != null && txt != null && _multiView != null)

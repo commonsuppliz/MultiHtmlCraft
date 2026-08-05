@@ -1,7 +1,16 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{46EB2EB3-21B5-4D9D-B352-603C488F48DD}|\u30BD\u30EA\u30E5\u30FC\u30B7\u30E7\u30F3\u9805\u76EE{46EB2EB3-21B5-4D9D-B352-603C488F48DD}|C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownPreview",
+      "RelativeMoniker": "D:0:0:{46EB2EB3-21B5-4D9D-B352-603C488F48DD}|\u30BD\u30EA\u30E5\u30FC\u30B7\u30E7\u30F3\u9805\u76EE{46EB2EB3-21B5-4D9D-B352-603C488F48DD}|solutionrelative:README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|MarkdownPreview"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{46EB2EB3-21B5-4D9D-B352-603C488F48DD}|\u30BD\u30EA\u30E5\u30FC\u30B7\u30E7\u30F3\u9805\u76EE{46EB2EB3-21B5-4D9D-B352-603C488F48DD}|C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{46EB2EB3-21B5-4D9D-B352-603C488F48DD}|\u30BD\u30EA\u30E5\u30FC\u30B7\u30E7\u30F3\u9805\u76EE{46EB2EB3-21B5-4D9D-B352-603C488F48DD}|solutionrelative:README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 2166,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -30,6 +39,31 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "README.md [\u30D7\u30EC\u30D3\u30E5\u30FC]",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\README.md",
+              "RelativeDocumentMoniker": "README.md",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\README.md [\u30D7\u30EC\u30D3\u30E5\u30FC]",
+              "RelativeToolTip": "README.md [\u30D7\u30EC\u30D3\u30E5\u30FC]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-08-05T00:27:11.801Z",
+              "EditorCaption": " [\u30D7\u30EC\u30D3\u30E5\u30FC]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "README.md",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\README.md",
+              "RelativeDocumentMoniker": "README.md",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\README.md",
+              "RelativeToolTip": "README.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-08-05T00:23:51.731Z",
+              "EditorCaption": ""
             }
           ]
         },

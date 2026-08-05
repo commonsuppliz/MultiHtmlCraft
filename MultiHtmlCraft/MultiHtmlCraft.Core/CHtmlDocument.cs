@@ -10125,9 +10125,53 @@ namespace MultiHtmlCraft.Core
                                                                                                 Task<TaskResultElement> task = ___downloadElementContentStringWithTask(cscriptElement, __absScriptUrl, typevalue, httpAsyncMode);
                                                                                                 task.ContinueWith((Task<TaskResultElement> t) =>
                                                                                                 {
+                                                                                                    Debug.WriteLine($"Status: {t.Status}");          // RanToCompletion / Faulted / Canceled
+                                                                                                    if (t.IsFaulted)
+                                                                                                    {
+                                                                                                        Debug.WriteLine($"Exception: {t.Exception}");
+                                                                                                        // AggregateException の中身も見る
+                                                                                                        foreach (var ex in t.Exception.InnerExceptions)
+                                                                                                            Debug.WriteLine(ex);
+                                                                                                        return;
+                                                                                                    }
+
+                                                                                                    if (t.IsCanceled)
+                                                                                                    {
+                                                                                                        Debug.WriteLine("Canceled");
+                                                                                                        return;
+                                                                                                    }
+                                                                                                    var result = t.Result;   // ここで例外が出ることが多い
+                                                                                                    Debug.WriteLine($"[ContinueWith] Result取得成功: {result != null}");
                                                                                                     TaskResultElement __taskResult = t.Result as TaskResultElement;
+                                                                                                    if (__taskResult != null)
+                                                                                                    {
+                                                                                                        Debug.WriteLine($"[ContinueWith] IsCompletedSuccessfully: {__taskResult.IsCompletedSuccessfully}");
+                                                                                                        Debug.WriteLine($"[ContinueWith] strResult length: {__taskResult.strResult?.Length ?? -1}");
+                                                                                                    }
                                                                                                     if (__taskResult != null && __taskResult.IsCompletedSuccessfully)
                                                                                                     {
+                                                                                                        Debug.WriteLine("[ContinueWith] ★★ 条件クリア → 後処理実行 ★★");
+
+                                                                                                        _sbStyleOrScriptTextBuilderPartial = new StringBuilder(__taskResult.strResult);
+
+                                                                                                        Debug.WriteLine($"[ContinueWith] httpAsyncMode = {httpAsyncMode}");
+
+                                                                                                        if (httpAsyncMode == commonHTML.HttpAsyncDeferMode.Async)
+                                                                                                        {
+                                                                                                            Debug.WriteLine("[ContinueWith] → Async 分岐に入りました");
+                                                                                                            // 既存の処理
+                                                                                                        }
+                                                                                                        else if (httpAsyncMode == commonHTML.HttpAsyncDeferMode.Defer)
+                                                                                                        {
+                                                                                                            Debug.WriteLine("[ContinueWith] → Defer 分岐に入りました");
+                                                                                                            // 既存の処理
+                                                                                                            Debug.WriteLine($"[ContinueWith] DeferScriptCount = {this.___DeferredEnqueuedScriptCount}");
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            Debug.WriteLine($"[ContinueWith] → 想定外の Mode: {httpAsyncMode}");
+                                                                                                        }
+
                                                                                                         _sbStyleOrScriptTextBuilderPartial = new StringBuilder(__taskResult.strResult);
 
 
@@ -10151,12 +10195,20 @@ namespace MultiHtmlCraft.Core
                                                                                                             deferScript.IsDeferScript = true;
                                                                                                             deferScript.text = _sbStyleOrScriptTextBuilderPartial.ToString();
                                                                                                             deferScript.IsCompiled = false;
-                                                                                                            this.___EnqueuedScriptList.Add(deferScript);
-                                                                                                            this.___DeferredEnqueuedScriptCount += 1;
-                                                                                                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                                                                                            lock (___EnqueuedScriptList)
+                                                                                                            {
+                                                                                                                this.___EnqueuedScriptList.Add(deferScript);
+                                                                                                                this.___DeferredEnqueuedScriptCount++;
+                                                                                                                Debug.WriteLine($"[Enqueue] this.GetHashCode() = {this.GetHashCode()}");
+                                                                                                                Debug.WriteLine($"[Enqueue] List.GetHashCode() = {this.___EnqueuedScriptList.GetHashCode()}");
+                                                                                                                Debug.WriteLine($"[Enqueue] Count = {this.___EnqueuedScriptList.Count}");
+                                                                                                            }
+                                                                                                            Debug.WriteLine($"[ContinueWith] Add後 Count = {this.___DeferredEnqueuedScriptCount}");
+                                                                                                            Debug.WriteLine($"[ContinueWith] List.Count = {this.___EnqueuedScriptList.Count}");
+                                                                                                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
                                                                                                             {
 
-                                                                                                                commonLog.LogEntry("defer script {0} has been downloaded and added to script queue Thread ID :{1}", __absScriptUrl, Thread.CurrentThread.ManagedThreadId);
+                                                                                                                commonLog.LogEntry($"Defer script {__absScriptUrl} has been downloaded and added to script queue Thread ID : {Thread.CurrentThread.ManagedThreadId} DeferScriptCount :{this.___DeferredEnqueuedScriptCount}");
 
 
                                                                                                             }
@@ -10780,7 +10832,10 @@ namespace MultiHtmlCraft.Core
 
                         if (commonHTML.CompileAsyncScriptAtDoucmentLoaded == true)
                         {
-                            if (this.___DeferredEnqueuedScriptCount > 0)
+                            Debug.WriteLine($"[参照側] List.GetHashCode() = {this.___EnqueuedScriptList.GetHashCode()}");
+                            Debug.WriteLine($"[参照側] Count = {this.___EnqueuedScriptList.Count}");
+
+                            if (this.___EnqueuedScriptList.Count > 0)
                             {
 
                                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)

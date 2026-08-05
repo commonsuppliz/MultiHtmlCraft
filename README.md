@@ -1,3 +1,8 @@
+<p>
+<img width="600" height="350" alt="Image" src="https://github.com/user-attachments/assets/790fe6a7-ec84-4ef6-93a6-d7dd9bd7057c" />
+</p>
+
+
 ## Project Overview
 
 <p align="center">
