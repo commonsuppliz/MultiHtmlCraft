@@ -58,13 +58,13 @@ namespace MultiHtmlCraaft.AvaloniaControl_Tesst.Views
                 // txt.Text = "http://localhost/jstest/KeyDownTest1.html"; // KeyDown Test 
                 // txt.Text = "http://localhost/jstest/DocumentAddEventListerTest1.html";//
                 // txt.Text = "http://localhost/canvas/canvasEllpseTest1.html"; // Canvas Ellipse Test OK
-                // txt.Text = "http://localhost/canvas/CanvasGradius3.html"; // Space Harior Javascript Canvas Test 
+                // txt.Text = "http://localhost/canvas/Canvas//3.html"; // Space Harior Javascript Canvas Test 
                 ///txt.Text = "http://localhost/canvas/CanvasMouseMoveTest1.html"; //
                 // txt.Text = "http://localhost/jstest/SimpleMouseMoveTest1.html"; // Simple Mouse Move Test
                 // txt.Text = "http://localhost/jstest/SimpleMouseDownTest1.html";// Simple Mouse Down Test
                 // txt.Text = "http://localhost/canvas/SpaceHarrior.html";// Space Harrior Canvas Test 
                 // txt.Text = "http://localhost/canvas/DoruagaTower.html";// 
-                //txt.Text = "http://localhost/canvas/CrazyClimber.html";// Crazy Climber Canvas Test KeyDown Event Works
+                // txt.Text = "http://localhost/canvas/CrazyClimber.html";// Crazy Climber Canvas Test KeyDown Event Works
                 //txt.Text = "http://localhost/jstest/KeyBoardEvent_WithKeyTest1.html";// Keyboard Event with Key Test
                 //  txt.Text = "http://localhost/canvas/gradius-master/index.html";// Gradius Test
                 //txt.Text = "http://localhost/canvas/CreateImageDataTest1.html";// Canvas createImageData Test, OK
@@ -89,7 +89,12 @@ namespace MultiHtmlCraaft.AvaloniaControl_Tesst.Views
                 // txt.Text = "http://localhost/html/FetchTest1.html"; // HTML Fetch Test
                 //txt.Text = "http://localhost/html/FetchTest2NoArrowFunction.html"; // HTML Fetch Test
                 // txt.Text = "http://localhost/html/DocumentFunctionTest1.html"; // HTML Fetch Test  
-                txt.Text = "http://localhost/html/DeferScriptTest.html";
+                //txt.Text = "http://localhost/html/DeferScriptTest.html"; Defer Script Test OK
+                //txt.Text = "http://localhost/html/AsyncScriptTest.html"; // Async Script Test OK
+                //txt.Text = "http://localhost/canvas/tmrDevelop/TheUnderground.html";// The Underground Test by tmrDevelop
+                //txt.Text = "http://localhost/canvas/Pacman1.html";// Pacman Test by tmrDevelop
+                //txt.Text = "http://localhost/canvas/FillRectWithHsla.html";// OK
+                //txt.Text = "http://localhost/canvas/MarksJumpingGame/index.html";
             }
 
             if (btnGo != null && txt != null && _multiView != null)

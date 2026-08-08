@@ -327,6 +327,11 @@ namespace MultiHtmlCraft.Core
         public void moveTo(double x, double y)
         {
             this.___currentPointF = new PointF((float)x, (float)y);
+            if (this.___CanvasTranslatePoint.X != 0 || this.___CanvasTranslatePoint.Y != 0)
+            {
+                x += this.___CanvasTranslatePoint.X;
+                y *= this.___CanvasTranslatePoint.Y;
+            }
 #if WINDOWS
             if (this.___CanvasGdiGraphicPath == null) this.___CanvasGdiGraphicPath = new GraphicsPath();
             this.___CanvasGdiGraphicPath.StartFigure();
@@ -350,7 +355,14 @@ namespace MultiHtmlCraft.Core
                 // (e.g. bezierCurveTo) which call moveTo when current point
                 // is not set and then continue drawing.
                 this.moveTo(x, y); // Act as moveTo if no current point exists
-                // continue to add line (may become zero-length)
+                                   // continue to add line (may become zero-length)
+
+            }
+
+            if (this.___CanvasTranslatePoint.X != 0 || this.___CanvasTranslatePoint.Y != 0)
+            {
+                x += this.___CanvasTranslatePoint.X;
+                y *= this.___CanvasTranslatePoint.Y;
             }
 #if WINDOWS
             if (this.___CanvasGdiGraphicPath == null) this.___CanvasGdiGraphicPath = new GraphicsPath();
@@ -370,6 +382,12 @@ namespace MultiHtmlCraft.Core
         public void fillRect(double x, double y, double w, double h)
         {
             ___setCanvasActivityIntoDocument();
+            if (this.___CanvasTranslatePoint.X != 0 || this.___CanvasTranslatePoint.Y != 0)
+            {
+                x += this.___CanvasTranslatePoint.X;
+                y += this.___CanvasTranslatePoint.Y;
+            }
+
 #if WINDOWS
             var gr = this.___getactiveC2DGraphicsFromBaseImage();
             if (gr != null)
@@ -478,6 +496,11 @@ namespace MultiHtmlCraft.Core
             {
                 sweepAngleDeg = anticlockwise ? -360 : 360;
             }
+            if(this.___CanvasTranslatePoint.X != 0 || this.___CanvasTranslatePoint.Y != 0)
+            {
+                x += this.___CanvasTranslatePoint.X;
+                y += this.___CanvasTranslatePoint.Y;
+            }
 
 #if WINDOWS
             if (this.___CanvasGdiGraphicPath == null) this.___CanvasGdiGraphicPath = new GraphicsPath();
@@ -522,6 +545,11 @@ namespace MultiHtmlCraft.Core
             {
                 this.moveTo(x1, y1);
                 return;
+            }
+            if (this.___CanvasTranslatePoint.X != 0 || this.___CanvasTranslatePoint.Y != 0)
+            {
+                x1 += this.___CanvasTranslatePoint.X;
+                y1 += this.___CanvasTranslatePoint.Y;
             }
 
             // Points
@@ -767,6 +795,11 @@ namespace MultiHtmlCraft.Core
 
         public void rect(double x, double y, double w, double h)
         {
+            if (this.___CanvasTranslatePoint.X != 0 || this.___CanvasTranslatePoint.Y != 0)
+            {
+                x += this.___CanvasTranslatePoint.X;
+                y += this.___CanvasTranslatePoint.Y;
+            }
             // Add rectangle to current path
             if (double.IsNaN(x) || double.IsNaN(y) || double.IsNaN(w) || double.IsNaN(h)) return;
 #if WINDOWS
@@ -2057,6 +2090,11 @@ namespace MultiHtmlCraft.Core
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
             {
                 commonLog.LogEntry("entering {0}.drawImage_inner({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10})...", this, _image.GetType().FullName, sx, sy, sw, sh, dx, dy, dw, dh, ____methodType);
+            }
+            if (this.___CanvasTranslatePoint.X != 0 || this.___CanvasTranslatePoint.Y != 0)
+            {
+                sx += this.___CanvasTranslatePoint.X;
+                sy = +this.___CanvasTranslatePoint.Y;
             }
 #if WINDOWS
             System.Drawing.Image ___imageObject = null;
@@ -3481,12 +3519,20 @@ namespace MultiHtmlCraft.Core
 
         public void translate(double x, double y)
         {
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"entering {this}.translate({x}, {y})");
+            }
             this.___CanvasTranslatePoint = new PointFSpec((float)x, (float)y);
             this.___CanvasInstructionsList.Add(new CHtmlCanvasContextInstruction { InstructionType = CanvasInstructionType.Translate, point = this.___CanvasTranslatePoint });
         }
 
         public void rotate(double angle)
         {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"entering {this}.rotate({angle}");
+            }
             this.___CanvasRotateAngle = (float)angle;
             this.___CanvasInstructionsList.Add(new CHtmlCanvasContextInstruction { InstructionType = CanvasInstructionType.Rotate, floatValue = (float)(angle * 180 / Math.PI) });
         }
@@ -3647,6 +3693,11 @@ namespace MultiHtmlCraft.Core
         }
         internal void ___fillText_Inner(string text, double x, double y, double maxWidth)
         {
+            if (this.___CanvasTranslatePoint.X != 0 || this.___CanvasTranslatePoint.Y != 0)
+            {
+                x += this.___CanvasTranslatePoint.X;
+                y = +this.___CanvasTranslatePoint.Y;
+            }
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
             {
                 commonLog.LogEntry("entering {0}.fillText_Inner('{1}', {2}, {3}, {4})", this, text, x, y, maxWidth);

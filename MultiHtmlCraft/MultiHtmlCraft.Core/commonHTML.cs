@@ -21,6 +21,14 @@ using NTextCat;
 using System.Linq.Expressions;
 using Microsoft.VisualBasic;
 using ManagedBass;
+using System.Runtime.Intrinsics.X86;
+using System.Text.RegularExpressions;
+
+using System.Globalization;
+using System.Data.SqlTypes;
+
+
+
 
 
 
@@ -22236,13 +22244,102 @@ namespace MultiHtmlCraft.Core
             }
 
             // Handle rgb() and rgba() colors
-            if (colorString.StartsWith("rgb"))
+            if (colorString.StartsWith("rgba"))
             {
                 return ParseRgbColor(colorString);
+            }
+            else if (colorString.StartsWith("rgb"))
+            {
+                return ParseRgbColor(colorString);
+            }
+            else if (colorString.StartsWith("hsla"))
+            {
+                var (r, g, b, a) = ParseHsl(colorString);
+                return new ColorSpec(r, g, b, a);
+            }
+            else if (colorString.StartsWith("hsl"))
+            {
+                var (r, g, b, a) = ParseHsl(colorString);
+                return new ColorSpec(r, g, b, a);
+
             }
 
             // If not recognized, return black
             return new ColorSpec(0, 0, 0, 255);
+        }
+        public static (byte R, byte G, byte B, byte A) ParseHsl(string hslString)
+        {
+            if (string.IsNullOrWhiteSpace(hslString))
+                throw new ArgumentException("色文字列が空です");
+
+            // 正規表現で hsl / hsla を抽出
+            var match = Regex.Match(
+                hslString.Trim(),
+                @"^hsla?\(\s*([+-]?\d*\.?\d+)\s*,\s*([+-]?\d*\.?\d+)%\s*,\s*([+-]?\d*\.?\d+)%(?:\s*,\s*([+-]?\d*\.?\d+%?))?\s*\)$",
+                RegexOptions.IgnoreCase);
+
+            if (!match.Success)
+                throw new FormatException($"不正な HSL/HSLA 文字列です: {hslString}");
+
+            // 値の取得
+            double h = double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+            double s = double.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture) / 100.0;
+            double l = double.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture) / 100.0;
+
+            // アルファ（指定がなければ 1.0）
+            double a = 1.0;
+            if (match.Groups[4].Success)
+            {
+                string alphaStr = match.Groups[4].Value;
+                if (alphaStr.EndsWith("%"))
+                    a = double.Parse(alphaStr.TrimEnd('%'), CultureInfo.InvariantCulture) / 100.0;
+                else
+                    a = double.Parse(alphaStr, CultureInfo.InvariantCulture);
+            }
+
+            // 範囲を正規化
+            h = ((h % 360) + 360) % 360;          // 0〜360
+            s = Math.Clamp(s, 0.0, 1.0);
+            l = Math.Clamp(l, 0.0, 1.0);
+            a = Math.Clamp(a, 0.0, 1.0);
+
+            // HSL → RGB 変換
+            var (r, g, b) = HslToRgb(h, s, l);
+
+            return (
+                (byte)Math.Round(r * 255),
+                (byte)Math.Round(g * 255),
+                (byte)Math.Round(b * 255),
+                (byte)Math.Round(a * 255)
+            );
+        }
+
+        private static (double R, double G, double B) HslToRgb(double h, double s, double l)
+        {
+            if (s == 0.0)
+                return (l, l, l);   // グレースケール
+
+            double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            double p = 2 * l - q;
+
+            double hk = h / 360.0;
+
+            double r = HueToRgb(p, q, hk + 1.0 / 3.0);
+            double g = HueToRgb(p, q, hk);
+            double b = HueToRgb(p, q, hk - 1.0 / 3.0);
+
+            return (r, g, b);
+        }
+
+        private static double HueToRgb(double p, double q, double t)
+        {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+
+            if (t < 1.0 / 6.0) return p + (q - p) * 6 * t;
+            if (t < 1.0 / 2.0) return q;
+            if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6;
+            return p;
         }
         public static string? getExceptionAsString(Exception ex)
         {

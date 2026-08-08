@@ -1,4 +1,6 @@
 using Avalonia.Media.Immutable;
+using Avalonia.Platform;
+using ExCSS;
 using MultiHtmlCraft.Core;
 using MultiHtmlCraft.Interfaces;
 using NiL.JS.BaseLibrary;
@@ -1260,11 +1262,39 @@ namespace MultiHtmlCraft.Core
                             }
                             if (CHtmlElement.CHtmlElementProperties.ContainsKey(binder.Name))
                             {
+                                /*
                                 var propertyInfo = GetCachedProperty(typeof(CHtmlElement), binder.Name) ?? GetCachedProperty(typeof(CHtmlNode), binder.Name);
-                                if (propertyInfo != null)
+                                */
+                                var elementValue = self.___getPropertyByName(binder.Name);
+
+                                switch (binder.Name )
+                                {
+                                    case "parentNode":
+                                        System.Diagnostics.Debug.WriteLine($"[CHtmlElement.BindGetMember] parentNode accessed");
+                                    System.Diagnostics.Debug.WriteLine($"Returning parentNode of type: {self.parentNode?.GetType().FullName}");
+                                    System.Diagnostics.Debug.WriteLine($"Implements IDynamicMetaObjectProvider? {self.parentNode is System.Dynamic.IDynamicMetaObjectProvider}");
+                                    var parent = self.parentNode;
+                                    if (parent == null)
+                                    {
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(null),
+                                            this.Restrictions
+                                        );
+                                    }
+
+                                    // これが最も確実
+                                    return ((IDynamicMetaObjectProvider)parent).GetMetaObject(
+                                        Expression.Constant(parent)
+                                        );
+                                    case "onerror":
+                                        System.Diagnostics.Debug.WriteLine($"[CHtmlElement.BindGetMember] onerror accessed");
+                                        break;
+                                }
+
+                                if (elementValue != null)
                                 {
                                     return new DynamicMetaObject(
-                                        Expression.Property(Expression.Constant(self), propertyInfo),
+                                        Expression.Constant(Expression.Constant(elementValue, typeof(object)), typeof(object)),
                                         BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                     );
                                 }
@@ -1407,23 +1437,22 @@ namespace MultiHtmlCraft.Core
                                         System.Diagnostics.Debug.WriteLine($"BindGetMember: insertBefore case matched for CHtmlElement {self?.tagName}");
                                         Func<object, object, object> insertBeforeDel = (object newNodeArg, object refNodeArg) =>
                                         {
-                                            System.Diagnostics.Debug.WriteLine($"insertBeforeDel invoked: newNodeArg={newNodeArg?.GetType().Name}, refNodeArg={refNodeArg?.GetType().Name}");
-                                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 9)
-                                            {
-                                                commonLog.LogEntry($"BindGetMember: insertBefore delegate invoked for CHtmlElement");
-                                            }
+                                            // ★ ここから下をそのまま貼り付け
+                                            System.Diagnostics.Debug.WriteLine("===== insertBeforeDel ENTERED =====");
+                                            System.Diagnostics.Debug.WriteLine($"self = {self?.tagName} ({self?.GetType().Name})");
+                                            System.Diagnostics.Debug.WriteLine($"newNodeArg type = {newNodeArg?.GetType().FullName}");
+                                            System.Diagnostics.Debug.WriteLine($"refNodeArg type = {refNodeArg?.GetType().FullName}");
+
                                             try
                                             {
-                                                // Unwrap both arguments
                                                 var argNew = UnwrapValue(newNodeArg) ?? newNodeArg;
                                                 var argRef = UnwrapValue(refNodeArg) ?? refNodeArg;
 
-                                                // debug log
-                                                try { if (commonLog.LoggingEnabled && commonLog.LogLevel >= 9) commonLog.LogEntry("insertBeforeDel called. argNewType={0}, argRefType={1}", argNew?.GetType().FullName ?? "<null>", argRef?.GetType().FullName ?? "<null>"); } catch { }
+                                                System.Diagnostics.Debug.WriteLine($"After Unwrap: argNew={argNew?.GetType().FullName}, argRef={argRef?.GetType().FullName}");
 
-                                                // If already native CHtmlElement, call directly (fastest)
                                                 if (argNew is CHtmlElement newEl)
                                                 {
+                                                    System.Diagnostics.Debug.WriteLine("Calling self.insertBefore(newEl, ...)");
                                                     if (argRef is CHtmlElement refEl)
                                                     {
                                                         return self.insertBefore(newEl, refEl);
@@ -1434,18 +1463,12 @@ namespace MultiHtmlCraft.Core
                                                     }
                                                 }
 
-                                                // ICHtmlNodeInterface case
-                                                if (argNew is ICHtmlNodeInterface nodeNew)
-                                                {
-                                                    return SafeInvoke(self, "insertBefore", new object[] { nodeNew, argRef });
-                                                }
-
-                                                // Generic fallback: let SafeInvoke handle type conversion
+                                                System.Diagnostics.Debug.WriteLine("Falling back to SafeInvoke");
                                                 return SafeInvoke(self, "insertBefore", new object[] { argNew, argRef });
                                             }
                                             catch (Exception ex)
                                             {
-                                                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("insertBeforeDel exception: {0}", ex.ToString()); } catch { }
+                                                System.Diagnostics.Debug.WriteLine($"insertBeforeDel EXCEPTION: {ex}");
                                                 return null;
                                             }
                                         };
@@ -1788,6 +1811,9 @@ namespace MultiHtmlCraft.Core
                                                 BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                             );
                                         }
+                                
+           
+
                                 } // end switch (binder.Name)
                             } // end if (CHtmlElementMethods.ContainsKey)
 
@@ -2720,14 +2746,28 @@ namespace MultiHtmlCraft.Core
                         {
                             if (actual != null)
                             {
-                                var typeName = actual.GetType().FullName ?? string.Empty;
-                                if (typeName.Contains("ClearScript") || typeName.Contains("ScriptItem") || typeName.Contains("ScriptObject") || typeName.Contains("V8"))
+                                var name = binder.Name; // "onload" など
+                                var isEventHandler = name.StartsWith("on", StringComparison.OrdinalIgnoreCase);
+
+                                if (isEventHandler)
                                 {
-                                    el.SetDynamicMember(binder.Name, actual);
+                                    // イベントは絶対に Unwrap しない
+                                    el.SetDynamicMember(name, actual);
+                                    // 必要なら内部で addEventListener 相当にも登録
+                                    // el.___addEventListenerInner(name.Substring(2), actual, false);
                                 }
                                 else
                                 {
-                                    el.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual);
+                                    var typeName = actual.GetType().FullName ?? "";
+                                    if (typeName.Contains("ClearScript") || typeName.Contains("ScriptItem") ||
+                                        typeName.Contains("ScriptObject") || typeName.Contains("V8"))
+                                    {
+                                        el.SetDynamicMember(name, actual);
+                                    }
+                                    else
+                                    {
+                                        el.SetDynamicMember(name, UnwrapValue(actual) ?? actual);
+                                    }
                                 }
                             }
                             else

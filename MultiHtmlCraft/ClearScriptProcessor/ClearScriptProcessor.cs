@@ -212,12 +212,42 @@ namespace ClearScriptProcessor
             if (functionobject == null) return null;
             dynamic? ___dynamicFunctionObject = null;
             ScriptObject? ___scriptObject = null;
+            if(functionobject.GetType().FullName == "Microsoft.ClearScript.V8.SplitProxy.V8ObjectImpl")
+            {
+                Debug.WriteLine("CallFunctionInternal: functionobject.GetType().FullName is Microsoft.ClearScript.V8.SplitProxy.V8ObjectImpl is called");
+                // ここで return する（下の universalApply に落とさない）
+                var mi = functionobject.GetType().GetMethod(
+                    "Invoke",
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(bool), typeof(object[]) },
+                    null);
+
+                if (mi == null)
+                {
+                    Debug.WriteLine("V8ObjectImpl: Invoke(bool,object[]) NOT FOUND");
+                    return null;
+                }
+
+                Debug.WriteLine("V8ObjectImpl: calling Invoke(false, args) — NOT universalApply");
+                try
+                {
+                    return mi.Invoke(functionobject, new object[] { false, args ?? Array.Empty<object>() });
+                }
+                catch (TargetInvocationException tie)
+                {
+                    Debug.WriteLine("V8ObjectImpl Invoke inner: " + (tie.InnerException?.Message ?? tie.Message));
+                    return null;
+                }
+
+            }
             if (functionobject is Microsoft.ClearScript.Undefined)
             {
                 Debug.WriteLine("CallFunctionInternal: functionobject is ClearScript.Undefined - skipping invocation.");
                 return null;
             }
 
+            
             int ___callfunctionStage = -1;
             try
             {

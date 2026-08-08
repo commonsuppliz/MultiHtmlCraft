@@ -1075,13 +1075,13 @@ namespace MultiHtmlCraft.Core
             doc.___locationBase.href = url;
             doc.___locationBase.___AnalyzeLocation();
             string HtmlContent = null;
-            if (string.IsNullOrEmpty(contentData.HtmlContent) == false)
+            if (contentData !=null && string.IsNullOrEmpty(contentData.HtmlContent) == false)
             {
                 HtmlContent = contentData.HtmlContent;
             }
             else
             {
-                if (contentData.RawData != null && contentData.RawData.Length > 0)
+                if (contentData != null && contentData.RawData != null && contentData.RawData.Length > 0)
                 {
                     HtmlContent = System.Text.Encoding.UTF8.GetString(contentData.RawData);
                 }
@@ -10137,7 +10137,7 @@ namespace MultiHtmlCraft.Core
 
                                                                                                         if (httpAsyncMode == commonHTML.HttpAsyncDeferMode.Async)
                                                                                                         {
-                                                                                                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                                                                                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
                                                                                                             {
 
                                                                                                                 commonLog.LogEntry("async script {0} has been downloaded Thread ID :{1}", __absScriptUrl, Thread.CurrentThread.ManagedThreadId);

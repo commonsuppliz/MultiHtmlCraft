@@ -3087,6 +3087,10 @@ namespace MultiHtmlCraft.Core
         /// <returns></returns>
         public object insertBefore(object newChildObj, object refChildObj)
         {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("entering {0}.insertBefore() {1} {2}", this, newChildObj, refChildObj);
+            }
             try
             {
                 CHtmlElement newChild = commonData.convertObjectIntoCHtmlElement(newChildObj);
@@ -3638,7 +3642,11 @@ namespace MultiHtmlCraft.Core
         
 		public object insertBefore(CHtmlElement  ochild, CHtmlElement refo)
 		{
-			if(ochild is CHtmlElement && ( refo is CHtmlElement || refo == null))
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("entering {0}.insertBefore() {1} {2}", this, ochild, refo);
+            }
+            if (ochild is CHtmlElement && ( refo is CHtmlElement || refo == null))
 			{
 				return this.___insertBeforeInner(ochild as CHtmlElement,  refo as CHtmlElement);
 			}

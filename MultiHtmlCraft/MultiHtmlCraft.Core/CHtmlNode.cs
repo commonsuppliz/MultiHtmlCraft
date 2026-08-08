@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.ClearScript;
 using MultiHtmlCraft.Interfaces;
+using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq.Expressions;
+using System.Text;
 
 namespace MultiHtmlCraft.Core
 {
@@ -382,6 +383,16 @@ public int ELEMENT_NODE
             }
             return objValue;
         }
+        /*
+        [ScriptMember("insertBefore")]
+        public object InsertBefore(object newChild, object refChild)
+        {
+            // 実際の DOM 操作をここに実装
+            // newChild を refChild の前に挿入する処理
+            
+        return newChild; // 仕様どおり newChild を返す
+        }
+        */
         public void SetDynamicMember(string name, object value)
         {
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
