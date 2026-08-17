@@ -19,6 +19,26 @@ namespace MultiHtmlCraft.Core
 	// =============================================================================
 	public class CHtmlLocationBase : CHtmlNode, ICommonObjectInterface, IDynamicMetaObjectProvider
     {
+        internal static Dictionary<string, int> CHtmlLocationBaseProperties = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "href", 0 },
+            { "protocol", 1 },
+            { "host", 2 },
+            { "hostname", 3 },
+            { "port", 4 },
+            { "pathname", 5 },
+            { "search", 6 },
+            { "hash", 7 },
+            { "origin", 8 }
+        };
+        internal static Dictionary<string, int> CHtmlLocationBaseMethods = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "reload", 0 },
+            { "replace", 1 },
+            { "assign", 2 },
+            { "toString", 3 },
+            { "valueOf", 4 }
+        };
         internal Type ___ownerObjectType = typeof(object);
 
         internal bool ___IsAdhocLocation = false;

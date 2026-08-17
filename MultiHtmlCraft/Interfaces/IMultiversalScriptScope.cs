@@ -63,5 +63,7 @@ namespace MultiHtmlCraft.Interfaces
 
         void setTimeout(int timeout);
 
+        bool ScopeHas(string name);
+        object ScopeGet(string name);
     }
 }

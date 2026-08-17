@@ -1,5 +1,7 @@
 ﻿using Microsoft.ClearScript;
 using MultiHtmlCraft.Interfaces;
+using NiLExpression = NiL.JS.Expressions.Expression;
+using LinqExpression = System.Linq.Expressions.Expression;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -2807,12 +2809,44 @@ namespace MultiHtmlCraft.Core
                     return ___elementInDocID;
                 }
             }
+            if(this.___multiversalScriptsHost != null && this.___multiversalScriptsHost.Count > 0)
+            {
+                int scriptScopeCount = this.___multiversalScriptsHost.Count;
+                Interfaces.IMultiversalScriptScope? scriptScope = null;
+                for (int i = 0; i < scriptScopeCount; i++)
+                {
+                    
+                    scriptScope = this.___multiversalScriptsHost[i];
+                    if(scriptScope !=null)
+                    {
+                        object _objValue =  getScopeValue(scriptScope, ___name);
+                        if (_objValue != null)
+                        {
+                            return _objValue;
+                            break;
+                        }
+                    }
+                }
+
+
+
+                /*
+                var defaultScope =this.___multiversalScriptsHost.___defaultScriptScope;
+                var scopeValue = getScopeValue(defaultScope, ___name);
+                return scopeValue;
+                */
+                return null; 
+            }
 
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
             {
                 commonLog.LogEntry("called {0}.___getInner(\'{1}\') returns null...", this, ___name);
             }
             return MultiversalUniqueTag.UniqueType.Not_Found;
+        }
+        internal static object getScopeValue(Interfaces.IMultiversalScriptScope scope, string name)
+        {
+              return scope.ScopeGet(name);
         }
         public object get(int ___index)
         {
@@ -7243,7 +7277,7 @@ s               else
 
         bool Interfaces.IMultiversalWindow.has(string ___name)
         {
-            throw new NotImplementedException();
+            return this.___WindowsPropertiesList.ContainsKey(___name);
         }
 
         bool Interfaces.IMultiversalWindow.has(int ___index)
@@ -7253,7 +7287,12 @@ s               else
 
         object Interfaces.IMultiversalWindow.get(string ___name)
         {
-            throw new NotImplementedException();
+            object? objValue = null;
+            if(this.___WindowsPropertiesList.TryGetValue(___name, out objValue))
+            {
+                return objValue;
+            }
+            return null;
         }
 
         object Interfaces.IMultiversalWindow.get(int ___index)

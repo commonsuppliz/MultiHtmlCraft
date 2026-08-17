@@ -92,9 +92,10 @@ namespace MultiHtmlCraaft.AvaloniaControl_Tesst.Views
                 //txt.Text = "http://localhost/html/DeferScriptTest.html"; Defer Script Test OK
                 //txt.Text = "http://localhost/html/AsyncScriptTest.html"; // Async Script Test OK
                 //txt.Text = "http://localhost/canvas/tmrDevelop/TheUnderground.html";// The Underground Test by tmrDevelop
-                //txt.Text = "http://localhost/canvas/Pacman1.html";// Pacman Test by tmrDevelop
+                // txt.Text = "http://localhost/canvas/Pacman1.html";// Pacman Test by tmrDevelop
                 //txt.Text = "http://localhost/canvas/FillRectWithHsla.html";// OK
                 //txt.Text = "http://localhost/canvas/MarksJumpingGame/index.html";
+                txt.Text = "http://localhost/jstest/jqueryTest/JQuwey371Test2.html";// JQuery 3.7.1 Test document.createElement Fail
             }
 
             if (btnGo != null && txt != null && _multiView != null)

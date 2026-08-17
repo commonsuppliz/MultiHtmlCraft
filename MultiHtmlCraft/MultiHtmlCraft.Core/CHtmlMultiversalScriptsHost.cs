@@ -89,7 +89,7 @@ namespace MultiHtmlCraft.Core
                             v8Scope.AddHostType("SVGElement", typeof(CHtmlSVGElement));
                             v8Scope.AddHostType("Worker", typeof(CHtmlWorkerWindow));
                             v8Scope.AddHostType("SharedWorker", typeof(CHtmlSharedWorkerWindow));
-
+                            v8Scope.AddHostType("CSSStyleSheet", typeof(CHtmlCSSStyleSheet));
 
                             v8Scope.AddHostType("URLSearchParams", typeof(CHtmlURLSearchParams));
                         

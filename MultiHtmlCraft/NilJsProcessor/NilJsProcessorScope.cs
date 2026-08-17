@@ -224,6 +224,19 @@ namespace NilJsProcessor
             if(!_inited) return; // only if already initialized
             exposeWindowObject();
         }
+        public bool ScopeHas(string key)
+        {
+            if (context == null) return false;
+            var v = context.GetVariable(key);
+            return v != null && v.ValueType != JSValueType.Undefined;
+        }
+        public object ScopeGet(string key)
+        {
+            if (context == null) return null;
+            var v = context.GetVariable(key);
+            if (v == null || v.ValueType == JSValueType.Undefined) return null;
+            return v.Value;
+        }
 
         private void basicGlobals(){
             if(context==null||multiwindow==null) return;

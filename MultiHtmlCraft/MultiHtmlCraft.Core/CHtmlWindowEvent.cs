@@ -16,6 +16,7 @@ namespace MultiHtmlCraft.Core
     public class CHtmlWindowEvent : CHtmlNode, ICommonObjectInterface
     {
         public static Dictionary<string, int> CHtmlWindowEventProperties = createHtmlWindowEventPropertiesList();
+        public static Dictionary<string, int> CHtmlWindowEventMethods = createHtmlWindowEventMethodsList();
         internal static Dictionary<string, int> createHtmlWindowEventPropertiesList()
         {
             Dictionary<string, int> list = new Dictionary<string, int>();
@@ -53,7 +54,12 @@ namespace MultiHtmlCraft.Core
 
             return list;
         }
-
+        internal static Dictionary<string, int> createHtmlWindowEventMethodsList()
+        {
+            Dictionary<string, int> list = new Dictionary<string, int>();
+            // Add method names and their indices here
+            return list;
+        }
         /// <summary>
         /// Due to rhino bug. we must returns event.type always.
         /// this string will be returned if it is emtry

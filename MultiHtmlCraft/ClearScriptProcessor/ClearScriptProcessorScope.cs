@@ -256,8 +256,7 @@ namespace ClearScriptProcessor
                     // AllowReflection true to improve interop with hosted dynamic objects (reduces DynamicHelpers errors)
                     AllowReflection = true,
                     DisableExtensionMethods = true,
-                    
-
+                   
                 };
 
 #else
@@ -485,7 +484,7 @@ namespace ClearScriptProcessor
             {
                 
                 //_v8Engine.AddHostObject("__host_window", HostItemFlags.GlobalMembers, window);
-                _v8Engine.AddHostObject("__host_window",  window);
+                _v8Engine.AddHostObject("__host_window",   window);
                 // Provide host-side delegate shims for timer functions. The window implementation
                 // often implements timers as explicit interface methods which are not visible as
                 // public members to ClearScript's host lookup. Expose small delegates that call
@@ -1458,6 +1457,7 @@ if (typeof document === 'undefined' || document === null) {
 
             return list;
         }
+
         const string getClassNameString = "object";
         public string getClasName()
         {
@@ -1886,6 +1886,8 @@ if (typeof document === 'undefined' || document === null) {
             DebugLog("Debugger: " + (arg?.ToString() ?? "null"));
         }
 
+        
+
         // 特定のオブジェクトに対するプロキシ用デバッグ
         [ScriptMember("debugDumpProxy")]
         public void DebugDumpProxy(object obj)
@@ -1922,5 +1924,45 @@ if (typeof document === 'undefined' || document === null) {
                 DebugLog($"debugDumpProxy failed: {ex.Message}");
             }
         }
+
+// IMultiversalScriptScope の未実装メンバーを追加
+public bool ScopeHas(string name)
+{
+    try
+    {
+        if (_multiversalWindow != null)
+        {
+            try { return _multiversalWindow.has(name); } catch { }
+                    var global = (ScriptObject)_v8Engine.Script;
+                    var value3 = global.GetProperty(name);
+                    if(value3 != null)
+                    {
+                        return true; 
+                }
+            }
+    }
+    catch { }
+    return false;
+}
+
+public object ScopeGet(string name)
+{
+    try
+    {
+        if (_multiversalWindow != null)
+        {
+            try {
+                        if(_multiversalWindow.has(name))
+                        {
+                            return _multiversalWindow.get(name);
+                        }
+                    } catch { }
+        }
+                var global = (ScriptObject)_v8Engine.Script;
+                var value3 = global.GetProperty(name);
+            }
+    catch { }
+    return null;
+}
     }
 }

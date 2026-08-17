@@ -1,0 +1,245 @@
+﻿## From full 'デバッグ' logs:
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: DefaultDomain): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Private.CoreLib.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\MultiHtmlCraft.AvaloniaControl_Test.dll' が読み込まれました。シンボルが読み込まれました。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'c:\program files\microsoft visual studio\18\community\common7\ide\extensions\microsoft\managedprojectsystem\HotReload\net6.0\Microsoft.Extensions.DotNetDeltaApplier.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Linq.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.Loader.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Console.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Private.Uri.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.IO.Pipes.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Collections.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.InteropServices.RuntimeInformation.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Collections.Concurrent.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Threading.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.InteropServices.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Threading.Overlapped.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Security.AccessControl.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Security.Principal.Windows.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Security.Claims.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Controls.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Base.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.ObjectModel.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\PrivateAssemblies\Runtime\Microsoft.VisualStudio.Debugger.Runtime.NetCoreApp.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Desktop.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Fonts.Inter.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Win32.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\MicroCom.Runtime.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Numerics.Vectors.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Skia.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.ComponentModel.Primitives.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Memory.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\SkiaSharp.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.OpenGL.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\Microsoft.Win32.Primitives.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.ComponentModel.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Threading.Thread.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Vulkan.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.MicroCom.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\netstandard.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Metal.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Markup.Xaml.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.ComponentModel.TypeConverter.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Themes.Fluent.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Dialogs.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\HarfBuzzSharp.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\CommunityToolkit.Mvvm.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\MultiHtmlCraft.Core.dll' が読み込まれました。シンボルが読み込まれました。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Drawing.Primitives.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\MultiHtmlCraft.Interfaces.dll' が読み込まれました。シンボルが読み込まれました。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Win32.Automation.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Diagnostics.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Diagnostics.DiagnosticSource.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Avalonia.Markup.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\MultiHtmlCraft.AvaroniaControl.dll' が読み込まれました。シンボルが読み込まれました。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Net.Http.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Net.Primitives.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Linq.Expressions.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\ClearScript.Core.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\System.Drawing.Common.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\System.Private.Windows.Core.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Collections.NonGeneric.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\NLog.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Diagnostics.StackTrace.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+navigator.userAgent : 'Chorome/1.0 (Windows NT 10.0; Win64; x64) MultiHtmlCraft 0.90.10.0  (KHTML, like Gecko) Chorome/1.0.0.0 Safari/537.36'
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\NTextCat.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+NTextCat Profile Resource Name : MultiHtmlCraft.Core.Resource.Core14.profile.xml
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Xml.XDocument.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Private.Xml.Linq.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Private.Xml.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Text.Encoding.Extensions.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+Platform Graphic API is set : "Avalonia"
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Text.Encoding.CodePages.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Diagnostics.Tracing.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Net.Security.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Security.Cryptography.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Text.Json.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+CHtmlSkiaFontsCache: resolving font file for family 'Google Sans Code': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Google_Sans_Code/GoogleSansCode-VariableFont_wght.ttf (exists=True)
+Registered font family 'Google Sans Code' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Google_Sans_Code/GoogleSansCode-VariableFont_wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Color Emoji': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Color_Emoji/NotoColorEmoji-Regular.ttf (exists=True)
+Registered font family 'Noto Color Emoji' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Color_Emoji/NotoColorEmoji-Regular.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Sans': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf (exists=True)
+Registered font family 'Noto Sans' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Sans Display': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_Display/NotoSansDisplay-VariableFont_wdth,wght.ttf (exists=True)
+Registered font family 'Noto Sans Display' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_Display/NotoSansDisplay-VariableFont_wdth,wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Sans Hebrew': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_Hebrew/NotoSansHebrew-VariableFont_wdth,wght.ttf (exists=True)
+Registered font family 'Noto Sans Hebrew' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_Hebrew/NotoSansHebrew-VariableFont_wdth,wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Sans JP': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_JP/NotoSansJP-VariableFont_wght.ttf (exists=True)
+Registered font family 'Noto Sans JP' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_JP/NotoSansJP-VariableFont_wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Sans KR': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_KR/NotoSansKR-VariableFont_wght.ttf (exists=True)
+Registered font family 'Noto Sans KR' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_KR/NotoSansKR-VariableFont_wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Sans Symbols': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_Symbols/NotoSansSymbols-VariableFont_wght.ttf (exists=True)
+Registered font family 'Noto Sans Symbols' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_Symbols/NotoSansSymbols-VariableFont_wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Sans Syriac': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_Syriac/NotoSansSyriac-VariableFont_wght.ttf (exists=True)
+Registered font family 'Noto Sans Syriac' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_Syriac/NotoSansSyriac-VariableFont_wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Sans Syriac Western': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_Syriac_Western/NotoSansSyriacWestern-VariableFont_wght.ttf (exists=True)
+Registered font family 'Noto Sans Syriac Western' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_Syriac_Western/NotoSansSyriacWestern-VariableFont_wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Sans TC': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_TC/NotoSansTC-VariableFont_wght.ttf (exists=True)
+Registered font family 'Noto Sans TC' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Sans_TC/NotoSansTC-VariableFont_wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Noto Serif JP': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Serif_JP/NotoSerifJP-VariableFont_wght.ttf (exists=True)
+Registered font family 'Noto Serif JP' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Noto_Serif_JP/NotoSerifJP-VariableFont_wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Open Sans': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Open_Sans/OpenSans-VariableFont_wdth,wght.ttf (exists=True)
+Registered font family 'Open Sans' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Open_Sans/OpenSans-VariableFont_wdth,wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Oswald': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Oswald/Oswald-VariableFont_wght.ttf (exists=True)
+Registered font family 'Oswald' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Oswald/Oswald-VariableFont_wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Roboto Serif': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Roboto_Serif/RobotoSerif-VariableFont_GRAD,opsz,wdth,wght.ttf (exists=True)
+Registered font family 'Roboto Serif' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Roboto_Serif/RobotoSerif-VariableFont_GRAD,opsz,wdth,wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Sora': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Sora/Sora-VariableFont_wght.ttf (exists=True)
+Registered font family 'Sora' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Sora/Sora-VariableFont_wght.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Zen Kaku Gothic New': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Zen_Kaku_Gothic_New/ZenKakuGothicNew-Regular.ttf (exists=True)
+Registered font family 'Zen Kaku Gothic New' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Zen_Kaku_Gothic_New/ZenKakuGothicNew-Regular.ttf'.
+CHtmlSkiaFontsCache: resolving font file for family 'Zen Old Mincho': C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Zen_Old_Mincho/ZenOldMincho-Regular.ttf (exists=True)
+Registered font family 'Zen Old Mincho' from file 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Assets/Fonts/Zen_Old_Mincho/ZenOldMincho-Regular.ttf'.
+CHtmlSkiaFontsCache initialized. Memory used: 49248 bytes.
+CHtmlSkiaFontsCache DefaultFont is set to "Noto Sans JP"
+Application Started : MultiHtmlCraft .Net: 9.0.5 GraphicAPI: Avalonia ScriptEngines: ClearScriptV8 Managed Thread ID 1
+Attached. Bounds=0, 0, 0, 0
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.Intrinsics.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+___fireWindoworDocumentEvent called with eventName: mouseleave, x: 600, y: -2, button: 0, clicks: 0 delta 0
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\NilJsProcessor.dll' が読み込まれました。シンボルが読み込まれました。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\NiL.JS.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\ClearScriptProcessor.dll' が読み込まれました。シンボルが読み込まれました。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Text.Encodings.Web.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Reflection.Emit.Lightweight.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Reflection.Primitives.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Reflection.Emit.ILGeneration.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+enter getMultiversalContentData http://localhost/jstest/jqueryTest/JQuwey371Test2.html    ManagedThreadID: 1
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Threading.ThreadPool.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\Microsoft.Win32.Registry.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Net.Sockets.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Net.NameResolution.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+object cache updated (200) within getMultiversalContentData http://localhost/jstest/jqueryTest/JQuwey371Test2.html text/html  ManagedThreadID: 1
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\ClearScript.V8.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+setMultiversalWindow called. window: CHtmlMultiversalWindow(1), isInitCompleted: False
+setMultiversalWindow: engine not initialized yet - proxy will be created later.
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\Newtonsoft.Json.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.Numerics.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\bin\Debug\net9.0\ClearScript.V8.ICUData.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\System.Runtime.CompilerServices.Unsafe.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+console.log('[ClearScript Debug] Current Environment: {
+  "hasModule": false,
+  "hasDefine": false,
+  "moduleType": "undefined",
+  "defineType": "undefined",
+  "exportsType": "undefined",
+  "requireType": "undefined",
+  "windowExists": true
+}')
+console.log('[ClearScript Debug] module/define/require have been disabled for jQuery loading.')
+window === self: True
+self === globalThis: True
+initScriptEngine: multiversalWindow already set — calling setMultiversalWindow to create proxy.
+setMultiversalWindow called. window: CHtmlMultiversalWindow(1), isInitCompleted: True
+console.log('Global addEventListener and removeEventListener bound successfully')
+setMultiversalWindow: window proxy created.
+console.log('Checks setDcoument typeof document :object')
+console.log('setDcoument window.document === __host_document :true')
+console.log('setDcoument window.document === document :true')
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.5\Microsoft.CSharp.dll' が読み込まれました。シンボルの読み込みをスキップしました。モジュールは最適化されていて、デバッグ オプションの [マイ コードのみ] 設定が有効になっています。
+[BindGetMember ENTRY] binder.Name=title, ValueType=MultiHtmlCraft.Core.CHtmlDocument
+[CHtmlDocument.BindGetMember] binder.Name=title
+[CHtmlDocument.BindGetMember] Attempting to get property title via reflection
+entering [object Document] ___getPropertyByName : title
+[CHtmlDocument.BindGetMember] returns get property title 
+'MultiHtmlCraft.AvaloniaControl_Test.exe' (CoreCLR: clrhost): 'Anonymously Hosted DynamicMethods Assembly' が読み込まれました。
+BindSetMember is called with value Microsoft.ClearScript.Util.DynamicHelpers+DynamicSetMemberBinder : System.Dynamic.DynamicMetaObject
+calling [object Document].___setPropertyByIndex(title, Protected)
+console.log('Checks setDcoument typeof document :object')
+[BindGetMember ENTRY] binder.Name=createElement, ValueType=MultiHtmlCraft.Core.CHtmlDocument
+[CHtmlDocument.BindGetMember] binder.Name=createElement
+console.log('Checks setDcoument typeof document.createElement :function')
+setDocument Success!
+console.log('--- Debug Check ---')
+console.log('window: object')
+console.log('document: object')
+console.log('document.createElement: function')
+console.log('--- Debug Check End ---')
+navigator.userAgent : 'Chorome/1.0 (Windows NT 10.0; Win64; x64) MultiHtmlCraft 0.90.10.0  (KHTML, like Gecko) Chorome/1.0.0.0 Safari/537.36'
+MultiversalScriptsHost setting default script processor :ClearScriptProcessor.ClearScriptProcessorScope
+entering MultiversalScriptsHost register classes ClearScriptProcessor.ClearScriptProcessorScope
+ MultiversalScriptsHost register classes sucess for ClearScriptProcessorScope 
+Unable to obtain Graphic Object...
+navigator.userAgent : 'Chorome/1.0 (Windows NT 10.0; Win64; x64) MultiHtmlCraft 0.90.10.0  (KHTML, like Gecko) Chorome/1.0.0.0 Safari/537.36'
+navigator.userAgent : 'Chorome/1.0 (Windows NT 10.0; Win64; x64) MultiHtmlCraft 0.90.10.0  (KHTML, like Gecko) Chorome/1.0.0.0 Safari/537.36'
+calling multihtmlcraft.core.chtmlelement <SCRIPT>.___getPropertyByName((src)
+entering <SCRIPT>.___getPropertyByName(src)
+<SCRIPT>.___getPropertyByName(src) sucess returning : 
+<SCRIPT>.___getPropertyByName(src) returning : 
+entering ___processScriptElementScript: [object HTMLScriptElement]   ThreadID: 1
+Executing Javascript script:
+========================= Start Script ===================================
+
+console.log('--- Document Check ---');
+console.log('nodeType:', document.nodeType);                     // 9
+console.log('nodeName:', document.nodeName);                     // "#document"
+console.log('documentElement:', document.documentElement);       // [object HTMLHtmlElement] 等
+console.log('defaultView:', typeof document.defaultView);        // "object" (window)
+console.log('createElement:', typeof document.createElement);
+
+========================= End Script   ===================================
+console.log('--- Document Check ---')
+[BindGetMember ENTRY] binder.Name=nodeType, ValueType=MultiHtmlCraft.Core.CHtmlDocument
+[CHtmlDocument.BindGetMember] binder.Name=nodeType
+[CHtmlDocument.BindGetMember] Attempting to get property nodeType via reflection
+entering [object Document] ___getPropertyByName : nodeType
+[CHtmlDocument.BindGetMember] returns get property nodeType 9
+console.log('nodeType: 9')
+BindGetIndex: target type = Microsoft.ClearScript.Util.DynamicHelpers+DynamicGetIndexBinder, [object Document] MultiHtmlCraft.Core.CHtmlDocument
+CHtmlDocument indexer access with BindGetIndex intIndex=0, strIndex='(null)'
+console.log('nodeName: [undefined]')
+[BindGetMember ENTRY] binder.Name=documentElement, ValueType=MultiHtmlCraft.Core.CHtmlDocument
+[CHtmlDocument.BindGetMember] binder.Name=documentElement
+console.log('documentElement: [object HTMLHtmlElement]')
+[BindGetMember ENTRY] binder.Name=defaultView, ValueType=MultiHtmlCraft.Core.CHtmlDocument
+[CHtmlDocument.BindGetMember] binder.Name=defaultView
+[CHtmlDocument.BindGetMember] Attempting to get property defaultView via reflection
+entering [object Document] ___getPropertyByName : defaultView
+[CHtmlDocument.BindGetMember] returns get property defaultView CHtmlMultiversalWindow(1)
+console.log('defaultView: object')
+[BindGetMember ENTRY] binder.Name=createElement, ValueType=MultiHtmlCraft.Core.CHtmlDocument
+[CHtmlDocument.BindGetMember] binder.Name=createElement
+console.log('createElement: function')
+___executeScriptElementScript('[object HTMLScriptElement]', '', '1')  completed successfully by multiversal processor
+calling multihtmlcraft.core.chtmlelement <SCRIPT>.___getPropertyByName((src)
+entering <SCRIPT>.___getPropertyByName(src)
+<SCRIPT>.___getPropertyByName(src) sucess returning : 
+<SCRIPT>.___getPropertyByName(src) returning : 
+entering ___processScriptElementScript: [object HTMLScriptElement]   ThreadID: 1
+Executing Javascript script:
+========================= Start Script ===================================
+
+var myDivElement = document.getElementById("myDiv");
+    myDivElement.style.backgroundClip = "content-box"; 
+    console.log("style.backrdoudClip done...");
+
+========================= End Script   ===================================
+[BindGetMember ENTRY] binder.Name=getElementById, ValueType=MultiHtmlCraft.Core.CHtmlDocument
+[CHtmlDocument.BindGetMember] binder.Name=getElementById
+calling document.getElementById_inner(myDiv, False)
+document.getElementById(myDiv) returns <DIV id=myDiv>
+例外がスローされました: 'System.ArgumentException' (System.Private.CoreLib.dll の中)
+例外がスローされました: 'System.TypeInitializationException' (MultiHtmlCraft.Core.dll の中)
+GetDynamicMemberNames exception for type MultiHtmlCraft.Core.CHtmlElement: The type initializer for 'MultiHtmlCraft.Core.CHtmlElement' threw an exception.
+BindGetIndex: target type = Microsoft.ClearScript.Util.DynamicHelpers+DynamicGetIndexBinder, [object HTMLDivElement] MultiHtmlCraft.Core.CHtmlElement
+entering CHtmlElement ___hasInner accessed by indexer "[object HTMLDivElement]" sKey=""
+プログラム '[21136] MultiHtmlCraft.AvaloniaControl_Test.exe' はコード 4294967295 (0xffffffff) で終了しました。

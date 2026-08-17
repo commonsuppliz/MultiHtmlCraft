@@ -8,7 +8,7 @@ public class PythonProcessorScope : IAsyncDisposable, IMultiversalScriptScope, I
 {
     private bool _disposed = false;
     private bool _initCompleted = false;
-    private Py.GILState? _scope = null;
+    private PyModule? _scope = null;
     private bool _isDefaultProcessor = false;
     private bool _EnableDebug = false;
     private bool _EnableScriptLogging = false;
@@ -40,6 +40,28 @@ public class PythonProcessorScope : IAsyncDisposable, IMultiversalScriptScope, I
     }
     public bool EnableDebug
         {
+        get
+        {
+            return _EnableDebug;
+        }
+        set
+        {
+            _EnableDebug = value;
+        }
+    }
+    public bool ScopeGetEnableScriptLogging
+    {
+        get
+        {
+            return _EnableScriptLogging;
+        }
+        set
+        {
+            _EnableScriptLogging = value;
+        }
+    }
+    public bool ScopeGGet8EnableDebug
+    {
         get
         {
             return _EnableDebug;
@@ -125,8 +147,24 @@ public class PythonProcessorScope : IAsyncDisposable, IMultiversalScriptScope, I
     {
         PythonEngine.Initialize();
         _initCompleted = true;
-         _scope = Py.GIL();
- 
+        using (Py.GIL())
+        { 
+            
+            var pyscope= Py.CreateScope();
+            this._scope = pyscope; 
+
+            /*
+           
+            scope.Exec("my_key = 42");
+
+            // 指定した key が存在するか確認
+            string keyToFind = "my_key";
+            bool exists = scope.Contains(keyToFind);
+
+            Console.WriteLine($"'{keyToFind}' exists: {exists}"); // True
+            */
+        }
+
     }
 
     public bool isDefaultMultiversalProcessor()
@@ -167,4 +205,15 @@ public class PythonProcessorScope : IAsyncDisposable, IMultiversalScriptScope, I
     {
        _timeout = timeout;
     }
+    public bool ScopeHas(string key)
+    {
+        //return _scope[global::Python.Runtime.PyObject].HasAttr(key);
+        return _scope.Contains(key);
+        
+    }
+    public object ScopeGet(string key)
+    { 
+        return _scope.Get(key).AsManagedObject(typeof(object));
+    }
+    
 }

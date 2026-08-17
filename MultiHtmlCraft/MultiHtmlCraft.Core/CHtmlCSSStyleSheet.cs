@@ -10,14 +10,16 @@ using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Linq;
-
+using Microsoft.ClearScript;
+using Microsoft.ClearScript.V8;
+using System.Linq;
 
 namespace MultiHtmlCraft.Core
 {
 
     [ComVisible(true)]
     
-    public sealed class CHtmlCSSStyleSheet : ICommonObjectInterface, ICHtmlCSSStyleDeclaration, IDynamicMetaObjectProvider
+    public sealed class CHtmlCSSStyleSheet : ICommonObjectInterface, ICHtmlCSSStyleDeclaration, IDynamicMetaObjectProvider, IPropertyBag, IScriptableObject
     {
         internal static readonly Dictionary<string, int> CHtmlCSSStyleSheetProperties = InitializeCHtmlCSSStyleSheetProperties();
         internal static readonly Dictionary<string, int> CHtmlCSSStyleSheetMethods = InitializeCHtmlCSSStyleMethods();
@@ -76,13 +78,222 @@ namespace MultiHtmlCraft.Core
                 ["BackgroundPosition"] = 142,
                 ["backgroundRepeat"] = 143,
                 ["backgroundrepeat"] = 144,
-                ["BackgroundRepeat"] = 145
+                ["BackgroundRepeat"] = 145,
+                ["backgroundClip"] = 146,
 
 
             };
+            try
+            {
+                // Get Unregisterd Properties from Reflection, and add to list
+                var props = typeof(CHtmlCSSStyleSheet).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static);
+                // 次に付与する ID を決定（既存の最大値 + 1）
+                int nextId = 1;
+                if (chtmlCSSStyleSheetProperties.Count > 0)
+                {
+                    foreach (var v in chtmlCSSStyleSheetProperties.Values)
+                    {
+                        if (v >= nextId) nextId = v + 1;
+                    }
+                }
+
+                foreach (var p in props)
+                {
+                    string name = p.Name;
+                    if (!chtmlCSSStyleSheetProperties.ContainsKey(name))
+                    {
+                        chtmlCSSStyleSheetProperties.Add(name, nextId++);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                {
+                    commonLog.LogEntry("CHtmlCSSStyleSheet InitializeCHtmlCSSStyleSheetProperties() Error : {0}", ex.Message);
+                }
+            }
+
+            return chtmlCSSStyleSheetProperties;
             return chtmlCSSStyleSheetProperties;
         }
+        #region IPropertyBag
+        object IDictionary<string, object>.this[string key]
+        {
+            get
+            {
+                return CHtmlCSSStyleSheet.CHtmlCSSStyleSheetProperties;
+            }
+            set
+            {
+                var propValue = value;
+                this.___setPropertyByName(key, propValue);
+            }
+        }
+        public void Add(string key, object value)
+        {
+            throw new NotImplementedException();
+       
+        }
 
+        public bool ContainsKey(string key)
+        {
+            throw new NotImplementedException();
+           
+        }
+
+        public bool Remove(string key)
+        {
+            throw new NotImplementedException();
+
+        }
+
+        public bool TryGetValue(string key, out object value)
+        {
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("CHtmlCSSStyleSheet.TryGetValue({0})", key);
+            }
+            switch (key)
+            {
+                case "setProperty":
+                    value = (Action<object, object>)((name, val) => this.setProperty(name, val));
+                    return true;
+                case "getPropertyValue":
+                    value = (Func<object, string>)((name) => this.getPropertyValue(key));
+                    return true;
+                case "getPropertyCSSValue":
+                    value = (Func<object, object>)((name) => this.getPropertyCSSValue(name));
+                    return true;
+                default:
+                    if(CHtmlCSSStyleSheet.CHtmlCSSStyleSheetProperties.ContainsKey(key))
+                    {
+                        value = this.___getPropertyByName(key);
+                        return true;
+                    }
+                    else
+                    {
+                        value = null;
+                        return false;
+                    }
+            }
+
+        }
+
+        public ICollection<string> Keys
+        {
+            get
+            {
+                return CHtmlCSSStyleSheet.CHtmlCSSStyleSheetProperties.Keys;
+            }
+        }
+
+        public ICollection<object> Values
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public int Count
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public bool IsReadOnly
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public void Clear()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Add(KeyValuePair<string, object> item)
+        {
+            this.___setPropertyByName(item.Key, item.Value);
+        }
+
+        public bool Contains(KeyValuePair<string, object> item)
+        {
+            throw new NotImplementedException();
+
+        }
+
+        public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
+        {
+            throw new NotImplementedException();
+
+        }
+
+        public bool Remove(KeyValuePair<string, object> item)
+        {
+            throw new NotImplementedException();
+
+        }
+
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region IScriptableObject
+        public bool OnGetProperty(string name, out object result)
+        {
+
+            var value = this.___getPropertyByName(name);
+            if(value != null)
+            {
+                result = value;
+                return true;
+            }
+
+            // 存在しないスタイルプロパティは DOM 仕様通り空文字を返して「成功」とする
+            result = string.Empty;
+            return true;
+        }
+
+        // JS からプロパティが代入された時 (div.style.backgroundClip = "content-box" など)
+        public bool OnSetProperty(string name, object value)
+        {
+            throw new NotImplementedException();
+            return true; // true を返すことで ClearScript のリフレクション例外を回避
+        }
+
+        // JS から delete div.style.backgroundClip された時
+        public bool OnRemoveProperty(string name)
+        {
+            throw new NotImplementedException();
+            return true;
+        }
+
+        // JS から for...in などでプロパティ列挙された時
+        public string[] OnGetPropertyNames()
+        {
+            return CHtmlCSSStyleSheet.CHtmlCSSStyleSheetProperties.Keys.ToArray<string>();
+
+       
+        }
+        public void OnExposedToScriptCode(ScriptEngine engine)
+        {
+            // 必要に応じてエンジンの参照を保持することもできますが、空で問題ありません
+        }
+
+        #endregion 
         internal SortedList<string, object> ___properties = new SortedList<string, object>();
         public CSSStyleConditionType ___styleConditionType;
         public CHtmlFontInfo ___StyleFontInfo = null;
@@ -1575,15 +1786,7 @@ namespace MultiHtmlCraft.Core
             }
             get { return ___convertNullToEmpty(this.___Clear); }
         }
-        public string Clear
-        {
-            set
-            {
-                this.___Clear = value;
-                ___CheckCSSClear();
-            }
-            get { return ___convertNullToEmpty(this.___Clear); }
-        }
+
         private void ___CheckCSSClear()
         {
             if (string.IsNullOrEmpty(this.___Clear) == true)
@@ -8098,7 +8301,7 @@ namespace MultiHtmlCraft.Core
                         this.___LetterSpacing = styleValue;
                         return;
                     case "clear":
-                        this.Clear = styleValue;
+                        this.clear = styleValue;
                         return;
                     case "textdecoration":
                         this.___TextDecoration = styleValue;

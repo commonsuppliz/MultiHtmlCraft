@@ -31,7 +31,9 @@ namespace MultiHtmlCraft.Core
 
         private static Dictionary<string, int> InitalizeCHtmlElementPropertiyNames()
         {
-            Dictionary<string, int> list = new Dictionary<string, int>
+            try
+            {
+                Dictionary<string, int> list = new Dictionary<string, int>
         {
             { "nodeName", 0 },
             { "name", 1 },
@@ -352,16 +354,28 @@ namespace MultiHtmlCraft.Core
             {"progress", 316 },
             {"change", 317  },
             {"click", 318  },
-            {"files" , 319   }
-               
+            {"files" , 319   },
+
+            { "nodeVakue", 319   }
 
 
 
-            }; 
 
 
 
-            return list;
+            };
+
+
+
+                return list;
+            }catch(Exception ex)
+                {
+                if(commonLog.LoggingEnabled && commonLog.LogLevel >7)
+                {
+                    commonLog.LogEntry("Element type perties list faild :" + ex);
+                }
+            }
+            return new Dictionary<string, int>();
         }
         internal static readonly Dictionary<string, int> CHtmlElementMethods = new Dictionary<string, int>
     {

@@ -202,6 +202,7 @@ namespace MultiHtmlCraft.Core
             { "foregroundcolor", 99 },
             { "foregroundColor", 100 },
             { "location", 101 },
+            { "nodeType", 102 },
 
 
         };

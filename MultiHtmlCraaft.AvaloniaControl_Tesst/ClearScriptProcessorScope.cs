@@ -1730,7 +1730,6 @@ namespace ClearScriptProcessor
                 catch { /* swallow */ }
             }
         }
-
         // ScriptMemberとしては無名関数で登録
         [ScriptMember("debugLog")]
         public void DebugLog_Invoke(object arg)
@@ -1773,6 +1772,32 @@ namespace ClearScriptProcessor
             catch (Exception ex)
             {
                 DebugLog($"debugDumpProxy failed: {ex.Message}");
+            }
+        }
+        public bool ScopeHas(string key)
+        {
+            if (_v8Engine == null) return false;
+            try
+            {
+                return _v8Engine.Script.HasProperty(key);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public object ScopeGet(string key)
+        {
+            if (_v8Engine == null) return false;
+            try
+            {
+                var value = _v8Engine.Script.GetProperty(key);
+                return value;
+            }
+            catch
+            {
+                return null;
+
             }
         }
     }

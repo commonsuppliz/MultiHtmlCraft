@@ -4994,7 +4994,7 @@ namespace MultiHtmlCraft.Core
                                 setCSSFontStyleIntoStyleSheetOrCHtmlFontInfo(sPart, null, rValue);
                                 continue;
                             case CSSAttributeType.clear:
-                                sPart.Clear = rValue;
+                                sPart.clear = rValue;
                                 continue;
                             case CSSAttributeType.marginleft:
                                 sPart.MarginLeft = rValue;

@@ -1,4 +1,5 @@
 using Avalonia.Media.Immutable;
+using Avalonia.Metadata;
 using Avalonia.Platform;
 using ExCSS;
 using MultiHtmlCraft.Core;
@@ -956,6 +957,13 @@ namespace MultiHtmlCraft.Core
             {
                 switch (this.Value)
                 {
+                    case CHtmlWindowEvent evt:
+                        {
+
+                            var props = CHtmlWindowEvent.CHtmlWindowEventProperties.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlWindowEvent.CHtmlWindowEventMethods.Keys ?? Enumerable.Empty<string>();
+                            return props.Concat(methods);
+                        }
                     case CHtmlMediaElement mediaElement:
                         {
                             // Include CHtmlMediaElement-specific methods (canPlayType, play, pause, load, stop)
@@ -995,11 +1003,7 @@ namespace MultiHtmlCraft.Core
                         return CHtmlConsole.CHtmlConsoleMethods?.Keys ?? Enumerable.Empty<string>();
                     case CHtmlTextMetrics textMetrics:
                         return CHtmlTextMetrics.CHtmlTextMetricsProperties?.Keys ?? Enumerable.Empty<string>();
-                    case CHtmlWindowEvent eventWindow:
-                        {
-                            return CHtmlWindowEvent.CHtmlWindowEventProperties?.Keys ?? Enumerable.Empty<string>();
-                        }
-                        break;
+
                     case CHtmlCanvas2DImageData imageDaga:
                         {
                             var props = CHtmlCanvas2DImageData.CHtmlCanvas2DImageDataProperties?.Keys ?? Enumerable.Empty<string>();
@@ -1019,6 +1023,19 @@ namespace MultiHtmlCraft.Core
                             return props.Concat(methods);  
                             
                         }
+                    case CHtmlCSSStyleSheet csheet:
+                        {
+                            var props = CHtmlCSSStyleSheet.CHtmlCSSStyleSheetProperties.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlCSSStyleSheet.CHtmlCSSStyleSheetMethods.Keys ?? Enumerable.Empty<string>();
+                            return props.Concat(methods);
+                        }
+                    case CHtmlLocationBase location:
+                        {
+                            var props = CHtmlLocationBase.CHtmlLocationBaseProperties.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlLocationBase.CHtmlLocationBaseMethods.Keys ?? Enumerable.Empty<string>();
+                            return props.Concat(methods);
+                        }
+
                     default:
                         var obj = this.Value;
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
@@ -1288,6 +1305,17 @@ namespace MultiHtmlCraft.Core
                                         );
                                     case "onerror":
                                         System.Diagnostics.Debug.WriteLine($"[CHtmlElement.BindGetMember] onerror accessed");
+                                        break;
+                                    case "style":
+                                    case "Style":
+                                        if (elementValue is System.Dynamic.IDynamicMetaObjectProvider dmo)
+                                        {
+                                            try
+                                            {
+                                                return dmo.GetMetaObject(Expression.Constant(elementValue));
+                                            }
+                                            catch { /* フォールバックへ */ }
+                                        }
                                         break;
                                 }
 
@@ -1913,6 +1941,7 @@ namespace MultiHtmlCraft.Core
                                         break;
                                     case "createElement":
                                         {
+                                            /*
                                             Func<object, object> createElementDel = (tagNameArg) =>
                                             {
                                                 try
@@ -1938,6 +1967,41 @@ namespace MultiHtmlCraft.Core
                                             return new DynamicMetaObject(
                                                 Expression.Constant(createElementDel, typeof(Func<object, object?>)),
                                                 BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            );
+                                            */
+                                            var methodInfo = typeof(CHtmlDocument).GetMethod(
+                       nameof(CHtmlDocument.createElement),
+                       BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                       null,
+                       new Type[] { typeof(string) }, // ← ここで引数の型を明確に指定！
+                       null
+                   );
+
+                                            // 2. CHtmlDocument インスタンスから CHtmlMultiversalWindow インスタンスを取得する Expression を構築
+                                            // （※ 実際のフィールド名が _window の場合の例。プロパティなら Expression.Property を使用）
+                                            var docInstance = Expression.Convert(Expression, typeof(CHtmlDocument));
+                                    
+
+                                            // 3. デリゲート型を決定 (___createObject の引数と戻り値の型に合わせる)
+                                            // 第一引数が string、戻り値が object の場合:
+                                            var delegateType = typeof(Func<string, object>);
+
+                                            var createDelegateMethod = typeof(Delegate).GetMethod(
+                                                nameof(Delegate.CreateDelegate),
+                                                new[] { typeof(Type), typeof(object), typeof(MethodInfo) }
+                                            );
+
+                                            var delegateExpression = Expression.Call(
+                                                createDelegateMethod,
+                                                Expression.Constant(delegateType),
+                                                docInstance,
+                                                Expression.Constant(methodInfo)
+                                            );
+
+                                            // 4. Delegate 型の Expression を ClearScript 側に渡すため object にキャスト
+                                            return new DynamicMetaObject(
+                                                Expression.Convert(delegateExpression, typeof(object)),
+                                                BindingRestrictions.GetTypeRestriction(Expression, LimitType)
                                             );
                                         }
                                     case "getElementsByTagName":
@@ -2465,12 +2529,108 @@ namespace MultiHtmlCraft.Core
                             return base.BindGetMember(binder);
                         }
 
-                    case CHtmlCSSStyleSheet cssStyleSheet:
+                    case CHtmlCSSStyleSheet sheet:
                         {
-                            var self = cssStyleSheet;
-                            var resultString = self.___getPropertyByName(binder.Name);
+                            var self = sheet;
+                            var name = binder.Name;
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+                            {
+                                commonLog.LogEntry($"[BindGetMember] CHtmlCSSStyleSheet binder.Name={name}");
+                            }
 
-                            return new DynamicMetaObject(Expression.Constant(resultString, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            // メソッド名辞書にあるものはデリゲートで返す
+                            if (CHtmlCSSStyleSheet.CHtmlCSSStyleSheetMethods.ContainsKey(name))
+                            {
+                                switch (name)
+                                {
+                                    case "getPropertyValue":
+                                        Func<object, object> getPropertyValueDel = (arg) =>
+                                        {
+                                            try
+                                            {
+                                                var n = (UnwrapValue(arg) ?? arg)?.ToString() ?? string.Empty;
+                                                return self.getPropertyValue(n) ?? string.Empty;
+                                            }
+                                            catch { return string.Empty; }
+                                        };
+                                        return new DynamicMetaObject(Expression.Constant(getPropertyValueDel, typeof(Func<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                                    case "setProperty":
+                                        // 2引数版と3引数版のどちらが来ても安全なラッパーを返す
+                                        Func<object, object, object> setProperty2Del = (nameArg, valueArg) =>
+                                        {
+                                            try
+                                            {
+                                                var n = (UnwrapValue(nameArg) ?? nameArg)?.ToString() ?? string.Empty;
+                                                var v = (UnwrapValue(valueArg) ?? valueArg)?.ToString() ?? string.Empty;
+                                                self.setProperty(n, v);
+                                            }
+                                            catch { }
+                                            return null!;
+                                        };
+                                        // JS 側で3引数 (name, value, priority) を渡す場合のラッパー
+                                        Func<object, object, object, object> setProperty3Del = (nameArg, valueArg, priorityArg) =>
+                                        {
+                                            try
+                                            {
+                                                var n = (UnwrapValue(nameArg) ?? nameArg)?.ToString() ?? string.Empty;
+                                                var v = (UnwrapValue(valueArg) ?? valueArg)?.ToString() ?? string.Empty;
+                                                // priorityArg は無視または必要なら取り扱い
+                                                self.setProperty(n, v);
+                                            }
+                                            catch { }
+                                            return null!;
+                                        };
+
+                                        // まず 3 引数デリゲートを返せるように、object を受ける dynamic wrapper を返す
+                                        // ClearScript はプロパティアクセス時にこのオブジェクトを関数として呼べる
+                                        var wrapper = new Func<object[], object>((args) =>
+                                        {
+                                            try
+                                            {
+                                                if (args == null || args.Length == 0) return null;
+                                                var n = (UnwrapValue(args[0]) ?? args[0])?.ToString() ?? string.Empty;
+                                                var v = args.Length > 1 ? (UnwrapValue(args[1]) ?? args[1])?.ToString() ?? string.Empty : string.Empty;
+                                                // 3rd arg ignored
+                                                self.setProperty(n, v);
+                                            }
+                                            catch { }
+                                            return null;
+                                        });
+
+                                        return new DynamicMetaObject(Expression.Constant(wrapper, wrapper.GetType()), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                                    case "getPropertyCSSValue":
+                                        Func<object, object> getPropertyCSSValueDel = (arg) =>
+                                        {
+                                            try
+                                            {
+                                                var n = (UnwrapValue(arg) ?? arg)?.ToString() ?? string.Empty;
+                                                return self.getPropertyCSSValue(n) ?? string.Empty;
+                                            }
+                                            catch { return string.Empty; }
+                                        };
+                                        return new DynamicMetaObject(Expression.Constant(getPropertyCSSValueDel, typeof(Func<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                }
+                            }
+
+                            // CLR プロパティが存在すれば直接返却（backgroundClip 等）
+                            var propInfo = GetCachedProperty(typeof(CHtmlCSSStyleSheet), name);
+                            if (propInfo != null)
+                            {
+                                return new DynamicMetaObject(Expression.Property(Expression.Constant(self), propInfo), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+
+                            // フォールバック：内部取得 API を返す
+                            try
+                            {
+                                var dyn = self.___getPropertyByName(name);
+                                return new DynamicMetaObject(Expression.Constant(dyn, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            catch { }
+
+                            break;
+
                         }
                     case ICHtmlCSSStyleDeclaration iCSssSyleDeclaration:
                         {
@@ -2575,6 +2735,23 @@ namespace MultiHtmlCraft.Core
             return base.BindConvert(binder);
         }
 
+        public override DynamicMetaObject BindSetIndex(SetIndexBinder binder, DynamicMetaObject[] indexes, DynamicMetaObject value)
+        {
+            List<object> lindexList = new List<object>();
+            if (indexes != null && indexes.Length > 0)
+            {
+                foreach (var index in indexes)
+                {
+                    lindexList.Add(index?.Value ?? null);
+                }
+            }
+
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"BindSetMember is called with value {binder.ToString()} : {value} {string.Join(", ", lindexList)}   ");
+            }
+            return base.BindSetIndex(binder, indexes, value);
+        }
         public override DynamicMetaObject BindSetMember(SetMemberBinder binder, DynamicMetaObject value)
         {
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
@@ -2864,11 +3041,25 @@ namespace MultiHtmlCraft.Core
 
         public override DynamicMetaObject BindGetIndex(GetIndexBinder binder, DynamicMetaObject[] indexes)
         {
+            List<int> indexArrayCol = new List<int>();
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
-                commonLog.LogEntry($"BindGetIndex: target type = {binder.ToString()}, {this.Value} {this.Value?.GetType().FullName ?? "(null)"}");
+                var sbIndex = new StringBuilder();
+                if (indexes != null)
+                {
+                    int len  = indexes.Length;
+                    for(int i = 0; i < len; i++)
+                    {
+                        var val = indexes[i];
+                        sbIndex.Append(val?.Value?.ToString() ?? "(null)");
+                        if (i < len - 1) sbIndex.Append(", ");
+                    }
+
+                }
+
+                commonLog.LogEntry($"BindGetIndex: target type = {this.Value}, Indexes: {sbIndex.ToString()} {this.Value?.GetType().FullName ?? "(null)"}");
             }
-            string strIndexArray = null;
+           
             if (indexes != null)
             {
                 foreach (var idx in indexes)
@@ -2878,7 +3069,8 @@ namespace MultiHtmlCraft.Core
 
                     if (rawValue != null)
                     {
-                        string valString = rawValue.ToString();
+                        int indexValue  = (int)rawValue;
+                        string valString = idx.Value.ToString() ?? "null";
 
                  
                         bool hasAlphabet = valString.Any(c => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
@@ -2893,7 +3085,7 @@ namespace MultiHtmlCraft.Core
                             return null;
                         }
 
-                        strIndexArray += valString + ",";
+                        indexArrayCol.Add(indexValue);
                     }
                 }
             }
@@ -2920,11 +3112,29 @@ namespace MultiHtmlCraft.Core
                 // Handle specific known targets
                 switch (this.Value)
                 {
+                    case CHtmlWindowEvent winEvent:
+                    {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("CHtmlWindowEvent indexer access with BindGetIndex intIndex={0}, strIndex='{1}'", intIndex.HasValue ? intIndex.Value.ToString() : "(null)", strIndex ?? "(null)");
+                            }
+
+                    };
+                        
+        break;
                     case CHtmlDocument cHtmlDocument:
                         {
                             if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
                             {
                                 commonLog.LogEntry("CHtmlDocument indexer access with BindGetIndex intIndex={0}, strIndex='{1}'", intIndex.HasValue ? intIndex.Value.ToString() : "(null)", strIndex ?? "(null)");
+                            }
+                            if (intIndex == 0) // あるいは範囲外の場合
+                            {
+                                // 処理失敗（例外やバインド失敗）にするのではなく、明示的に ClearScript の「Undefined」や「Null」をバインドして返す
+                                return new DynamicMetaObject(
+                                    Expression.Constant(Microsoft.ClearScript.Undefined.Value), // または等価な表現
+                                    BindingRestrictions.GetTypeRestriction(Expression, LimitType)
+                                );
                             }
                             var result = cHtmlDocument.___getPropertyByIndex((int)intIndex);
 
@@ -2943,6 +3153,19 @@ namespace MultiHtmlCraft.Core
                                     Expression.Constant(result ?? string.Empty, typeof(object)),
                                     BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                 );
+                            }
+                            break;
+                        }
+                    case CHtmlElement elem:
+                        { 
+                            if(indexArrayCol.Count > 0)
+                            {
+                                var result = elem.___getPropertyByIndex(indexArrayCol[0]);
+                                return new DynamicMetaObject(
+                                Expression.Constant(result ?? string.Empty, typeof(object)),
+                               BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+);
+
                             }
                             break;
                         }
@@ -2981,6 +3204,10 @@ namespace MultiHtmlCraft.Core
 
                     default:
                         {
+                            if(commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+                            {
+                                commonLog.LogEntry($"TODO BindGetIndex {this.Value.GetType()}");
+                            }
                             // Fallback: try to invoke indexer via reflection on default members
                             var target = this.Value;
                             if (target != null)
