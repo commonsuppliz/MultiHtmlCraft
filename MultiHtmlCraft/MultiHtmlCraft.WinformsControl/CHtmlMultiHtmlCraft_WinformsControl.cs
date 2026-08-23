@@ -2,6 +2,7 @@
 using MultiHtmlCraft.Core;
 using MultiHtmlCraft.Interfaces;
 using MultiHtmlCraft.WinformsControl;
+using System.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -16,9 +17,11 @@ using System.Windows.Forms;
 namespace MultiHtmlCraft.WinFormsControl
 {
 
-    public class CHtmlMultiHtmlCraft_WinControl : UserControl, ICHtmlMultiversalControlInterface
+    public class CHtmlMultiHtmlCraft_WinControl : UserControl, MultiHtmlCraft.Interfaces.ICHtmlMultiversalControlInterface
     {
         private readonly object _drawImageLock = new object();
+        private bool _isDisposed = false;
+        private bool ___skipWebAuthorityCheck = false;
         private Graphics? _cachedGraphics;
 
         private const int GRAPHICS_CACHE_TIMEOUT_MS = 100;
@@ -764,11 +767,11 @@ namespace MultiHtmlCraft.WinFormsControl
             ___createControlFromDocumentForElement(___doc, __element);
         }
 
-        private void ___fireWindoworDocumentEvent(string eventName, MultiversalMouseEventArgsSpec? mouseArgSpec)
+        private void ___fireWindoworDocumentEvent(string eventName, CHtmlMultiversalMouseEventArgsSpec? mouseArgSpec)
         {
             ___fireWindoworDocumentEvent(eventName, mouseArgSpec, null);
         }
-            private void ___fireWindoworDocumentEvent(string eventName, MultiversalMouseEventArgsSpec? mouseArgSpec, MultiversalKeyboardEventArgsSpec? keyArgSpec)
+            private void ___fireWindoworDocumentEvent(string eventName, CHtmlMultiversalMouseEventArgsSpec? mouseArgSpec, CHtmlMultiversalKeyboardEventArgsSpec? keyArgSpec)
         {
             string logPrefix = "___fireWindoworDocumentEvent";
             if (mouseArgSpec != null)
@@ -1235,7 +1238,7 @@ namespace MultiHtmlCraft.WinFormsControl
         {
             base.OnKeyDown(e);
             MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] OnKeyDown override: KeyCode={0}", e.KeyCode);
-            ___fireWindoworDocumentEvent("keydown", null, new MultiversalKeyboardEventArgsSpec()
+            ___fireWindoworDocumentEvent("keydown", null, new CHtmlMultiversalKeyboardEventArgsSpec()
             {
                 Key = e.KeyCode.ToString(),
                 AltKey = e.Alt,
@@ -1247,7 +1250,7 @@ namespace MultiHtmlCraft.WinFormsControl
         {
             base.OnKeyUp(e);
             MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] OnKeyUp override: KeyCode={0}", e.KeyCode);
-            ___fireWindoworDocumentEvent("keyup", null, new MultiversalKeyboardEventArgsSpec()
+            ___fireWindoworDocumentEvent("keyup", null, new CHtmlMultiversalKeyboardEventArgsSpec()
             {
                 Key = e.KeyCode.ToString(),
                 AltKey = e.Alt,
@@ -1451,6 +1454,12 @@ namespace MultiHtmlCraft.WinFormsControl
 
                     }
             }
+        }
+        [DefaultValue(false)]
+        public bool skipWebAuthorityCheck
+        {
+            get { return ___skipWebAuthorityCheck; }
+            set { ___skipWebAuthorityCheck = value; }
         }
 
 
@@ -1731,9 +1740,9 @@ namespace MultiHtmlCraft.WinFormsControl
             throw new NotImplementedException();
         }
 
-        private MultiversalKeyboardEventArgsSpec ___createMultiversalKeyboardEventArgsSpecFromKeyEventArgs(System.Windows.Forms.KeyEventArgs e)
+        private CHtmlMultiversalKeyboardEventArgsSpec ___createMultiversalKeyboardEventArgsSpecFromKeyEventArgs(System.Windows.Forms.KeyEventArgs e)
         {
-            var eventArgsSpec = new MultiversalKeyboardEventArgsSpec();
+            var eventArgsSpec = new CHtmlMultiversalKeyboardEventArgsSpec();
             // KeyCode を保存
             eventArgsSpec.KeyCode = (int)e.KeyCode;
             eventArgsSpec.Key = e.KeyCode.ToString();
@@ -1744,9 +1753,9 @@ namespace MultiHtmlCraft.WinFormsControl
             return eventArgsSpec;
         }
 
-        private MultiversalKeyboardEventArgsSpec ___createMultiversalKeyboardEventArgsSpecFromKeyEventArgs(System.Windows.Forms.KeyPressEventArgs e)
+        private CHtmlMultiversalKeyboardEventArgsSpec ___createMultiversalKeyboardEventArgsSpecFromKeyEventArgs(System.Windows.Forms.KeyPressEventArgs e)
         {
-            var eventArgsSpec = new MultiversalKeyboardEventArgsSpec();
+            var eventArgsSpec = new CHtmlMultiversalKeyboardEventArgsSpec();
             // KeyChar を文字列として保存
             eventArgsSpec.Key = e.KeyChar.ToString();
             eventArgsSpec.KeyCode = (int)e.KeyChar;
@@ -1767,9 +1776,15 @@ namespace MultiHtmlCraft.WinFormsControl
 
         private void CHtmlMultiHtmlCraft_WinControl_KeyUp(object? sender, KeyEventArgs e)
         {
-            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] KeyUp event (Selectable): sender={0}, type={1}, KeyCode={2}", sender, sender?.GetType().Name, e?.KeyCode);
-            var eventArgsSpec = ___createMultiversalKeyboardEventArgsSpecFromKeyEventArgs(e);
-            ___fireWindoworDocumentEvent("keyup", null, eventArgsSpec);
+            base.OnKeyUp(e);
+            MultiHtmlCraft.Core.commonLog.LogEntry("[WinformsControl] OnKeyUp override: KeyCode={0}", e.KeyCode);
+            ___fireWindoworDocumentEvent("keyup", null, new CHtmlMultiversalKeyboardEventArgsSpec()
+            {
+                Key = e.KeyCode.ToString(),
+                AltKey = e.Alt,
+                CtrlKey = e.Control,
+                ShiftKey = e.Shift,
+            });
         }
         private void CHtmlMultiHtmlCraft_WinControl_KeyPress(object? sender, KeyPressEventArgs e)
         {
@@ -1789,9 +1804,9 @@ namespace MultiHtmlCraft.WinFormsControl
         #region MultiversalRendererControlEvents
 
 
-        private MultiversalMouseEventArgsSpec createMouseEventSpecFromMouseArg(System.Windows.Forms.MouseEventArgs e)
+        private CHtmlMultiversalMouseEventArgsSpec createMouseEventSpecFromMouseArg(System.Windows.Forms.MouseEventArgs e)
         {
-            var mouseArgSpec = new MultiversalMouseEventArgsSpec();
+            var mouseArgSpec = new CHtmlMultiversalMouseEventArgsSpec();
             if (e != null)
             {
                 mouseArgSpec.X = e.X;

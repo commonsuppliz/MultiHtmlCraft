@@ -28,11 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MultiHtmlCraft.Test", "Mult
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MulversalRenderer.Core.Test", "MultiHtmlCraft.Test\MulversalRenderer.Core.Test.csproj", "{DBA60E14-22B4-4296-ADE8-3B384D4EA4E6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MultiHtmlCraaft.AvaloniaControl_Tesst", "MultiHtmlCraaft.AvaloniaControl_Tesst", "{47155D90-6121-FC77-EF1E-5ED7E774B4DD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft.AvaloniaControl_Test", "MultiHtmlCraaft.AvaloniaControl_Tesst\MultiHtmlCraft.AvaloniaControl_Test.csproj", "{DEB50F8D-61E5-4561-8ECB-04CE5757535D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MultiHtmlCraft", "MultiHtmlCraft", "{42A2A028-69E3-EADC-8078-6524021A5F62}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiHtmlCraft.AvaloniaControl_Form_Test", "MultiHtmlCraaft_AvaloniaControl_Form_Tesst\MultiHtmlCraft.AvaloniaControl_Form_Test.csproj", "{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -140,25 +138,24 @@ Global
 		{DBA60E14-22B4-4296-ADE8-3B384D4EA4E6}.Release|x64.Build.0 = Release|Any CPU
 		{DBA60E14-22B4-4296-ADE8-3B384D4EA4E6}.Release|x86.ActiveCfg = Release|Any CPU
 		{DBA60E14-22B4-4296-ADE8-3B384D4EA4E6}.Release|x86.Build.0 = Release|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Debug|x64.Build.0 = Debug|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Debug|x86.Build.0 = Debug|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Release|x64.ActiveCfg = Release|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Release|x64.Build.0 = Release|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Release|x86.ActiveCfg = Release|Any CPU
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D}.Release|x86.Build.0 = Release|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Debug|x64.Build.0 = Debug|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Debug|x86.Build.0 = Debug|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Release|x64.ActiveCfg = Release|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Release|x64.Build.0 = Release|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Release|x86.ActiveCfg = Release|Any CPU
+		{AC68CCC7-3B60-416B-F7A8-AC96BA6A8480}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DBA60E14-22B4-4296-ADE8-3B384D4EA4E6} = {7629547E-C148-567D-B50D-EF2D76BD5753}
-		{DEB50F8D-61E5-4561-8ECB-04CE5757535D} = {47155D90-6121-FC77-EF1E-5ED7E774B4DD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C682FD05-FE2F-4B58-A599-69B7F85CD4F2}

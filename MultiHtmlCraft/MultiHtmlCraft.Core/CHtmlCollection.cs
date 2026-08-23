@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Collections.Generic;
 using System.Reflection;
 using NiL.JS.Statements;
+using System.Reflection.Metadata.Ecma335;
 namespace MultiHtmlCraft.Core
 {
     /// <summary>
@@ -19,21 +20,22 @@ namespace MultiHtmlCraft.Core
         internal static Dictionary<string, int> CHtmlCollectionProperties = new Dictionary<string, int>()
         {
             {"length", 1 },
-            {"item", 2 },
             {"tags", 3 },
             {"childNodes", 4 },
             {"constructor", 5 },
-            {"toString", 6 },
-            {"toArray", 7 },
-            {"toDataArray", 8 },
-            {"QueryString", 9 }
+
+
           
 
         };
         internal static Dictionary<string, int> CHtmlCollectionMethods = new Dictionary<string, int>()
         {
             {"forEach", 1 },
-
+            {"item", 2 },
+            {"toString", 6 },
+            {"toArray", 7 },
+            {"toDataArray", 8 },
+            {"QueryString", 9 }
         };
         internal IMutilversalObjectType ___multiversalClassType;
         public bool IsEnumByIndex = false;
@@ -239,32 +241,131 @@ namespace MultiHtmlCraft.Core
             }
 			return arResult;
 		}
+        public object this[string strIndex]
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(strIndex))
+                    return null;
 
+                // 数値文字列なら数値として扱う
+                if (int.TryParse(strIndex, out int idx))
+                {
+                    if (idx >= 0 && idx < this.Count)
+                    {
+                        var objectBase = base[idx];
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                        {
+                            commonLog.LogEntry($"CHtmlCollection Accessing index {idx}: Type = {objectBase?.GetType().Name} base Count: {base.Count} Returns: {objectBase}");
+                        }
+                        return objectBase;
+                    }
+                    return null;
+                }
+
+                // プロパティ辞書に存在すれば返す
+                if (this.___properties != null && this.___properties.TryGetValue(strIndex, out var propVal))
+                    return propVal;
+
+                // name / id による検索（先頭一致）
+                for (int i = 0; i < this.Count; i++)
+                {
+                    var obj = base[i];
+                    if (obj == null) continue;
+
+                    var t = obj.GetType();
+
+                    // public property "name" / "id"
+                    try
+                    {
+                        var pName = t.GetProperty("name", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.IgnoreCase);
+                        if (pName != null)
+                        {
+                            var v = pName.GetValue(obj) as string;
+                            if (!string.IsNullOrEmpty(v) && string.Equals(v, strIndex, StringComparison.Ordinal))
+                                return obj;
+                        }
+                    }
+                    catch { }
+
+                    try
+                    {
+                        var pId = t.GetProperty("id", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.IgnoreCase);
+                        if (pId != null)
+                        {
+                            var v = pId.GetValue(obj) as string;
+                            if (!string.IsNullOrEmpty(v) && string.Equals(v, strIndex, StringComparison.Ordinal))
+                                return obj;
+                        }
+                    }
+                    catch { }
+
+                    // 非公開フィールド名の候補も試す（例: ___name / ___id）
+                    try
+                    {
+                        var fName = t.GetField("___name", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.IgnoreCase);
+                        if (fName != null)
+                        {
+                            var v = fName.GetValue(obj) as string;
+                            if (!string.IsNullOrEmpty(v) && string.Equals(v, strIndex, StringComparison.Ordinal))
+                                return obj;
+                        }
+                    }
+                    catch { }
+
+                    try
+                    {
+                        var fId = t.GetField("___id", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.IgnoreCase);
+                        if (fId != null)
+                        {
+                            var v = fId.GetValue(obj) as string;
+                            if (!string.IsNullOrEmpty(v) && string.Equals(v, strIndex, StringComparison.Ordinal))
+                                return obj;
+                        }
+                    }
+                    catch { }
+                }
+
+                return null;
+
+
+                return null;
+            }
+        }
+            
         /// <summary>
         /// Get Object by indexParam
         /// </summary>
         /// <param name="indexParam"></param>
         /// <returns>object</returns>
         /// <exception cref="IndexOutOfRangeException"></exception>
-		public new object  this[int indexParam]
+		public object  this[int indexParam]
 		{
             get
             {
                 if (indexParam >= 0 && indexParam < base.Count)
                 {
 
-                    var objectBase =  base[indexParam];
-
-                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 11)
-                    { 
-                        commonLog.LogEntry($"Accessing index {indexParam}: Type = {objectBase?.GetType().Name}");
+                    var objectBase = base[indexParam];
+                    try
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                        {
+                            var st = new System.Diagnostics.StackTrace(1, false); // 1 フレーム上から取得
+                            commonLog.LogEntry($"CHtmlCollection.Indexer called with indexParam={indexParam} Count={base.Count} Caller={st.GetFrame(0)?.GetMethod()?.Name} objectBase : {objectBase}");
+                        }
                     }
+                    catch { /* ログ失敗は無視して続行 */ }
 
                     return objectBase;
                 }
                 else
                 {
-                    throw new IndexOutOfRangeException($"Index {indexParam} is out of range.");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                    {
+                        commonLog.LogEntry($"Index {indexParam} is out of range. returns null");
+                    }
+                    return null;
                 }
             }
 			set
@@ -322,15 +423,25 @@ namespace MultiHtmlCraft.Core
 			catch{}
 			return null;
 		}
-		public object item(string s)
-		{
-			if(commonLog.LoggingEnabled &commonLog.LogLevel >= 5)
-			{
-				commonLog.LogEntry("TODO: CHtmlCollection trying seek item(string: ({0})", s);
-			}
+        public object item(string s)
+        {
+            if (commonLog.LoggingEnabled & commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("CHtmlCollection trying item(string : ({0})", s);
+            }
+            return this[s]; 
+        }
 
-			return null;
-		}
+
+
+
+
+
+
+
+
+
+		
 
         public object item(int i)
         {

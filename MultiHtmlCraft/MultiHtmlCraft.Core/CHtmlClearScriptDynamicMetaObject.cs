@@ -1062,7 +1062,17 @@ namespace MultiHtmlCraft.Core
                 {
                     commonLog.LogEntry($"[BindGetMember ENTRY] binder.Name={binder?.Name}, ValueType={this.Value?.GetType().FullName}");
                 };
-  
+                var memberName = binder?.Name ?? string.Empty;
+
+                var target = UnwrapValue(this.Value) ?? this.Value;
+
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                {
+                    commonLog.LogEntry($"[BindGetMember] targetType={target?.GetType().FullName}, memberName={memberName}");
+                }
+
+
+
 
                 switch (this.Value)
                 {       
@@ -1157,6 +1167,17 @@ namespace MultiHtmlCraft.Core
                             // Handle CHtmlMediaElement-specific methods
                             switch (binder.Name)
                             {
+                                case "nodeName":
+                                    {
+                                        var nodeNameStr = self.___tagName ?? self.tagName; 
+                                        if (nodeNameStr == null) nodeNameStr = string.Empty;
+                                        return new DynamicMetaObject(
+                                            Expression.Constant((object)nodeNameStr),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType),
+                                            nodeNameStr
+                                        );
+                                        
+                                    }
                                 case "canPlayType":
                                     {
                                         // Return a callable delegate for canPlayType(mediaType)
@@ -1286,6 +1307,54 @@ namespace MultiHtmlCraft.Core
 
                                 switch (binder.Name )
                                 {
+                                    case "nodeName":
+                                        var selfElem = self;
+                                        var nodeNameStr = self.___tagName ?? self.tagName;
+                                        try
+                                        {
+                                            // テキストノードの場合
+                                            if (selfElem.___nodeType == CHtmlNodeType.TEXT_NODE)
+                                            {
+                                                nodeNameStr = "#text";
+                                            }
+                                            // ドキュメントフラグメント（内部でこの種別を使っている場合）
+                                            else if (selfElem.___elementTagType == CHtmlElementType._DOCUMENT_FRAGMENT)
+                                            {
+                                                nodeNameStr = "#dcument-fragment";
+                                            }
+                                            else
+                                            {
+                                                // 一般の要素は tagName プロパティを優先して返す（DOM 互換で大文字）
+                                                try
+                                                {
+                                                    var tn = selfElem.tagName;
+                                                    nodeNameStr = string.IsNullOrEmpty(tn) ? (selfElem.___tagName ?? string.Empty) : tn;
+                                                }
+                                                catch
+                                                {
+                                                    nodeNameStr = selfElem.___tagName ?? string.Empty;
+                                                }
+
+                                                if (string.IsNullOrEmpty(nodeNameStr))
+                                                {
+                                                    // フォールバック: 要素種別を利用して何か返す（必要なら拡張）
+                                                    nodeNameStr = "#element";
+                                                }
+                                                nodeNameStr = nodeNameStr.ToUpperInvariant();
+                                            }
+                                        }
+                                        catch
+                                        {
+                                            nodeNameStr = string.Empty;
+                                        }
+                                        if (nodeNameStr == null) nodeNameStr = string.Empty;
+                                        return new DynamicMetaObject(
+                                            Expression.Constant((object)nodeNameStr),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType),
+                                            nodeNameStr
+                                        );
+                                        break;
+
                                     case "parentNode":
                                         System.Diagnostics.Debug.WriteLine($"[CHtmlElement.BindGetMember] parentNode accessed");
                                     System.Diagnostics.Debug.WriteLine($"Returning parentNode of type: {self.parentNode?.GetType().FullName}");
@@ -1303,6 +1372,14 @@ namespace MultiHtmlCraft.Core
                                     return ((IDynamicMetaObjectProvider)parent).GetMetaObject(
                                         Expression.Constant(parent)
                                         );
+                                    case "childNodes":
+                                        var resChildNodes = self.GetDynamicMember(memberName);
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(resChildNodes, typeof(object)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType),
+                                            resChildNodes
+                                        );
+                                        break;
                                     case "onerror":
                                         System.Diagnostics.Debug.WriteLine($"[CHtmlElement.BindGetMember] onerror accessed");
                                         break;
@@ -1863,6 +1940,143 @@ namespace MultiHtmlCraft.Core
                             return new DynamicMetaObject(Expression.Constant(res, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
                         }
                         break;
+                    case CHtmlCollection collection:
+                        {
+                            var selfCol = collection;
+                            if (!string.IsNullOrEmpty(memberName))
+                            {
+                                if (int.TryParse(memberName, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var idx))
+                                {
+                                    try
+                                    {
+                                        object item = null;
+                                        if (idx >= 0 && idx < selfCol.Count)
+                                            item = selfCol[idx];
+                                        // third引数に実オブジェクトを渡して返す
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(item, typeof(object)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType),
+                                            item
+                                        );
+                                    }
+                                    catch { /* swallow */ }
+                                }
+                            }
+                            switch (binder.Name)
+                            {
+                                case "length":
+                                    {
+                                        return new DynamicMetaObject(
+                                            Expression.Constant((object)collection.Count),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    }
+
+
+                                    break;
+                                case "item":
+                                    {
+                                        Func<object, object> itemFunc = (object indexArg) =>
+                                        {
+                                            try
+                                            {
+                                                var unwrapped = UnwrapValue(indexArg) ?? indexArg;
+                                                if (unwrapped is int idx)
+                                                {
+                                                    if (idx >= 0 && idx < selfCol.Count)
+                                                        return selfCol.item(idx);
+                                                }
+                                                else if (unwrapped is string strIdx && int.TryParse(strIdx, out int parsedIdx))
+                                                {
+                                                    if (parsedIdx >= 0 && parsedIdx < selfCol.Count)
+                                                        return selfCol.item(parsedIdx);
+                                                }
+                                            }
+                                            catch { }
+                                            return null;
+                                        };
+                                        return new DynamicMetaObject(Expression.Constant(itemFunc), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    }
+                                    break;
+                                case "toArray":
+                                case "toDataArray":
+                                    Func<object[]> del = () =>
+                                    {
+                                        try { return selfCol.toArray(); } catch { return System.Array.Empty<object>(); }
+                                    };
+                                    return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                                    break;
+                                case "forEach":
+                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                                    {
+                                        commonLog.LogEntry("CHtmlCollection.forEach has been called by BindGetMember");
+                                    }
+
+                                    Action<object> forEachFunc = (jsCallback) =>
+                                    {
+                                        if (jsCallback == null) return;
+
+                                        for (int i = 0; i < selfCol.Count; i++)
+                                        {
+                                            var item = selfCol[i];
+
+                                            try
+                                            {
+                                                if (jsCallback is Delegate del)
+                                                {
+                                                    del.DynamicInvoke(item, i, selfCol);
+                                                }
+                                                else if (jsCallback is System.Dynamic.IDynamicMetaObjectProvider)
+                                                {
+
+                                                    dynamic dyn = jsCallback;
+                                                    dyn(item, i, selfCol);
+                                                }
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                if (commonLog.LoggingEnabled)
+                                                    commonLog.LogEntry($"CHtmlCollection.forEach error at [{i}]: {ex.Message}");
+                                            }
+                                        }
+                                    };
+
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(forEachFunc),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                    break;
+
+
+
+
+
+
+
+
+                                case "toString":
+                                    break;
+
+
+                            }
+                            ;
+
+
+
+
+
+
+
+                            try
+                            {
+                                var dyn = selfCol.GetDynamicMember(binder.Name);
+                                return new DynamicMetaObject(Expression.Constant(dyn, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            catch { }
+
+                            return base.BindGetMember(binder);
+                        }
+                        
 
                     case CHtmlDocument document:
                         {
@@ -2309,95 +2523,7 @@ namespace MultiHtmlCraft.Core
                         break;
 
                     // Explicitly handle CHtmlCollection so properties like length are returned as CLR primitives
-                    case CHtmlCollection collection:
-                        {
-                            var selfCol = collection;
-                            switch (binder.Name)
-                            {
-                                case "length":
-                                    return new DynamicMetaObject(
-             Expression.Constant(selfCol.length, typeof(int)),
-             BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
-         );
-                                    break;
-                                case "toArray":
-                                case "toDataArray":
-                                    Func<object[]> del = () =>
-                                    {
-                                        try { return selfCol.toArray(); } catch { return System.Array.Empty<object>(); }
-                                    };
-                                    return new DynamicMetaObject(Expression.Constant(del), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
 
-                                    break;
-                                case "forEach":
-                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
-                                    {
-                                        commonLog.LogEntry("CHtmlCollection.forEach has been called by BindGetMember");
-                                    }
-
-                                    Action<object> forEachFunc = (jsCallback) =>
-                                    {
-                                        if (jsCallback == null) return;
-
-                                        for (int i = 0; i < selfCol.Count; i++)
-                                        {
-                                            var item = selfCol[i];
-
-                                            try
-                                            {
-                                                if (jsCallback is Delegate del)
-                                                {
-                                                    del.DynamicInvoke(item, i, selfCol);   
-                                                }
-                                                else if (jsCallback is System.Dynamic.IDynamicMetaObjectProvider)
-                                                {
-                                                    
-                                                    dynamic dyn = jsCallback;
-                                                    dyn(item, i, selfCol);
-                                                }
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                if (commonLog.LoggingEnabled)
-                                                    commonLog.LogEntry($"CHtmlCollection.forEach error at [{i}]: {ex.Message}");
-                                            }
-                                        }
-                                    };
-
-                                    return new DynamicMetaObject(
-                                        Expression.Constant(forEachFunc),
-                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
-                                    );
-                                    break;
-                            
-                     
-
-
-
-
-                             
-
-                                case "toString":
-                                    break;
-
-
-                            };
-                            
-                                 
-                            
-
-
- 
-
-                            try
-                            {
-                                var dyn = selfCol.GetDynamicMember(binder.Name);
-                                return new DynamicMetaObject(Expression.Constant(dyn, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
-                            }
-                            catch { }
-
-                            return base.BindGetMember(binder);
-                        }
                     case CHtmlTextMetrics textMetrics:
                         {
                             var self = textMetrics;
@@ -3002,7 +3128,13 @@ namespace MultiHtmlCraft.Core
                         try { xhr.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("XHR.SetDynamicMember: {0}", ex.Message); }
                         break;
                     default:
-                        // If target exposes a SetDynamicMember via reflection, try calling it with unwrapped value
+                        // If target exposes a SetDynamicMember via reflection, try ca
+                        // {
+                        // lling it with unwrapped value
+                        if(commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+                        {
+                           commonLog.LogEntry($"TODO :SetBinIndex {binder.Name}" );
+                        }
                         try
                         {
                             var setMethod = GetMethodIgnoreAmbiguous(this.Value?.GetType(), "SetDynamicMember", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, 2);
@@ -3038,10 +3170,14 @@ namespace MultiHtmlCraft.Core
             var fallback = actual ?? value?.Value;
             return new DynamicMetaObject(Expression.Constant(fallback, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
         }
-
+        
         public override DynamicMetaObject BindGetIndex(GetIndexBinder binder, DynamicMetaObject[] indexes)
         {
+
             List<int> indexArrayCol = new List<int>();
+            int? intIndex = null;
+            string strIndex = string.Empty;
+
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
                 var sbIndex = new StringBuilder();
@@ -3059,201 +3195,281 @@ namespace MultiHtmlCraft.Core
 
                 commonLog.LogEntry($"BindGetIndex: target type = {this.Value}, Indexes: {sbIndex.ToString()} {this.Value?.GetType().FullName ?? "(null)"}");
             }
-           
+
             if (indexes != null)
             {
                 foreach (var idx in indexes)
                 {
-
-                    var rawValue = UnwrapValue(idx.Value) ?? idx.Value;
-
-                    if (rawValue != null)
+                    try
                     {
-                        int indexValue  = (int)rawValue;
-                        string valString = idx.Value.ToString() ?? "null";
-
-                 
-                        bool hasAlphabet = valString.Any(c => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
-
-                        if (hasAlphabet)
+                        var expr = idx?.Expression;
+                        var nodeType = expr?.NodeType.ToString() ?? "(null)";
+                        var exprType = expr?.Type?.FullName ?? "(null)";
+                        var limitType = idx?.LimitType?.FullName ?? "(null)";
+                        commonLog.LogEntry($"BindGetIndex DEBUG: idx.Value='{idx?.Value?.ToString() ?? "(null)"}', Expression.NodeType={nodeType}, Expression.Type={exprType}, LimitType={limitType}");
+                    }
+                    catch { }
+                    object? rawValue = null;
+                    string valString = "(null)";
+                    string typeName = "(null)";
+                    try
+                    {
+                        // 1) まず DynamicMetaObject.Value を試す
+                        if (idx?.Value != null)
                         {
-                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            rawValue = UnwrapValue(idx.Value) ?? idx.Value;
+                        }
+
+                        // 2) idx.Value が null の場合、Expression に定数が埋め込まれているケースを試す
+                        if (rawValue == null && idx?.Expression != null)
+                        {
+                            var expr = idx.Expression;
+                            switch (expr)
                             {
-                                commonLog.LogEntry("BindGetIndex: index value with alphabetic characters detected: {0}", valString);
+                                case System.Linq.Expressions.ConstantExpression ce:
+                                    rawValue = ce.Value;
+                                    break;
+                                case System.Linq.Expressions.UnaryExpression ue when ue.Operand is System.Linq.Expressions.ConstantExpression oce:
+                                    rawValue = oce.Value;
+                                    break;
+                                default:
+                                    // 最後の手段: 式をコンパイルして評価（高コストなのでログし必要なら有効化）
+                                    // try { rawValue = System.Linq.Expressions.Expression.Lambda(expr).Compile().DynamicInvoke(); } catch { }
+                                    break;
                             }
-                        
-                            return null;
+                        }
+
+                        valString = (idx?.Value?.ToString()) ?? (rawValue?.ToString()) ?? "(null)";
+                        typeName = rawValue?.GetType().FullName ?? idx?.Value?.GetType().FullName ?? "(null)";
+
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 6)
+                        {
+                            commonLog.LogEntry($"BindGetIndex: idx.Value='{idx?.Value?.ToString() ?? "(null)"}', extractedRaw='{valString}', rawType='{typeName}', Expression='{idx?.Expression?.NodeType.ToString() ?? "(null)"}'");
+                        }
+
+                        if (rawValue == null)
+                        {
+                            // 文字列インデックス等は後段の TryResolveIndex で再処理するため続行
+                            continue;
+                        }
+
+                        // 数値へ安全に変換
+                        int indexValue;
+                        switch (rawValue)
+                        {
+                            case int i:
+                                indexValue = i;
+                                break;
+                            case long l:
+                                indexValue = Convert.ToInt32(l);
+                                break;
+                            case short s:
+                                indexValue = s;
+                                break;
+                            case byte b:
+                                indexValue = b;
+                                break;
+                            case double d:
+                                indexValue = Convert.ToInt32(d);
+                                break;
+                            case float f:
+                                indexValue = Convert.ToInt32(f);
+                                break;
+                            case decimal dec:
+                                indexValue = Convert.ToInt32(dec);
+                                break;
+                            case string sRaw when int.TryParse(sRaw, out var pi):
+                                indexValue = pi;
+                                break;
+                            default:
+                                indexValue = Convert.ToInt32(rawValue);
+                                break;
                         }
 
                         indexArrayCol.Add(indexValue);
                     }
-                }
-            }
-     
-            try
-            {
-                if (indexes == null || indexes.Length == 0)
-                {
-                    return base.BindGetIndex(binder, indexes);
-                }
-
-                // Resolve first index into either int or string using helper (handles DynamicMetaObject and wrappers)
-                if (!TryResolveIndex(indexes[0], out int? intIndex, out string? strIndex))
-                {
-                    // best-effort unwrap fallback
-                    var raw = UnwrapValue(indexes[0].Value) ?? indexes[0].Value;
-                    if (raw is string s) strIndex = s;
-                    else
+                    catch (Exception ex)
                     {
-                        try { intIndex = Convert.ToInt32(raw); } catch { strIndex = raw?.ToString(); }
-                    }
-                }
-
-                // Handle specific known targets
-                switch (this.Value)
-                {
-                    case CHtmlWindowEvent winEvent:
-                    {
-                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
-                            {
-                                commonLog.LogEntry("CHtmlWindowEvent indexer access with BindGetIndex intIndex={0}, strIndex='{1}'", intIndex.HasValue ? intIndex.Value.ToString() : "(null)", strIndex ?? "(null)");
-                            }
-
-                    };
-                        
-        break;
-                    case CHtmlDocument cHtmlDocument:
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 6)
                         {
-                            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
-                            {
-                                commonLog.LogEntry("CHtmlDocument indexer access with BindGetIndex intIndex={0}, strIndex='{1}'", intIndex.HasValue ? intIndex.Value.ToString() : "(null)", strIndex ?? "(null)");
-                            }
-                            if (intIndex == 0) // あるいは範囲外の場合
-                            {
-                                // 処理失敗（例外やバインド失敗）にするのではなく、明示的に ClearScript の「Undefined」や「Null」をバインドして返す
-                                return new DynamicMetaObject(
-                                    Expression.Constant(Microsoft.ClearScript.Undefined.Value), // または等価な表現
-                                    BindingRestrictions.GetTypeRestriction(Expression, LimitType)
-                                );
-                            }
-                            var result = cHtmlDocument.___getPropertyByIndex((int)intIndex);
-
-                            return new DynamicMetaObject(
-                                Expression.Constant(result, typeof(object)),
-                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
-                            );
+                            commonLog.LogEntry($"BindGetIndex: failed to extract/convert index (idx.Value='{idx?.Value}', expr='{idx?.Expression}'): {ex.Message}");
                         }
-                        break;
-                    case CHtmlCSSStyleSheet cssSheet:
-                        {
-                            if (!string.IsNullOrEmpty(strIndex))
+                        // 失敗してもループ継続 — TryResolveIndex / 以降の処理に委ねる
+                        continue;
+                    }
+
+                }
+                try
+                {
+                    // Handle specific known targets
+                    switch (this.Value)
+                    {
+                        case CHtmlWindowEvent winEvent:
                             {
-                                var result = cssSheet.getPropertyValue(strIndex);
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                {
+                                    commonLog.LogEntry(
+                                        "CHtmlWindowEvent indexer access with BindGetIndex intIndex={0}, strIndex='{1}'",
+                                        intIndex.HasValue ? intIndex.Value.ToString() : "(null)",
+                                        strIndex ?? "(null)"
+                                    );
+                                }
+
+                                // If you need to return or handle something here, do it before the break.
+                                break;
+                            }
+
+
+
+                        case CHtmlDocument cHtmlDocument:
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                {
+                                    commonLog.LogEntry("CHtmlDocument indexer access with BindGetIndex intIndex={0}, strIndex='{1}'", intIndex.HasValue ? intIndex.Value.ToString() : "(null)", strIndex ?? "(null)");
+                                }
+                                if (intIndex == 0) // あるいは範囲外の場合
+                                {
+                                    // 処理失敗（例外やバインド失敗）にするのではなく、明示的に ClearScript の「Undefined」や「Null」をバインドして返す
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(Microsoft.ClearScript.Undefined.Value), // または等価な表現
+                                        BindingRestrictions.GetTypeRestriction(Expression, LimitType)
+                                    );
+                                }
+                                var result = cHtmlDocument.___getPropertyByIndex((int)intIndex);
+
                                 return new DynamicMetaObject(
-                                    Expression.Constant(result ?? string.Empty, typeof(object)),
+                                    Expression.Constant(result, typeof(object)),
                                     BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                 );
                             }
                             break;
-                        }
-                    case CHtmlElement elem:
-                        { 
-                            if(indexArrayCol.Count > 0)
+                        case CHtmlCSSStyleSheet cssSheet:
                             {
-                                var result = elem.___getPropertyByIndex(indexArrayCol[0]);
-                                return new DynamicMetaObject(
-                                Expression.Constant(result ?? string.Empty, typeof(object)),
-                               BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
-);
-
-                            }
-                            break;
-                        }
-
-                    case CHtmlCollection collection:
-                        {
-                            if (intIndex.HasValue)
-                            {
-                                var result = collection[intIndex.Value];
-                                return new DynamicMetaObject(
-                                    Expression.Constant(result, typeof(object)),
-                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
-                            }
-
-                            if (!string.IsNullOrEmpty(strIndex))
-                            {
-                                // Try named/indexer access via reflection (get_Item or indexer property)
-                                try
+                                if (!string.IsNullOrEmpty(strIndex))
                                 {
-                                    var mi = GetMethodIgnoreAmbiguous(collection.GetType(), "get_Item", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, 1);
-                                    if (mi != null)
-                                    {
-                                        var res = mi.Invoke(collection, new object[] { strIndex });
-                                        return new DynamicMetaObject(
-                                            Expression.Constant(res, typeof(object)),
-                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
-                                        );
-                                    }
+                                    var result = cssSheet.getPropertyValue(strIndex);
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(result ?? string.Empty, typeof(object)),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
                                 }
-                                catch { /* swallow */ }
+                                break;
                             }
-
-                            // If nothing matched, let base try to produce binding expression
-                            return base.BindGetIndex(binder, indexes);
-                        }
-
-                    default:
-                        {
-                            if(commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+                        case CHtmlElement elem:
                             {
-                                commonLog.LogEntry($"TODO BindGetIndex {this.Value.GetType()}");
-                            }
-                            // Fallback: try to invoke indexer via reflection on default members
-                            var target = this.Value;
-                            if (target != null)
-                            {
-                                var t = target.GetType();
-                                var defaultMembers = t.GetDefaultMembers();
-                                foreach (var member in defaultMembers)
+                                if (indexArrayCol.Count > 0)
                                 {
-                                    if (member is PropertyInfo pi)
+                                    var result = elem.___getPropertyByIndex(indexArrayCol[0]);
+                                    return new DynamicMetaObject(
+                                    Expression.Constant(result ?? string.Empty, typeof(object)),
+                                   BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+    );
+
+                                }
+                                break;
+                            }
+
+                        case CHtmlCollection collection:
+                            {
+                                if (intIndex.HasValue)
+                                {
+                                    var result = collection[intIndex.Value];
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(result, typeof(object)),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                }
+
+                                if (!string.IsNullOrEmpty(strIndex))
+                                {
+                                    try
                                     {
-                                        var indexParams = pi.GetIndexParameters();
-                                        if (indexParams.Length == indexes.Length)
+                                        var mi = GetMethodIgnoreAmbiguous(collection.GetType(), "get_Item", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, 1);
+                                        if (mi != null)
                                         {
-                                            try
+                                            var res = mi.Invoke(collection, new object[] { strIndex });
+                                            return new DynamicMetaObject(
+                                                Expression.Constant(res, typeof(object)),
+                                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            );
+                                        }
+                                    }
+                                    catch { }
+                                }
+
+                                // 実行時評価ヘルパーを呼ぶ式を返す（ParameterExpression 等に対応）
+                                if (indexes != null && indexes.Length > 0 && indexes[0]?.Expression != null)
+                                {
+                                    try
+                                    {
+                                        var helper = typeof(CHtmlClearScriptDynamicMetaObject<T>).GetMethod(nameof(SafeGetCollectionItem), BindingFlags.Static | BindingFlags.NonPublic);
+                                        if (helper != null)
+                                        {
+                                            var collExpr = Expression.Constant(collection, typeof(CHtmlCollection));
+                                            var idxObjExpr = Expression.Convert(indexes[0].Expression, typeof(object));
+                                            var callExpr = Expression.Call(helper, collExpr, idxObjExpr);
+                                            var finalExpr = Expression.Convert(callExpr, typeof(object));
+                                            return new DynamicMetaObject(finalExpr, BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                        }
+                                    }
+                                    catch { }
+                                }
+
+                                return base.BindGetIndex(binder, indexes);
+                            }
+
+                        default:
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+                                {
+                                    commonLog.LogEntry($"TODO BindGetIndex {this.Value.GetType()}");
+                                }
+                                // Fallback: try to invoke indexer via reflection on default members
+                                var target = this.Value;
+                                if (target != null)
+                                {
+                                    var t = target.GetType();
+                                    var defaultMembers = t.GetDefaultMembers();
+                                    foreach (var member in defaultMembers)
+                                    {
+                                        if (member is PropertyInfo pi)
+                                        {
+                                            var indexParams = pi.GetIndexParameters();
+                                            if (indexParams.Length == indexes.Length)
                                             {
-                                                var args = new object[indexes.Length];
-                                                for (int i = 0; i < indexes.Length; i++)
+                                                try
                                                 {
-                                                    args[i] = UnwrapValue(indexes[i].Value) ?? indexes[i].Value;
+                                                    var args = new object[indexes.Length];
+                                                    for (int i = 0; i < indexes.Length; i++)
+                                                    {
+                                                        args[i] = UnwrapValue(indexes[i].Value) ?? indexes[i].Value;
+                                                    }
+                                                    var result = pi.GetValue(target, args);
+                                                    return new DynamicMetaObject(
+                                                        Expression.Constant(result, typeof(object)),
+                                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                                    );
                                                 }
-                                                var result = pi.GetValue(target, args);
-                                                return new DynamicMetaObject(
-                                                    Expression.Constant(result, typeof(object)),
-                                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
-                                                );
+                                                catch { /* swallow */ }
                                             }
-                                            catch { /* swallow */ }
                                         }
                                     }
                                 }
+                                break;
                             }
-                            break;
-                        }
 
-                }
-            }
-            catch (Exception ex)
-            {
-                try
-                {
-                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
-                    {
-                        commonLog.LogEntry("BindGetIndex exception {0}", ex.ToString());
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                        {
+                            commonLog.LogEntry("BindGetIndex exception {0}", ex.ToString());
+                        }
+                    }
+                    catch { }
+                }
             }
 
             // 必ず有効な DynamicMetaObject を返す（base にフォールバック）
@@ -3344,6 +3560,62 @@ namespace MultiHtmlCraft.Core
             }
         }
 
+
+        private static object? SafeGetCollectionItem(CHtmlCollection collection, object? indexObj)
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 6)
+                {
+                    try { commonLog.LogEntry($"SafeGetCollectionItem: indexObj type={indexObj?.GetType().FullName ?? "(null)"} value={indexObj ?? "(null)"}"); } catch { }
+                }
+                if (collection == null) return null;
+                if (indexObj == null) return null;
+
+                // 既に int なら直接
+                if (indexObj is int ii) return collection.__GetByIndex(ii);
+
+                // 数値系を安全に変換
+                if (indexObj is long l) return collection.__GetByIndex((int)l);
+                if (indexObj is short s) return collection.__GetByIndex((int)s);
+                if (indexObj is byte b) return collection.__GetByIndex((int)b);
+                if (indexObj is double d) return collection.__GetByIndex(Convert.ToInt32(d));
+                if (indexObj is float f) return collection.__GetByIndex(Convert.ToInt32(f));
+                if (indexObj is decimal dec) return collection.__GetByIndex(Convert.ToInt32(dec));
+
+                // 文字列なら名前または数値パース
+                if (indexObj is string sRaw)
+                {
+                    if (int.TryParse(sRaw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var pi))
+                    {
+                        return collection.__GetByIndex(pi);
+                    }
+                    // 名前検索（コレクション側の実装に依存するが、試しに item(string) を呼ぶ）
+                    try { return collection.item(sRaw); } catch { }
+                    return null;
+                }
+
+                // 最後の手段：ToString を数値にする、または直接 Convert
+                try
+                {
+                    var asInt = Convert.ToInt32(indexObj);
+                    return collection.__GetByIndex(asInt);
+                }
+                catch
+                {
+                    try
+                    {
+                        var strIndex4 = indexObj.ToString();
+                        if (!string.IsNullOrEmpty(strIndex4) && int.TryParse(strIndex4, out var pi2))
+                            return collection.__GetByIndex(pi2);
+                    }
+                    catch { }
+                }
+
+                return null;
+            }
+            catch { return null; }
+        }
         // BindGetIndex 内の先頭付近（既存の UnwrapValue を使える位置に挿入）
         private bool TryResolveIndex(DynamicMetaObject indexObj, out int? intIndex, out string? strIndex)
         {

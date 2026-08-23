@@ -1,0 +1,49 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MultiHtmlCraft.AvaloniaControl_Form_Test.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ctrls="using:MultiHtmlCraft.AvaloniaControl_Form_Test.Controls"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="MultiHtmlCraft.AvaloniaControl_Form_Test.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="MultiHtmlCraft.AvaloniaControl_Form_Test">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="*">
+        <!-- Top toolbar: URL textbox expands, buttons stay right-aligned -->
+        <Grid Grid.Row="0" Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="txtUrl" Grid.Column="0" MinWidth="120" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button x:Name="btnGo" MinWidth="32">
+                    <Image Source="/Assets/Rocket.png" Width="24" Height="24" Stretch="Uniform"/>
+                </Button>
+                <Button x:Name="btnDOM" MinWidth="32">
+                    <Image Source="/Assets/Tree.png" Width="24" Height="24" Stretch="Uniform"/>
+                </Button>
+                <Button x:Name="btnScripts" MinWidth="32">
+                    <Image Source="/Assets/Gear.png" Width="24" Height="24" Stretch="Uniform"/>
+                </Button>
+                <Button x:Name="btnCSS" MinWidth="32">
+                    <Image Source="/Assets/Pallet.png" Width="24" Height="24" Stretch="Uniform"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Content: the MultiversalAvaroniaView fills remaining space -->
+        <ctrls:MultiversalAvaroniaView x:Name="MultiversalAvaroniaView" Grid.Row="1" Margin="8" />
+    </Grid>
+
+</Window>

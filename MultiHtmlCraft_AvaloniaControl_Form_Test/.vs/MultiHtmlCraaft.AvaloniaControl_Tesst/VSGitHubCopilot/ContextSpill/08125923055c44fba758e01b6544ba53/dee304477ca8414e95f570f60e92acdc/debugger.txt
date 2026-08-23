@@ -1,0 +1,952 @@
+﻿## PROCESSES
+Currently debugging:
+- MultiHtmlCraft.AvaloniaControl_Test.exe (PID: 28876)
+
+## CALLSTACK
+Thread ID: 12688
+[1] MultiHtmlCraft.Core.dll!MultiHtmlCraft.Core.CHtmlCollection.this[int].get
+This is the current user focused stack frame. The provided locals context corresponds to this stack frame, but you may evaluate expressions and retrieve code for any frame.
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.Core\CHtmlCollection.cs
+330: 
+331:                 return null;
+332:             }
+333:         }
+334:             
+335:         /// <summary>
+336:         /// Get Object by indexParam
+337:         /// </summary>
+338:         /// <param name="indexParam"></param>
+339:         /// <returns>object</returns>
+340:         /// <exception cref="IndexOutOfRangeException"></exception>
+341: 		public object  this[int indexParam]
+342: 		{
+343:             get
+344:             {
+345:                 if (indexParam >= 0 && indexParam < base.Count)
+```
+Current statement: line 345
+[2] MultiHtmlCraft.Core.dll!MultiHtmlCraft.Core.CHtmlDocument.drawRootElementRecursively
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.Core\CHtmlDocument.cs
+27304:         public void drawRootElementRecursively(CHtmlElement ___tagElement, ref CHtmlGraphicContainer _grCon)
+27305:         {
+27306:             if (___tagElement == null)
+27307:             {
+27308:                 return;
+27309:             }
+27310: 
+27311: 
+27312: 
+27313:             bool ___DrawTagElementCalled = false;
+27314:             bool ___isResetElementBoundsCalled = false;
+27315:             bool ___isDrawingObjectResetBoundsCalled = false;
+27316:             if (_grCon.IsUIThreadPaint == true)
+27317:             {
+27318:                 try
+27319:                 {
+27320: 
+27321: 
+27322:                     if (___tagElement.___isElementPositionAbsoluteOrStatic == false)
+27323:                     {
+27324: 
+27325:                         if (___tagElement.___IsElementofffsetParentPointCaluculationRequired == true)
+27326:                         {
+27327: 
+27328: 
+27329:                             if (___tagElement.___isCalculateElementBoundsCalled == false)
+27330:                             {
+27331: 
+27332:                                 if (commonHTML.elementTagTypesNoStylesheetLookupSortedList.ContainsKey(___tagElement.___elementTagType) == true)
+27333:                                 {
+27334:                                     ___tagElement.___IsElementVisible = false;
+27335:                                     ___tagElement.___isCalculateElementBoundsCalled = true;
+27336:                                 }
+27337:                                 else
+27338:                                 {
+27339:                                     try
+27340:                                     {
+27341:                                         if (this.___IsOnLoadWindowDocumentCompletedCalled == true)
+27342:                                         {
+27343:                                             this.___calculateElementBounds(___tagElement);
+27344:                                         }
+27345:                                         else
+27346:                                         {
+27347:                                             return;
+27348:                                         }
+27349:                                     }
+27350:                                     catch (Exception ex)
+27351:                                     {
+27352:                                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+27353:                                         {
+27354:                                             commonLog.LogEntry("{0} ___hasInner error {1}", this, commonData.GetExceptionAsString(ex));
+27355:                                         }
+27356:                                     }
+27357: 
+27358:                                 }
+27359:                             }
+27360: 
+27361:                             ___tagElement.___offfsetParentPoint = new PointFSpec((float)(_grCon.TotalOffsetLeft + ___tagElement.___offsetLeft), (float)(_grCon.TotalOffsetTop + ___tagElement.___offsetTop));
+27362:                             ___tagElement.___IsElementofffsetParentPointCaluculationRequired = false;
+27363: 
+27364:                             if (___tagElement.___drawingObjectList != null && ___tagElement.___IsElementVisible == true)
+27365:                             {
+27366:                                 if (___tagElement.___drawingObjectList.Count > 0)
+27367:                                 {
+27368:                                     this.___resetDrawingElementParentBounds(___tagElement, ref _grCon);
+27369:                                     ___isResetElementBoundsCalled = true;
+27370:                                     ___isDrawingObjectResetBoundsCalled = true;
+27371:                                     if (___isDrawingObjectResetBoundsCalled == false) {; }
+27372:                                     ___tagElement.___IsElementofffsetParentPointCaluculationRequired = false;
+27373:                                 }
+27374:                             }
+27375:                             if (___isResetElementBoundsCalled == false)
+27376:                             {
+27377: 
+27378:                                 CHtmlElement __parentElement = ___tagElement.___parent as CHtmlElement;
+27379:                                 if (__parentElement != null)
+27380:                                 {
+27381: 
+27382:                                     if (___tagElement.___offfsetParentPoint.Y < __parentElement.___offfsetParentPoint.Y)
+27383:                                     {
+27384:                                         if (___tagElement.___isElementPositionAbsoluteOrStatic == false)
+27385:                                         {
+27386:                                             ___tagElement.___offfsetParentPoint.Y = __parentElement.___offfsetParentPoint.Y + (float)___tagElement.___offsetTop;
+27387:                                         }
+27388:                                     }
+27389: 
+27390:                                 }
+27391: 
+27392:                             }
+27393:                         }
+27394: 
+27395: 
+27396:                     }
+27397:                     else
+27398:                     {
+27399:                         // ================================================
+27400:                         //   Calculate Absolute Postion. May be wrong ...
+27401:                         // ================================================
+27402:                         if (___tagElement.___IsElementofffsetParentPointCaluculationRequired == true)
+27403:                         {
+27404:                             ___tagElement.___offfsetParentPoint = new PointFSpec((float)(_grCon.TotalOffsetLeft + ___tagElement.___offsetLeft), (float)(_grCon.TotalOffsetTop + ___tagElement.___offsetTop));
+27405:                             ___tagElement.___IsElementofffsetParentPointCaluculationRequired = false;
+27406:                             if (___tagElement.___drawingObjectList != null)
+27407:                             {
+27408:                                 if (___tagElement.___IsElementVisible == true)
+27409:                                 {
+27410:                                     if (___tagElement.___drawingObjectList.Count > 0)
+27411:                                     {
+27412:                                         this.___resetDrawingElementParentBounds(___tagElement, ref _grCon);
+27413:                                         ___isDrawingObjectResetBoundsCalled = true;
+27414:                                         ___isResetElementBoundsCalled = true;
+27415:                                         ___tagElement.___IsElementofffsetParentPointCaluculationRequired = false;
+27416:                                     }
+27417:                                 }
+27418:                             }
+27419:                         }
+27420: 
+27421:                     }
+27422:                 }
+27423:                 catch (Exception ex)
+27424:                 {
+27425:                     if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+27426:                     {
+27427:                         commonLog.LogEntry("DrawElementRecursively {0} : {1}", ___tagElement, ex.Message);
+27428:                     }
+27429:                 }
+27430:             }
+27431:             if (_grCon.CurrentElementDepth >= DRAW_ELEMENT_STACK_LIMIT)
+27432:             {
+27433:                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+27434:                 {
+27435:                     commonLog.LogEntry("drawRootElementRecursively {0} stack depth is too deep. Abort Drawring : {1}", ___tagElement, DRAW_ELEMENT_STACK_LIMIT);
+27436:                 }
+27437:                 ___tagElement.___IsElementVisible = false;
+27438:                 ___tagElement.___style.StyleCommentAdd("DrawElement Stack Depth is too Deep");
+27439:                 return;
+27440:             }
+27441:             bool IsResetBoundsComplete = false;
+27442: 
+27443:             if (___tagElement.___IsElementVisible == true)
+27444:             {
+27445:                 if (___tagElement.___ManagedControlWeakReference != null || ___tagElement.___ManagedControlHandle != IntPtr.Zero)
+27446:                 {
+27447:                     try
+27448:                     {
+27449:                         relocateManagedControlForTagElement(___tagElement, ref _grCon, true);
+27450:                         return;
+27451:                     }
+27452:                     catch (Exception ex)
+27453:                     {
+27454:                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+27455:                         {
+27456:                             commonLog.LogEntry("relocateManagedControlForTagElement", ex);
+27457:                         }
+27458:                     }
+27459: 
+27460:                 }
+27461:                 /*
+27462: #if DEBUG
+27463:                 if (___textElement.___drawingObjectList.Count > 0)
+27464:                 {
+27465:                     ___testDrawingElementBoundsPosition(___textElement);
+27466:                 }
+27467: #endif
+27468:                 */
+27469: 
+27470: 
+27471: 
+27472:                 //if(_grCon.PaintRectangle.IntersectsWith(___textElement.offsetScreenBounds) || ___textElement.___elementTagType == CHtmlElementType._ITEXT)
+27473:                 //{
+27474:                 if (___tagElement.___ManagedControlHandle == IntPtr.Zero)
+27475:                 {
+27476:                     if (___tagElement.___offsetWidth > 0 && ___tagElement.___offsetHeight > 0)
+27477:                     {
+27478: 
+27479:                         if (___tagElement.___IsElementBlock == true || ___tagElement.___elementTagType == CHtmlElementType.IMG)
+27480:                         {
+27481:                             RectangleF targetBounds = commonTypeConverter.ToRectangleF(___tagElement.___ScreenRectangle);
+27482:                             if (!commonTypeConverter.IsEqualRectangleFSpecValue(_grCon.PaintRectangle, ___tagElement.___BaseControlDisplayRectangle))
+27483:                             {
+27484:                                 ___tagElement.___BaseControlDisplayRectangle = _grCon.PaintRectangle;
+27485:                                 targetBounds = commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen());
+27486:                             }
+27487:                             if (___IsCalucuateScreenMaximunBoundsRequired == true)
+27488:                             {
+27489:                                 _grCon.ScreenMaximunBounds = RectangleFSpec.Union(_grCon.ScreenMaximunBounds, commonTypeConverter.ToRectangleFSpec(targetBounds));
+27490:                             }
+27491:                             IsResetBoundsComplete = true;
+27492:                             if (___tagElement.___elementTagType != CHtmlElementType.SVG)
+27493:                             {
+27494:                                 if (_grCon.IsHoverPaintMode == false)
+27495:                                 {
+27496: 
+27497:                                     this.___drawElement(___tagElement, ___tagElement.___style, targetBounds, _grCon, true, false);
+27498: 
+27499:                                 }
+27500:                                 else
+27501:                                 {
+27502:                                     this.___drawElement(___tagElement, ___tagElement.___styleHover, targetBounds, _grCon, true, false);
+27503:                                 }
+27504:                             }
+27505:                             else
+27506:                             {
+27507:                                 if (_grCon.IsHoverPaintMode == false)
+27508:                                 {
+27509: 
+27510:                                     CHtmlSVGElement.___drawSVGElement(___tagElement, ___tagElement.___style, targetBounds, _grCon, true, false);
+27511: 
+27512:                                 }
+27513:                                 else
+27514:                                 {
+27515:                                     CHtmlSVGElement.___drawSVGElement(___tagElement, ___tagElement.___styleHover, targetBounds, _grCon, true, false);
+27516:                                 }
+27517: 
+27518:                             }
+27519:                             ___DrawTagElementCalled = true;
+27520:                         }
+27521: 
+27522:                     }
+27523:                 }
+27524:                 if (___DrawTagElementCalled == false)
+27525:                 {
+27526:                     if (___tagElement.___ElementInlineLevel <= 1)
+27527:                     {
+27528:                         RectangleF targetBounds = commonTypeConverter.ToRectangleF(___tagElement.___ScreenRectangle);
+27529:                         if (!commonTypeConverter.IsEqualRectangleFSpecValue(_grCon.PaintRectangle, ___tagElement.___BaseControlDisplayRectangle))
+27530:                         {
+27531:                             ___tagElement.___BaseControlDisplayRectangle = _grCon.PaintRectangle;
+27532:                             targetBounds = commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen());
+27533:                         }
+27534:                         if (this.___IsCalucuateScreenMaximunBoundsRequired == true)
+27535:                         {
+27536:                             _grCon.ScreenMaximunBounds = RectangleFSpec.Union(_grCon.ScreenMaximunBounds, commonTypeConverter.ToRectangleFSpec(targetBounds));
+27537:                         }
+27538:                         IsResetBoundsComplete = true;
+27539:                         if (___tagElement.___elementTagType != CHtmlElementType.SVG)
+27540:                         {
+27541:                             if (_grCon.IsHoverPaintMode == false)
+27542:                             {
+27543:                                 this.___drawElement(___tagElement, ___tagElement.___style, targetBounds, _grCon, true, false);
+27544: 
+27545:                             }
+27546:                             else
+27547:                             {
+27548:                                 this.___drawElement(___tagElement, ___tagElement.___styleHover, targetBounds, _grCon, true, false);
+27549:                             }
+27550:                         }
+27551:                         else
+27552:                         {
+27553:                             if (_grCon.IsHoverPaintMode == false)
+27554:                             {
+27555:                                 CHtmlSVGElement.___drawSVGElement(___tagElement, ___tagElement.___style, targetBounds, _grCon, true, false);
+27556: 
+27557:                             }
+27558:                             else
+27559:                             {
+27560:                                 CHtmlSVGElement.___drawSVGElement(___tagElement, ___tagElement.___styleHover, targetBounds, _grCon, true, false);
+27561:                             }
+27562:                         }
+27563:                         ___DrawTagElementCalled = true;
+27564:                     }
+27565:                 }
+27566:                 if (___tagElement.___drawingObjectList != null && ___tagElement.___drawingObjectList.Count > 0)
+27567:                 {
+27568:                     if (IsResetBoundsComplete == false)
+27569:                     {
+27570:                         RectangleFSpec targetBounds = ___tagElement.___ScreenRectangle;
+27571:                         if (!commonTypeConverter.IsEqualRectangleFSpecValue(_grCon.PaintRectangle, ___tagElement.___BaseControlDisplayRectangle))
+27572:                         {
+27573:                             ___tagElement.___BaseControlDisplayRectangle = _grCon.PaintRectangle;
+27574:                             targetBounds = ___tagElement.GetElementBoundsOnScreen();
+27575:                         }
+27576:                         if (this.___IsCalucuateScreenMaximunBoundsRequired == true)
+27577:                         {
+27578:                             _grCon.ScreenMaximunBounds = RectangleFSpec.Union(_grCon.ScreenMaximunBounds, targetBounds);
+27579:                         }
+27580:                     }
+27581: 
+27582:                     this.___drawTextElement(___tagElement, ref _grCon, false);
+27583:                     ___DrawTagElementCalled = true;
+27584:                 }
+27585: 
+27586:                 //}
+27587:             }
+27588: 
+27589:             short ShiftMethod = 0;
+27590:             System.Drawing.Drawing2D.GraphicsState graphicState = null;
+27591:             IDisposable avaloniaStates = null;
+27592:             int skiaSaveCount = -1;
+27593:             //if(___textElement.___IsElementBlock == true &&  ___textElement.___elementTagType != CHtmlElementType._ITEXT)
+27594:             if (___tagElement.___ElementInlineShifted == false)
+27595:             {
+27596:                 // If Block Element (regardless vibile or non-visile) increment the location
+27597:                 // for layout
+27598: 
+27599:                 _grCon.TotalOffsetLeft += (float)(___tagElement.___offsetLeft + ___tagElement.___paddingLeft);
+27600:                 _grCon.TotalOffsetTop += (float)(___tagElement.___offsetTop + ___tagElement.___paddingTop);
+27601: 
+27602:                 if (___tagElement.___HasOverflowHidden == true && ___tagElement.___StyleOverFlowSize != SizeF.Empty)
+27603:                 {
+27604: #if WINDOWS
+27605:                     graphicState = _grCon.Graphic.Save();
+27606:                     RectangleF clipRect = commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen());
+27607:                     clipRect.Size = ___tagElement.___StyleOverFlowSize;
+27608:                     _grCon.Graphic.SetClip(clipRect, System.Drawing.Drawing2D.CombineMode.Replace);
+27609: #else
+27610:                         switch(commonHTML.GraphicApiType)
+27611:                         {
+27612:                             case GraphicAPIType.Avalonia:
+27613:                                 if (_grCon.AvaloniaDrawingContext != null)
+27614:                                 {
+27615:                                     avaloniaStates = _grCon.AvaloniaDrawingContext.PushClip(commonTypeConverter.convertRectangleFToAvaloniaRect(commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen())));
+27616:                                 }
+27617:                                 break;
+27618:                             case GraphicAPIType.SkiaSharp:
+27619:                                 if (_grCon.SkiaCanvas != null)
+27620:                                 {
+27621:                                     skiaSaveCount = _grCon.SkiaCanvas.Save();
+27622:                                     _grCon.SkiaCanvas.ClipRect(commonTypeConverter.convertRectangleFToSKRect(commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen())));
+27623:                                 }
+27624:                                 break;
+27625:                          }
+27626: 
+27627: 
+27628: #endif
+27629:                 }
+27630: 
+27631:                 ShiftMethod = 1;
+27632:             }
+27633: 
+27634: 
+27635:             try
+27636:             {
+27637:                 if (___tagElement.___isSvgElement == false)
+27638:                 {
+27639: 
+27640: 
+27641:                     if (___tagElement.___childNodes.Count > 0)
+27642:                     {
+27643:                         // Draw z-index == 0 Elements first
+27644:                         int __childCount = ___tagElement.___childNodes.Count;
+27645:                         for (int i = 0; i < __childCount; i++)
+27646:                         {
+27647:                             CHtmlElement cElement = ___tagElement.___childNodes[i] as CHtmlElement;
+27648:                             if (cElement != null && cElement.___IsElementVisible == true)
+27649:                             {
+27650:                                 if (cElement.___style != null && cElement.___style.___zIndexValue <= 0)
+27651:                                 {
+27652: 
+27653:                                     if (this.___IsRenderingFirstCompleted == false && (cElement.___IsElementBlock == true && cElement.offsetScreenBounds.Top > _grCon.PaintRectangle.Top + _grCon.PaintRectangle.Height + 3600) == false)
+27654:                                     {
+27655:                                         _grCon.CurrentElementDepth++;
+27656:                                         drawRootElementRecursively(cElement, ref _grCon);
+27657:                                         _grCon.CurrentElementDepth--;
+27658:                                     }
+27659:                                 }
+27660:                             }
+27661:                         }
+27662:                         if (___tagElement.___ZIndexedChildElementList != null)
+27663:                         {
+27664:                             int zItemCount = ___tagElement.___ZIndexedChildElementList.Count;
+27665:                             if (zItemCount > 0)
+27666:                             {
+27667:                                 for (int zPos = 0; zPos < zItemCount; zPos++)
+27668:                                 {
+27669:                                     CHtmlElement zIndexedElement = ___tagElement.___ZIndexedChildElementList[zPos];
+27670:                                     //HTML.CHtmlElement zIndexedElement = ___textElement.ZIndexedChildElementSortedList[____zIndexKey] as CHtmlElement;
+27671:                                     if (zIndexedElement != null)
+27672:                                     {
+27673:                                         if (zIndexedElement.___IsElementVisible == true && object.ReferenceEquals(___tagElement, zIndexedElement) == false)
+27674:                                         {
+27675: 
+27676:                                             if (this.___IsRenderingFirstCompleted == false && (zIndexedElement.___IsElementBlock == true && zIndexedElement.offsetScreenBounds.Top > _grCon.PaintRectangle.Top + _grCon.PaintRectangle.Height + 3600) == false)
+27677:                                             {
+27678:                                                 _grCon.CurrentElementDepth++;
+27679:                                                 drawRootElementRecursively(zIndexedElement, ref _grCon);
+27680:                                                 _grCon.CurrentElementDepth--;
+27681:                                             }
+27682: 
+27683:                                         }
+27684: 
+27685:                                     }
+27686:                                 }
+27687:                             }
+27688:                         }
+27689:                     }
+27690:                 }
+27691: 
+27692:             }
+27693:             catch (Exception ex)
+27694:             {
+27695:                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+27696:                 {
+27697:                     commonLog.LogEntry("drawRootElementRecursively Draw Error" + ___tagElement.toLogString(), ex);
+27698:                 }
+27699:                 /*
+27700: 				if(___textElement.___elementTagType != CHtmlElementType.HTML && ___textElement.___elementTagType != CHtmlElementType.BODY)
+27701: 				{
+27702: 					___textElement.___IsElementVisible = false;
+27703: 				}
+27704:                 */
+27705:                 //return;
+27706:             }
+27707:             finally
+27708:             {
+27709:                 switch (ShiftMethod)
+27710:                 {
+27711:                     case 1:
+27712:                         _grCon.TotalOffsetLeft -= (float)(___tagElement.___offsetLeft + ___tagElement.___paddingLeft);
+27713:                         _grCon.TotalOffsetTop -= (float)(___tagElement.___offsetTop + ___tagElement.___paddingTop);
+27714: 
+27715:                         if (graphicState != null)
+27716:                         {
+27717:                             _grCon.Graphic.Restore(graphicState);
+27718:                         }
+27719:                         if (avaloniaStates != null)
+27720:                         {
+27721:                             avaloniaStates.Dispose();
+27722:                         }
+27723:                         if (skiaSaveCount != -1)
+27724:                         {
+27725:                             _grCon.SkiaCanvas.RestoreToCount(skiaSaveCount);
+27726:                         }
+27727:                         break;
+27728:                     case 2:
+27729:                         _grCon.TotalOffsetLeft -= (float)___tagElement.___offsetLeft;
+27730:                         _grCon.TotalOffsetTop -= (float)___tagElement.___offsetTop;
+27731:                         break;
+27732:                 }
+27733: 
+27734:             }
+27735: 
+27736:         }
+```
+Current statement: line 27647
+[3] MultiHtmlCraft.Core.dll!MultiHtmlCraft.Core.CHtmlDocument.drawRootElementRecursively
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.Core\CHtmlDocument.cs
+27304:         public void drawRootElementRecursively(CHtmlElement ___tagElement, ref CHtmlGraphicContainer _grCon)
+27305:         {
+27306:             if (___tagElement == null)
+27307:             {
+27308:                 return;
+27309:             }
+27310: 
+27311: 
+27312: 
+27313:             bool ___DrawTagElementCalled = false;
+27314:             bool ___isResetElementBoundsCalled = false;
+27315:             bool ___isDrawingObjectResetBoundsCalled = false;
+27316:             if (_grCon.IsUIThreadPaint == true)
+27317:             {
+27318:                 try
+27319:                 {
+27320: 
+27321: 
+27322:                     if (___tagElement.___isElementPositionAbsoluteOrStatic == false)
+27323:                     {
+27324: 
+27325:                         if (___tagElement.___IsElementofffsetParentPointCaluculationRequired == true)
+27326:                         {
+27327: 
+27328: 
+27329:                             if (___tagElement.___isCalculateElementBoundsCalled == false)
+27330:                             {
+27331: 
+27332:                                 if (commonHTML.elementTagTypesNoStylesheetLookupSortedList.ContainsKey(___tagElement.___elementTagType) == true)
+27333:                                 {
+27334:                                     ___tagElement.___IsElementVisible = false;
+27335:                                     ___tagElement.___isCalculateElementBoundsCalled = true;
+27336:                                 }
+27337:                                 else
+27338:                                 {
+27339:                                     try
+27340:                                     {
+27341:                                         if (this.___IsOnLoadWindowDocumentCompletedCalled == true)
+27342:                                         {
+27343:                                             this.___calculateElementBounds(___tagElement);
+27344:                                         }
+27345:                                         else
+27346:                                         {
+27347:                                             return;
+27348:                                         }
+27349:                                     }
+27350:                                     catch (Exception ex)
+27351:                                     {
+27352:                                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+27353:                                         {
+27354:                                             commonLog.LogEntry("{0} ___hasInner error {1}", this, commonData.GetExceptionAsString(ex));
+27355:                                         }
+27356:                                     }
+27357: 
+27358:                                 }
+27359:                             }
+27360: 
+27361:                             ___tagElement.___offfsetParentPoint = new PointFSpec((float)(_grCon.TotalOffsetLeft + ___tagElement.___offsetLeft), (float)(_grCon.TotalOffsetTop + ___tagElement.___offsetTop));
+27362:                             ___tagElement.___IsElementofffsetParentPointCaluculationRequired = false;
+27363: 
+27364:                             if (___tagElement.___drawingObjectList != null && ___tagElement.___IsElementVisible == true)
+27365:                             {
+27366:                                 if (___tagElement.___drawingObjectList.Count > 0)
+27367:                                 {
+27368:                                     this.___resetDrawingElementParentBounds(___tagElement, ref _grCon);
+27369:                                     ___isResetElementBoundsCalled = true;
+27370:                                     ___isDrawingObjectResetBoundsCalled = true;
+27371:                                     if (___isDrawingObjectResetBoundsCalled == false) {; }
+27372:                                     ___tagElement.___IsElementofffsetParentPointCaluculationRequired = false;
+27373:                                 }
+27374:                             }
+27375:                             if (___isResetElementBoundsCalled == false)
+27376:                             {
+27377: 
+27378:                                 CHtmlElement __parentElement = ___tagElement.___parent as CHtmlElement;
+27379:                                 if (__parentElement != null)
+27380:                                 {
+27381: 
+27382:                                     if (___tagElement.___offfsetParentPoint.Y < __parentElement.___offfsetParentPoint.Y)
+27383:                                     {
+27384:                                         if (___tagElement.___isElementPositionAbsoluteOrStatic == false)
+27385:                                         {
+27386:                                             ___tagElement.___offfsetParentPoint.Y = __parentElement.___offfsetParentPoint.Y + (float)___tagElement.___offsetTop;
+27387:                                         }
+27388:                                     }
+27389: 
+27390:                                 }
+27391: 
+27392:                             }
+27393:                         }
+27394: 
+27395: 
+27396:                     }
+27397:                     else
+27398:                     {
+27399:                         // ================================================
+27400:                         //   Calculate Absolute Postion. May be wrong ...
+27401:                         // ================================================
+27402:                         if (___tagElement.___IsElementofffsetParentPointCaluculationRequired == true)
+27403:                         {
+27404:                             ___tagElement.___offfsetParentPoint = new PointFSpec((float)(_grCon.TotalOffsetLeft + ___tagElement.___offsetLeft), (float)(_grCon.TotalOffsetTop + ___tagElement.___offsetTop));
+27405:                             ___tagElement.___IsElementofffsetParentPointCaluculationRequired = false;
+27406:                             if (___tagElement.___drawingObjectList != null)
+27407:                             {
+27408:                                 if (___tagElement.___IsElementVisible == true)
+27409:                                 {
+27410:                                     if (___tagElement.___drawingObjectList.Count > 0)
+27411:                                     {
+27412:                                         this.___resetDrawingElementParentBounds(___tagElement, ref _grCon);
+27413:                                         ___isDrawingObjectResetBoundsCalled = true;
+27414:                                         ___isResetElementBoundsCalled = true;
+27415:                                         ___tagElement.___IsElementofffsetParentPointCaluculationRequired = false;
+27416:                                     }
+27417:                                 }
+27418:                             }
+27419:                         }
+27420: 
+27421:                     }
+27422:                 }
+27423:                 catch (Exception ex)
+27424:                 {
+27425:                     if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+27426:                     {
+27427:                         commonLog.LogEntry("DrawElementRecursively {0} : {1}", ___tagElement, ex.Message);
+27428:                     }
+27429:                 }
+27430:             }
+27431:             if (_grCon.CurrentElementDepth >= DRAW_ELEMENT_STACK_LIMIT)
+27432:             {
+27433:                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+27434:                 {
+27435:                     commonLog.LogEntry("drawRootElementRecursively {0} stack depth is too deep. Abort Drawring : {1}", ___tagElement, DRAW_ELEMENT_STACK_LIMIT);
+27436:                 }
+27437:                 ___tagElement.___IsElementVisible = false;
+27438:                 ___tagElement.___style.StyleCommentAdd("DrawElement Stack Depth is too Deep");
+27439:                 return;
+27440:             }
+27441:             bool IsResetBoundsComplete = false;
+27442: 
+27443:             if (___tagElement.___IsElementVisible == true)
+27444:             {
+27445:                 if (___tagElement.___ManagedControlWeakReference != null || ___tagElement.___ManagedControlHandle != IntPtr.Zero)
+27446:                 {
+27447:                     try
+27448:                     {
+27449:                         relocateManagedControlForTagElement(___tagElement, ref _grCon, true);
+27450:                         return;
+27451:                     }
+27452:                     catch (Exception ex)
+27453:                     {
+27454:                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+27455:                         {
+27456:                             commonLog.LogEntry("relocateManagedControlForTagElement", ex);
+27457:                         }
+27458:                     }
+27459: 
+27460:                 }
+27461:                 /*
+27462: #if DEBUG
+27463:                 if (___textElement.___drawingObjectList.Count > 0)
+27464:                 {
+27465:                     ___testDrawingElementBoundsPosition(___textElement);
+27466:                 }
+27467: #endif
+27468:                 */
+27469: 
+27470: 
+27471: 
+27472:                 //if(_grCon.PaintRectangle.IntersectsWith(___textElement.offsetScreenBounds) || ___textElement.___elementTagType == CHtmlElementType._ITEXT)
+27473:                 //{
+27474:                 if (___tagElement.___ManagedControlHandle == IntPtr.Zero)
+27475:                 {
+27476:                     if (___tagElement.___offsetWidth > 0 && ___tagElement.___offsetHeight > 0)
+27477:                     {
+27478: 
+27479:                         if (___tagElement.___IsElementBlock == true || ___tagElement.___elementTagType == CHtmlElementType.IMG)
+27480:                         {
+27481:                             RectangleF targetBounds = commonTypeConverter.ToRectangleF(___tagElement.___ScreenRectangle);
+27482:                             if (!commonTypeConverter.IsEqualRectangleFSpecValue(_grCon.PaintRectangle, ___tagElement.___BaseControlDisplayRectangle))
+27483:                             {
+27484:                                 ___tagElement.___BaseControlDisplayRectangle = _grCon.PaintRectangle;
+27485:                                 targetBounds = commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen());
+27486:                             }
+27487:                             if (___IsCalucuateScreenMaximunBoundsRequired == true)
+27488:                             {
+27489:                                 _grCon.ScreenMaximunBounds = RectangleFSpec.Union(_grCon.ScreenMaximunBounds, commonTypeConverter.ToRectangleFSpec(targetBounds));
+27490:                             }
+27491:                             IsResetBoundsComplete = true;
+27492:                             if (___tagElement.___elementTagType != CHtmlElementType.SVG)
+27493:                             {
+27494:                                 if (_grCon.IsHoverPaintMode == false)
+27495:                                 {
+27496: 
+27497:                                     this.___drawElement(___tagElement, ___tagElement.___style, targetBounds, _grCon, true, false);
+27498: 
+27499:                                 }
+27500:                                 else
+27501:                                 {
+27502:                                     this.___drawElement(___tagElement, ___tagElement.___styleHover, targetBounds, _grCon, true, false);
+27503:                                 }
+27504:                             }
+27505:                             else
+27506:                             {
+27507:                                 if (_grCon.IsHoverPaintMode == false)
+27508:                                 {
+27509: 
+27510:                                     CHtmlSVGElement.___drawSVGElement(___tagElement, ___tagElement.___style, targetBounds, _grCon, true, false);
+27511: 
+27512:                                 }
+27513:                                 else
+27514:                                 {
+27515:                                     CHtmlSVGElement.___drawSVGElement(___tagElement, ___tagElement.___styleHover, targetBounds, _grCon, true, false);
+27516:                                 }
+27517: 
+27518:                             }
+27519:                             ___DrawTagElementCalled = true;
+27520:                         }
+27521: 
+27522:                     }
+27523:                 }
+27524:                 if (___DrawTagElementCalled == false)
+27525:                 {
+27526:                     if (___tagElement.___ElementInlineLevel <= 1)
+27527:                     {
+27528:                         RectangleF targetBounds = commonTypeConverter.ToRectangleF(___tagElement.___ScreenRectangle);
+27529:                         if (!commonTypeConverter.IsEqualRectangleFSpecValue(_grCon.PaintRectangle, ___tagElement.___BaseControlDisplayRectangle))
+27530:                         {
+27531:                             ___tagElement.___BaseControlDisplayRectangle = _grCon.PaintRectangle;
+27532:                             targetBounds = commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen());
+27533:                         }
+27534:                         if (this.___IsCalucuateScreenMaximunBoundsRequired == true)
+27535:                         {
+27536:                             _grCon.ScreenMaximunBounds = RectangleFSpec.Union(_grCon.ScreenMaximunBounds, commonTypeConverter.ToRectangleFSpec(targetBounds));
+27537:                         }
+27538:                         IsResetBoundsComplete = true;
+27539:                         if (___tagElement.___elementTagType != CHtmlElementType.SVG)
+27540:                         {
+27541:                             if (_grCon.IsHoverPaintMode == false)
+27542:                             {
+27543:                                 this.___drawElement(___tagElement, ___tagElement.___style, targetBounds, _grCon, true, false);
+27544: 
+27545:                             }
+27546:                             else
+27547:                             {
+27548:                                 this.___drawElement(___tagElement, ___tagElement.___styleHover, targetBounds, _grCon, true, false);
+27549:                             }
+27550:                         }
+27551:                         else
+27552:                         {
+27553:                             if (_grCon.IsHoverPaintMode == false)
+27554:                             {
+27555:                                 CHtmlSVGElement.___drawSVGElement(___tagElement, ___tagElement.___style, targetBounds, _grCon, true, false);
+27556: 
+27557:                             }
+27558:                             else
+27559:                             {
+27560:                                 CHtmlSVGElement.___drawSVGElement(___tagElement, ___tagElement.___styleHover, targetBounds, _grCon, true, false);
+27561:                             }
+27562:                         }
+27563:                         ___DrawTagElementCalled = true;
+27564:                     }
+27565:                 }
+27566:                 if (___tagElement.___drawingObjectList != null && ___tagElement.___drawingObjectList.Count > 0)
+27567:                 {
+27568:                     if (IsResetBoundsComplete == false)
+27569:                     {
+27570:                         RectangleFSpec targetBounds = ___tagElement.___ScreenRectangle;
+27571:                         if (!commonTypeConverter.IsEqualRectangleFSpecValue(_grCon.PaintRectangle, ___tagElement.___BaseControlDisplayRectangle))
+27572:                         {
+27573:                             ___tagElement.___BaseControlDisplayRectangle = _grCon.PaintRectangle;
+27574:                             targetBounds = ___tagElement.GetElementBoundsOnScreen();
+27575:                         }
+27576:                         if (this.___IsCalucuateScreenMaximunBoundsRequired == true)
+27577:                         {
+27578:                             _grCon.ScreenMaximunBounds = RectangleFSpec.Union(_grCon.ScreenMaximunBounds, targetBounds);
+27579:                         }
+27580:                     }
+27581: 
+27582:                     this.___drawTextElement(___tagElement, ref _grCon, false);
+27583:                     ___DrawTagElementCalled = true;
+27584:                 }
+27585: 
+27586:                 //}
+27587:             }
+27588: 
+27589:             short ShiftMethod = 0;
+27590:             System.Drawing.Drawing2D.GraphicsState graphicState = null;
+27591:             IDisposable avaloniaStates = null;
+27592:             int skiaSaveCount = -1;
+27593:             //if(___textElement.___IsElementBlock == true &&  ___textElement.___elementTagType != CHtmlElementType._ITEXT)
+27594:             if (___tagElement.___ElementInlineShifted == false)
+27595:             {
+27596:                 // If Block Element (regardless vibile or non-visile) increment the location
+27597:                 // for layout
+27598: 
+27599:                 _grCon.TotalOffsetLeft += (float)(___tagElement.___offsetLeft + ___tagElement.___paddingLeft);
+27600:                 _grCon.TotalOffsetTop += (float)(___tagElement.___offsetTop + ___tagElement.___paddingTop);
+27601: 
+27602:                 if (___tagElement.___HasOverflowHidden == true && ___tagElement.___StyleOverFlowSize != SizeF.Empty)
+27603:                 {
+27604: #if WINDOWS
+27605:                     graphicState = _grCon.Graphic.Save();
+27606:                     RectangleF clipRect = commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen());
+27607:                     clipRect.Size = ___tagElement.___StyleOverFlowSize;
+27608:                     _grCon.Graphic.SetClip(clipRect, System.Drawing.Drawing2D.CombineMode.Replace);
+27609: #else
+27610:                         switch(commonHTML.GraphicApiType)
+27611:                         {
+27612:                             case GraphicAPIType.Avalonia:
+27613:                                 if (_grCon.AvaloniaDrawingContext != null)
+27614:                                 {
+27615:                                     avaloniaStates = _grCon.AvaloniaDrawingContext.PushClip(commonTypeConverter.convertRectangleFToAvaloniaRect(commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen())));
+27616:                                 }
+27617:                                 break;
+27618:                             case GraphicAPIType.SkiaSharp:
+27619:                                 if (_grCon.SkiaCanvas != null)
+27620:                                 {
+27621:                                     skiaSaveCount = _grCon.SkiaCanvas.Save();
+27622:                                     _grCon.SkiaCanvas.ClipRect(commonTypeConverter.convertRectangleFToSKRect(commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen())));
+27623:                                 }
+27624:                                 break;
+27625:                          }
+27626: 
+27627: 
+27628: #endif
+27629:                 }
+27630: 
+27631:                 ShiftMethod = 1;
+27632:             }
+27633: 
+27634: 
+27635:             try
+27636:             {
+27637:                 if (___tagElement.___isSvgElement == false)
+27638:                 {
+27639: 
+27640: 
+27641:                     if (___tagElement.___childNodes.Count > 0)
+27642:                     {
+27643:                         // Draw z-index == 0 Elements first
+27644:                         int __childCount = ___tagElement.___childNodes.Count;
+27645:                         for (int i = 0; i < __childCount; i++)
+27646:                         {
+27647:                             CHtmlElement cElement = ___tagElement.___childNodes[i] as CHtmlElement;
+27648:                             if (cElement != null && cElement.___IsElementVisible == true)
+27649:                             {
+27650:                                 if (cElement.___style != null && cElement.___style.___zIndexValue <= 0)
+27651:                                 {
+27652: 
+27653:                                     if (this.___IsRenderingFirstCompleted == false && (cElement.___IsElementBlock == true && cElement.offsetScreenBounds.Top > _grCon.PaintRectangle.Top + _grCon.PaintRectangle.Height + 3600) == false)
+27654:                                     {
+27655:                                         _grCon.CurrentElementDepth++;
+27656:                                         drawRootElementRecursively(cElement, ref _grCon);
+27657:                                         _grCon.CurrentElementDepth--;
+27658:                                     }
+27659:                                 }
+27660:                             }
+27661:                         }
+27662:                         if (___tagElement.___ZIndexedChildElementList != null)
+27663:                         {
+27664:                             int zItemCount = ___tagElement.___ZIndexedChildElementList.Count;
+27665:                             if (zItemCount > 0)
+27666:                             {
+27667:                                 for (int zPos = 0; zPos < zItemCount; zPos++)
+27668:                                 {
+27669:                                     CHtmlElement zIndexedElement = ___tagElement.___ZIndexedChildElementList[zPos];
+27670:                                     //HTML.CHtmlElement zIndexedElement = ___textElement.ZIndexedChildElementSortedList[____zIndexKey] as CHtmlElement;
+27671:                                     if (zIndexedElement != null)
+27672:                                     {
+27673:                                         if (zIndexedElement.___IsElementVisible == true && object.ReferenceEquals(___tagElement, zIndexedElement) == false)
+27674:                                         {
+27675: 
+27676:                                             if (this.___IsRenderingFirstCompleted == false && (zIndexedElement.___IsElementBlock == true && zIndexedElement.offsetScreenBounds.Top > _grCon.PaintRectangle.Top + _grCon.PaintRectangle.Height + 3600) == false)
+27677:                                             {
+27678:                                                 _grCon.CurrentElementDepth++;
+27679:                                                 drawRootElementRecursively(zIndexedElement, ref _grCon);
+27680:                                                 _grCon.CurrentElementDepth--;
+27681:                                             }
+27682: 
+27683:                                         }
+27684: 
+27685:                                     }
+27686:                                 }
+27687:                             }
+27688:                         }
+27689:                     }
+27690:                 }
+27691: 
+27692:             }
+27693:             catch (Exception ex)
+27694:             {
+27695:                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+27696:                 {
+27697:                     commonLog.LogEntry("drawRootElementRecursively Draw Error" + ___tagElement.toLogString(), ex);
+27698:                 }
+27699:                 /*
+27700: 				if(___textElement.___elementTagType != CHtmlElementType.HTML && ___textElement.___elementTagType != CHtmlElementType.BODY)
+27701: 				{
+27702: 					___textElement.___IsElementVisible = false;
+27703: 				}
+27704:                 */
+27705:                 //return;
+27706:             }
+27707:             finally
+27708:             {
+27709:                 switch (ShiftMethod)
+27710:                 {
+27711:                     case 1:
+27712:                         _grCon.TotalOffsetLeft -= (float)(___tagElement.___offsetLeft + ___tagElement.___paddingLeft);
+27713:                         _grCon.TotalOffsetTop -= (float)(___tagElement.___offsetTop + ___tagElement.___paddingTop);
+27714: 
+27715:                         if (graphicState != null)
+27716:                         {
+27717:                             _grCon.Graphic.Restore(graphicState);
+27718:                         }
+27719:                         if (avaloniaStates != null)
+27720:                         {
+27721:                             avaloniaStates.Dispose();
+27722:                         }
+27723:                         if (skiaSaveCount != -1)
+27724:                         {
+27725:                             _grCon.SkiaCanvas.RestoreToCount(skiaSaveCount);
+27726:                         }
+27727:                         break;
+27728:                     case 2:
+27729:                         _grCon.TotalOffsetLeft -= (float)___tagElement.___offsetLeft;
+27730:                         _grCon.TotalOffsetTop -= (float)___tagElement.___offsetTop;
+27731:                         break;
+27732:                 }
+27733: 
+27734:             }
+27735: 
+27736:         }
+```
+Current statement: line 27656
+[4] MultiHtmlCraft.AvaroniaControl.dll!MultiHtmlCraft.AvaroniaControl.MultiversalAvaroniaControl.Render
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.AvaroniaControl\MultiHtmlCraft.AvaroniaControl.cs
+832:         public override void Render(DrawingContext context)
+833:         {
+834:             var grCon = this.CreateGraphicContainer(context);
+835:             if (grCon == null) return;
+836:             grCon.IsUIThreadPaint = true;
+837:             grCon.AvaloniaDrawingContext = context;
+838:             grCon.PaintRectangle = commonTypeConverter.ToRectangleFSpec(this.GetPaintRectScrollbar());
+839:             if (___document != null && ___document.documentElement is CHtmlElement documentRootElement)
+840:             {
+841:                 if (_documentPaintCount >= int.MaxValue)
+842:                     _documentPaintCount = 0;
+843:                 _documentPaintCount++;
+844:                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 15 && _documentPaintCount == 1)
+845:                 {
+846:                     commonUtils.LogElementDOMTree(documentRootElement, "", commonUtils.CJHtmlDOMElementLogModeType.ElementWidthAndHeight);
+847:                 }
+848: 
+849:                 ___document.drawRootElementRecursively(documentRootElement, ref grCon);
+850: 
+851:             }
+852:             base.Render(context);
+853: #if !WINDOWS
+854: 
+855:             if (___document != null)
+856:             {
+857:                 ___document.ApplyPendingAvaloniaRelocations();
+858:             }
+859: #endif
+860:         }
+```
+Current statement: line 849
+[5] [外部コード]
+[29] MultiHtmlCraft.AvaloniaControl_Test.dll!MultiHtmlCraaft.AvaloniaControl_Tesst.Program.Main
+Code for the stack frame:
+```csharp MultiHtmlCraaft.AvaloniaControl_Tesst\Program.cs
+12:         [STAThread]
+13:         public static void Main(string[] args) => BuildAvaloniaApp()
+14:             .StartWithClassicDesktopLifetime(args);
+```
+Current statement: lines 13-14
+
+## LOCALS
+Variable: 'this' of type 'MultiHtmlCraft.Core.CHtmlCollection' is a complex object with child properties and has value: Count = 4
+Variable: 'indexParam' of type 'int' has value: 2
+

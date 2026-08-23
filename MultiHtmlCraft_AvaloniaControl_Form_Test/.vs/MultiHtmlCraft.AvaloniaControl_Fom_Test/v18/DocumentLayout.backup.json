@@ -1,0 +1,278 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\controls\\multiversalavaroniaview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:controls\\multiversalavaroniaview.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\controls\\multiversalavaroniaview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:controls\\multiversalavaroniaview.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\views\\mainwindow.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:views\\mainwindow.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\viewmodels\\mainwindowviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:viewmodels\\mainwindowviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\app.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:app.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5CA2EE9F-D07E-0FD5-EC68-933978DEAD55}|..\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.avaroniacontrol\\multihtmlcraft.avaroniacontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\views\\mainwindow.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:views\\mainwindow.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\app.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:app.axaml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\viewlocator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:viewlocator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\viewmodels\\viewmodelbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:viewmodels\\viewmodelbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\app.manifest||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:app.manifest||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 543,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 77,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 312,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MultiversalAvaroniaView.axaml",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Controls\\MultiversalAvaroniaView.axaml",
+              "RelativeDocumentMoniker": "Controls\\MultiversalAvaroniaView.axaml",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Controls\\MultiversalAvaroniaView.axaml",
+              "RelativeToolTip": "Controls\\MultiversalAvaroniaView.axaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-08-22T23:50:11.694Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MultiversalAvaroniaView.axaml.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Controls\\MultiversalAvaroniaView.axaml.cs",
+              "RelativeDocumentMoniker": "Controls\\MultiversalAvaroniaView.axaml.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Controls\\MultiversalAvaroniaView.axaml.cs",
+              "RelativeToolTip": "Controls\\MultiversalAvaroniaView.axaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-22T23:49:46.39Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "MultiHtmlCraft.AvaroniaControl.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.cs",
+              "ViewState": "AgIAABIAAAAACObo8XsDwBwAAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-22T23:38:32.347Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainWindow.axaml.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Views\\MainWindow.axaml.cs",
+              "RelativeDocumentMoniker": "Views\\MainWindow.axaml.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Views\\MainWindow.axaml.cs",
+              "RelativeToolTip": "Views\\MainWindow.axaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-22T23:29:06.362Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Microsoft.Common.CurrentVersion.targets",
+              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ViewState": "AgIAAHwXAAAAAAAAAAAIwJUXAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2026-08-22T11:18:46.015Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "App.axaml",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\App.axaml",
+              "RelativeDocumentMoniker": "App.axaml",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\App.axaml",
+              "RelativeToolTip": "App.axaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-08-22T11:05:33.86Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-22T10:59:46.221Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ViewModelBase.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\ViewModels\\ViewModelBase.cs",
+              "RelativeDocumentMoniker": "ViewModels\\ViewModelBase.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\ViewModels\\ViewModelBase.cs",
+              "RelativeToolTip": "ViewModels\\ViewModelBase.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-22T10:48:46.423Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MainWindow.axaml",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Views\\MainWindow.axaml",
+              "RelativeDocumentMoniker": "Views\\MainWindow.axaml",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Views\\MainWindow.axaml",
+              "RelativeToolTip": "Views\\MainWindow.axaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAABGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-08-22T10:45:47.112Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MainWindowViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\ViewModels\\MainWindowViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\MainWindowViewModel.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\ViewModels\\MainWindowViewModel.cs",
+              "RelativeToolTip": "ViewModels\\MainWindowViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-22T10:44:24.427Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "app.manifest",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\app.manifest",
+              "RelativeDocumentMoniker": "app.manifest",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\app.manifest",
+              "RelativeToolTip": "app.manifest",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001203|",
+              "WhenOpened": "2026-08-22T10:44:04.93Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ViewLocator.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\ViewLocator.cs",
+              "RelativeDocumentMoniker": "ViewLocator.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\ViewLocator.cs",
+              "RelativeToolTip": "ViewLocator.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-22T10:43:26.152Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "App.axaml.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\App.axaml.cs",
+              "RelativeDocumentMoniker": "App.axaml.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\App.axaml.cs",
+              "RelativeToolTip": "App.axaml.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAcAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-22T10:43:11.074Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

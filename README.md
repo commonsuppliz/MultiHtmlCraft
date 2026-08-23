@@ -14,9 +14,9 @@
 
 The library is written in C# and has no dependency on browser engines such as Internet Explorer, Gecko, WebKit, Chromium, or Edge. It supports both Windows and cross-platform builds using conditional compilation and platform-specific dependencies.
 
-The original "fair[dll] V1" project was designed for .NET Framework 1.1 and Mono (Windows and Linux) with JavaScript integration using IKVM (it used its own thread pool). This version is no longer supported or maintained.
+The original "fair[dll='fair'] V1" project was designed for .NET Framework 1.1 and Mono (Windows and Linux) with JavaScript integration using IKVM (it used its own thread pool). This version is no longer supported or maintained.
 
-The modern "fair[dll] V2" project targets .NET 9 and later. It offers improved performance, modern .NET APIs, and better script engine integration (async/await, `HttpClient`, and other current APIs).
+The modern   "fair[dll='fair'] V2" project targets .NET 9 and later. It offers improved performance, modern .NET APIs, and better script engine integration (async/await, `HttpClient`, and other current APIs).
 
 ## Supported Web APIs
 
@@ -48,7 +48,7 @@ The following table lists representative Web APIs provided by `MultiHtmlCraft.Co
 | `XMLHttpRequest` | Implemented (basic) | Basic GET/POST, headers, events (`readyState`, `onload`, `onerror`, etc.) |
 | Window basic events (`load`, `resize`, `click`, etc.) | Implemented (basic) | Event listener registration and dispatch supported |
 | `Element.addEventListener()` / `Element.removeEventListener()` | Implemented | DOM event handling supported |
-| CSSOM (reading styles, partial manipulation) | Partial | Not fully spec-complete but major features available |
+
 
 ## Solution structure
 
@@ -119,6 +119,23 @@ Run unit tests (if present):
 ## Running / Rendering
 
 - WinForms, Avalonia (in development), and Skia-based rendering are supported or under development.
+
+### UI Form Test (with WinForms Form, AvaloniaUI Form)
+
+
+Winforms Form
+
+```
+cd .\MultiHtmlCraft_Winforms_Test
+dotnet build MultiHtmlCraft_WinFormsControl_Test.sln -c Debug
+```
+
+AvaloniaUI Form
+```
+cd .\MultiHtmlCraft_AvaloniaControl_Form_Test
+dotnet build MultiHtmlCraft.AvaloniaControl_Form_Test.sln -c Debug
+```
+
 
 ## Font management
 
