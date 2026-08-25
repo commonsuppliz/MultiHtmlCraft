@@ -1,5 +1,5 @@
 <p align="center">
-<img src="MultiHtmlCraftLogo3_Small.jpg" alt="MultiHtmlCraftProject Logo">
+<img src="MultiHtmlCraftLogo4.jpg" alt="MultiHtmlCraftProject Logo">
 </p>
 
 
