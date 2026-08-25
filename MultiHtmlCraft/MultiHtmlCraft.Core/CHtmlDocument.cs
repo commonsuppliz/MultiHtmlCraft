@@ -65,7 +65,8 @@ namespace MultiHtmlCraft.Core
             Dictionary<string, int> documentMethods = new Dictionary<string, int>
             {
             { "addEventListener", 100},
-            { "getElementById", 102},
+            { "removeEventListener", 101},
+            {"getElementById", 102},
             { "getElementsByName", 103},
             { "getElementsByTagName", 104},
             { "getElementsByClassName", 105},

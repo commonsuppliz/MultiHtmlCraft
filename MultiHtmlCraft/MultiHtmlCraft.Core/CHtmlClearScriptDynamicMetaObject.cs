@@ -1542,7 +1542,7 @@ namespace MultiHtmlCraft.Core
                                         System.Diagnostics.Debug.WriteLine($"BindGetMember: insertBefore case matched for CHtmlElement {self?.tagName}");
                                         Func<object, object, object> insertBeforeDel = (object newNodeArg, object refNodeArg) =>
                                         {
-                                            // ★ ここから下をそのまま貼り付け
+                                          
                                             System.Diagnostics.Debug.WriteLine("===== insertBeforeDel ENTERED =====");
                                             System.Diagnostics.Debug.WriteLine($"self = {self?.tagName} ({self?.GetType().Name})");
                                             System.Diagnostics.Debug.WriteLine($"newNodeArg type = {newNodeArg?.GetType().FullName}");
@@ -2376,25 +2376,33 @@ namespace MultiHtmlCraft.Core
                                         }
                                     case "removeEventListener":
                                         {
-                                            Action<object[]> remEvtDel = (args) =>
+                                            var name = binder.Name;
+                                            Action<object, object> removeEventListenerDel = (nameValue, funcObj) =>
                                             {
                                                 try
                                                 {
-                                                    if (args != null && args.Length >= 2)
+
+                                                    string nameStr = UnwrapValue(nameValue)?.ToString() ?? string.Empty;
+                                                    var handler = funcObj;
+                                                    // object optionsArg = args.Length >= 3 ? args[2] : null;
+                                                    if (!string.IsNullOrEmpty(nameStr))
                                                     {
-                                                        var nameStr = UnwrapValue(args[0])?.ToString() ?? string.Empty;
-                                                        var handler = args[1];
-                                                        object optionsArg = args.Length >= 3 ? args[2] : null;
-                                                        if (!string.IsNullOrEmpty(nameStr))
-                                                        {
-                                                            try { self.removeEventListener(nameStr, handler, optionsArg); } catch { }
-                                                        }
+                                                        self.removeEventListener((string)nameStr, handler);
                                                     }
+
                                                 }
-                                                catch { }
+                                                catch (Exception ex)
+                                                {
+                                                    if (commonLog.LoggingEnabled) commonLog.LogEntry("removeEventListener delegate exception: {0}", ex.Message);
+                                                }
+
                                             };
+
                                             return new DynamicMetaObject(
-                                                Expression.Constant(remEvtDel, typeof(Action<object[]>)),
+                                                Expression.Convert(
+                                                    Expression.Constant(removeEventListenerDel),
+                                                    typeof(object)
+                                                ),
                                                 BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                             );
                                         }
@@ -3327,7 +3335,7 @@ namespace MultiHtmlCraft.Core
                                 {
                                     commonLog.LogEntry("CHtmlDocument indexer access with BindGetIndex intIndex={0}, strIndex='{1}'", intIndex.HasValue ? intIndex.Value.ToString() : "(null)", strIndex ?? "(null)");
                                 }
-                                if (intIndex == 0) // あるいは範囲外の場合
+                                if ( intIndex == null || intIndex ==0) // あるいは範囲外の場合
                                 {
                                     // 処理失敗（例外やバインド失敗）にするのではなく、明示的に ClearScript の「Undefined」や「Null」をバインドして返す
                                     return new DynamicMetaObject(
@@ -3335,6 +3343,7 @@ namespace MultiHtmlCraft.Core
                                         BindingRestrictions.GetTypeRestriction(Expression, LimitType)
                                     );
                                 }
+                               
                                 var result = cHtmlDocument.___getPropertyByIndex((int)intIndex);
 
                                 return new DynamicMetaObject(
@@ -3396,7 +3405,7 @@ namespace MultiHtmlCraft.Core
                                     catch { }
                                 }
 
-                                // 実行時評価ヘルパーを呼ぶ式を返す（ParameterExpression 等に対応）
+                                
                                 if (indexes != null && indexes.Length > 0 && indexes[0]?.Expression != null)
                                 {
                                     try
@@ -3572,10 +3581,10 @@ namespace MultiHtmlCraft.Core
                 if (collection == null) return null;
                 if (indexObj == null) return null;
 
-                // 既に int なら直接
+                
                 if (indexObj is int ii) return collection.__GetByIndex(ii);
 
-                // 数値系を安全に変換
+               
                 if (indexObj is long l) return collection.__GetByIndex((int)l);
                 if (indexObj is short s) return collection.__GetByIndex((int)s);
                 if (indexObj is byte b) return collection.__GetByIndex((int)b);
@@ -3583,19 +3592,19 @@ namespace MultiHtmlCraft.Core
                 if (indexObj is float f) return collection.__GetByIndex(Convert.ToInt32(f));
                 if (indexObj is decimal dec) return collection.__GetByIndex(Convert.ToInt32(dec));
 
-                // 文字列なら名前または数値パース
+                
                 if (indexObj is string sRaw)
                 {
                     if (int.TryParse(sRaw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var pi))
                     {
                         return collection.__GetByIndex(pi);
                     }
-                    // 名前検索（コレクション側の実装に依存するが、試しに item(string) を呼ぶ）
+                   
                     try { return collection.item(sRaw); } catch { }
                     return null;
                 }
 
-                // 最後の手段：ToString を数値にする、または直接 Convert
+                
                 try
                 {
                     var asInt = Convert.ToInt32(indexObj);
@@ -3616,7 +3625,7 @@ namespace MultiHtmlCraft.Core
             }
             catch { return null; }
         }
-        // BindGetIndex 内の先頭付近（既存の UnwrapValue を使える位置に挿入）
+       
         private bool TryResolveIndex(DynamicMetaObject indexObj, out int? intIndex, out string? strIndex)
         {
             intIndex = null;

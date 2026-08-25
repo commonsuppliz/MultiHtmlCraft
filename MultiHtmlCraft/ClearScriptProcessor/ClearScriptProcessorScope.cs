@@ -313,6 +313,73 @@ namespace ClearScriptProcessor
         ");
 
                 createStandardObjects();
+                _v8Engine.Execute(@"
+(function(){
+    try {
+        // Provide minimal window event API expected by libraries (add/remove/dispatch)
+        if (typeof window.addEventListener === 'undefined') {
+            (function(){
+                var __listeners = Object.create(null);
+
+                function addToList(type, handler){
+                    __listeners[type] = __listeners[type] || [];
+                    __listeners[type].push(handler);
+                }
+                function removeFromList(type, handler){
+                    var a = __listeners[type];
+                    if (!a) return;
+                    for (var i = a.length - 1; i >= 0; i--) if (a[i] === handler) a.splice(i,1);
+                }
+                function callList(type, evt){
+                    var a = __listeners[type] || [];
+                    for (var i = 0; i < a.length; i++) { try { a[i].call(window, evt); } catch(e) {} }
+                }
+
+                window.addEventListener = function(type, handler){
+                    // Prefer host window if it implements listeners
+                    try {
+                        if (typeof __host_window !== 'undefined' && __host_window && typeof __host_window.addEventListener === 'function') {
+                            return __host_window.addEventListener(type, handler);
+                        }
+                    } catch(_) {}
+                    // Delegate DOM events to document when appropriate
+                    try { if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+                        document.addEventListener(type, handler);
+                        return;
+                    } } catch(_) {}
+                    addToList(type, handler);
+                };
+
+                window.removeEventListener = function(type, handler){
+                    try {
+                        if (typeof __host_window !== 'undefined' && __host_window && typeof __host_window.removeEventListener === 'function') {
+                            return __host_window.removeEventListener(type, handler);
+                        }
+                    } catch(_) {}
+                    try { if (typeof document !== 'undefined' && typeof document.removeEventListener === 'function') {
+                        document.removeEventListener(type, handler);
+                    } } catch(_) {}
+                    removeFromList(type, handler);
+                };
+
+                window.dispatchEvent = function(evt){
+                    var type = (evt && evt.type) || evt;
+                    try {
+                        if (typeof __host_window !== 'undefined' && __host_window && typeof __host_window.dispatchEvent === 'function') {
+                            return __host_window.dispatchEvent(evt);
+                        }
+                    } catch(_) {}
+                    // dispatch to stored listeners and to document.dispatchEvent for DOM-level handlers
+                    callList(type, evt);
+                    try { if (typeof document !== 'undefined' && typeof document.dispatchEvent === 'function') {
+                        document.dispatchEvent(evt);
+                    } } catch(_) {}
+                };
+            })();
+        }
+    } catch(e) { /* swallow */ }
+})();
+");
 
                 // Provide safe JS stubs for timer functions so scripts can call them even
                 // before the real window proxy (__host_window) is attached. If the host
@@ -349,7 +416,19 @@ namespace ClearScriptProcessor
                                     } catch(e) {}
                                     return undefined;
                                 };
-                            }
+                            }  
+                        if (typeof getComputedStyle === 'undefined') {
+                       getComputedStyle = function(){
+                        try {
+                        if (typeof __host_window !== 'undefined' && __host_window && typeof __host_window.getComputedStyle === 'function') {
+                            return __host_window.getComputedStyle.apply(__host_window, arguments);
+                           }
+                            } catch(e) {}
+                                return undefined;
+                             };
+                           }
+            
+                            
                             if (typeof clearInterval === 'undefined') {
                                 clearInterval = function(id){
                                     try {
@@ -430,6 +509,50 @@ namespace ClearScriptProcessor
                 }
 #endif
 
+                try
+                {
+                    var typeofDollar = engine.Evaluate("typeof $");
+                    engine.Execute("console.log('[ClearScript] post-exec typeof $ = ' + (typeof $));");
+
+                    if (typeofDollar == null || typeofDollar.ToString() != "function")
+                    {
+                        engine.Execute(@"
+            (function(){
+                try {
+                    if (typeof $ === 'undefined' || $ === null) { console.log('[ClearScript] $ is undefined/null'); return; }
+                    var orig = $;
+                    var targetFunc = null;
+
+                    if (typeof orig === 'function') targetFunc = orig;
+                    if (!targetFunc && orig && typeof orig.default === 'function') targetFunc = orig.default;
+                    if (!targetFunc && orig && orig.fn && typeof orig.fn.init === 'function') {
+                        targetFunc = function(){ return orig.fn.init.apply(orig, arguments); };
+                    }
+                    if (!targetFunc && orig && typeof orig.apply === 'function') targetFunc = orig.apply;
+
+                    if (targetFunc) {
+                        var wrapper = function() { return targetFunc.apply(this, arguments); };
+                        try { for (var k in orig) wrapper[k] = orig[k]; } catch(e){}
+                        try { if (orig.prototype) wrapper.prototype = orig.prototype; } catch(e){}
+                        $ = wrapper; jQuery = wrapper;
+                        if (typeof window !== 'undefined') { window.$ = wrapper; window.jQuery = wrapper; }
+                        console.log('[ClearScript] $ wrapped, typeof $=' + typeof $);
+                    } else {
+                        console.log('[ClearScript] No callable target found on $ object');
+                    }
+                } catch(e) { console.log('[ClearScript] $ wrap error: ' + e); }
+            })();
+        ");
+                    
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"execute: post-exec $ wrapper check failed: {ex.Message}");
+        
+                        engine.Execute("console.log('[ClearScript] post-exec wrapper check error" + ex.Message); 
+                    } 
+                }
                 _isInitCompleted = true;
                 // 重要: もし window が先にセットされている場合、ここで proxy 作成処理を確実に実行する
                 try
@@ -446,7 +569,7 @@ namespace ClearScriptProcessor
                     Debug.WriteLine($"initScriptEngine: failed to finalize window proxy creation: {ex.GetType().Name} - {ex.Message}");
                 }
             }
-        }
+        
 
         public bool isDefaultMultiversalProcessor()
         {
@@ -644,7 +767,8 @@ namespace ClearScriptProcessor
                 target.setTimeout = function(){ try { if (typeof __host_window_setTimeout_delegate !== 'undefined') return __host_window_setTimeout_delegate(Array.prototype.slice.call(arguments)); if (host && typeof host.setTimeout === 'function') return host.setTimeout.apply(host, arguments); } catch(e){} return undefined; };
                 target.setInterval = function(){ try { if (typeof __host_window_setInterval_delegate !== 'undefined') return __host_window_setInterval_delegate(Array.prototype.slice.call(arguments)); if (host && typeof host.setInterval === 'function') return host.setInterval.apply(host, arguments); } catch(e){} return undefined; };
                 target.clearTimeout = function(id){ try { if (host && typeof host.clearTimeout === 'function') return host.clearTimeout(id); } catch(e){} return undefined; };
-                target.clearInterval = function(id){ try { if (host && typeof host.clearInterval === 'function') return host.clearInterval(id); } catch(e){} return undefined; };
+                target.clearInterval = function(id){ try { if (host && typeof host.clearInterval === 'function') return host.clearInterval(id); } catch(e){} return undefined; };]
+                target.getComputedStyle = function(id){ try { if (host && typeof host.getComputedStyle === 'function') return host.getComputedStyle(element); } catch(e){} return undefined; };
                 target.requestAnimationFrame = function(){ try { if (typeof __host_window_requestAnimationFrame_delegate !== 'undefined') return __host_window_requestAnimationFrame_delegate(Array.prototype.slice.call(arguments)); if (host && typeof host.requestAnimationFrame === 'function') return host.requestAnimationFrame.apply(host, arguments); } catch(e){} return undefined; };
                 target.cancelAnimationFrame = function(){ try { if (typeof __host_window_cancelAnimationFrame_delegate !== 'undefined') return __host_window_cancelAnimationFrame_delegate(Array.prototype.slice.call(arguments)); if (host && typeof host.cancelAnimationFrame === 'function') return host.cancelAnimationFrame.apply(host, arguments); } catch(e){} return undefined; };
                 target.alert = function(){ try { if (host && typeof host.alert === 'function') return host.alert.apply(host, arguments); } catch(e){} return undefined; };

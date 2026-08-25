@@ -113,9 +113,10 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/canvas/Pacman1.html";// Pacman Test by tmrDevelop
                 //txt.Text = "http://localhost/canvas/FillRectWithHsla.html";// OK
                 //txt.Text = "http://localhost/canvas/MarksJumpingGame/index.html";
-                //txt.Text = "http://localhost/jstest/jqueryTest/JQuwey371Test2.html";// JQuery 3.7.1 Test document.createElement Fail
-                // txt.Text = "http://localhost/jstest/jqueryTest/JQuery371Test4.html";// JQuery 3.7.1 Test Version 4
-                txt.Text = "http://localhost/jstest/NodeNameTest1.html"; // NodeNameTest V1
+                txt.Text = "http://localhost/jstest/jqueryTest/JQuwey371Test2.html";// JQuery 3.7.1 Test document.createElement Fail
+                //txt.Text = "http://localhost/jstest/jqueryTest/JQuery371Test4.html";// JQuery 3.7.1 Test Version 4
+                //txt.Text = "http://localhost/jstest/NodeNameTest1.html"; // NodeNameTest V1
+                //txt.Text = "http://localhost/jstest/document_removeEventListerSample1.html"; // document.removeEventListener Sample 1
             }
 
             if (btnGo != null && txt != null && _multiView != null)
