@@ -349,13 +349,13 @@ namespace MultiHtmlCraft.Core
                     var objectBase = base[indexParam];
                     try
                     {
-                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 30)
                         {
-                            var st = new System.Diagnostics.StackTrace(1, false); // 1 フレーム上から取得
+                            var st = new System.Diagnostics.StackTrace(1, false);
                             commonLog.LogEntry($"CHtmlCollection.Indexer called with indexParam={indexParam} Count={base.Count} Caller={st.GetFrame(0)?.GetMethod()?.Name} objectBase : {objectBase}");
                         }
                     }
-                    catch { /* ログ失敗は無視して続行 */ }
+                    catch {  }
 
                     return objectBase;
                 }
@@ -363,7 +363,7 @@ namespace MultiHtmlCraft.Core
                 {
                     if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
                     {
-                        commonLog.LogEntry($"Index {indexParam} is out of range. returns null");
+                        commonLog.LogEntry($"{this} Index {indexParam} is out of range. returns null");
                     }
                     return null;
                 }

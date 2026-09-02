@@ -47,7 +47,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/canvas/CanvasBezierCavasTest1.html"; // Canvas Bezier Curve Test
                 // txt.Text = "http://localhost/canvas/CanvasDrawImageSimpleTest1.html";
                 //txt.Text = "http://localhost/html/ImgTest.html";// ___drawImage() OK
-                //txt.Text = "http://localhost/canvas/RequestAnimationFrameTest1.html"; // Animation Frame Test
+               // txt.Text = "http://localhost/canvas/RequestAnimationFrameTest1.html"; // Animation Frame Test
                 //txt.Text = "http://localhost/canvas/CanvasFillRectTest2.html"; // Fill Rect Test OK
                 // txt.Text = "http://localhost/canvas/CanvasMeasureTextTest.html";
                 // txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test OK
@@ -69,14 +69,14 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/jstest/AudioCanPlayTypeTest1.html";//
                 //txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test OK
                 // txt.Text = "http://localhost/canvas/jagarikin/angelic_weapon.html"; // Angelic Weapon Test by jagarikin
-                //txt.Text = "http://localhost/jstest/ImageTeset1.html"; // 3 image load test with promise
-                //txt.Text = "http://localhost/jstest/FetchJSonTest.html"; // Fetch JSON Test OK
-                // txt.Text = "http://localhost/canvas/DonkeyKongTest.html";// Donkey Kong Test   onload function is set before src is set
-                //txt.Text = "http://localhost/canvas/DonkeyKongTestAfterSrcIsSet.html";// Donkey Kong Test   onload function is set after src is set
-                // txt.Text = "http://localhost/jstest/KeyDownTest1.html"; // KeyDown Test 
-                // txt.Text = "http://localhost/jstest/DocumentAddEventListerTest1.html";//
-                // txt.Text = "http://localhost/canvas/canvasEllpseTest1.html"; // Canvas Ellipse Test OK
-                // txt.Text = "http://localhost/canvas/Canvas//3.html"; // Space Harior Javascript Canvas Test 
+                //xt.Text = "http://localhost/jstest/ImageTeset1.html"; // 3 image load test with promise
+                                                                       //txt.Text = "http://localhost/jstest/FetchJSonTest.html"; // Fetch JSON Test OK
+                                                                       // txt.Text = "http://localhost/canvas/DonkeyKongTest.html";// Donkey Kong Test   onload function is set before src is set
+                                                                       //txt.Text = "http://localhost/canvas/DonkeyKongTestAfterSrcIsSet.html";// Donkey Kong Test   onload function is set after src is set
+                                                                       // txt.Text = "http://localhost/jstest/KeyDownTest1.html"; // KeyDown Test 
+                                                                       // txt.Text = "http://localhost/jstest/DocumentAddEventListerTest1.html";//
+                                                                       // txt.Text = "http://localhost/canvas/canvasEllpseTest1.html"; // Canvas Ellipse Test OK
+                                                                       // txt.Text = "http://localhost/canvas/Canvas//3.html"; // Space Harior Javascript Canvas Test 
                 ///txt.Text = "http://localhost/canvas/CanvasMouseMoveTest1.html"; //
                 // txt.Text = "http://localhost/jstest/SimpleMouseMoveTest1.html"; // Simple Mouse Move Test
                 // txt.Text = "http://localhost/jstest/SimpleMouseDownTest1.html";// Simple Mouse Down Test
@@ -113,10 +113,12 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/canvas/Pacman1.html";// Pacman Test by tmrDevelop
                 //txt.Text = "http://localhost/canvas/FillRectWithHsla.html";// OK
                 //txt.Text = "http://localhost/canvas/MarksJumpingGame/index.html";
-                txt.Text = "http://localhost/jstest/jqueryTest/JQuwey371Test2.html";// JQuery 3.7.1 Test document.createElement Fail
+                // txt.Text = "http://localhost/jstest/jqueryTest/JQuwey371Test2.html";// JQuery 3.7.1 Test document.createElement Fail
                 //txt.Text = "http://localhost/jstest/jqueryTest/JQuery371Test4.html";// JQuery 3.7.1 Test Version 4
                 //txt.Text = "http://localhost/jstest/NodeNameTest1.html"; // NodeNameTest V1
                 //txt.Text = "http://localhost/jstest/document_removeEventListerSample1.html"; // document.removeEventListener Sample 1
+                //txt.Text = "http://localhost/canvas/CanvasImageMove6.html";//
+                txt.Text = "http://localhost/canvas/CanvasDrawGradiusBitmapStatic.html"; // Canvas Draw Gradius Bitmap Static Test
             }
 
             if (btnGo != null && txt != null && _multiView != null)

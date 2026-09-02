@@ -26,10 +26,13 @@ namespace MultiHtmlCraft.Core
     public  class CHtmlMultiversalWindow :  Interfaces.IMultiversalWindow, IDisposable
     {
         internal static readonly Dictionary<string, int> CHtmlMultiversalWindowProperties = InitializeCHtmlMultiversalWindowProperties();
+        internal static readonly Dictionary<string, int> CHtmlMultiversalWindowMethods = InitializeCHtmlMultiversalWindowMethods();
 
         private static Dictionary<string, int> InitializeCHtmlMultiversalWindowProperties()
         {
-            Dictionary<string, int> chtmlMultiversalWindowProperties = new Dictionary<string, int>
+            try
+            {
+                Dictionary<string, int> chtmlMultiversalWindowProperties = new Dictionary<string, int>
         {
             { "availHeight", 0 },
             { "availWidth", 1 },
@@ -51,7 +54,70 @@ namespace MultiHtmlCraft.Core
             { "msOrientation", 17 },
             { "webkitOrientation", 18 }
         };
-            return chtmlMultiversalWindowProperties;
+                return chtmlMultiversalWindowProperties;
+            } catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("InitializeCHtmlMultiversalWindowProperties() Exception. " + ex.Message);
+                }
+            }
+            return new Dictionary<string, int>();
+        }
+        private static Dictionary<string, int> InitializeCHtmlMultiversalWindowMethods()
+        {
+   
+            try
+            {
+                var methods = new Dictionary<string, int>
+            {
+                { "alert", 0 },
+                { "confirm", 1 },
+                { "prompt", 2 },
+                { "open", 3 },
+                { "close", 4 },
+                { "print", 5 },
+                { "focus", 6 },
+                { "blur", 7 },
+                { "scrollTo", 8 },
+                { "scrollBy", 9 },
+                { "resizeTo", 10 },
+                { "resizeBy", 11 },
+                { "moveTo", 12 },
+                { "moveBy", 13 },
+                { "postMessage", 14 },
+                { "requestAnimationFrame", 15 },
+                { "cancelAnimationFrame", 16 },
+                { "setTimeout", 17 },
+                { "clearTimeout", 18 },
+                { "setInterval", 19 },
+                { "clearInterval", 20 },
+                { "getComputedStyle", 21 },
+                { "matchMedia", 22 },
+                { "getSelection", 23 },
+                { "webkitRequestFileSystem", 26 },
+                { "webkitResolveLocalFileSystemURL", 27 },
+                { "webkitStorageInfo", 28 },
+                { "webkitRequestAnimationFrame", 29 },
+                { "webkitCancelAnimationFrame", 30 },
+                { "webkitRequestFileSystem", 31 },
+                { "webkitResolveLocalFileSystemURL", 32 },
+                { "webkitStorageInfo", 33 },
+                { "webkitRequestAnimationFrame", 34 },
+                { "webkitCancelAnimationFrame", 35 }
+
+
+            };
+                return methods; 
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("InitializeCHtmlMultiversalWindowMethods() Exception. " + ex.Message);
+                }
+            }
+            return new Dictionary<string, int>();
         }
 
         private static HttpClient? ___httpClient = null;

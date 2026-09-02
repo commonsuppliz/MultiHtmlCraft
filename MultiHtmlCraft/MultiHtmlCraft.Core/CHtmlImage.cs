@@ -11,13 +11,15 @@ namespace MultiHtmlCraft.Core
 		private double _y = 0;
 		public CHtmlImage()
 		{
-			this.tagName = "IMG";
+            this.___tagName = "IMG";
+			this.___elementTagType = CHtmlElementType.IMG;
 			this.___IsDynamicElement = true;
 		}
 		public CHtmlImage(double x, double y):base()
 		{
-			this.tagName = "IMG";
-			this._x = x;
+			this.___tagName = "IMG";
+            this.___elementTagType = CHtmlElementType.IMG;
+            this._x = x;
 			this._y = y;
 			this.___IsDynamicElement = true;
 		}

@@ -1035,7 +1035,12 @@ namespace MultiHtmlCraft.Core
                             var methods = CHtmlLocationBase.CHtmlLocationBaseMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
                         }
-
+                    case CHtmlMultiversalWindow window:
+                        {
+                            var props = CHtmlMultiversalWindow.CHtmlMultiversalWindowProperties.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlMultiversalWindow.CHtmlMultiversalWindowMethods.Keys ?? Enumerable.Empty<string>();
+                            return props.Concat(methods);
+                        }
                     default:
                         var obj = this.Value;
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)

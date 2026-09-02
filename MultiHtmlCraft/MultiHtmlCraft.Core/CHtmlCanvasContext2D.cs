@@ -2612,14 +2612,6 @@ namespace MultiHtmlCraft.Core
                                 }
                             }
                         ImageObjectFound:
-                            if (skBitmapToDraw == null)
-                            {
-                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
-                                {
-                                    commonLog.LogEntry("CHtmlCanvasContext drawImage: Unable to obtain SKBitmap for the provided image object. This may occur when: 1) The image is still loading, 2) The image source is invalid, or 3) There is an issue with caching. Provided image object: {0}", _image);
-                                }
-                                return; // Only return when bitmap is null
-                            }
 
                             // Draw the bitmap
                             if (skBitmapToDraw != null)
@@ -2657,8 +2649,18 @@ namespace MultiHtmlCraft.Core
                                             }
                                         }
                                     }
+                                    else
+                                    { 
+                                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                            {
+                                                commonLog.LogEntry("CHtmlCanvasContext drawImage: Unable to obtain SKBitmap for the provided image object. This may occur when: 1) The image is still loading, 2) The image source is invalid, or 3) There is an issue with caching. Provided image object: {0}", _image);
+                                            }
+                                            return; // Only return when bitmap is null
+                                        
+                                    }
                                 }
                             }
+                            
                             this.___ContextTimerDelay = 0;
                         }
                         break;
