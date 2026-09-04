@@ -70,13 +70,13 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test OK
                 // txt.Text = "http://localhost/canvas/jagarikin/angelic_weapon.html"; // Angelic Weapon Test by jagarikin
                 //xt.Text = "http://localhost/jstest/ImageTeset1.html"; // 3 image load test with promise
-                                                                       //txt.Text = "http://localhost/jstest/FetchJSonTest.html"; // Fetch JSON Test OK
-                                                                       // txt.Text = "http://localhost/canvas/DonkeyKongTest.html";// Donkey Kong Test   onload function is set before src is set
-                                                                       //txt.Text = "http://localhost/canvas/DonkeyKongTestAfterSrcIsSet.html";// Donkey Kong Test   onload function is set after src is set
-                                                                       // txt.Text = "http://localhost/jstest/KeyDownTest1.html"; // KeyDown Test 
-                                                                       // txt.Text = "http://localhost/jstest/DocumentAddEventListerTest1.html";//
-                                                                       // txt.Text = "http://localhost/canvas/canvasEllpseTest1.html"; // Canvas Ellipse Test OK
-                                                                       // txt.Text = "http://localhost/canvas/Canvas//3.html"; // Space Harior Javascript Canvas Test 
+                //txt.Text = "http://localhost/jstest/FetchJSonTest.html"; // Fetch JSON Test OK
+                // txt.Text = "http://localhost/canvas/DonkeyKongTest.html";// Donkey Kong Test   onload function is set before src is set
+                //txt.Text = "http://localhost/canvas/DonkeyKongTestAfterSrcIsSet.html";// Donkey Kong Test   onload function is set after src is set
+                // txt.Text = "http://localhost/jstest/KeyDownTest1.html"; // KeyDown Test 
+                // txt.Text = "http://localhost/jstest/DocumentAddEventListerTest1.html";//
+                // txt.Text = "http://localhost/canvas/canvasEllpseTest1.html"; // Canvas Ellipse Test OK
+                // txt.Text = "http://localhost/canvas/Canvas//3.html"; // Space Harior Javascript Canvas Test 
                 ///txt.Text = "http://localhost/canvas/CanvasMouseMoveTest1.html"; //
                 // txt.Text = "http://localhost/jstest/SimpleMouseMoveTest1.html"; // Simple Mouse Move Test
                 // txt.Text = "http://localhost/jstest/SimpleMouseDownTest1.html";// Simple Mouse Down Test
@@ -97,8 +97,8 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "https://www.joshuakgoldberg.com/FullScreenMario/Source/"; // Canvas Fill Style Test OKÅEìÔΩÅE
                 //txt.Text = "http://localhost/jstest/AudioPlayTest1.html"; // Audio Play Test 1 OK
                 //  txt.Text = "http://localhost/html/HtmlControlTest1.html"; // Html Control Test 1 OK
-                //txt.Text = "http://localhost/html/QuerySelectorAllTest1.html";//
-                //txt.Text = "http://localhost/canvas/CanvasGradius4.html";// Canvas Gradius 4 Test OK
+                //txt.Text = "http://localhost/html/QuerySelectorAllTest1.html";// texContent,trim() fail.
+                 txt.Text = "http://localhost/canvas/CanvasGradius4.html";// Canvas Gradius 4 Test OK
                 //txt.Text = "http://localhost/canvas/WindowOnloadTest1.html"; // Window onload Test
                 //txt.Text = "http://localhost/canvas/CanvasBrushTest1.html"; // Canvas Brush Test 1 OK
                 //txt.Text = "http://localhost/canvas/CanvasCreatePatternTest1.html";//
@@ -118,7 +118,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/jstest/NodeNameTest1.html"; // NodeNameTest V1
                 //txt.Text = "http://localhost/jstest/document_removeEventListerSample1.html"; // document.removeEventListener Sample 1
                 //txt.Text = "http://localhost/canvas/CanvasImageMove6.html";//
-                txt.Text = "http://localhost/canvas/CanvasDrawGradiusBitmapStatic.html"; // Canvas Draw Gradius Bitmap Static Test
+                //txt.Text = "http://localhost/canvas/CanvasDrawGradiusBitmapStatic.html"; // Canvas Draw Gradius Bitmap Static Test
             }
 
             if (btnGo != null && txt != null && _multiView != null)
