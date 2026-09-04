@@ -1,5 +1,5 @@
 <p align="center">
-<img src="MultiHtmlCraftLogo4.jpg" alt="MultiHtmlCraftProject Logo">
+<img src="MultiHtmlCraftLogo4.jpg" alt="MultiHtmlCraftProject Logo" width="300" height="300" />
 </p>
 
 
@@ -12,7 +12,7 @@
 
 MultiHtmlCraft is a .NET library for HTML parsing, DOM construction, and rendering. It aims to provide a lightweight alternative to full browser engines for server-side or headless client-side processing scenarios.
 
-The library is written in Mostyly in C#. It has no dependency on other html parsers and other rendering engines such as trident gecko, webKit, chromium. It supports both Windows and cross-platform builds using conditional compilation and platform-specific dependencies.
+The library is written in C#. It has no dependency on other html parsers and other rendering engines such as trident gecko, webKit, chromium. It supports both Windows and cross-platform builds using conditional compilation and platform-specific dependencies.
 
 The original "fair[dll='fair'] V1" project was designed for .NET Framework 1.1 and Mono (Windows and Linux) with JavaScript integration using IKVM and Java Rhino Library. This version is no longer supported or maintained.
 
