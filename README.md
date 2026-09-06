@@ -87,6 +87,10 @@ See the solution explorer for the full project list and references.
   - NilJS (via the `NilJsProcessor` project)
 - Variables and functions may be exposed to the script engine's scope via `IScriptScope` methods to enable interaction between scripts and the DOM.
 
+## Javascript Frameork
+
+- JQuery ver 3.7.1, ver 4.0.0 can be compiled for basic api.
+
 ## GUI Platforms
 
 - WinForms is supported on Windows (GDI). Avalonia support for cross-platform GUI for MacOS, Linuex rendering is almost compmpleted.

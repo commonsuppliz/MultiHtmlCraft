@@ -124,7 +124,8 @@
               "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlElement.cs",
               "ViewState": "AgIAANMSAAAAAAAAAADwv+MSAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-26T23:55:25.53Z"
+              "WhenOpened": "2026-08-26T23:55:25.53Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -172,7 +173,8 @@
               "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDocument.cs",
               "ViewState": "AgIAAL0EAAAAAAAAAAAawM4EAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-24T04:44:11.712Z"
+              "WhenOpened": "2026-08-24T04:44:11.712Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -196,7 +198,8 @@
               "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlClearScriptDynamicMetaObject.cs",
               "ViewState": "AgIAADcEAAAAAAAAAAAAAEMEAABEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-24T00:21:36.789Z"
+              "WhenOpened": "2026-08-24T00:21:36.789Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
