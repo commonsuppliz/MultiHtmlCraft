@@ -80,6 +80,7 @@ namespace MultiHtmlCraft.Core
                 ["backgroundrepeat"] = 144,
                 ["BackgroundRepeat"] = 145,
                 ["backgroundClip"] = 146,
+                ["length"] = 147,
 
 
             };

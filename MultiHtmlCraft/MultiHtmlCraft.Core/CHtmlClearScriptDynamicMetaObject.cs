@@ -1399,7 +1399,39 @@ namespace MultiHtmlCraft.Core
                                             catch { /* フォールバックへ */ }
                                         }
                                         break;
-                                }
+                                    case "width":
+                                    case "height":
+                                    case "offsetWidth":
+                                    case "offsetHeight":
+                                    case "clientWidth":
+                                    case "clientHeight":
+                                    case "scrollWidth":
+                                    case "scrollHeight":
+                                    case "scrollTop":
+                                    case "scrollLeft":
+                                    case "naturalWidth":
+                                   
+                                    case "naturalHeight":
+                                    case "currentTime":
+                                    case "duration":
+                                    case "volume":
+                                    case "playbackRate":
+                                    case "videoWidth":
+                                    case "videoHeight":
+
+
+                                        double numericValue = elementValue != null ? Convert.ToDouble(elementValue) : 0.0;
+
+                                        return new DynamicMetaObject(
+                                            Expression.Convert(
+                                                Expression.Constant(numericValue),
+                                                typeof(double)
+                                            ),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                        break;
+                                        }
+                                 
 
                                 if (elementValue != null)
                                 {

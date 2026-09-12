@@ -223,24 +223,50 @@ namespace MultiHtmlCraft.Core
             CHtmlMediaElement.___isVideo_MPEG4_Part2_supported  = true;
             CHtmlMediaElement.___isVideo_Ogg_supported = true;
         }
+        public static void ___defineBassNetAudioVideoFormmats()
+        {
+            // Audio Section
+
+            CHtmlMediaElement.___isAudio_ACC_255_supported = true;
+            CHtmlMediaElement.___isAudio_AMR_NB_supported = true;
+            CHtmlMediaElement.___isAudio_MP3_supported = true;
+            CHtmlMediaElement.___isAudio_PCM_supported = true;
+            CHtmlMediaElement.___isAudio_WMA_353_supported = true;
+            CHtmlMediaElement.___isAudio_WMA_354_supported = true;
+            CHtmlMediaElement.___isAudio_M4A_suppoted = true;
+            CHtmlMediaElement.___isAudio_Ogg_supported = true;
+
+            // Video
+            CHtmlMediaElement.___isVideo_H263_supported = false;
+            CHtmlMediaElement.___isVideo_H264_supported = true;
+            CHtmlMediaElement.___isVideo_MPEG4_Part2_supported = true;
+            CHtmlMediaElement.___isVideo_Windows_Media_Video_VC_1_supported = true;
+            CHtmlMediaElement.___isVideo_WMV3_Windows_Media_Video_9_supported = true;
+            CHtmlMediaElement.___isVideo_WMVA_supported = true;
+            CHtmlMediaElement.___isVideo_MPEG4_Part2_supported = true;
+            CHtmlMediaElement.___isVideo_Ogg_supported = true;
+        }
 
         public static void ___initMediaElementControlInterface()
         {
-            switch(System.Environment.OSVersion.Platform)
+            switch(commonHTML.GraphicApiType)
             {
 #if WINDOWS
-                case PlatformID.Win32NT:
-                case PlatformID.Win32S:
-                case PlatformID.Win32Windows:
-                case PlatformID.Xbox:
-                case PlatformID.WinCE:
+                case  GraphicAPIType.WinformsGDI:
+                case GraphicAPIType.WPF:
+               
+
                     ___initWindowsCHtmlMediaIntegrationElementHostType();
+                    ___hostLibraryLoadStatus = CHtmlAssemblyLoadStatusType.Loaded;
                     break;
 #else
-                case PlatformID.Unix:
-                case PlatformID.MacOSX:
-                
 
+
+                case GraphicAPIType.Avalonia:
+                case GraphicAPIType.SkiaSharp:
+
+                    ___defineBassNetAudioVideoFormmats();
+                    ___hostLibraryLoadStatus = CHtmlAssemblyLoadStatusType.Loaded;
                     break;
 #endif
                 default:

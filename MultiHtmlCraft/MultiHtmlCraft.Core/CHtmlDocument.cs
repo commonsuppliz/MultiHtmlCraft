@@ -33078,6 +33078,8 @@ namespace MultiHtmlCraft.Core
 
         public int setTimeout_viaWindow(object callback, object _timer)
         {
+            
+            
             object[] args = { callback, _timer };
             return this.setTimeoutInner(args);
         }

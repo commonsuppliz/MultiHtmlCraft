@@ -474,9 +474,19 @@ namespace MultiHtmlCraft.Core
 
         public void arc(double x, double y, double radius, double startAngle, double endAngle, bool anticlockwise)
         {
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"{this}.arc({x}, {y}, {radius}, {startAngle}, {endAngle}, {anticlockwise}) method called. Current instruction count: " + (this.___CanvasInstructionsList != null ? this.___CanvasInstructionsList.Count : 0));
+            }
+            double safeX = double.IsNaN(x) ? 0 : x;
+            double safeY = double.IsNaN(y) ? 0 : y;
+
+            /*
             if (double.IsNaN(x) || double.IsNaN(y) || double.IsNaN(radius) || double.IsNaN(startAngle) || double.IsNaN(endAngle))
                 return;
-
+            */
+            if (double.IsNaN(safeX) || double.IsNaN(safeY) || double.IsNaN(radius) || double.IsNaN(startAngle) || double.IsNaN(endAngle))
+                return;
             double startAngleDeg = startAngle * 180 / Math.PI;
             double endAngleDeg = endAngle * 180 / Math.PI;
             double sweepAngleDeg = endAngleDeg - startAngleDeg;
@@ -721,7 +731,8 @@ namespace MultiHtmlCraft.Core
             {
                 if (skCanvas != null && this.___CanvasSkiaGraphicPath != null)
                 {
-                    if (this.___CanvasSkiaFillPaint == null || this.___contextFillStyleAsObject is CHtmlCanvasContextExtenstionObject) ___createBrushFromFillStyleObject(Color.Black);
+                    if (this.___CanvasSkiaFillPaint == null || this.___contextFillStyleAsObject is CHtmlCanvasContextExtenstionObject || this.___contextFillStyleAsObject is string)
+                        ___createBrushFromFillStyleObject(Color.Black);
 
                     var paint = this.___CanvasSkiaFillPaint;
                     byte originalAlpha = paint.Color.Alpha;
@@ -3972,7 +3983,8 @@ namespace MultiHtmlCraft.Core
 
             try 
             { 
-                ColorSpec spec = commonHTML.GetColorSpecFromString(colorStr);
+                var spec = commonHTML.GetColorSpecFromHTMLColorExtend(colorStr);
+      
                 // If it returned black but the string isn't black, try alternative parsing
                 if (spec.R == 0 && spec.G == 0 && spec.B == 0 && spec.A == 255 && colorStr.ToLower() != "black" && !colorStr.StartsWith("#000"))
                 {

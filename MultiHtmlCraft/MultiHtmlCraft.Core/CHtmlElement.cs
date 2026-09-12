@@ -14510,7 +14510,7 @@ namespace MultiHtmlCraft.Core
 						return this.___offsetWidth;
 					case "offsettop":
                     case "offsetTop":
-                        // 要素が存在し、有効な状態かチェチE��
+                        
                         if (this.___HasElementRemoved || this.___IsDisposing)
                         {
                             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
@@ -16158,7 +16158,7 @@ namespace MultiHtmlCraft.Core
                 {
                     if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
                     {
-                       commonLog.LogEntry("Element ___getPropertyByName by index {0} {1} {2} will throw exception.", this.GetType(), this, ___index);
+                       commonLog.LogEntry("Element ___getPropertyByIndex by index {0} {1} {2} will throw exception.", this.GetType(), this, ___index);
                     }
                     ___ElementPropertyAccessByIndexLastTime = DateTime.Now;
                     ___ElementPropertyAccessByIndexCount = 0;
