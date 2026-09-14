@@ -1513,7 +1513,14 @@ namespace MultiHtmlCraft.AvaroniaControl
             ___fireWindoworDocumentEvent("mousedown", mouseArg);
 
         }
-
+        protected override void OnSizeChanged(SizeChangedEventArgs e)
+        {
+            base.OnSizeChanged(e);
+            if(this.___multiversalWindow != null)
+            {
+                this.___multiversalWindow.___updateMultiversalWindowSize(e.NewSize.Width, e.NewSize.Height);
+            }
+        }
 
 
         public static int ToJavaScriptKeyCode(Avalonia.Input.Key key)

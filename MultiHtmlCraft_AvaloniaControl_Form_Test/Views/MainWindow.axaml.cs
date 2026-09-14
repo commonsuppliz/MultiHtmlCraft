@@ -47,7 +47,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/canvas/CanvasBezierCavasTest1.html"; // Canvas Bezier Curve Test
                 // txt.Text = "http://localhost/canvas/CanvasDrawImageSimpleTest1.html";
                 //txt.Text = "http://localhost/html/ImgTest.html";// ___drawImage() OK
-               // txt.Text = "http://localhost/canvas/RequestAnimationFrameTest1.html"; // Animation Frame Test
+                // txt.Text = "http://localhost/canvas/RequestAnimationFrameTest1.html"; // Animation Frame Test
                 //txt.Text = "http://localhost/canvas/CanvasFillRectTest2.html"; // Fill Rect Test OK
                 // txt.Text = "http://localhost/canvas/CanvasMeasureTextTest.html";
                 // txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test OK
@@ -62,25 +62,11 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/canvas/CanvasBeginPathClosePathMove.html"; // Canvas BeginPath ClosePath MoveTo Test OK
                 // txt.Text = "http://localhost/phoria.js-master/test1t_noGUI.html"; // Phoria Textbure
                 // txt.Text = "http://localhost/canvas/CanvasClipTest1.html"; // Canvas Clip Test OK
-                txt.Text = "http://localhost/mariohtml5-master/minTest.html"; // Mario HTML5 Test OnProgress
-                                                                              //txt.Text = "http://localhost/phoria.js-master/test4g_NoGUI.Q"; // Phoria 3D Test Slow on progress but works
-                                                                              // txt.Text = "http://localhost/canvas/tmrDevelop/cosmos.html"; // Cosmos Test by tmrDevelop 
-                                                                              //txt.Text = "http://localhost/jstest/jqueryTest/JQuwey371Test1.html"; // JQuert 371 Test document.createElement Fail
-                                                                              //txt.Text = "http://localhost/jstest/AudioCanPlayTypeTest1.html";//
-                                                                              //txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test OK
-                                                                              // txt.Text = "http://localhost/canvas/jagarikin/angelic_weapon.html"; // Angelic Weapon Test by jagarikin
-                                                                              //xt.Text = "http://localhost/jstest/ImageTeset1.html"; // 3 image load test with promise
-                                                                              //txt.Text = "http://localhost/jstest/FetchJSonTest.html"; // Fetch JSON Test OK
-                                                                              // txt.Text = "http://localhost/canvas/DonkeyKongTest.html";// Donkey Kong Test   onload function is set before src is set
-                                                                              //txt.Text = "http://localhost/canvas/DonkeyKongTestAfterSrcIsSet.html";// Donkey Kong Test   onload function is set after src is set
-                                                                              // txt.Text = "http://localhost/jstest/KeyDownTest1.html"; // KeyDown Test 
-                                                                              // txt.Text = "http://localhost/jstest/DocumentAddEventListerTest1.html";//
-                                                                              // txt.Text = "http://localhost/canvas/canvasEllpseTest1.html"; // Canvas Ellipse Test OK
-                                                                              // txt.Text = "http://localhost/canvas/Canvas//3.html"; // Space Harior Javascript Canvas Test 
+                //txt.Text = "http://localhost/mariohtml5-master/minTest.html"; // Mario HTML5 Test OnProgress
                 ///txt.Text = "http://localhost/canvas/CanvasMouseMoveTest1.html"; //
                 // txt.Text = "http://localhost/jstest/SimpleMouseMoveTest1.html"; // Simple Mouse Move Test
                 // txt.Text = "http://localhost/jstest/SimpleMouseDownTest1.html";// Simple Mouse Down Test
-                // txt.Text = "http://localhost/canvas/SpaceHarrior.html";// Space Harrior Canvas Test 
+                //  txt.Text = "http://localhost/canvas/SpaceHarrior.html";// Space Harrior Canvas Test 
                 // txt.Text = "http://localhost/canvas/DoruagaTower.html";// 
                 // txt.Text = "http://localhost/canvas/CrazyClimber.html";// Crazy Climber Canvas Test KeyDown Event Works
                 //txt.Text = "http://localhost/jstest/KeyBoardEvent_WithKeyTest1.html";// Keyboard Event with Key Test
@@ -121,7 +107,8 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/canvas/CanvasDrawGradiusBitmapStatic.html"; // Canvas Draw Gradius Bitmap Static Test
                 // txt.Text = "http://localhost/neon-hexagon-forming-particles/dist/index.html"; // Neon Hexagon Forming Particles Test
                 //txt.Text = "http://localhost/canvas/CanvasArcTest.html"; //
-                txt.Text = " http://localhost/canvas/RequestAmimationFrameHSLHATest2.html"; // RequestAnimationFrame HSLHA Test 2
+                // txt.Text = " http://localhost/canvas/RequestAmimationFrameHSLHATest2.html"; // RequestAnimationFrame HSLHA Test 2 OK
+                txt.Text = "http://localhost/jstest/WindowPropertyNumberCheck.html";// Window Property Number Check Test OK
             }
 
             if (btnGo != null && txt != null && _multiView != null)

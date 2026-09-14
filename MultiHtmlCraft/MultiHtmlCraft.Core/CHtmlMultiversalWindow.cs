@@ -13,6 +13,8 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection.Metadata.Ecma335;
+
 #if WINDOWS
 using System.Windows.Forms;
 #endif
@@ -52,7 +54,12 @@ namespace MultiHtmlCraft.Core
             { "orientation", 15 },
             { "mozOrientation", 16 },
             { "msOrientation", 17 },
-            { "webkitOrientation", 18 }
+            { "webkitOrientation", 18 },
+            { "innerWidth", 19},
+            { "innerHeight", 20},
+            { "outerWidth", 21},
+            { "outerHeight", 22}
+
         };
                 return chtmlMultiversalWindowProperties;
             } catch (Exception ex)
@@ -213,6 +220,32 @@ namespace MultiHtmlCraft.Core
         private readonly object ___ChildWindowControlCreationPendingList_LockingObject = new object();
         internal System.Threading.Timer ___multiHtmlCraftWindowTimer = null;
         private object ___multiHtmlCraftWindowTimerLockingObject = new object();
+
+        private double ___innerWidth = 0;
+        private double ___innerHeight = 0;
+
+        private double ___outerWidth = 0;
+
+        private double ___outerHeight = 0;
+
+        private double ___pageXOffset = 0;
+
+        private double ___pageYOffset = 0;
+
+        private double ___scrollLeft = 0;
+        private double ___scrollTop = 0;
+        private double ___screenX = 0;
+
+        private double ___screenY = 0;
+
+        private double ___scrollX = 0;
+        private double ___scrollY = 0;
+
+        private double ___devicePixelRatio = 0;
+
+
+
+
 
 
 
@@ -2794,20 +2827,20 @@ namespace MultiHtmlCraft.Core
                     }
                 //break;
                 case "outerHeight":
-                    return 0;
+                    return this.___innerHeight;
 
                 case "outerWidth":
+                    return this.___innerWidth;
 
-                    return 0;
 
 
                 case "innerHeight":
-                    return 0;
+                    return this.___innerHeight;
 
 
 
                 case "innerWidth":
-                    return 0;
+                    return this.___innerWidth;
 
                 case "opener":
                     if (this.___parentMultiversalWindowWeakReference != null)
@@ -3963,6 +3996,11 @@ namespace MultiHtmlCraft.Core
             {
                 throw new System.NotSupportedException(___languate + " is handler not reigstered");
             }
+        }
+        public void ___updateMultiversalWindowSize(double w, double  h)
+        {
+            this.___innerWidth = w;
+            this.___innerHeight = h;
         }
         #region Function Execution Section
         public void ___executeElementEventFunction(string __eventName, CHtmlElement ___element, object ___objFunction, object[] ___args)
@@ -7328,12 +7366,12 @@ s               else
 
 
 
-            return (double)1000;
+            return this.___innerHeight;
         }
         internal double ___getinnerWidth()
         {
 
-            return 1000;
+            return this.___innerWidth;
         }
 
         int Interfaces.IMultiversalWindow.___getMultiversalWindowLevel()
