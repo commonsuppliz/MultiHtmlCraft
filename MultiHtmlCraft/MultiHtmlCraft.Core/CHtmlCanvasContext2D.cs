@@ -159,6 +159,7 @@ namespace MultiHtmlCraft.Core
         {"isPointInPath", 35},
         {"flush", 36},
         {"drawElements", 37},
+      
 
     };
             return dict;
@@ -1637,7 +1638,7 @@ namespace MultiHtmlCraft.Core
         {
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
             {
-                commonLog.LogEntry("entering {0}.getImageDataInner({1}, {2})", this, p1Object, p2Object);
+                commonLog.LogEntry("entering {0}.createImageDataInner({1}, {2})", this, p1Object, p2Object);
             }
             double p1 = 0;
             if (p1Object != null)
@@ -3846,8 +3847,70 @@ namespace MultiHtmlCraft.Core
             ___setCanvasActivityIntoDocument();
         }
 
-        public static string ___performToDataURLOperation(string type, double p1, double p2, double p3, object p4, CHtmlElement element)
+        public static string ___getToDataURLString(string type, double p1, double p2, double p3, object p4, CHtmlElement element)
         {
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry($"entering ___getToDataURLString(type: {type}, p1: {p1}, p2: {p2}, p3: {p3}, p4: {p4}, {element})");
+            }
+            if(element != null && element.___canvasContextCurrent2D != null)
+            {
+                try
+                {
+                    var canvasContext = element.___canvasContextCurrent2D;
+                    if (canvasContext.___CanvasSkiaBitmapWeakReference?.Target is SKBitmap bitmap)
+                    {
+                        using (var image = SKImage.FromBitmap(bitmap))
+                        {
+                            SKEncodedImageFormat format = SKEncodedImageFormat.Png;
+                            int quality = 100;
+                            if (!string.IsNullOrEmpty(type))
+                            {
+                                switch(type)
+                                {
+                                    case "image/jpeg":
+                                        format = SKEncodedImageFormat.Jpeg;
+                                        quality = (int)p1;
+                                        break;
+                                    case "image/webp":
+                                        format = SKEncodedImageFormat.Webp;
+                                        quality = (int)p1;
+                                        break;
+                                    case "image/bmp":
+                                        format = SKEncodedImageFormat.Bmp;
+                                        break;
+                                    case "image/gif":
+                                        format = SKEncodedImageFormat.Gif;
+                                        break;
+                                    case "image/png":
+                                    default:
+                                        format = SKEncodedImageFormat.Png;
+                                        break;
+                                }
+
+                            }
+                            using (var data = image.Encode(format, quality))
+                            {
+                                string base64Data = Convert.ToBase64String(data.ToArray());
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                                {
+                                    commonLog.LogEntry("___getToDataURLString returns : ", base64Data);
+                                }
+
+                                    return $"data:{type};base64,{base64Data}";
+                            }
+                        }
+                    }
+                } catch(Exception ex)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                    {
+                        commonLog.LogEntry("___getToDataURLString error: ", ex);
+                    }
+                }
+            }
+
+
             return "";
         }
 

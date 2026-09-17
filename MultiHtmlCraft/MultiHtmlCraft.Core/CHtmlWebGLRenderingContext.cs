@@ -1069,7 +1069,7 @@ namespace MultiHtmlCraft.Core
         /// </summary>
         /// <param name="imageType">Type of array</param>
         /// <returns>image string</returns>
-        internal static string ___performToDataURLOperationWebGL(string ___imageType, int ___imageQuality, int ___ImageWidth, int ___imageHeight, CHtmlWebGLRenderingContext __contextObject, CHtmlElement __canvasElement)
+        internal static string ___performToDataURLOperation(string ___imageType, int ___imageQuality, int ___ImageWidth, int ___imageHeight, CHtmlWebGLRenderingContext __contextObject, CHtmlElement __canvasElement)
         {
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
             {
@@ -1263,15 +1263,15 @@ namespace MultiHtmlCraft.Core
         /// <returns></returns>
         public string toDataURL(object __imageTypes, object ___imageQuality)
         {
-            return CHtmlWebGLRenderingContext.___performToDataURLOperationWebGL(commonHTML.GetStringValue(__imageTypes), -1, -1, -1, this, null);
+           return CHtmlWebGLRenderingContext.___performToDataURLOperation(commonHTML.GetStringValue(__imageTypes), -1, -1, -1, this, null);
         }
         public string toDataURL(object __imageTypes)
         {
-            return CHtmlWebGLRenderingContext.___performToDataURLOperationWebGL(commonHTML.GetStringValue(__imageTypes), -1, -1, -1, this, null);
+            return CHtmlWebGLRenderingContext.___performToDataURLOperation(commonHTML.GetStringValue(__imageTypes), -1, -1, -1, this, null);
         }
         public string toDataURL()
         {
-            return CHtmlWebGLRenderingContext.___performToDataURLOperationWebGL("", -1, -1, -1, this, null);
+            return CHtmlWebGLRenderingContext.___performToDataURLOperation("", -1, -1, -1, this, null);
         }
         /// <summary>
         /// Convert Radian to Degree

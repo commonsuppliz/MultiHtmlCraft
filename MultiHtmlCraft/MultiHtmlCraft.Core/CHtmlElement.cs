@@ -377,122 +377,141 @@ namespace MultiHtmlCraft.Core
             }
             return new Dictionary<string, int>();
         }
-        internal static readonly Dictionary<string, int> CHtmlElementMethods = new Dictionary<string, int>
+        internal static readonly Dictionary<string, int> CHtmlElementMethods = InitCHtmlElementMethodsList();
+
+    
+internal static Dictionary<string, int> InitCHtmlElementMethodsList()
+{
+    Dictionary<string, int> list = new Dictionary<string, int>();
+    try
     {
+        list["getElementsByTagName"] = 0;
+        list["getElementsByTagNameNS"] = 0;
+        list["getElementsByName"] = 0;
+        list["createDocumentFragment"] = 0;
+        list["createElement"] = 0;
+        list["item"] = 0;
+        list["hasAttributes"] = 0;
+        list["hasAttribute"] = 0;
+        list["createTextRange"] = 0;
+        list["isSupported"] = 0;
+        list["isEqualNode"] = 0;
+        list["getAttribute"] = 0;
+        list["getAttributeNS"] = 0;
+        list["hasAttributeNS"] = 0;
+        list["setAttributeNS"] = 0;
+        list["removeAttributeNS"] = 0;
+        list["getAttributeNode"] = 0;
+        list["setAttributeNode"] = 0;
+        list["removeAttributeNode"] = 0;
+        list["removeAttribute"] = 0;
+        list["setAttribute"] = 0;
+        list["getElementsByTagNameNS"] = 0;
+        list["getElementsByTagName"] = 0;
+        list["getElementsByName"] = 0;
+        list["getElementsByClassName"] = 0;
+        list["getElementById"] = 0;
+        list["querySelectorAll"] = 0;
+        list["querySelector"] = 0;
+        list["matches"] = 0;
+        list["matchesSelector"] = 0;
+        list["mozMatchesSelector"] = 0;
+        list["webkitMatchesSelector"] = 0;
+        list["replaceChild"] = 0;
+        list["swapNode"] = 0;
+        list["supports"] = 0;
+        list["insertBefore"] = 0;
+        list["removeChild"] = 0;
+        list["removeNode"] = 0;
+        list["clearAttributes"] = 0;
+        list["ResetScreenBounds"] = 0;
+        list["normalize"] = 0;
+        list["doScroll"] = 0;
+        list["contains"] = 0;
+        list["appendChild"] = 0;
+        list["update"] = 0;
+        list["scrollIntoView"] = 0;
+        list["addEventListener"] = 0;
+        list["detachEvent"] = 0;
+        list["dispatchEvent"] = 0;
+        list["attachEvent"] = 0;
+        list["focus"] = 0;
+        list["compareDocumentPosition"] = 0;
+        list["createEventObject"] = 0;
+        list["fireEvent"] = 0;
+        list["insertAdjacentElement"] = 0;
+        list["insertAdjacentHTML"] = 0;
+        list["insertAdjacentText"] = 0;
+        list["blur"] = 0;
+        list["addBehavior"] = 0;
+        list["removeBehavior"] = 0;
+        list["getVariable"] = 0;
+        list["reset"] = 0;
+        list["save"] = 0;
+        list["click"] = 0;
+        list["hasChildNodes"] = 0;
+        list["setExpression"] = 0;
+        list["insertRow"] = 0;
+        list["insertCell"] = 0;
+        list["start"] = 0;
+        list["stop"] = 0;
+        list["toDataURL"] = 0;
+        list["toDataUrl"] = 0;
+        list["getContext"] = 0;
+        list["requestPointerLock"] = 0;
+        list["webkitRequestPointerLock"] = 0;
+        list["mozRequestPointerLock"] = 0;
+        list["checkValidity"] = 0;
+        list["mergeAttributes"] = 0;
+        list["setActive"] = 0;
+        list["getBoundingClientRect"] = 0;
+        list["getClientRects"] = 0;
+        list["LogElementDOMTree"] = 0;
+        list["captureEvents"] = 0;
+        list["isHomePage"] = 0;
+        list["mozRequestFullscreen"] = 0;
+        list["mozRequestFullScreen"] = 0;
+        list["webkitRequestFullscreen"] = 0;
+        list["webkitRequestFullScreen"] = 0;
+        list["msRequestFullscreen"] = 0;
+        list["msRequestFullScreen"] = 0;
+        list["requestFullscreen"] = 0;
+        list["requestFullScreen"] = 0;
+        list["mozCancelFullscreen"] = 0;
+        list["mozCancelFullScreen"] = 0;
+        list["webkitCancelFullscreen"] = 0;
+        list["webkitCancelFullScreen"] = 0;
+        list["msCancelFullscreen"] = 0;
+        list["msCancelFullScreen"] = 0;
+        list["cancelFullscreen"] = 0;
+        list["cancelFullScreen"] = 0;
+        list["mozExitFullscreen"] = 0;
+        list["mozExitFullScreen"] = 0;
+        list["webkitExitFullscreen"] = 0;
+        list["webkitExitFullScreen"] = 0;
+        list["msExitFullscreen"] = 0;
+        list["msExitFullScreen"] = 0;
+        list["exitFullscreen"] = 0;
+        list["exitFullScreen"] = 0;
+        list["hasClassName"] = 0;
+        list["remove"] = 0;
+        list["hasOwnProperty"] = 0;
+        list["toString"] = 0;
+        list["isPrototypeOf"] = 0;
+        list["cloneNode"] = 0;
+                return list;
+    }
+    catch (Exception ex)
+    {
+        if (commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+        {
+            commonLog.LogEntry("InitCHtmlElementMethodsList failed: " + ex);
+        }
+    }
+            return list;
 
-        { "createDocumentFragment", 0 },
-        { "createElement", 0 },
-        { "item", 0 },
-        { "hasAttributes", 0 },
-        { "hasAttribute", 0 },
-        { "createTextRange", 0 },
-        { "isSupported", 0 },
-        { "isEqualNode", 0 },
-        { "getAttribute", 0 },
-        { "getAttributeNS", 0 },
-        { "hasAttributeNS", 0 },
-        { "setAttributeNS", 0 },
-        { "removeAttributeNS", 0 },
-        { "getAttributeNode", 0 },
-        { "setAttributeNode", 0 },
-        { "removeAttributeNode", 0 },
-        { "removeAttribute", 0 },
-        { "setAttribute", 0 },
-        { "getElementsByTagNameNS", 0 },
-        { "getElementsByTagName", 0 },
-        { "getElementsByName", 0 },
-        { "getElementsByClassName", 0 },
-        { "getElementById", 0 },
-        { "querySelectorAll", 0 },
-        { "querySelector", 0 },
-        { "matches", 0 },
-        { "matchesSelector", 0 },
-        { "mozMatchesSelector", 0 },
-        { "webkitMatchesSelector", 0 },
-        { "replaceChild", 0 },
-        { "swapNode", 0 },
-        { "supports", 0 },
-        { "insertBefore", 0 },
-        { "removeChild", 0 },
-        { "removeNode", 0 },
-        { "clearAttributes", 0 },
-        { "ResetScreenBounds", 0 },
-        { "normalize", 0 },
-        { "doScroll", 0 },
-        { "contains", 0 },
-        { "appendChild", 0 },
-        { "update", 0 },
-        { "scrollIntoView", 0 },
-        { "addEventListener", 0 },
-        { "detachEvent", 0 },
-        { "dispatchEvent", 0 },
-        { "attachEvent", 0 },
-        { "focus", 0 },
-        { "compareDocumentPosition", 0 },
-        { "createEventObject", 0 },
-        { "fireEvent", 0 },
-        { "insertAdjacentElement", 0 },
-        { "insertAdjacentHTML", 0 },
-        { "insertAdjacentText", 0 },
-        { "blur", 0 },
-        { "addBehavior", 0 },
-        { "removeBehavior", 0 },
-        { "getVariable", 0 },
-        { "reset", 0 },
-        { "save", 0 },
-        { "click", 0 },
-        { "hasChildNodes", 0 },
-        { "setExpression", 0 },
-        { "insertRow", 0 },
-        { "insertCell", 0 },
-        { "start", 0 },
-        { "stop", 0 },
-        { "toDataURL", 0 },
-        { "toDataUrl", 0 },
-        { "getContext", 0 },
-        { "requestPointerLock", 0 },
-        { "webkitRequestPointerLock", 0 },
-        { "mozRequestPointerLock", 0 },
-        { "checkValidity", 0 },
-        { "mergeAttributes", 0 },
-        { "setActive", 0 },
-        { "getBoundingClientRect", 0 },
-        { "getClientRects", 0 },
-        { "LogElementDOMTree", 0 },
-        { "captureEvents", 0 },
-        { "isHomePage", 0 },
-        { "mozRequestFullscreen", 0 },
-        { "mozRequestFullScreen", 0 },
-        { "webkitRequestFullscreen", 0 },
-        { "webkitRequestFullScreen", 0 },
-        { "msRequestFullscreen", 0 },
-        { "msRequestFullScreen", 0 },
-        { "requestFullscreen", 0 },
-        { "requestFullScreen", 0 },
-        { "mozCancelFullscreen", 0 },
-        { "mozCancelFullScreen", 0 },
-        { "webkitCancelFullscreen", 0 },
-        { "webkitCancelFullScreen", 0 },
-        { "msCancelFullscreen", 0 },
-        { "msCancelFullScreen", 0 },
-        { "cancelFullscreen", 0 },
-        { "cancelFullScreen", 0 },
-        { "mozExitFullscreen", 0 },
-        { "mozExitFullScreen", 0 },
-        { "webkitExitFullscreen", 0 },
-        { "webkitExitFullScreen", 0 },
-        { "msExitFullscreen", 0 },
-        { "msExitFullScreen", 0 },
-        { "exitFullscreen", 0 },
-        { "exitFullScreen", 0 },
-        { "hasClassName", 0 },
-        { "remove", 0 },
-        { "hasOwnProperty", 0 },
-        { "toString", 0 },
-        { "isPrototypeOf", 0 },
-        { "cloneNode", 0 },
 
-    };
+    }
 
 
         internal CHtmlVersionType ___ElementVersion = CHtmlVersionType.Version1;
@@ -12611,7 +12630,7 @@ namespace MultiHtmlCraft.Core
         {
             if (this.___elementTagType == CHtmlElementType.CANVAS)
             {
-                return CHtmlCanvasContext2D.___performToDataURLOperation(commonHTML.GetStringValue(__imageTypes), -1, -1, -1, null, this);
+                return CHtmlCanvasContext2D.___getToDataURLString(commonHTML.GetStringValue(__imageTypes), -1, -1, -1, null, this);
 
             }
             else
@@ -12628,7 +12647,7 @@ namespace MultiHtmlCraft.Core
         {
             if (this.___elementTagType == CHtmlElementType.CANVAS)
             {
-                return CHtmlCanvasContext2D.___performToDataURLOperation(commonHTML.GetStringValue(__imageTypes), -1, -1, -1, null, this);
+                return CHtmlCanvasContext2D.___getToDataURLString(commonHTML.GetStringValue(__imageTypes), -1, -1, -1, null, this);
 
             }
             else
@@ -12641,7 +12660,7 @@ namespace MultiHtmlCraft.Core
         {
             if (this.___elementTagType == CHtmlElementType.CANVAS)
             {
-                return CHtmlCanvasContext2D.___performToDataURLOperation("", -1, -1, -1, null, this);
+                return CHtmlCanvasContext2D.___getToDataURLString("", -1, -1, -1, null, this);
             }
             else
             {
@@ -12652,7 +12671,7 @@ namespace MultiHtmlCraft.Core
         {
             if (this.___elementTagType == CHtmlElementType.CANVAS)
             {
-                return CHtmlCanvasContext2D.___performToDataURLOperation("", -1, -1, -1, null, this);
+                return CHtmlCanvasContext2D.___getToDataURLString("", -1, -1, -1, null, this);
            
             }
             else

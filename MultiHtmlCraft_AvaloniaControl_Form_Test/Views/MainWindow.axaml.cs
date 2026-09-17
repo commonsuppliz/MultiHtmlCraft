@@ -108,7 +108,9 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/neon-hexagon-forming-particles/dist/index.html"; // Neon Hexagon Forming Particles Test
                 //txt.Text = "http://localhost/canvas/CanvasArcTest.html"; //
                 // txt.Text = " http://localhost/canvas/RequestAmimationFrameHSLHATest2.html"; // RequestAnimationFrame HSLHA Test 2 OK
-                txt.Text = "http://localhost/jstest/WindowPropertyNumberCheck.html";// Window Property Number Check Test OK
+                //txt.Text = "http://localhost/jstest/WindowPropertyNumberCheck.html";// Window Property Number Check Test OK
+                txt.Text = "http://localhost/phoria.js-master/test7.html";// Phoria Test 7 OK
+               // txt.Text = "http://localhost/canvas/CanvasToDataURLTest1.html";// Canvas toDataURL Test 1 OK
             }
 
             if (btnGo != null && txt != null && _multiView != null)

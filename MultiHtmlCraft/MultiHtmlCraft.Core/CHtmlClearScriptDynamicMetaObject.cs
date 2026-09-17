@@ -1831,6 +1831,21 @@ namespace MultiHtmlCraft.Core
                                             return false;
                                         };
                                         return new DynamicMetaObject(Expression.Constant(matchesDel, typeof(Func<object, bool>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    case "toDataURL":
+                                        Func<object, string> toDataURLDel = (object nameArg) =>
+                                        {
+                                            try
+                                            {
+                                                var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+                                                if (!string.IsNullOrEmpty(nameStr))
+                                                {
+                                                    return self.toDataURL(nameStr);
+                                                }
+                                            }
+                                            catch { }
+                                            return "";
+                                        };
+                                        return new DynamicMetaObject(Expression.Constant(toDataURLDel, typeof(Func<object, string>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
 
 
                                     case "getContext":
