@@ -8622,7 +8622,7 @@ namespace MultiHtmlCraft.Core
         }
 
 
-        public static byte[] convertBase64IntoBytesArray(string strBinary64, ref string formatinfo)
+        public static byte[] convertBase64IntoBytesArray(string strBinary64)
         {
             try
             {
@@ -8637,7 +8637,7 @@ namespace MultiHtmlCraft.Core
                     {
                         int posSemi = strBinary64.IndexOf(';');
                         //data:audio/wav;base64,
-                        formatinfo = strBinary64.Substring(5, posSemi - 5);
+
                         string strNew = strBinary64.Substring(posConma + 1);
                         byte[] bts = Convert.FromBase64String(strNew);
                         return bts;

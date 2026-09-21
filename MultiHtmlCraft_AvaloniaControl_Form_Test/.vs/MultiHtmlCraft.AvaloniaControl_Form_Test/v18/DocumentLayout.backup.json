@@ -3,17 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlcanvascontext2d.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\views\\mainwindow.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:views\\mainwindow.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlelement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\commonhtml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlcanvascontext2d.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmldocument.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\views\\mainwindow.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE798D16-912C-CEE1-BA64-8011409B25AC}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:views\\mainwindow.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlwebglrenderingcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -29,9 +32,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{5CA2EE9F-D07E-0FD5-EC68-933978DEAD55}|..\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.avaroniacontrol\\multihtmlcraft.avaroniacontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmldocument.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlclearscriptcanvascontexthostproxy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -92,7 +92,7 @@
         },
         {
           "DockedWidth": 554,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 11,
           "Children": [
             {
               "$type": "Bookmark",
@@ -100,7 +100,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "CHtmlWebGLRenderingContext.cs",
               "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlWebGLRenderingContext.cs",
               "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlWebGLRenderingContext.cs",
@@ -112,7 +112,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "CHtmlCanvasElement.cs",
               "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCanvasElement.cs",
               "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCanvasElement.cs",
@@ -124,7 +124,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "MultiHtmlCraft.AvaroniaControl.cs",
               "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.cs",
               "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.cs",
@@ -136,15 +136,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "commonHTML.cs",
               "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\commonHTML.cs",
               "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\commonHTML.cs",
               "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\commonHTML.cs",
               "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\commonHTML.cs",
-              "ViewState": "AgIAACtLAAAAAAAAAAAswDtLAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAAKchAAAAAAAAAAAWwLAhAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-11T01:57:54.52Z"
+              "WhenOpened": "2026-09-11T01:57:54.52Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -185,7 +186,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "CHtmlMultiversalWindow.cs",
               "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlMultiversalWindow.cs",
               "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlMultiversalWindow.cs",
@@ -197,13 +198,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "CHtmlCanvasContext2D.cs",
               "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCanvasContext2D.cs",
               "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCanvasContext2D.cs",
               "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCanvasContext2D.cs",
               "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCanvasContext2D.cs",
-              "ViewState": "AgIAAPwOAAAAAAAAAAAAAAsPAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAAPsOAAAAAAAAAADwvwsPAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-28T00:00:25.617Z",
               "EditorCaption": ""
@@ -222,13 +223,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "CHtmlElement.cs",
               "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlElement.cs",
               "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlElement.cs",
               "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlElement.cs",
               "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlElement.cs",
-              "ViewState": "AgIAAE4xAAAAAAAAAAAqwFgxAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAAPISAAAAAAAAAAAawAQTAABIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-26T23:55:25.53Z",
               "EditorCaption": ""
@@ -271,19 +272,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 3,
               "Title": "CHtmlDocument.cs",
               "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDocument.cs",
               "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDocument.cs",
               "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDocument.cs",
               "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDocument.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADKBAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAACWBAAAAAAAAAAAMwDKBAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-24T04:44:11.712Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "MainWindow.axaml.cs",
               "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Views\\MainWindow.axaml.cs",
               "RelativeDocumentMoniker": "Views\\MainWindow.axaml.cs",
@@ -291,12 +292,11 @@
               "RelativeToolTip": "Views\\MainWindow.axaml.cs",
               "ViewState": "AgIAAGAAAAAAAAAAAAAAAG8AAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-24T04:39:18.599Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-24T04:39:18.599Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "CHtmlClearScriptDynamicMetaObject.cs",
               "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlClearScriptDynamicMetaObject.cs",
               "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlClearScriptDynamicMetaObject.cs",

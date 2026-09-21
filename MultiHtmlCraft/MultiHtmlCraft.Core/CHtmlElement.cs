@@ -1,4 +1,5 @@
 
+using Microsoft.ClearScript;
 using MultiHtmlCraft.Interfaces;
 using Newtonsoft.Json.Linq;
 using NiL.JS.Core.Interop;
@@ -12,9 +13,9 @@ using System.Dynamic;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
-using Microsoft.ClearScript;
 
 namespace MultiHtmlCraft.Core
 {
@@ -4852,17 +4853,30 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                                                                               
                                 case CHtmlElementType.IMG:
                                     {
-                                        if (this.___elementTagType == CHtmlElementType.IMG && this.___IsDynamicElement)
+                                        if (this.___elementTagType == CHtmlElementType.IMG )
                                         {
                                             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
                                             {
-                                                commonLog.LogEntry($"{this.toLogString()}  src : {this.___src} is DynaimicElement and Image.src has been altered");
+                                                commonLog.LogEntry($"{this.toLogString()}  src : {this.___src} has been altered");
                                             }
-                                            var imgCache = CHmlMultiversalWebCache.getMultiversalContentDataSync(this.___srcBase.href, null);
-                                            if (imgCache != null)
+                                            if (value.StartsWith("data:"))
                                             {
-                                                this.___Document.___setDocumentUrlImage(__srcFullUrl, imgCache);
+                                                CHtmlMultiversalContentData imgData = new CHtmlMultiversalContentData();
+                                                imgData.Url = value;
+                                                string? formatInfo= string.Empty;
+                                                imgData.RawData = commonHTML.convertBase64IntoBytesArray(value);
+                                                this.___Document.___setDocumentUrlImage(__srcFullUrl, imgData);
                                                 this.___complete = true;
+                                            }
+                                            else
+                                            {
+
+                                                var imgCache = CHmlMultiversalWebCache.getMultiversalContentDataSync(this.___srcBase.href, null);
+                                                if (imgCache != null)
+                                                {
+                                                    this.___Document.___setDocumentUrlImage(__srcFullUrl, imgCache);
+                                                    this.___complete = true;
+                                                }
                                             }
                                             // onload handler (property or attribute)
                                             object elementSrcScriptHandler = null;
@@ -10698,15 +10712,69 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 		{
 			get
 			{
-				if(this.___style != null)
+                double ___elementHeight = 0;
+                if (this.___style != null)
 				{
-                    return commonHTML.GetDoubleValueFromString(this.___style.___Height, 0, 0);
+                    ___elementHeight = commonHTML.GetDoubleValueFromString(this.___style.___Height, 0, 0);
                 }
-				else
-				{
-					return 0;
-				}
-			}
+                if (___elementHeight <= 0)
+                {
+                    if (this.___elementTagType == CHtmlElementType.IMG)
+                    {
+                        if (string.IsNullOrEmpty(this.___src) == false)
+                        {
+                            try
+                            {
+#if WINDOWS
+                                System.Drawing.Image? img = null;
+                                if (this.___Document != null && this.___Document.___imageRawConcurrentDictionaryForGdi != null)
+                                {
+                                    if (this.___Document.___imageRawConcurrentDictionaryForGdi.TryGetValue(this.___src, out img))
+                                    {
+                                        ___elementHeight = img.Height;
+                                    }
+                                }
+#else
+                            switch(commonHTML.GraphicApiType)
+                            {
+                               case GraphicAPIType.SkiaSharp:
+                               case GraphicAPIType.Avalonia:
+                              
+                               
+                                    SkiaSharp.SKBitmap? bitmap = null;
+                                    if(this.___Document != null && this.___Document.___imageRawConcurrentDictionaryForSKBitmap != null)
+                                    {
+                                        if(this.___Document.___imageRawConcurrentDictionaryForSKBitmap.TryGetValue(this.___src , out bitmap))
+                                        {
+                                            ___elementHeight = bitmap.Height;
+                                        }
+                                    }
+                                    break;
+
+                                default:
+                                    break;
+                            }
+
+
+
+#endif
+
+
+                            }
+                            catch (Exception ex)
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry("Element height processing error", ex);
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                return ___elementHeight; 
+            }
 		}
 		/// <summary>
 		/// Attributes for image only 
@@ -10715,14 +10783,66 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 		{
 			get
 			{
-				if(this.___style != null)
+                double ___elementWidth = 0;
+                if (this.___style != null)
 				{
-                   return commonHTML.GetDoubleValueFromString(this.___style.___Width, 0,0);
+                   ___elementWidth = commonHTML.GetDoubleValueFromString(this.___style.___Width, 0,0);
 				}
-				else
-				{
-					return 0;
-				}
+				if(___elementWidth <= 0)
+                {
+                    if (this.___elementTagType == CHtmlElementType.IMG)
+                    {
+                        if (string.IsNullOrEmpty(this.___src) == false)
+                        {
+                            try
+                            {
+#if WINDOWS
+                                System.Drawing.Image? img = null;
+                                if(this.___Document != null && this.___Document.___imageRawConcurrentDictionaryForGdi != null)
+                                {
+                                    if(this.___Document.___imageRawConcurrentDictionaryForGdi.TryGetValue(this.___src , out img))
+                                    {
+                                        ___elementWidth = img.Width;
+                                    }
+                                }
+#else
+                            switch(commonHTML.GraphicApiType)
+                            {
+                               case GraphicAPIType.SkiaSharp:
+                               case GraphicAPIType.Avalonia:
+                              
+                               
+                                    SkiaSharp.SKBitmap? bitmap = null;
+                                    if(this.___Document != null && this.___Document.___imageRawConcurrentDictionaryForSKBitmap != null)
+                                    {
+                                        if(this.___Document.___imageRawConcurrentDictionaryForSKBitmap.TryGetValue(this.___src , out bitmap))
+                                        {
+                                            ___elementWidth = bitmap.Width;
+                                        }
+                                    }
+                                    break;
+
+                                default:
+                                    break;
+                            }
+
+
+
+#endif
+
+
+                            }
+                            catch (Exception ex)
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry("Element width processing error", ex);
+                                }
+                            }
+                        }
+                    }
+                }
+                return ___elementWidth;
 			}
 		}
 
@@ -15103,6 +15223,11 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 
                                         }
                                     }
+                                    if(this.___offsetWidth <= 0)
+                                    {
+
+                                        this.___offsetWidth = this.width;
+                                    }
                                 }
                                 return this.___offsetWidth;
 
@@ -15133,6 +15258,10 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                                             this.___offsetHeight = ___img.Height;
                                             
                                         }
+                                    }
+                                    if (this.___offsetHeight <= 0)
+                                    {
+                                        this.___offsetHeight = this.height;
                                     }
                                 }
                                 return this.___offsetHeight;
