@@ -8651,7 +8651,7 @@ namespace MultiHtmlCraft.Core
                 {
                     commonLog.LogEntry("convertBase64IntoBytesArray Error : ", ex);
                 }
-                formatinfo = "";
+                
             }
             return null;
         }
