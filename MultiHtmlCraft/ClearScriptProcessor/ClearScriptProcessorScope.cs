@@ -1913,7 +1913,26 @@ if (typeof document === 'undefined' || document === null) {
                 }
                 catch { }
             }));
-
+            _v8Engine.AddHostObject("__host_console_info", new Action<object>((arg) =>
+            {
+                try
+                {
+                    var args = normalizeArgsGlobal(arg);
+                    var sb = new StringBuilder();
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        try
+                        {
+                            var str = (_multiversalWindow != null) ? _multiversalWindow.___convertScriptObjectToString(new object[] { args[i] })?.ToString() ?? string.Empty : (args[i]?.ToString() ?? string.Empty);
+                            if (i > 0) sb.Append(' ');
+                            sb.Append(str);
+                        }
+                        catch { }
+                    }
+                    invokeConsoleGlobal("info", sb.ToString());
+                }
+                catch { }
+            }));
             _v8Engine.AddHostObject("__host_console_debug", new Action<object>((arg) =>
             {
                 try
@@ -1954,6 +1973,7 @@ if (typeof document === 'undefined' || document === null) {
                             jsConsole.warn = function(){ __host_console_warn(Array.prototype.slice.call(arguments)); };
                             jsConsole.error = function(){ __host_console_error(Array.prototype.slice.call(arguments)); };
                             jsConsole.debug = function(){ __host_console_debug(Array.prototype.slice.call(arguments)); };
+                            jsConsole.info = function(){ __host_console_info(Array.prototype.slice.call(arguments)); };
                             Object.defineProperty(jsConsole, '__wired', { value: true });
                             try { Object.freeze(jsConsole); } catch(e){}
                             lockConsole(jsConsole);

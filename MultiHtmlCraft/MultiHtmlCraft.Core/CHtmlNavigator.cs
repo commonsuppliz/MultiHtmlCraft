@@ -20,11 +20,49 @@ namespace MultiHtmlCraft.Core
 	
 	public class CHtmlNavigator: CHtmlNode, ICommonObjectInterface, IDynamicMetaObjectProvider
     {
+		internal static Dictionary<string, int> CHtmlNavigatorProperties = initCHtmlNavigatorProperties();
+        internal static Dictionary<string, int> CHtmlNavigatorMethods = initCHtmlNavigatorMethods();
+		private static Dictionary<string, int> initCHtmlNavigatorProperties()
+		{
+            Dictionary<string, int> list = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+			list["appCodeName"] = 1;
+            list["appMinorVersion"] = 1;
+            list["appName"] = 1;
+            list["appVersion"] = 1;
+            list["browserLanguage"] = 1;
+            list["cookieEnabled"] = 1;
+            list["cpuClass"] = 1;
+            list["doNotTrack"] = 1;
+            list["geolocation"] = 1;
+            list["javaEnabled"] = 1;
+            list["language"] = 1;
+            list["languages"] = 1;
+            list["mimeTypes"] = 1;
+            list["onLine"] = 1;
+            list["platform"] = 1;
+            list["plugins"] = 1;
+            list["product"] = 1;
+            list["productSub"] = 1;
+			
 
+            return list;
+		}
+		private static Dictionary<string, int> initCHtmlNavigatorMethods()
+		{
+            Dictionary<string, int> list = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+			list["getUserMedia"] = 1;
+            list["msGetUserMedia"] = 1;
+            list["mozGetUserMedia"] = 1;
+            list["webkitGetUserMedia"] = 1;
+            list["sendBeacon"] = 1;
+            list["getBattery"] = 1;
+            list["vibrate"] = 1;
+            return list;
+        }
         /// <summary>
         /// string returns for ActiveXObject getVersion
         /// </summary>
-		internal static string ___FlashVersionString = "";
+        internal static string ___FlashVersionString = "";
         /// <summary>
         /// String will be returns as navigator.plugin[0].version
         /// </summary>
@@ -803,3 +841,4 @@ namespace MultiHtmlCraft.Core
         #endregion
     }
 }
+

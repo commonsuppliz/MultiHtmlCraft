@@ -62,31 +62,40 @@ private static Dictionary<string, int> InitCHtmlConsoleMethods()
             this.___multiversalClassType = IMutilversalObjectType.Console;
         }
 
-        private void ___log_inner(object obj)
+        private void ___log_inner(object obj, string? logtype)
         {
             string str = commonHTML.GetStringValue(obj);
+            string logTypeStr = logtype != null && logtype.Length > 0 ? commonHTML.GetStringValue(logtype) : "log";
+            if (logtype != null && logtype.Length > 0)
+            {
+                logTypeStr = commonHTML.GetStringValue(logtype);
+            }
+            if (string.IsNullOrEmpty(logTypeStr))
+            {
+                logTypeStr = "log";
+            }
             if (commonLog.LoggingEnabled || System.Diagnostics.Debugger.IsAttached)
             {
-                commonLog.LogEntry(string.Concat("console.log('", str, "')"));
+                commonLog.LogEntry($"console.{logTypeStr}('{str}')");
             }
         }
 
         [ScriptMember("log")]
         public void log(object arg)
         {
-            this.___log_inner(arg);
+            this.___log_inner(arg, null);
         }
 
         public void log(params object[] args)
         {
             if (args == null || args.Length == 0)
             {
-                this.___log_inner("");
+                this.___log_inner("", null);
                 return;
             }
             if (args.Length == 1)
             {
-                this.___log_inner(args[0]);
+                this.___log_inner(args[0], null);
                 return;
             }
             StringBuilder sb = new StringBuilder();
@@ -98,7 +107,7 @@ private static Dictionary<string, int> InitCHtmlConsoleMethods()
                     sb.Append(' ');
                 }
             }
-            this.___log_inner(sb.ToString());
+            this.___log_inner(sb.ToString(), null);
         }
 
         #region warn
@@ -220,6 +229,38 @@ private static Dictionary<string, int> InitCHtmlConsoleMethods()
             this.___debug_inner(sb.ToString());
         }
         #endregion
+        #region info
+        public void info(object arg)
+        {
+            this.___log_inner(commonHTML.GetStringValue(arg), "info");
+        }
+        public void info(params object[] args)
+        {
+
+            if (args == null || args.Length == 0)
+            {
+                this.___log_inner("", null);
+                return;
+            }
+            if (args.Length == 1)
+            {
+                this.___log_inner(args[0], null);
+                return;
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < args.Length; i++)
+            {
+                sb.Append(commonHTML.GetStringValue(args[i]));
+                if (i < args.Length - 1)
+                {
+                    sb.Append(' ');
+                }
+            }
+            this.___log_inner(sb.ToString(), "info");
+        }
+        #endregion
+
+
 
         // ICommonObjectInterface implementation
         public void ___setPropertyByName(string name, object val)
