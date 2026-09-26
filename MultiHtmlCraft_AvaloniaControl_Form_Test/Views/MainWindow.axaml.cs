@@ -56,7 +56,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/jstest/SetTimeoutTest1.html";// SetTimeout Test OK
                 //  txt.Text= "http://localhost/canvas/RequestAnimationFrameRGBATest1.html";//
                 //txt.Text = "http://localhost/phoria.js-master/test3_noGUI.html";
-                //txt.Text = "http://localhost/phoria.js-master/test1d_nogui.html";
+                // txt.Text = "http://localhost/phoria.js-master/test1d_nogui.html";
                 // txt.Text ="http://localhost/canvas/jagarikin/angelic_weapon.html";// Angelic Weapon Test by jagarikin HSLA
                 //txt.Text ="http://localhost/canvas/jagarikin/angelic_weapon_RGBA.html";// Angelic Weapon Test by jagarikin RGBA
                 // txt.Text = "http://localhost/canvas/CanvasBeginPathClosePathMove.html"; // Canvas BeginPath ClosePath MoveTo Test OK
@@ -111,8 +111,11 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/jstest/WindowPropertyNumberCheck.html";// Window Property Number Check Test OK
                 //txt.Text = "http://localhost/phoria.js-master/test7.html";// Phoria Test 7 OK
                 // txt.Text = "http://localhost/canvas/CanvasToDataURLTest1.html";// Canvas toDataURL Test 1 OK
-                txt.Text = "http://localhost/jstest/CoonoleInfoTest1.html";// Console Info Test 1 OK
-
+                //txt.Text = "http://localhost/jstest/CoonoleInfoTest1.html";// Console Info Test 1 OK
+                //txt.Text = "http://localhost/jstest/VueJSTest1.html";//
+                // txt.Text = "http://localhost/jstest/SVGInstanceOfCheckTest1.html"; // SVG InstanceOf Check Test Fail
+                //   txt.Text = "http://localhost/canvas/CanvasTextureBrushTest2.html";// 
+                txt.Text = "http://localhost/jstest/VueJSConsoleTest2.html"; //VueJSConsoleTest 2
             }
 
             if (btnGo != null && txt != null && _multiView != null)

@@ -49,6 +49,7 @@ using Newtonsoft.Json.Serialization;
 using Microsoft.ClearScript;
 using Avalonia.Controls;
 using Avalonia;
+using Avalonia.Controls.Documents;
 
 namespace MultiHtmlCraft.Core
 {
@@ -1177,6 +1178,10 @@ namespace MultiHtmlCraft.Core
 
                         }
                         doc.___window.___multiversalScriptsHost.Add(scope);
+                        /* 
+                         * ==============================================================================
+                         * for NijJS
+                         * ==============================================================================
                         scope.defineConstructor(typeof(CHtmlNode), "Node");
                         scope.defineConstructor(typeof(CHtmlDocument), "Document");
                         scope.defineConstructor(typeof(CHtmlElement), "Element");
@@ -1184,6 +1189,28 @@ namespace MultiHtmlCraft.Core
                         scope.defineConstructor(typeof(CHtmlXMLHttpRequest), "XMLHttpRequest");
                         scope.defineConstructor(typeof(CHtmlRequest), "Request");
                         scope.defineConstructor(typeof(CHtmlWindowURL), "URL");
+                        scope.defineConstructor(typeof(CHtmlElement), "SVGElement");
+                         * ===============================================================================
+                        /*
+                        scope.(@"
+    (function() {
+        const constructors = [Node, Document, Element, Image, XMLHttpRequest, Request, URL, SVGElement];
+        constructors.forEach(ctor => {
+            if (ctor && typeof ctor === 'function' && !ctor.prototype) {
+                // prototype が undefined の場合、空のプロトタイプオブジェクトを付与
+                ctor.prototype = Object.create(Object.prototype);
+                ctor.prototype.constructor = ctor;
+            }
+        });
+        
+        // Element の継承関係を反映させる場合
+        if (typeof Element !== 'undefined' && Element.prototype && typeof SVGElement !== 'undefined') {
+            Object.setPrototypeOf(SVGElement.prototype, Element.prototype);
+        }
+    })();
+");
+                        */
+
 
                         commonHTML.checkScriptGlobalObjectIntance(processor);
                     }
@@ -31869,6 +31896,51 @@ namespace MultiHtmlCraft.Core
                             return new CHtmlMediaElement();
 
                         case "SVG":
+                        case "DEFS":
+                        case "RECT":
+                        case "PATH":
+                        case "CIRCLE":
+                        case "TEXT":
+                        case "FOREIGNOBJECT":
+                        case "G":
+                        case "SYMBOL":
+                        case "LINE":
+                        case "USE":
+                        case "POLYGON":
+                        case "POLYLINE":
+                        case "ELLIPSE":
+                        case "CLIPPATH":
+                        case "MASK":
+                        case "PATTERN":
+                        case "LINEARGRADIENT":
+                        case "RADIALGRADIENT":
+                        case "STOP":
+                        case "FILTER":
+                        case "FEGAUSSIANBLUR":
+                        case "FEOFFSET":
+                        case "FECOMPOSITE":
+                        case "FEMORPHOLOGY":
+                        case "TSPAN":
+                        case "TEXTPATH":
+                        case "FEIMAGE":
+                        case "FEPOINTLIGHT":
+                        case "FESPOTLIGHT":
+                        case "ANIMATE":
+                        case "ANIMATETRANSFORM":
+                        case "ANIMATECOLOR":
+                        case "ANIMATEMOTION":
+                        case "FEFLOOD":
+                        case "FEDISPLACEMENTMAP":
+                        case "FEFEMERGENCE":
+                        case "FECOLORMATRIX":
+                        case "FECONVOLVEMATRIX":
+                        case "FEFEATHER":
+                        case "FESPECULARLIGHTING":
+                        case "FEVOLUMELIGHT":
+
+
+
+
                             return new CHtmlSVGElement();
                         case "TEMPLATE":
                             return new CHtmlTemplateElement();
@@ -31876,6 +31948,7 @@ namespace MultiHtmlCraft.Core
                             return new CHtmlElement();
                         case "INPUT":
                         case "TEXTAREA":
+
                             return new CHtmlInputElement();
                     }
                     break;

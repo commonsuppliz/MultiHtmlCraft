@@ -90,6 +90,7 @@ See the solution explorer for the full project list and references.
 ## Javascript Frameork
 
 - JQuery ver 3.7.1, ver 4.0.0 can be compiled for basic api.
+- Vue.js ver 3.x can be compiled for basic api.
 
 ## GUI Platforms
 

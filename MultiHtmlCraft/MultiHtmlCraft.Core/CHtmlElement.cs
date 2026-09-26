@@ -500,6 +500,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
         list["toString"] = 0;
         list["isPrototypeOf"] = 0;
         list["cloneNode"] = 0;
+        list["constructor"] = 0;
                 return list;
     }
     catch (Exception ex)
@@ -12974,8 +12975,16 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                         }
                         this.___style.___IsBackgroundColorSpecified = true;
                         this.___style.___BackgroundSysColor = ___parentElem.___style.___BackgroundSysColor;
-                        this.___canvasContextCurrent2D.___CanvasBackgroundSysColor = this.___style.___BackgroundSysColor;
-                        this.___canvasContextCurrent2D.___IsCanvasBackgroundSysColorSpecified = true;
+                        if(commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("{0} does not have background-color, use parentNode {1} background-color: {2} this.___canvasContextCurrent2D : {3}", this.toLogString(), ___parentElem.toLogString(), ___parentElem.___style.___BackgroundSysColor, this.___canvasContextCurrent2D);
+                        }
+                        if(this.___canvasContextCurrent2D != null)
+                        {
+                            this.___canvasContextCurrent2D.___CanvasBackgroundSysColor = ___parentElem.___style.___BackgroundSysColor;
+                            this.___canvasContextCurrent2D.___IsCanvasBackgroundSysColorSpecified = true;
+                        };
+                        
 
                         break;
                     }

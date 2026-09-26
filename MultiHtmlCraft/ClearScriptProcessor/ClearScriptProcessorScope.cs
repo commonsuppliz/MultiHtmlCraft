@@ -1992,7 +1992,12 @@ if (typeof document === 'undefined' || document === null) {
             _enableDebugLog = enable;
         }
 
-        // 優先度低めのデバッグ用（通常は無効）
+        private void defineConstructor(Type type, string name)
+        {
+
+            this._v8Engine.Execute($@"{name}.prototype = Object.create(({name} === Element ? Object.prototype : (typeof Element !== 'undefined' && Element.prototype ? Element.prototype : Object.prototype)));
+                        {name}.prototype.constructor = {name};");
+        }
         public void DebugLog(string message)
         {
             if (_enableDebugLog)

@@ -1,6 +1,8 @@
-﻿using ClearScriptProcessor;
+﻿using Avalonia.Controls.Documents;
+using ClearScriptProcessor;
 using Microsoft.ClearScript;
 using Microsoft.ClearScript.V8;
+using MultiHtmlCraft.Core; // ensure MutationObserver visible
 using MultiHtmlCraft.Interfaces;
 using NiL.JS.BaseLibrary;
 using NilJsProcessor;
@@ -12,7 +14,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using static System.Formats.Asn1.AsnWriter;
-using MultiHtmlCraft.Core; // ensure MutationObserver visible
 
 namespace MultiHtmlCraft.Core
 {
@@ -79,7 +80,8 @@ namespace MultiHtmlCraft.Core
 
                             // AddHostTypeXMLHttpRequestCalled?.Invoke(this, EventArgs.Empty);
                             //v8Scope.AddHostType("URL", typeof(CHtmlWindowURL));
-              
+                            v8Scope.AddHostObject("host", new HostFunctions());
+
                             v8Scope.AddHostType("Element", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLIFrameElement", typeof(CHtmlElement));
@@ -96,6 +98,14 @@ namespace MultiHtmlCraft.Core
 
                       
                             v8Scope.AddHostType("FontFace", typeof(CHtmlFontFace));
+
+                           v8Scope.engine.Execute(@"
+    Object.defineProperty(SVGElement, Symbol.hasInstance, {
+        value: function(instance) {
+            return instance != null && host.isType(SVGElement, instance);
+        }
+    });
+");
                             // Register MutationObserver so scripts can use `new MutationObserver()`
                             // v8Scope.AddHostType("MutationObserver", typeof(CHtmlMutationObserver));
                             /*

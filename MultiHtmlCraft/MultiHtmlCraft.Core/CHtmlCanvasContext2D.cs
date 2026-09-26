@@ -3916,7 +3916,28 @@ namespace MultiHtmlCraft.Core
 
         public static CanvasContextModeType ___GetCanvasTypeFromName(string name)
         {
-            if (string.Compare(name, "2d", StringComparison.OrdinalIgnoreCase) == 0) return CanvasContextModeType.Canvas2D;
+            switch(name)
+            {
+                case "2d":
+                case "2D":
+                    
+                    return CanvasContextModeType.Canvas2D;
+                case "webgl":
+                case "WebGL":
+                    return CanvasContextModeType.WebGL;
+                case "webgl2":
+                case "WebGL2":
+                    return CanvasContextModeType.WebGL;
+                case "bitmaprenderer":
+                    return CanvasContextModeType.Canvas2D;
+                case "_webgl":
+                    return CanvasContextModeType.WebGL;
+                case "__svg":
+                case "___svg":
+                    return CanvasContextModeType.SVG;
+                default:
+                    break;
+            }
             return CanvasContextModeType.None;
         }
 
