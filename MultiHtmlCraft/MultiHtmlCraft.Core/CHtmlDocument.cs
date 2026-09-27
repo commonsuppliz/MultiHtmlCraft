@@ -31936,12 +31936,16 @@ namespace MultiHtmlCraft.Core
                         case "FECONVOLVEMATRIX":
                         case "FEFEATHER":
                         case "FESPECULARLIGHTING":
+
+
+
+
                         case "FEVOLUMELIGHT":
+                            var _svgElement = new CHtmlSVGElement();
+                            _svgElement.___isSvgElement = true;
+                            _svgElement.___tagName = ___tagNameUpper;
+                            return _svgElement;
 
-
-
-
-                            return new CHtmlSVGElement();
                         case "TEMPLATE":
                             return new CHtmlTemplateElement();
                         case "CANVAS":
