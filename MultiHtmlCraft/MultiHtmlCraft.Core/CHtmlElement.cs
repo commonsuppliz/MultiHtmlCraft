@@ -13,6 +13,7 @@ using System.Dynamic;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
@@ -28,6 +29,7 @@ namespace MultiHtmlCraft.Core
 	
 	public class CHtmlElement : CHtmlBase, ICommonObjectInterface, ICHtmlElementInterface  
 	{
+        
         public static readonly Dictionary<string, int> CHtmlElementProperties = InitalizeCHtmlElementPropertiyNames();
 
         private static Dictionary<string, int> InitalizeCHtmlElementPropertiyNames()
@@ -2598,7 +2600,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 			{
 				if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
 				{
-				   commonLog.LogEntry("entering CHtmlElement ___hasInner accessed by indexer \"{0}\" sKey=\"{1}\"", this, sKey);
+				   commonLog.LogEntry("entering CHtmlElement.this[] accessed by indexer \"{0}\" sKey=\"{1}\"", this, sKey);
 				}
 				object result = null;
 				try
@@ -2609,12 +2611,12 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 				{
 					if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
 					{
-					   commonLog.LogEntry("{0} ___hasInner error {1}", this,commonData.GetExceptionAsString(ex));
+					   commonLog.LogEntry("{0}.this[] error {1}", this,commonData.GetExceptionAsString(ex));
 					}
 				}
 				if(commonLog.LoggingEnabled &&commonLog.LogLevel>= 8)
 				{
-					commonLog.LogEntry("CHtmlElement ___hasInner accessed by indexer \"{0}\" sKey=\"{1}\"= {2}", this, sKey, result);
+					commonLog.LogEntry("CHtmlElement.this[] accessed by indexer \"{0}\" sKey=\"{1}\"= {2}", this, sKey, result);
 				}
 				return result;
 			}
@@ -2640,7 +2642,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 
 				if(commonLog.LoggingEnabled &&commonLog.LogLevel>= 8)
 				{
-                   commonLog.LogEntry("CHtmlElement ___hasInner accessed by indexer \"{0}\" {1}= {2}", this, intKey, result);
+                   commonLog.LogEntry("CHtmlElement.this[] accessed by indexer \"{0}\" {1}= {2}", this, intKey, result);
 				}
 				return result;
 			}
@@ -2648,7 +2650,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 			{
                 if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
                 {
-                   commonLog.LogEntry("CHtmlElement ___hasInner set indexer \"{0}\" {1}= {2}", this, intKey, value);
+                   commonLog.LogEntry("CHtmlElement.this[] set indexer \"{0}\" {1}= {2}", this, intKey, value);
                 }
 				
 			}
@@ -9398,7 +9400,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
         /// <summary>
         /// return ownerDocument
         /// </summary>
-		public CHtmlDocument ownerDocument
+		public CHtmlDocument? ownerDocument
 		{
 			get{
                 CHtmlDocument ___ownerDocumentReturnObject = null;
@@ -15445,6 +15447,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                 return false;
             }
         }
+        
 
 		public virtual void ___setPropertyByName(string ___name, object val)
 		{
@@ -15452,9 +15455,9 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 
 			try
 			{
-                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
                 {
-                    commonLog.LogEntry($"{this.toLogString()} {this.GetType().FullName} {this.toLogString()}.set :   {___name} = {val}");
+                    commonLog.LogEntry($"CHtmlElement.___setPropertyByName enter with {this.toLogString()} {this.GetType().FullName} {this.toLogString()} name : {___name} value :  {val}");
                 }
               
 
@@ -16226,8 +16229,10 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                     {
                         this.___ElementPrototypeMethodPropertyCount++;
                     }
+                    this.___properties[___name] = val;
 
-					___ValueStored = true;
+                    ___ValueStored = true;
+                   
 				}
 				else
 				{
@@ -16243,9 +16248,9 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 				
 			}
 			ExitSet:
-			if(commonLog.LoggingEnabled &&commonLog.LogLevel > 10)
+			if(commonLog.LoggingEnabled &&commonLog.LogLevel >= 5 )
 			{
-				commonLog.LogEntry("SetPropertyValue for {0} {1}  '{2}' = {3} Success : {4}",this.GetType(), this.toLogString(), ___name, val, ___ValueStored );
+				commonLog.LogEntry("CHtmlElement.___setPropertyByName exit with {0} {1}  '{2}' = {3} Success : {4}",this.GetType(), this.toLogString(), ___name, val, ___ValueStored );
 			}
 		}
 
@@ -16449,6 +16454,18 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
         public override string ToString()
         {
             return "[object " + base.___multiversalClassType.ToString() + "]";
+        }
+
+
+        public bool HasDynamicMember(string name)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(name) || this.___properties == null) return false;
+                return this.___properties.ContainsKey(name);
+            }
+            catch { }
+            return false;
         }
 
         public static IMutilversalObjectType ___getMultiversalObectTypeFromTagType(CHtmlElementType tagType)
@@ -16670,6 +16687,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 			}
 			return null;
 		}
+
         public virtual void ___setParentScope(object ___object)
 		{
 			if(commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)

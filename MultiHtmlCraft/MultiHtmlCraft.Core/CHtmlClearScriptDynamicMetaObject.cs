@@ -983,14 +983,24 @@ namespace MultiHtmlCraft.Core
                             // Return both property and method names (match CHtmlElement.GetDynamicMemberNames)
                             var props = CHtmlElement.CHtmlElementProperties?.Keys ?? Enumerable.Empty<string>();
                             var methods = CHtmlElement.CHtmlElementMethods?.Keys ?? Enumerable.Empty<string>();
-                            return props.Concat(methods);
+                            var elementProps = element.___properties.Keys ?? Enumerable.Empty<string>();
+                            if (elementProps.Any())
+                            {
+                                if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                   commonLog.LogEntry($"[GetDynamicMemberNames] Exporting Expando Keys for <{element.toLogString()}>: {string.Join(", ", elementProps)}");
+                            }
+                            return props.Concat(methods).Concat(elementProps);
                         }
                     case CHtmlDocument document:
                         {
                             // Return both property and method names (match CHtmlDocument.GetDynamicMemberNames)
                             var props = CHtmlDocument.CHtmlDocumentProperties?.Keys ?? Enumerable.Empty<string>();
                             var methods = CHtmlDocument.CHtmlDocumentMethods?.Keys ?? Enumerable.Empty<string>();
-                            return props.Concat(methods);
+                            IEnumerable<string>? docProps = null;
+   
+                            docProps = document.GetExpandoPropertyKeys().ToList();
+                            
+                            return props.Concat(methods).Concat(docProps);
                         }
                     case CHtmlCanvasContext2D canvas:
                         {
@@ -1046,6 +1056,12 @@ namespace MultiHtmlCraft.Core
                             var props = CHtmlNavigator.CHtmlNavigatorProperties.Keys ?? Enumerable.Empty<string>();
                             var methods = CHtmlNavigator.CHtmlNavigatorMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
+                        }
+                    case CHtmlNode node:
+                        {
+                            var props = CHtmlNode.CHtmlNodeProperties.Keys ?? Enumerable.Empty<string>();
+
+                            return props;
                         }
                     default:
                         var obj = this.Value;
@@ -1318,7 +1334,24 @@ namespace MultiHtmlCraft.Core
 
                                 switch (binder.Name )
                                 {
+
+                                    case "nodeType":
+                                        double nodeTypeValue = (double)self.nodeType;
+
+                                     
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(nodeTypeValue, typeof(double)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                        break;
+                                    case "ownerDocument":
+                                        
+                                        return new DynamicMetaObject(
+    Expression.Constant(elementValue, typeof(object)),
+    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+);
                                     case "nodeName":
+                                    case "tagName":
                                         var selfElem = self;
                                         var nodeNameStr = self.___tagName ?? self.tagName;
                                         try
@@ -1351,18 +1384,23 @@ namespace MultiHtmlCraft.Core
                                                     // フォールバック: 要素種別を利用して何か返す（必要なら拡張）
                                                     nodeNameStr = "#element";
                                                 }
-                                                nodeNameStr = nodeNameStr.ToUpperInvariant();
+                                                nodeNameStr = nodeNameStr.ToUpperInvariant() ?? "DIV";
                                             }
                                         }
                                         catch
                                         {
                                             nodeNameStr = string.Empty;
                                         }
-                                        if (nodeNameStr == null) nodeNameStr = string.Empty;
+                                        if (string.IsNullOrEmpty(nodeNameStr))
+                                        {
+                                            nodeNameStr = "DIV";
+                                        }
+
+                                        
                                         return new DynamicMetaObject(
-                                            Expression.Constant((object)nodeNameStr),
-                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType),
-                                            nodeNameStr
+                                            Expression.Constant(nodeNameStr, typeof(string)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            
                                         );
                                         break;
 
@@ -1379,7 +1417,7 @@ namespace MultiHtmlCraft.Core
                                         );
                                     }
 
-                                    // これが最も確実
+                                    
                                     return ((IDynamicMetaObjectProvider)parent).GetMetaObject(
                                         Expression.Constant(parent)
                                         );
@@ -2944,11 +2982,12 @@ namespace MultiHtmlCraft.Core
             }
             return base.BindSetIndex(binder, indexes, value);
         }
+        
         public override DynamicMetaObject BindSetMember(SetMemberBinder binder, DynamicMetaObject value)
         {
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
-                commonLog.LogEntry($"BindSetMember is called with value {binder.ToString()} : {value}");
+                commonLog.LogEntry($"BindSetMember is called with value {binder.Name.ToString()} : {value}");
             }
 
             // Conservative extraction: handle DynamicMetaObject specially then try UnwrapValue for common wrappers.
@@ -2977,38 +3016,35 @@ namespace MultiHtmlCraft.Core
                 {
                     switch (this.Value)
                     {
-                        case CHtmlDocument doc:
-                            _isTypeSwitchFound = true;
-                            try { 
-                            doc.___setPropertyByName(binder.Name, actual); 
-                        } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry($"Document {doc}.SetDynamicMember error: {0}", ex.Message); }
-                            break;
+
 
                         case CHtmlElement el:
                             _isTypeSwitchFound = true;
                             try
                             {
                                 // Preserve ClearScript/V8 script objects so they remain callable from script.
-                                if (actual != null)
-                                {
-                                    var typeName = actual.GetType().FullName ?? string.Empty;
-                                    if (typeName.Contains("ClearScript") || typeName.Contains("ScriptItem") || typeName.Contains("ScriptObject") || typeName.Contains("V8"))
-                                    {
-                                        el.___setPropertyByName(binder.Name, actual);
-                                    }
-                                    else
-                                    {
-                                        el.___setPropertyByName(binder.Name, UnwrapValue(actual) ?? actual);
-                                    }
-                                }
-                                else
-                                {
+                                
                                     el.___setPropertyByName(binder.Name, actual);
-                                }
+                                
                             }
                             catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry($"Element {el}.___setPropertyByName error: {0}", ex.Message); }
                             break;
-                        case CHtmlDomTokenList dom:
+                    case CHtmlDocument doc:
+
+                        _isTypeSwitchFound = true;
+
+
+                        try
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry($"Document {doc}.BindSetMemnber called with {binder.Name} = {actual}");
+                            }
+                            doc.___setPropertyByName(binder.Name, actual);
+                        }
+                        catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry($"Document {doc}.BindSetMember error: {0}", ex.Message); }
+                        break;
+                    case CHtmlDomTokenList dom:
                             _isTypeSwitchFound = true;
                             try { dom.SetDynamicMember(binder.Name, UnwrapValue(actual) ?? actual); } catch (Exception ex) { if (commonLog.LoggingEnabled) commonLog.LogEntry("DomTokenList.SetDynamicMember error: {0}", ex.Message); }
                             break;
@@ -3391,22 +3427,47 @@ namespace MultiHtmlCraft.Core
                             {
                                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
                                 {
-                                    commonLog.LogEntry("CHtmlDocument indexer access with BindGetIndex intIndex={0}, strIndex='{1}'", intIndex.HasValue ? intIndex.Value.ToString() : "(null)", strIndex ?? "(null)");
+                                    commonLog.LogEntry("CHtmlDocument indexer access with BindGetIndex intIndex={0}, strIndex='{1}'",
+                                        intIndex.HasValue ? intIndex.Value.ToString() : "(null)", strIndex ?? "(null)");
                                 }
-                                if ( intIndex == null || intIndex ==0) // あるいは範囲外の場合
+
+                                // 1. Restriction（制約）の生成
+                                var restrictions = BindingRestrictions
+                                    .GetTypeRestriction(this.Expression, this.LimitType);
+
+                                if (indexes.Length > 0 && indexes[0] != null)
                                 {
-                                    // 処理失敗（例外やバインド失敗）にするのではなく、明示的に ClearScript の「Undefined」や「Null」をバインドして返す
-                                    return new DynamicMetaObject(
-                                        Expression.Constant(Microsoft.ClearScript.Undefined.Value), // または等価な表現
-                                        BindingRestrictions.GetTypeRestriction(Expression, LimitType)
+                                    restrictions = restrictions.Merge(
+                                        BindingRestrictions.GetTypeRestriction(indexes[0].Expression, indexes[0].LimitType)
                                     );
                                 }
-                               
-                                var result = cHtmlDocument.___getPropertyByIndex((int)intIndex);
 
+                                // 2. 引数（indexes[0]）の Expression を評価用に準備
+                                // (indexes[0].Value が null であっても Expression をそのまま利用する)
+                                Expression indexArgExpr = indexes[0].Expression;
+
+                                // もし indexArgExpr が object 型等の場合は string に変換
+                                if (indexArgExpr.Type != typeof(string))
+                                {
+                                    indexArgExpr = Expression.Call(
+                                        indexArgExpr,
+                                        typeof(object).GetMethod(nameof(object.ToString))
+                                    );
+                                }
+
+                                // 3. CHtmlDocument の GetExpandoProperty(string) または ___getPropertyByName(string) を動的呼び出しする AST 構築
+                                var targetExpr = Expression.Convert(this.Expression, typeof(CHtmlDocument));
+
+                                // メソッド情報の取得 (GetExpandoProperty が無ければ ___getPropertyByName を使用)
+                                var getMethod = typeof(CHtmlDocument).GetMethod("GetExpandoProperty")
+                                             ?? typeof(CHtmlDocument).GetMethod("___getPropertyByName");
+
+                                var methodCall = Expression.Call(targetExpr, getMethod, indexArgExpr);
+
+                                // 4. 定数 (Undefined) ではなく MethodCall Expression を返却する
                                 return new DynamicMetaObject(
-                                    Expression.Constant(result, typeof(object)),
-                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    Expression.Convert(methodCall, typeof(object)),
+                                    restrictions
                                 );
                             }
                             break;
@@ -3683,9 +3744,91 @@ namespace MultiHtmlCraft.Core
             }
             catch { return null; }
         }
-       
+        private bool TryGetIndex(DynamicMetaObject indexObj, out int? intIndex, out string? strIndex)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"enter TryGetIndex {indexObj} ");
+
+            }
+            intIndex = null;
+            strIndex = null;
+
+            try
+            {
+                var raw = UnwrapValue(indexObj?.Value) ?? indexObj?.Value;
+                if (raw == null) return false;
+
+                switch (raw)
+                {
+                    case int i:
+                        intIndex = i;
+                        return true;
+                    case long l:
+                        intIndex = (int)l;
+                        return true;
+                    case short s:
+                        intIndex = s;
+                        return true;
+                    case double d:
+                        intIndex = Convert.ToInt32(d);
+                        return true;
+                    case float f:
+                        intIndex = Convert.ToInt32(f);
+                        return true;
+                    case decimal m:
+                        intIndex = Convert.ToInt32(m);
+                        return true;
+                    case string sraw:
+                        // "3" => index 3, "name" => named lookup
+                        if (int.TryParse(sraw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var p))
+                        {
+                            intIndex = p;
+                        }
+                        else
+                        {
+                            strIndex = sraw;
+                        }
+                        return true;
+                    default:
+                        // best-effort: try Convert.ToInt32 on arbitrary object (handles boxed numbers)
+                        try
+                        {
+                            intIndex = Convert.ToInt32(raw);
+                            return true;
+                        }
+                        catch
+                        {
+                            // fallback to string key if ToString is meaningful
+                            var s = raw.ToString();
+                            if (!string.IsNullOrEmpty(s))
+                            {
+                                strIndex = s;
+                                return true;
+                            }
+                        }
+                        break;
+                }
+            }
+            catch { /* swallow */ }
+
+            return false;
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"enter TryGetIndex {indexObj} intIndex : {intIndex} strIndex : {strIndex}");
+
+            }
+            return false;
+        }
+
+
         private bool TryResolveIndex(DynamicMetaObject indexObj, out int? intIndex, out string? strIndex)
         {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"enter TryResolveIndex {indexObj} ");
+
+            }
             intIndex = null;
             strIndex = null;
 

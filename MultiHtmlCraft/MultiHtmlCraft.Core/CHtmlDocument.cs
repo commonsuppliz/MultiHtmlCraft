@@ -6349,6 +6349,47 @@ namespace MultiHtmlCraft.Core
             get { return commonHTML.___convertNullToEmpty(this.___lastModified); }
             set { this.___lastModified = value; }
         }
+        public void SetExpandoProperty(string name, object value)
+        {
+            this.___properties[name] = value;
+        }
+        public IEnumerable<string> GetExpandoPropertyKeys()
+        {
+            // ___properties に登録されている動的キーの一覧を返す
+            return this.___properties.Keys;
+        }
+
+        public object GetExpandoProperty(string name)
+        {
+            // 1. ユーザーやスクリプトが明示的にセットしたプロパティ（_reactListening... 等）があればそれを優先
+            if (this.___properties.TryGetValue(name, out var val))
+            {
+                return val;
+            }
+
+            // 2. V8 がオブジェクト構造の判定用に問い合わせてくる特殊プロパティの制御
+            switch (name)
+            {
+                case "constructor":
+                    var constructorObj = new Microsoft.ClearScript.PropertyBag();
+                    constructorObj["name"] = "HTMLDocument";
+                    return constructorObj;
+
+                case "nodeType":
+                    // Document ノードの nodeType (9 = DOCUMENT_NODE)
+                    return 9;
+
+                case "nodeName":
+                    return "#document";
+
+                default:
+                    // 未定義プロパティには Undefined を返す
+                    return Microsoft.ClearScript.Undefined.Value;
+            }
+        }
+
+        
+
         /// <summary>
         /// IE Specific object
         /// </summary>
@@ -31020,6 +31061,23 @@ namespace MultiHtmlCraft.Core
                 readyStateTemp = "Disposed";
             }
             return string.Format("CHtmlDocument (display: \'{0}\' state: {1} nodes: {2} mode: {3})", this.___UrlShortName, readyStateTemp, ___allcount, this.___documentDomType);
+        }
+        private object? ___scriptHostObject = null;
+
+        
+        public void SetScriptHostObject(object scriptHostObject)
+        {
+            try
+            {
+                this.___scriptHostObject = scriptHostObject;
+            }
+            catch { }
+        }
+
+       
+        public object? GetScriptHostObject()
+        {
+            return this.___scriptHostObject;
         }
 
 

@@ -1118,18 +1118,34 @@ namespace ClearScriptProcessor
                 try
                 {
                     _v8Engine.AddHostObject("__host_document", document);
+
                     _v8Engine.Execute("window.document = __host_document;");
                     _v8Engine.Execute("console.log('Checks setDcoument typeof document :' + typeof document);");
                     _v8Engine.Execute("console.log('setDcoument window.document === __host_document :' + (window.document === __host_document));");
                     _v8Engine.Execute("console.log('setDcoument window.document === document :' + (window.document === document));");
-                    _v8Engine.Execute(@"
-    Object.defineProperty(window.document, 'title', {
-        value: 'Protected',
-        writable: false,
-        configurable: false
-    });
-");
-                  //  _v8Engine.Execute("document= null;"); // Attempt to overwrite document to test protection
+                    /*
+                    try
+                    {
+                        // _v8Engine.Script.document はスクリプト側のラッパ（V8 の HostObject）を返す
+                        var scriptDocWrapper = _v8Engine.Script.document;
+                        if (scriptDocWrapper != null)
+                        {
+                            
+                            // CHtmlDocument に SetScriptHostObject メソッドを用意しておく（次に示す）
+                            (document as MultiHtmlCraft.Core.sdfafdas)?.SetScriptHostObject(scriptDocWrapper);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // ログ出力等（防御的に）
+                        Debug.WriteLine("SetScriptHostObject failed: {0}", ex.Message);
+                    }
+                    */
+
+
+
+
+                    //  _v8Engine.Execute("document= null;"); // Attempt to overwrite document to test protection
                     _v8Engine.Execute("console.log('Checks setDcoument typeof document :' + typeof document);");
                     _v8Engine.Execute("console.log('Checks setDcoument typeof document.createElement :' + typeof document.createElement);");
                     System.Diagnostics.Debug.WriteLine($"setDocument Success!");

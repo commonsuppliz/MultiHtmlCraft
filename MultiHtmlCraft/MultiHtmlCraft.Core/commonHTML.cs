@@ -1114,6 +1114,7 @@ namespace MultiHtmlCraft.Core
         HEAD_DELETED = 997,
         BODY_DELETED = 998,
         UNKNOWN = 999,
+        REACT = 1000, // REACT
 
 
         // ALL INLINE STYLE will be over 1000
@@ -13012,6 +13013,8 @@ namespace MultiHtmlCraft.Core
                     return CHtmlElementType.LINKTEXT;
                 case "CONTENT":
                     return CHtmlElementType.CONTENT;
+                case "REACT":
+                    return CHtmlElementType.REACT;
                 // --------------------------------- SVG START----------------------------
                 case "SVG":
                     return CHtmlElementType.SVG;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.ClearScript;
 using MultiHtmlCraft.Interfaces;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -400,6 +401,22 @@ public int ELEMENT_NODE
                 commonLog.LogEntry("{0}.SettDynamicMember({1} is called value: {2}", this, name, value);
             }
             this.___properties[name] = value;
+        }
+        public bool hasOwnProperty(string name)
+        {
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                {
+                    commonLog.LogEntry("{0}.hasOwnProperty({1} is called", this, name);
+                }
+                if (string.IsNullOrEmpty(name)) return false;
+                if (this.___properties != null && this.___properties.ContainsKey(name)) return true;
+                // CHtmlElement 側に別の expando を持っているならチェック
+
+            }
+            catch { }
+            return false;
         }
         public IEnumerable<string> GetDynamicMemberNames()
         {
