@@ -5574,6 +5574,9 @@ s               else
                     CHtmlFile ___newFile = new CHtmlFile(__args);
                     ___newFile.___prototypeWeakReference = this.___WindowPrototypeRootNode.___FilePrototypeWeakReference;
                     return ___newFile;
+                case "MessageChannel":
+                    CHtmlMessageChannel ___channel = new CHtmlMessageChannel(__args);
+                    return ___channel;
                 case "Element":
                 case "HTMLElement":
                     CHtmlElement ___newElem = new CHtmlElement();

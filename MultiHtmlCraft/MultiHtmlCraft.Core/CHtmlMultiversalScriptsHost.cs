@@ -73,10 +73,12 @@ namespace MultiHtmlCraft.Core
                         {
                             v8Scope.AddHostType("Node", typeof(CHtmlNode));
                             v8Scope.AddHostType("Document", typeof(CHtmlDocument));
+                            v8Scope.AddHostType("HTMLDocument", typeof(CHtmlDocument));
                             v8Scope.AddHostType("Request", typeof(CHtmlRequest));
                             v8Scope.AddHostObject("host", new HostFunctions());
                             v8Scope.AddHostType("Element", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLElement", typeof(CHtmlElement));
+                            v8Scope.AddHostType("HTMLBodyElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLIFrameElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLDivElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLInputElement", typeof(CHtmlInputElement));
@@ -87,8 +89,11 @@ namespace MultiHtmlCraft.Core
                             v8Scope.AddHostType("CSSStyleSheet", typeof(CHtmlCSSStyleSheet));
                             v8Scope.AddHostType("URLSearchParams", typeof(CHtmlURLSearchParams));
                             v8Scope.AddHostType("FontFace", typeof(CHtmlFontFace));
+                            v8Scope.AddHostType("MessageChannel", typeof(CHtmlMessageChannel));
+                            v8Scope.AddHostType("MessagePort", typeof(CHtmlMessagePort));
 
-                           v8Scope.engine.Execute(@"
+
+                            v8Scope.engine.Execute(@"
     Object.defineProperty(SVGElement, Symbol.hasInstance, {
         value: function(instance) {
             return instance != null && host.isType(SVGElement, instance);

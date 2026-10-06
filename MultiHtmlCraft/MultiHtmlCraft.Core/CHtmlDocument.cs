@@ -6361,34 +6361,45 @@ namespace MultiHtmlCraft.Core
 
         public object GetExpandoProperty(string name)
         {
-            // 1. ユーザーやスクリプトが明示的にセットしたプロパティ（_reactListening... 等）があればそれを優先
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"enter {this}.GetExpandoProperty({name})");
+            }
+       
             if (this.___properties.TryGetValue(name, out var val))
             {
                 return val;
             }
 
-            // 2. V8 がオブジェクト構造の判定用に問い合わせてくる特殊プロパティの制御
             switch (name)
             {
+                case "prototype":
+                    
+                    var proto = new Microsoft.ClearScript.PropertyBag();
+                    proto["constructor"] = this; 
+                    return proto;
                 case "constructor":
                     var constructorObj = new Microsoft.ClearScript.PropertyBag();
                     constructorObj["name"] = "HTMLDocument";
                     return constructorObj;
 
                 case "nodeType":
-                    // Document ノードの nodeType (9 = DOCUMENT_NODE)
                     return 9;
 
                 case "nodeName":
                     return "#document";
-
+                case "valueOf":
+                    return new Func<object>(valueOf);
                 default:
-                    // 未定義プロパティには Undefined を返す
+                    
                     return Microsoft.ClearScript.Undefined.Value;
             }
         }
+        public object valueOf()
+        {
+            return this;
+        }
 
-        
 
         /// <summary>
         /// IE Specific object
@@ -14986,8 +14997,8 @@ namespace MultiHtmlCraft.Core
                         // it may be text node just before the box.
                         //   [Todays News < >, which was tommorrows news.]
                         //                 +-------[Exchange Server  < > is Microsoft Product]
-                        //                                            |
-                        //                                            +[ZZZZZZZZZZZZZZZZZZZZZZZZZZ]
+                        //                                            
+                        //                                           
                         //
                         // =================================================================================
                         int indexOfInParent = tagElement.___ChildNodeIndex;

@@ -91,6 +91,7 @@ namespace MultiHtmlCraft.Interfaces
         EventSource,
         EventTarget,
         File,
+        MessageChannel,
         TextMetrix,
         FileList,
         FileError,

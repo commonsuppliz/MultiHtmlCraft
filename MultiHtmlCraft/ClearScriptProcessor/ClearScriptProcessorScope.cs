@@ -994,7 +994,7 @@ namespace ClearScriptProcessor
     // 登録対象
     const classNames = [
         'Image', 'Audio', 'Video', 'Canvas', 'DOMParser', 'XMLHttpRequest',
-        'EventSource', 'WebSocket', 'FileReader', 'Blob', 'URL', 'AudioContext'
+        'EventSource', 'WebSocket', 'FileReader', 'Blob', 'URL', 'AudioContext', 'MessageChannel'
     ];
 
     classNames.forEach(defineCustomClass);
@@ -1006,7 +1006,7 @@ namespace ClearScriptProcessor
     "Blob", "File", "MutationObserver", "ImageData", "TextDecoder",
     "TextEncoder", "URL", "FormData", "CustomEvent", "Event",
     "MouseEvent", "KeyboardEvent", "TouchEvent", "MessageEvent",
-    "Worker", "SharedWorker", "SpeechSynthesisUtterance", "SpeechRecognition"
+    "Worker", "SharedWorker", "SpeechSynthesisUtterance", "SpeechRecognition", "MessageChannel"
 };
                 engine.AddHostObject("_classNames", classNames);
                 // JS 側で plain の window オブジェクトを作る（ホストを変更しない）
@@ -1447,6 +1447,26 @@ if (typeof document === 'undefined' || document === null) {
     };
 }
 ");
+            _v8Engine.Execute(@"(function() {
+    console.log(""=== DOM Classes Prototype Validation ==="");
+    const targets = [
+        'Event', 'Node', 'Element', 'HTMLElement', 'HTMLDocument', 
+        'HTMLBodyElement', 'DocumentFragment', 'MessageChannel'
+    ];
+    
+    targets.forEach(name => {
+        const item = globalThis[name];
+        if (typeof item === 'undefined') {
+            console.log(`[Missing] ${name} is UNDEFINED on globalThis`);
+        } else if (typeof item !== 'function') {
+            console.log(`[Invalid] ${name} is NOT a function (typeof: ${typeof item})`);
+        } else if (!item.prototype || typeof item.prototype !== 'object') {
+            console.log(`[Error] ${name}.prototype is invalid/undefined!`);
+        } else {
+            console.log(`[OK] ${name} is valid constructor with prototype`);
+        }
+    });
+})();");
 
 
             _v8Engine.Execute("console.log('--- Debug Check ---');");

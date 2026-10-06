@@ -4,6 +4,7 @@ using Avalonia.Platform;
 using ExCSS;
 using MultiHtmlCraft.Core;
 using MultiHtmlCraft.Interfaces;
+using Newtonsoft.Json.Serialization;
 using NiL.JS.BaseLibrary;
 using NiL.JS.Statements;
 using System;
@@ -1057,12 +1058,25 @@ namespace MultiHtmlCraft.Core
                             var methods = CHtmlNavigator.CHtmlNavigatorMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
                         }
+                    case CHtmlMessageChannel messgeChannel:
+                        {
+                            var props = CHtmlMessageChannel.CHtmlMessageChannelProperties.Keys ?? Enumerable.Empty<string>();
+
+                            return props;
+                        }
+                    case CHtmlMessagePort messagePort:
+                        {
+                            var props = CHtmlMessagePort.CHtmlMessagePortProperties.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlMessagePort.CHtmlMessagePortMethods.Keys ?? Enumerable.Empty<string>();
+                            return props.Concat(methods);
+                        }
                     case CHtmlNode node:
                         {
                             var props = CHtmlNode.CHtmlNodeProperties.Keys ?? Enumerable.Empty<string>();
 
                             return props;
                         }
+
                     default:
                         var obj = this.Value;
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
@@ -1108,7 +1122,7 @@ namespace MultiHtmlCraft.Core
                             var self = window;
                            
                             if (binder.Name == "Image" || binder.Name == "Audio" || binder.Name == "Video" || 
-                                binder.Name == "XMLHttpRequest" || binder.Name == "DOMParser")
+                                binder.Name == "XMLHttpRequest" || binder.Name == "DOMParser" || binder.Name == "MessageChannel")
                             {
                             
                                 Func<object, object, object> factoryCtor = (arg1, arg2) => 
@@ -2758,6 +2772,46 @@ namespace MultiHtmlCraft.Core
                             // Allow ClearScript to bind to CLR methods directly.
                             return base.BindGetMember(binder);
                         }
+                    case CHtmlMessageChannel messageChannel:
+                        {
+                            var self = messageChannel;
+                            var name = binder.Name;
+                         
+
+                            switch (binder.Name)
+                            {
+                                case "port1":
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(self.___getPropertyByName("port1"), typeof(IDynamicMetaObjectProvider)),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType),
+                                        self.___getPropertyByName("port1")
+                                    );
+                                case "port2":
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(self.___getPropertyByName("port2"), typeof(IDynamicMetaObjectProvider)),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType),
+                                        self.___getPropertyByName("port2")
+                                    );
+                            }
+                            // Allow ClearScript to bind to CLR methods directly.
+                            return base.BindGetMember(binder);
+                        }
+                    case CHtmlMessagePort messagePort:
+                        {
+                            switch (binder.Name)
+                            {
+                                case "onmessage":
+                                    break;
+                                case "postMessage":
+                                    break;
+                                case "start":
+                                    break;
+                                case "close":
+                                    break;
+                            }
+            
+                            return base.BindGetMember(binder);
+                        }
 
                     case CHtmlCSSStyleSheet sheet:
                         {
@@ -3497,6 +3551,18 @@ namespace MultiHtmlCraft.Core
                                 break;
                             }
 
+                        case CHtmlMessageChannel messageChannel:
+                            {
+                                if (!string.IsNullOrEmpty(strIndex))
+                                {
+                                    var result = messageChannel.___getPropertyByIndex(indexArrayCol[0]);
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(result ?? string.Empty, typeof(object)),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                                break;
+                            }
                         case CHtmlCollection collection:
                             {
                                 if (intIndex.HasValue)
