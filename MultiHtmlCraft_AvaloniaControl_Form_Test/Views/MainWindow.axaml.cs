@@ -56,11 +56,12 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/jstest/SetTimeoutTest1.html";// SetTimeout Test OK
                 //  txt.Text= "http://localhost/canvas/RequestAnimationFrameRGBATest1.html";//
                 //txt.Text = "http://localhost/phoria.js-master/test3_noGUI.html";
-                 txt.Text = "http://localhost/phoria.js-master/test1d_nogui.html";
+                // txt.Text = "http://localhost/phoria.js-master/test1d_nogui.html";
                 // txt.Text ="http://localhost/canvas/jagarikin/angelic_weapon.html";// Angelic Weapon Test by jagarikin HSLA
                 //txt.Text ="http://localhost/canvas/jagarikin/angelic_weapon_RGBA.html";// Angelic Weapon Test by jagarikin RGBA
                 // txt.Text = "http://localhost/canvas/CanvasBeginPathClosePathMove.html"; // Canvas BeginPath ClosePath MoveTo Test OK
-                // txt.Text = "http://localhost/phoria.js-master/test1t_noGUI.html"; // Phoria Textbure
+                
+                //txt.Text = "http://localhost/phoria.js-master/test1t_noGUI.html"; // Phoria Textbure
                 // txt.Text = "http://localhost/canvas/CanvasClipTest1.html"; // Canvas Clip Test OK
                 //txt.Text = "http://localhost/mariohtml5-master/minTest.html"; // Mario HTML5 Test OnProgress
                 ///txt.Text = "http://localhost/canvas/CanvasMouseMoveTest1.html"; //
@@ -119,8 +120,8 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/jstest/VueJSConsoleTest2.html"; //VueJSConsoleTest 2 Looks OK
                 // txt.Text = "http://localhost/jstest/ReactJSTest1.html"; // ReactJS Test 1 Fail
                 //txt.Text = "http://localhost/jstest/OwnerDocumentTest1.html"; // ReactJS this[] check Test OK 
-                txt.Text = "http://localhost/jstest/ReactJSTest2.html"; // ReactJS Test 2 Fail
-                // txt.Text = "http://localhost/jstest/MessageChannelTest1.html"; // MessageChannel Test 1 
+                //txt.Text = "http://localhost/jstest/ReactJSTest2.html"; // ReactJS Test 2 Fail
+                 txt.Text = "http://localhost/jstest/MessageChannelTest1.html"; // MessageChannel Test 1 
                 
 
             }

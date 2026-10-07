@@ -981,10 +981,9 @@ namespace ClearScriptProcessor
         window.console = console;
     }
 
-    // 3. クラス登録関数
+
         var defineCustomClass = function(className) {
-        // window はただの JS オブジェクトになったので、
-        // className という名前のプロパティを自由に動的追加できます。
+
         window[className] = function() {
             var args = Array.prototype.slice.call(arguments);
             return _windowHost.___createObject(className, args);
@@ -1065,6 +1064,7 @@ namespace ClearScriptProcessor
         ""DOMParser"",
         ""AudioContext"",
         ""XMLHttpRequest"",
+        ""MessageChannel"",
         ""EventSource"",
         ""WebSocket"",
         ""Option"",
@@ -1123,24 +1123,7 @@ namespace ClearScriptProcessor
                     _v8Engine.Execute("console.log('Checks setDcoument typeof document :' + typeof document);");
                     _v8Engine.Execute("console.log('setDcoument window.document === __host_document :' + (window.document === __host_document));");
                     _v8Engine.Execute("console.log('setDcoument window.document === document :' + (window.document === document));");
-                    /*
-                    try
-                    {
-                        // _v8Engine.Script.document はスクリプト側のラッパ（V8 の HostObject）を返す
-                        var scriptDocWrapper = _v8Engine.Script.document;
-                        if (scriptDocWrapper != null)
-                        {
-                            
-                            // CHtmlDocument に SetScriptHostObject メソッドを用意しておく（次に示す）
-                            (document as MultiHtmlCraft.Core.sdfafdas)?.SetScriptHostObject(scriptDocWrapper);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // ログ出力等（防御的に）
-                        Debug.WriteLine("SetScriptHostObject failed: {0}", ex.Message);
-                    }
-                    */
+
 
 
 
@@ -1451,7 +1434,7 @@ if (typeof document === 'undefined' || document === null) {
     console.log(""=== DOM Classes Prototype Validation ==="");
     const targets = [
         'Event', 'Node', 'Element', 'HTMLElement', 'HTMLDocument', 
-        'HTMLBodyElement', 'DocumentFragment', 'MessageChannel'
+        'HTMLBodyElement', 'DocumentFragment'
     ];
     
     targets.forEach(name => {

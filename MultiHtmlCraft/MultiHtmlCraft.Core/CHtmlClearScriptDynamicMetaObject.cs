@@ -1122,7 +1122,7 @@ namespace MultiHtmlCraft.Core
                             var self = window;
                            
                             if (binder.Name == "Image" || binder.Name == "Audio" || binder.Name == "Video" || 
-                                binder.Name == "XMLHttpRequest" || binder.Name == "DOMParser" || binder.Name == "MessageChannel")
+                                binder.Name == "XMLHttpRequest" || binder.Name == "DOMParser" || binder.Name == "MessageChannel" || binder.Name == "MessagePort" || binder.Name == "MessageEvent" || binder.Name == "Message" || binder.Name == "Blob" || binder.Name == "FileReader")
                             {
                             
                                 Func<object, object, object> factoryCtor = (arg1, arg2) => 
@@ -2297,17 +2297,15 @@ namespace MultiHtmlCraft.Core
                        nameof(CHtmlDocument.createElement),
                        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                        null,
-                       new Type[] { typeof(string) }, // ← ここで引数の型を明確に指定！
+                       new Type[] { typeof(string) }, 
                        null
                    );
 
-                                            // 2. CHtmlDocument インスタンスから CHtmlMultiversalWindow インスタンスを取得する Expression を構築
-                                            // （※ 実際のフィールド名が _window の場合の例。プロパティなら Expression.Property を使用）
+                                           
                                             var docInstance = Expression.Convert(Expression, typeof(CHtmlDocument));
                                     
 
-                                            // 3. デリゲート型を決定 (___createObject の引数と戻り値の型に合わせる)
-                                            // 第一引数が string、戻り値が object の場合:
+                                 
                                             var delegateType = typeof(Func<string, object>);
 
                                             var createDelegateMethod = typeof(Delegate).GetMethod(
@@ -2322,7 +2320,7 @@ namespace MultiHtmlCraft.Core
                                                 Expression.Constant(methodInfo)
                                             );
 
-                                            // 4. Delegate 型の Expression を ClearScript 側に渡すため object にキャスト
+                                        
                                             return new DynamicMetaObject(
                                                 Expression.Convert(delegateExpression, typeof(object)),
                                                 BindingRestrictions.GetTypeRestriction(Expression, LimitType)
