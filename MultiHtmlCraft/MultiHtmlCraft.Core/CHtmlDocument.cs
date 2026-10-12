@@ -31958,12 +31958,13 @@ namespace MultiHtmlCraft.Core
 
                     switch (___tagNameUpper)
                     {
-                        case "VIDEO":
+                
                         case "AUDIO":
                         case "TRACK":
                         case "SOURCE":
                             return new CHtmlMediaElement();
-
+                        case "VIDEO":
+                            return new CHtmlVideoElement();
                         case "SVG":
                         case "DEFS":
                         case "RECT":

@@ -8464,38 +8464,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
             {
                 commonLog.LogEntry($"enter {this}.___addEventListenerInner({__evtName}, {___function}, {___bool})");
             }
-            // #region agent log
-            try
-            {
-                var payload = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
-                {
-                    ["sessionId"] = "b0830d",
-                    ["hypothesisId"] = "E",
-                    ["location"] = "CHtmlElement:___addEventListenerInner",
-                    ["message"] = "handler registered",
-                    ["data"] = new Dictionary<string, object?>
-                    {
-                        ["evtName"] = __evtName,
-                        ["handlerType"] = ___function?.GetType().FullName,
-                        ["isScriptObject"] = ___function is Microsoft.ClearScript.ScriptObject,
-                        ["element"] = this.ToString()
-                    },
-                    ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                }) + Environment.NewLine;
-                var logPaths = new[]
-                {
-                    System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "debug-b0830d.log")),
-                    System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "debug-b0830d.log")),
-                    @"C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\debug-b0830d.log"
-                };
-                foreach (var p in logPaths) { try { System.IO.File.AppendAllText(p, payload); break; } catch { } }
-            }
-            catch { }
-            // #endregion
-            if (this.___IsPrototype == true)
-            {
-                goto AttributeSection;
-            }
+
 
             switch(__evtName)
             {
@@ -8605,6 +8574,26 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                     {
                         _isSrcDataCached = true;
                         goto ElementSrcDataIsFound;
+                    }
+                    else
+                    {
+                        if(commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                        {
+                            commonLog.LogEntry($"Event handler for {___evtName} on {this} is not cached with src {_srcAbsouteUrlString} download now...");
+
+                        }
+                        try
+                        {
+                            var imgCache = CHmlMultiversalWebCache.getMultiversalContentDataSync(this.___srcBase.href, null);
+                            _isSrcDataCached = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                            {
+                                commonLog.LogEntry($"Error downloading src {_srcAbsouteUrlString} for event handler {___evtName} on {this}", ex);
+                            }
+                        }
                     }
                 }
             }

@@ -80,6 +80,7 @@ namespace MultiHtmlCraft.Core
                             v8Scope.AddHostType("HTMLElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLBodyElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLIFrameElement", typeof(CHtmlElement));
+                            v8Scope.AddHostType("HTMLVideoElement", typeof(CHtmlVideoElement));
                             v8Scope.AddHostType("HTMLDivElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLInputElement", typeof(CHtmlInputElement));
                             v8Scope.AddHostType("HTMLButtonElement", typeof(CHtmlElement));
@@ -89,8 +90,8 @@ namespace MultiHtmlCraft.Core
                             v8Scope.AddHostType("CSSStyleSheet", typeof(CHtmlCSSStyleSheet));
                             v8Scope.AddHostType("URLSearchParams", typeof(CHtmlURLSearchParams));
                             v8Scope.AddHostType("FontFace", typeof(CHtmlFontFace));
-                            v8Scope.AddHostType("MessageChannel", typeof(CHtmlMessageChannel));
-                            v8Scope.AddHostType("MessagePort", typeof(CHtmlMessagePort));
+                            // v8Scope.AddHostType("MessageChannel", typeof(CHtmlMessageChannel)); should use ___createObject instead of constructor to avoid passing ScriptObject to constructor
+                            // v8Scope.AddHostType("MessagePort", typeof(CHtmlMessagePort));
 
 
                             v8Scope.engine.Execute(@"

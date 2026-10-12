@@ -418,7 +418,15 @@ namespace MultiHtmlCraft.Core
 		{
 			try
 			{
-				return base[i];
+                if(i < 0 || i >= base.Count)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                    {
+                        commonLog.LogEntry("CHtmlCollection.__GetByIndex({0}) is out of range. Count={1}", i, base.Count);
+                    }
+                    return null;
+                }
+                return base[i];
 			}
 			catch{}
 			return null;

@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using MultiHtmlCraft.Interfaces;
+﻿using MultiHtmlCraft.Interfaces;
 using NiL.JS.BaseLibrary;
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Text;
+using System.Linq.Expressions;
 namespace MultiHtmlCraft.Core
 {
     /// <summary>
@@ -206,6 +208,10 @@ namespace MultiHtmlCraft.Core
                commonLog.LogEntry("___getClassName {0} {1} called", this.GetType(), this);
             }
             return this.GetType().Name;
+        }
+        public DynamicMetaObject GetMetaObject(Expression parameter)
+        {
+            return new CHtmlClearScriptDynamicMetaObject<CHtmlMessageChannel>(parameter, this);
         }
         public virtual object ___getDefaultValue()
         {

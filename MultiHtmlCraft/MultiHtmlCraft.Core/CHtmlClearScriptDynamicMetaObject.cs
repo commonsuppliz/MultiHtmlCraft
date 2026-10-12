@@ -965,6 +965,25 @@ namespace MultiHtmlCraft.Core
                             var methods = CHtmlWindowEvent.CHtmlWindowEventMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
                         }
+                    case CHtmlVideoElement videoElement:
+                        {
+                            var props = CHtmlElement.CHtmlElementProperties?.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlElement.CHtmlElementMethods?.Keys ?? Enumerable.Empty<string>();
+                            var mediaProps = new[] { "canPlayType", "play", "pause", "load", "stop", "addTextTrack", "autoplay", "buffered", "controls", "currentSrc", "currentTime", "duration", "ended", "loop", "muted", "paused", "playbackRate", "played", "preload", "readyState", "seekable", "seeking", "src", "volume" };
+
+                            var videoprops = CHtmlVideoElement.CHtmlVideoElementProperties.Keys ?? Enumerable.Empty<string>();
+                            var videoMethods = CHtmlVideoElement.CHtmlVideoElementMethods.Keys ?? Enumerable.Empty<string>();
+                            var videoElemnetDynamicMemberNamesObject = props.Concat(methods).Concat(mediaProps).Concat(videoprops).Concat(videoMethods);
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry($"[GetDynamicMemberNames] Exporting Dynamic Member Names for <{videoElement.toLogString()}>: {string.Join(", ", videoElemnetDynamicMemberNamesObject)}");
+                      
+                            }
+                            return videoElemnetDynamicMemberNamesObject;
+                        
+
+                        }
+
                     case CHtmlMediaElement mediaElement:
                         {
                             // Include CHtmlMediaElement-specific methods (canPlayType, play, pause, load, stop)
@@ -1079,9 +1098,9 @@ namespace MultiHtmlCraft.Core
 
                     default:
                         var obj = this.Value;
-                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 1)
                         {
-                            commonLog.LogEntry($"TODO GetDynamicMemberNames fallback for type: {this.Value?.GetType().FullName}");
+                            commonLog.LogEntry($"TODO GetDynamicMemberNames definition missing for type: {this.Value?.GetType().FullName}");
                         }
                         try { return ((dynamic)obj).GetDynamicMemberNames() as IEnumerable<string> ?? System.Array.Empty<string>(); } catch { }
                         break;
@@ -1122,7 +1141,7 @@ namespace MultiHtmlCraft.Core
                             var self = window;
                            
                             if (binder.Name == "Image" || binder.Name == "Audio" || binder.Name == "Video" || 
-                                binder.Name == "XMLHttpRequest" || binder.Name == "DOMParser" || binder.Name == "MessageChannel")
+                                binder.Name == "XMLHttpRequest" || binder.Name == "DOMParser" || binder.Name == "MessageChannel" || binder.Name == "MessagePort" || binder.Name == "MessageEvent" || binder.Name == "Message" || binder.Name == "Blob" || binder.Name == "FileReader")
                             {
                             
                                 Func<object, object, object> factoryCtor = (arg1, arg2) => 
@@ -1195,6 +1214,163 @@ namespace MultiHtmlCraft.Core
                             }
                         }
                         break;
+                    case CHtmlVideoElement videoElement:
+                    {
+                            var self = videoElement;
+                            
+       
+                            if (commonLog.LoggingEnabled)
+                            {
+                                commonLog.LogEntry("[CHtmlVideoElement.BindGetMember] binder.Name={0}, tagName={1}", binder.Name, self?.tagName);
+                            }
+                            
+                            switch (binder.Name)
+                            {
+                                case "addEventListener":
+                                    {
+                                        if (commonLog.LoggingEnabled)
+                                        {
+                                            commonLog.LogEntry("[CHtmlVideoElement.BindGetMember] binder.Name={0}, tagName={1}", binder.Name, self?.tagName);
+                                        }
+                                        // jQuery calls addEventListener(type, handler) with 2 args
+                                        // Standard DOM allows optional 3rd arg (options/useCapture)
+                                        // Use 2-arg delegate since that's what jQuery uses
+                                        Action<object, object> addEl = (nameArg, handlerArg) =>
+                                        {
+                                            try
+                                            {
+                                                var nameStr = UnwrapValue(nameArg)?.ToString() ?? string.Empty;
+                                                var handler = handlerArg;
+                                                if (!string.IsNullOrEmpty(nameStr))
+                                                {
+                                                    try { self.addEventListener(nameStr, handler); } catch { }
+                                                }
+                                            }
+                                            catch { }
+                                        };
+                                        return new DynamicMetaObject(Expression.Constant(addEl, typeof(Action<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+
+                                        break;
+                                    }
+                                case "nodeName":
+                                    {
+                                        var nodeNameStr = self.___tagName ?? self.tagName;
+                                        if (nodeNameStr == null) nodeNameStr = string.Empty;
+                                        return new DynamicMetaObject(
+                                            Expression.Constant((object)nodeNameStr),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType),
+                                            nodeNameStr
+                                        );
+
+                                    }
+                                case "canPlayType":
+                                    {
+                                        // Return a callable delegate for canPlayType(mediaType)
+                                        Func<object, object> canPlayTypeDel = (mediaTypeArg) =>
+                                        {
+                                            try
+                                            {
+                                                var unwrapped = UnwrapValue(mediaTypeArg) ?? mediaTypeArg;
+                                                return self.canPlayType(unwrapped) ?? string.Empty;
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("canPlayType delegate exception: {0}", ex.Message); } catch { }
+                                                return string.Empty;
+                                            }
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(canPlayTypeDel, typeof(Func<object, object>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                case "play":
+                                    {
+                                        Func<Task> mediaPlayDelegate = self.play;
+
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(mediaPlayDelegate, typeof(Func<Task>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                    break;
+                                case "pause":
+                                    {
+                                        Action pauseDel = () =>
+                                        {
+                                            try { self.pause(); } catch { }
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(pauseDel, typeof(Action)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                case "load":
+                                    {
+                                        Action loadDel = () =>
+                                        {
+                                            try { self.load(); } catch { }
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(loadDel, typeof(Action)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                case "addTextTrack":
+                                    {
+                                        Func<object, object, object, object> addTextTrackDel = (kindArg, labelArg, languageArg) =>
+                                        {
+                                            try
+                                            {
+                                                var kind = UnwrapValue(kindArg) ?? kindArg;
+                                                var label = UnwrapValue(labelArg) ?? labelArg;
+                                                var language = UnwrapValue(languageArg) ?? languageArg;
+                                                return self.addTextTrack(kind, label, language);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("addTextTrack delegate exception: {0}", ex.Message); } catch { }
+                                                return null!;
+                                            }
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(addTextTrackDel, typeof(Func<object, object, object, object>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                            }
+                            // For non-media-specific members, delegate to CHtmlElement's property/method handling
+                            // Handle className specially
+                            if (binder.Name == "className" || binder.Name == "classname" || binder.Name == "class")
+                            {
+                                var classNameValue = self.className ?? string.Empty;
+                                return new DynamicMetaObject(
+                                    Expression.Constant(classNameValue, typeof(string)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                            /*
+                            // Check for known CHtmlElement properties
+                            if (CHtmlElement.CHtmlElementProperties.ContainsKey(binder.Name))
+                            {
+                                var propertyInfo = GetCachedProperty(typeof(CHtmlElement), binder.Name) ?? GetCachedProperty(typeof(CHtmlNode), binder.Name);
+                                if (propertyInfo != null)
+                                {
+                                    return new DynamicMetaObject(
+                                        Expression.Property(Expression.Constant(self), propertyInfo),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                            }
+                            // Fallback to GetDynamicMember for other members
+                            var mediaRes = self.GetDynamicMember(binder.Name);
+                            return new DynamicMetaObject(Expression.Constant(mediaRes, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            */
+                            break;
+
+                        }
+                    break;
 
                     case CHtmlMediaElement mediaElement:
                         {
@@ -2050,6 +2226,7 @@ namespace MultiHtmlCraft.Core
                             return new DynamicMetaObject(Expression.Constant(res, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
                         }
                         break;
+                    
                     case CHtmlCollection collection:
                         {
                             var selfCol = collection;
@@ -2297,17 +2474,15 @@ namespace MultiHtmlCraft.Core
                        nameof(CHtmlDocument.createElement),
                        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                        null,
-                       new Type[] { typeof(string) }, // ← ここで引数の型を明確に指定！
+                       new Type[] { typeof(string) }, 
                        null
                    );
 
-                                            // 2. CHtmlDocument インスタンスから CHtmlMultiversalWindow インスタンスを取得する Expression を構築
-                                            // （※ 実際のフィールド名が _window の場合の例。プロパティなら Expression.Property を使用）
+                                           
                                             var docInstance = Expression.Convert(Expression, typeof(CHtmlDocument));
                                     
 
-                                            // 3. デリゲート型を決定 (___createObject の引数と戻り値の型に合わせる)
-                                            // 第一引数が string、戻り値が object の場合:
+                                 
                                             var delegateType = typeof(Func<string, object>);
 
                                             var createDelegateMethod = typeof(Delegate).GetMethod(
@@ -2322,7 +2497,7 @@ namespace MultiHtmlCraft.Core
                                                 Expression.Constant(methodInfo)
                                             );
 
-                                            // 4. Delegate 型の Expression を ClearScript 側に渡すため object にキャスト
+                                        
                                             return new DynamicMetaObject(
                                                 Expression.Convert(delegateExpression, typeof(object)),
                                                 BindingRestrictions.GetTypeRestriction(Expression, LimitType)
@@ -2813,6 +2988,7 @@ namespace MultiHtmlCraft.Core
                             return base.BindGetMember(binder);
                         }
 
+
                     case CHtmlCSSStyleSheet sheet:
                         {
                             var self = sheet;
@@ -2822,7 +2998,7 @@ namespace MultiHtmlCraft.Core
                                 commonLog.LogEntry($"[BindGetMember] CHtmlCSSStyleSheet binder.Name={name}");
                             }
 
-                            // メソッド名辞書にあるものはデリゲートで返す
+                           
                             if (CHtmlCSSStyleSheet.CHtmlCSSStyleSheetMethods.ContainsKey(name))
                             {
                                 switch (name)
@@ -2840,7 +3016,7 @@ namespace MultiHtmlCraft.Core
                                         return new DynamicMetaObject(Expression.Constant(getPropertyValueDel, typeof(Func<object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
 
                                     case "setProperty":
-                                        // 2引数版と3引数版のどちらが来ても安全なラッパーを返す
+                                     
                                         Func<object, object, object> setProperty2Del = (nameArg, valueArg) =>
                                         {
                                             try
@@ -2852,22 +3028,21 @@ namespace MultiHtmlCraft.Core
                                             catch { }
                                             return null!;
                                         };
-                                        // JS 側で3引数 (name, value, priority) を渡す場合のラッパー
+                                      
                                         Func<object, object, object, object> setProperty3Del = (nameArg, valueArg, priorityArg) =>
                                         {
                                             try
                                             {
                                                 var n = (UnwrapValue(nameArg) ?? nameArg)?.ToString() ?? string.Empty;
                                                 var v = (UnwrapValue(valueArg) ?? valueArg)?.ToString() ?? string.Empty;
-                                                // priorityArg は無視または必要なら取り扱い
+                                                
                                                 self.setProperty(n, v);
                                             }
                                             catch { }
                                             return null!;
                                         };
 
-                                        // まず 3 引数デリゲートを返せるように、object を受ける dynamic wrapper を返す
-                                        // ClearScript はプロパティアクセス時にこのオブジェクトを関数として呼べる
+                         
                                         var wrapper = new Func<object[], object>((args) =>
                                         {
                                             try
@@ -2898,14 +3073,14 @@ namespace MultiHtmlCraft.Core
                                 }
                             }
 
-                            // CLR プロパティが存在すれば直接返却（backgroundClip 等）
+                           
                             var propInfo = GetCachedProperty(typeof(CHtmlCSSStyleSheet), name);
                             if (propInfo != null)
                             {
                                 return new DynamicMetaObject(Expression.Property(Expression.Constant(self), propInfo), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
                             }
 
-                            // フォールバック：内部取得 API を返す
+                          
                             try
                             {
                                 var dyn = self.___getPropertyByName(name);

@@ -192,16 +192,9 @@ namespace ClearScriptProcessor
                     ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                 };
                 var line = JsonSerializer.Serialize(payload) + Environment.NewLine;
-                var candidates = new[]
-                {
-                    Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "debug-b0830d.log")),
-                    Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "debug-b0830d.log")),
-                    @"C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraaft.AvaloniaControl_Tesst\debug-b0830d.log"
-                };
-                foreach (var logPath in candidates.Distinct())
-                {
-                    try { File.AppendAllText(logPath, line); break; } catch { }
-                }
+                Debug.WriteLine($"[AgentDebugLog] {line}");
+                return;
+
             }
             catch { }
         }
@@ -285,12 +278,12 @@ namespace ClearScriptProcessor
                 ___callfunctionStage = 2;
 
                 var engine = this._v8ScriptEngine;
-
+                Type? tcheck = null;
 
                 bool isFunction = false;
                 try
                 {
-                    var tcheck = functionobject.GetType();
+                    tcheck = functionobject.GetType();
                     var okProp = tcheck.GetProperty("ObjectKind", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                     if (okProp != null)
                     {
@@ -512,7 +505,7 @@ namespace ClearScriptProcessor
                     }
                     else
                     {
-                        Debug.WriteLine("CallFunctionInternal: target is not a JS function according to ObjectKind - skip engine.Invoke to avoid ClearScript errors.");
+                        Debug.WriteLine("CallFunctionInternal: target is not a JS function according to ObjectKind - skip engine.Invoke to avoid ClearScript errors. : " + tcheck);
                     }
                 }
 
