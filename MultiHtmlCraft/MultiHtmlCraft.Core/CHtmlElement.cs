@@ -13722,11 +13722,50 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 
             }
         }
+        internal void ___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize()
+        {
+            if (this.___offsetWidth <= 0)
+            {
+                this.___offsetWidth = 1;
+            
+            }
+            if(this.___offsetHeight <= 0)
+            {
+                this.___offsetHeight = 1;
+            }
+            if (this.___CanvasSkiaBitmap != null)
+            {
+                if (Math.Abs(this.___CanvasSkiaBitmap.Width - this.___offsetWidth) > 0 && Math.Abs(this.___CanvasSkiaBitmap.Height - this.___offsetHeight) > 0)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize SkiaSharp Canvas BitmapSize {0} : {1} x {2}", this, this.___offsetWidth, this.___offsetHeight);
+                    }
+                    this.___CanvasSkiaBitmap.Dispose();
+                    this.___CanvasSkiaBitmap = null;
+                    
+                    this.___CanvasSkiaBitmap = new SkiaSharp.SKBitmap((int)this.___offsetWidth, (int)this.___offsetHeight, SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Premul);
+                    this.___canvasContextCurrent2D.___CanvasSkiaBitmapWeakReference = null;
+                    this.___canvasContextCurrent2D.___CanvasSkiaBitmapWeakReference = new WeakReference(___CanvasSkiaBitmap, false);
+
+
+
+                    return;
+                }
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("exit ___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize SkiaSharp Canvas BitmapSize {0} : {1} x {2}", this, this.___offsetWidth, this.___offsetHeight);
+                }
+            }
+            return;
+        }
 
 
 
 
-		public void PrintChildNodeDOMTree(string prefix)
+
+
+        public void PrintChildNodeDOMTree(string prefix)
 		{
 			commonLog.LogEntry("{0} + {1} : {2}", prefix, this, this.___childNodes.Count);
             int ___thisChildCount = this.___childNodes.Count;
@@ -15860,10 +15899,26 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                         if (this.___elementTagType == CHtmlElementType.CANVAS)
                         {
                             double doubleWidth = commonHTML.GetDoubleValueFromString(this.___style.___Width, this.___availWidth, -1);
-                            if (Math.Abs(doubleWidth - this.___offsetWidth) > 10)
+                            if (Math.Abs(doubleWidth - this.___offsetWidth) > 0)
                             {
                                 this.___offsetWidth = (float)doubleWidth;
+#if WINDOWS
                                 ___resetC2DBitmapImageBaseduponOffsetSize();
+#else
+                                switch(commonHTML.GraphicApiType)
+                                {
+                                    case GraphicAPIType.Avalonia:
+                                    case GraphicAPIType.SkiaSharp:
+                                        ___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize();
+                                        break;
+
+
+
+                                    default:
+                                        break;
+                                }
+                             
+#endif
 
                             }
                             if (this.___canvasContextCurrent2D != null)
@@ -15880,9 +15935,26 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 						}
                         if (this.___elementTagType == CHtmlElementType.CANVAS)
                         {
-                            double doubleHeight = this.___style.___HeightComputedValue;
-                            this.___offsetHeight = (float)doubleHeight;
+                            double doubleHeight = commonHTML.GetDoubleValueFromString(this.___style.___Height, this.___availHeight, -1);
+                            if (Math.Abs(doubleHeight - this.___offsetHeight) > 0)
+                            {
+                                this.___offsetHeight = (float)doubleHeight;
+                            }
+                            if (Math.Abs(doubleHeight - this.___offsetHeight) > 0)
+                            {
+                                this.___offsetHeight = (float)doubleHeight;
+                            }
+#if WINDOWS
                             ___resetC2DBitmapImageBaseduponOffsetSize();
+#else
+                                switch (commonHTML.GraphicApiType)
+                            {
+                                case GraphicAPIType.Avalonia:
+                                case GraphicAPIType.SkiaSharp:
+                                    ___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize();
+                                    break;
+                            }
+#endif
                             if (this.___canvasContextCurrent2D != null)
                             {
                                 ___canvasContextCurrent2D.___CanvasHeight = doubleHeight;
@@ -16717,7 +16789,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 		}
 
 
-        #endregion
+#endregion
         public bool isPrototypeOf(object ___protoObject)
         {
             if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)

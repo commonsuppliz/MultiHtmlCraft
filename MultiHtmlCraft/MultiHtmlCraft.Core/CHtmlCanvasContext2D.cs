@@ -382,20 +382,26 @@ namespace MultiHtmlCraft.Core
 
         public void fillRect(double x, double y, double w, double h)
         {
-            ___setCanvasActivityIntoDocument();
-            if (this.___CanvasTranslatePoint.X != 0 || this.___CanvasTranslatePoint.Y != 0)
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
             {
-                x += this.___CanvasTranslatePoint.X;
-                y += this.___CanvasTranslatePoint.Y;
+                commonLog.LogEntry($" enter {this}.fillRect({x}, {y}, {w}, {h}) method called. Current instruction count: " + (this.___CanvasInstructionsList != null ? this.___CanvasInstructionsList.Count : 0));
             }
+            try
+            {
+                ___setCanvasActivityIntoDocument();
+                if (this.___CanvasTranslatePoint.X != 0 || this.___CanvasTranslatePoint.Y != 0)
+                {
+                    x += this.___CanvasTranslatePoint.X;
+                    y += this.___CanvasTranslatePoint.Y;
+                }
 
 #if WINDOWS
-            var gr = this.___getactiveC2DGraphicsFromBaseImage();
-            if (gr != null)
-            {
-                if (this.___CanvasGdiBrush == null) ___createBrushFromFillStyleObject(Color.Black);
-                gr.FillRectangle(this.___CanvasGdiBrush, (float)x, (float)y, (float)w, (float)h);
-            }
+                var gr = this.___getactiveC2DGraphicsFromBaseImage();
+                if (gr != null)
+                {
+                    if (this.___CanvasGdiBrush == null) ___createBrushFromFillStyleObject(Color.Black);
+                    gr.FillRectangle(this.___CanvasGdiBrush, (float)x, (float)y, (float)w, (float)h);
+                }
 #endif
 #if !WINDOWS
             using (var skCanvas = this.___getActiveSkiaCanvasFromBaseImage())
@@ -421,9 +427,16 @@ namespace MultiHtmlCraft.Core
                 }
             }
 #endif
-            if (this.___CanvasInstructionsList != null)
+                if (this.___CanvasInstructionsList != null)
+                {
+                    this.___CanvasInstructionsList.Add(new CHtmlCanvasContextInstruction { InstructionType = CanvasInstructionType.FillRect, rectangle = new RectangleFSpec((float)x, (float)y, (float)w, (float)h) });
+                }
+            } catch(Exception ex)
             {
-                this.___CanvasInstructionsList.Add(new CHtmlCanvasContextInstruction { InstructionType = CanvasInstructionType.FillRect, rectangle = new RectangleFSpec((float)x, (float)y, (float)w, (float)h) });
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                {
+                    commonLog.LogEntry($"Exception in {this}.fillRect({x}, {y}, {w}, {h}): " + ex.ToString());
+                }
             }
         }
 
@@ -1716,6 +1729,35 @@ namespace MultiHtmlCraft.Core
         private ICHtmlCanvas2DImageData getImageDataInner(object p1, object p2, object p3, object p4)
         {
             CHtmlCanvas2DImageData imageDateResult = new CHtmlCanvas2DImageData();
+#if DEBUG
+            // ======================================================================================
+            // Check canvas element width
+            if(this.___parentElementWeakReference != null)
+            {
+                if (this.___parentElementWeakReference.Target is CHtmlElement canvasElement)
+                {
+                    
+
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                        {
+                            commonLog.LogEntry("getImageDataInner Canvas element  Width: {0}, Height: {1}", canvasElement.width, canvasElement.height);
+                        }
+                    
+                }
+                var skiaCanvas = this.___CanvasSkiaBitmapWeakReference.Target as SkiaSharp.SKBitmap;
+                if (skiaCanvas != null)
+                {
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                    {
+                        commonLog.LogEntry("getImageDataInner SkiaBitmap Canvas  Width: {0}, Height: {1}", skiaCanvas.Width, skiaCanvas.Height);
+                    }
+                }
+            }
+
+
+
+            // ======================================================================================
+#endif
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
             {
                 commonLog.LogEntry("entering {0}.getImageDataInner({1}, {2}, {3}, {4})...", this, p1, p2, p3, p4);
@@ -1835,40 +1877,40 @@ namespace MultiHtmlCraft.Core
                                     if (srcSkiaSharpBitmap != null)
                                     {
                                         int sx = (int)___x1;
-    int sy = (int)___y1;
-    int swidth = (int)___width1;
-    int sheight = (int)___height1;
+                                        int sy = (int)___y1;
+                                        int swidth = (int)___width1;
+                                        int sheight = (int)___height1;
     
-    // 全体のピクセルスパンを取得
-    var fullPixelSpan = srcSkiaSharpBitmap.GetPixelSpan();
-    int stride = srcSkiaSharpBitmap.RowBytes / 4; // 1ピクセル = 4バイト
+                                 
+                                        var fullPixelSpan = srcSkiaSharpBitmap.GetPixelSpan();
+                                        int stride = srcSkiaSharpBitmap.RowBytes / 4; 
     
-    // 指定領域のピクセルデータを作成
-    byte[] pixelBytes = new byte[swidth * sheight * 4];
+                                       
+                                        byte[] pixelBytes = new byte[swidth * sheight * 4];
     
-    int destIndex = 0;
-    for (int y = sy; y < sy + sheight; y++)
-    {
-        int srcStartIndex = (y * stride + sx) * 4;
-        Array.Copy(srcSkiaSharpBitmap.Bytes, srcStartIndex, pixelBytes, destIndex, swidth * 4);
-        destIndex += swidth * 4;
-    }
+                                        int destIndex = 0;
+                                        for (int y = sy; y < sy + sheight; y++)
+                                        {
+                                            int srcStartIndex = (y * stride + sx) * 4;
+                                            Array.Copy(srcSkiaSharpBitmap.Bytes, srcStartIndex, pixelBytes, destIndex, swidth * 4);
+                                            destIndex += swidth * 4;
+                                        }
     
-    var skiaArrayListSkiaData = new CHtmlCanvas2DImageData();
+                                        var skiaArrayListSkiaData = new CHtmlCanvas2DImageData();
 
 
-    skiaArrayListSkiaData.data = new CHtmlNativeArray(CHtmlNumericArrayType.Uint8ClampedArray)
-    {
-        ___byteArray = pixelBytes,
-        ___arrayLength = pixelBytes.Length,
-        ___width = swidth,
-        ___height = sheight,
-        ___BYTES_PER_ELEMENT = 1
-    };
-    skiaArrayListSkiaData.width = swidth;
-    skiaArrayListSkiaData.height = sheight;
-     skiaArrayListSkiaData.___height = sheight;
-    return skiaArrayListSkiaData;
+                                        skiaArrayListSkiaData.data = new CHtmlNativeArray(CHtmlNumericArrayType.Uint8ClampedArray)
+                                        {
+                                            ___byteArray = pixelBytes,
+                                            ___arrayLength = pixelBytes.Length,
+                                            ___width = swidth,
+                                            ___height = sheight,
+                                            ___BYTES_PER_ELEMENT = 1
+                                        };
+                                        skiaArrayListSkiaData.width = swidth;
+                                        skiaArrayListSkiaData.height = sheight;
+                                         skiaArrayListSkiaData.___height = sheight;
+                                        return skiaArrayListSkiaData;
                                     }
                                 }
                                 if (srcImage != null)
@@ -1889,8 +1931,24 @@ namespace MultiHtmlCraft.Core
             {
                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                 {
-                    commonLog.LogEntry("Canvas getImageDataInner Failed. ", ex);
+                    commonLog.LogEntry($"Canvas getImageDataInner Failed. Returns dummy data.", ex);
+
                 }
+                var skiaArrayListSkiaDummyData = new CHtmlCanvas2DImageData();
+
+
+                skiaArrayListSkiaDummyData.data = new CHtmlNativeArray(CHtmlNumericArrayType.Uint8ClampedArray)
+                {
+                    ___byteArray = new byte[4] { 0, 0, 0, 0 },
+                    ___arrayLength = 4,
+                    ___width = 1,
+                    ___height = 1,
+                    ___BYTES_PER_ELEMENT = 1
+                };
+                skiaArrayListSkiaDummyData.width = ___width1;
+                skiaArrayListSkiaDummyData.height = ___height1;
+                skiaArrayListSkiaDummyData.___height = ___height1;
+                return skiaArrayListSkiaDummyData;
             }
 #if WINDOWS
             if (___grAdhocContext != null)
@@ -2915,8 +2973,9 @@ namespace MultiHtmlCraft.Core
                     skBitmap = this.___CanvasSkiaBitmapWeakReference.Target as SKBitmap;
                     if (skBitmap != null)
                     {
-                        skCanvas = new SKCanvas(skBitmap);
+              
                         ___hasSkiaCanvasObtained = true;
+                        skCanvas = new SKCanvas(skBitmap);
                         
                         // Set default properties
                         // skCanvas.Clear(SKColors.Transparent); // Removed: clearing on every get wipes intermediate drawings
@@ -2939,13 +2998,13 @@ namespace MultiHtmlCraft.Core
             {
                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
                 {
-                    commonLog.LogEntry("SkiaSharp Canvas Failed....", ex);
+                    commonLog.LogEntry("___getActiveSkiaCanvasFromBaseImage SkiaSharp Canvas Failed....", ex);
                 }
             }
             
             if (skCanvas == null)
             {
-                throw new Exception("SkiaSharp Canvas Failed to obtain Canvas from Canvas Image");
+                throw new Exception("___getActiveSkiaCanvasFromBaseImage SkiaSharp Canvas Failed to obtain Canvas from Canvas Image");
             }
             return skCanvas;
         }

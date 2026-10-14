@@ -965,6 +965,11 @@ namespace MultiHtmlCraft.Core
                             var methods = CHtmlWindowEvent.CHtmlWindowEventMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
                         }
+                    case CHtmlCanvas2DImageData canvasImageData:
+                        {
+                            var props = CHtmlCanvas2DImageData.CHtmlCanvas2DImageDataProperties.Keys ?? Enumerable.Empty<string>();
+                            return props;
+                        }
                     case CHtmlVideoElement videoElement:
                         {
                             var props = CHtmlElement.CHtmlElementProperties?.Keys ?? Enumerable.Empty<string>();
@@ -1034,12 +1039,7 @@ namespace MultiHtmlCraft.Core
                     case CHtmlTextMetrics textMetrics:
                         return CHtmlTextMetrics.CHtmlTextMetricsProperties?.Keys ?? Enumerable.Empty<string>();
 
-                    case CHtmlCanvas2DImageData imageDaga:
-                        {
-                            var props = CHtmlCanvas2DImageData.CHtmlCanvas2DImageDataProperties?.Keys ?? Enumerable.Empty<string>();
-                            var methods = CHtmlCanvas2DImageData.CHtmlCanvas2DImageDataMethods?.Keys ?? Enumerable.Empty<string>();
-                            return props.Concat(methods);
-                        }
+
                     case CHtmlNativeArray nativeArray:
                         {
                             var props = CHtmlNativeArray.CHtmlNativeArrayProperties?.Keys ?? Enumerable.Empty<string>(); 
@@ -1089,6 +1089,7 @@ namespace MultiHtmlCraft.Core
                             var methods = CHtmlMessagePort.CHtmlMessagePortMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
                         }
+
                     case CHtmlNode node:
                         {
                             var props = CHtmlNode.CHtmlNodeProperties.Keys ?? Enumerable.Empty<string>();

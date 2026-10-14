@@ -4102,8 +4102,18 @@ namespace MultiHtmlCraft.Core
                                 if (___owerElement.___offsetHeight != doubleHeight)
                                 {
                                     ___owerElement.___offsetHeight = doubleHeight;
-
+#if WINDOWS
                                     ___owerElement.___resetC2DBitmapImageBaseduponOffsetSize();
+#else
+                                    switch (commonHTML.GraphicApiType)
+                                    {
+                                        case GraphicAPIType.Avalonia:
+                                        case GraphicAPIType.SkiaSharp:
+                                            ___owerElement.___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize();
+                                            break;
+                                    }
+
+#endif
                                     this.___CanvasHeight = doubleHeight;
                                 }
                             }
@@ -4288,7 +4298,7 @@ namespace MultiHtmlCraft.Core
             }
             return CanvasContextModeType.OtherType;
         }
-		#endregion
+#endregion
         private object ___CanvasWindowLockingObject = new object();
 
         private void ___CanvasContextTimerDoNothing(object ___state)

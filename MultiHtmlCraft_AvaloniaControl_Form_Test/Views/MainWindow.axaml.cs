@@ -125,7 +125,8 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/jstest/MessageChannelTest1.html"; // MessageChannel Test 1 
                 //txt.Text = "http://localhost/canvas/CanvasRotateTest1.html";//
                 //txt.Text = "http://localhost/canvas/phaser/phaserGameText1.html"; // Phaser Game Text Test 1
-                txt.Text = "http://localhost/html/HTMLVideoElementTest1.html"; // HTML Video Element Test 1
+                //txt.Text = "http://localhost/html/HTMLVideoElementTest1.html"; // HTML Video Element Test 1 Basic ok
+                txt.Text = "http://localhost/canvas/phaser/Gamedev-Phaser-Content-Kit-gh-pages/demos/lesson16.html"; // Phaser Game Text Test 1
 
 
 
