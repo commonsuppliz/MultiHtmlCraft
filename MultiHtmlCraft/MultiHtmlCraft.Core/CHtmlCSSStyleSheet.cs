@@ -19,7 +19,7 @@ namespace MultiHtmlCraft.Core
 
     [ComVisible(true)]
     
-    public sealed class CHtmlCSSStyleSheet : ICommonObjectInterface, ICHtmlCSSStyleDeclaration, IDynamicMetaObjectProvider, IPropertyBag, IScriptableObject
+    public sealed class CHtmlCSSStyleSheet : CHtmlCSSStyleDeclaration, ICommonObjectInterface, IDynamicMetaObjectProvider, IPropertyBag, IScriptableObject
     {
         internal static readonly Dictionary<string, int> CHtmlCSSStyleSheetProperties = InitializeCHtmlCSSStyleSheetProperties();
         internal static readonly Dictionary<string, int> CHtmlCSSStyleSheetMethods = InitializeCHtmlCSSStyleMethods();
@@ -116,7 +116,7 @@ namespace MultiHtmlCraft.Core
             }
 
             return chtmlCSSStyleSheetProperties;
-            return chtmlCSSStyleSheetProperties;
+            
         }
         #region IPropertyBag
         object IDictionary<string, object>.this[string key]
@@ -157,11 +157,13 @@ namespace MultiHtmlCraft.Core
             }
             switch (key)
             {
+
+
                 case "setProperty":
                     value = (Action<object, object>)((name, val) => this.setProperty(name, val));
                     return true;
                 case "getPropertyValue":
-                    value = (Func<object, string>)((name) => this.getPropertyValue(key));
+                    value = (Func<object, string>)((name) => this.getPropertyValue(Convert.ToString(name)));
                     return true;
                 case "getPropertyCSSValue":
                     value = (Func<object, object>)((name) => this.getPropertyCSSValue(name));
@@ -377,12 +379,18 @@ namespace MultiHtmlCraft.Core
         {
             if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
-               commonLog.LogEntry("entering {0}.ggetPropertyValue(\'{1}\')", this, _arg);
+               commonLog.LogEntry("entering {0}.getPropertyValue(\'{1}\')", this, _arg);
             }
             string _strProperty = _arg;
             if (string.IsNullOrEmpty(_strProperty) == false)
             {
-                return commonHTML.GetStringValue(this.___getPropertyByName(_strProperty));
+                var stylePropValue = commonHTML.GetStringValue(this.___getPropertyByName(_strProperty));
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                {
+                    commonLog.LogEntry("entering {0}.getPropertyValue(\'{1}\') returns : {2} ", this, _arg, stylePropValue);
+                }
+                return stylePropValue;
+
             }
             return "";
         }
@@ -7869,6 +7877,9 @@ namespace MultiHtmlCraft.Core
                 case "webkitfullscreen":
                 case "-webkit-full-screen":
                     return ___convertNullToEmpty(this.___fullscreen);
+                case "background-color":
+                case "background-Color":
+                case "backgroundColor":
                 case "backgroundcolor":
                     return ___convertNullToEmpty(this.___BackgroundColor);
                 case "backgroundimage":
@@ -8116,6 +8127,7 @@ namespace MultiHtmlCraft.Core
                     //return commonHTML.rhinoForLoopEnumratorFunction;
                     return null;
 
+
                 default:
 
                     break;
@@ -8148,11 +8160,11 @@ namespace MultiHtmlCraft.Core
                 {
                     if (this.___IsOwnerElementAssigned() == true)
                     {
-                       commonLog.LogEntry("StyleSet: {0} {1} = \'{2}\'", this.ownerElement, ___name, val);
+                       commonLog.LogEntry($"CSSStyleSheet.{this}.__setPropertyByName( {___name} = \'{val}\'");
                     }
                     else
                     {
-                       commonLog.LogEntry("StyleSet: {0} {1} = \'{2}\'", "", ___name, val);
+                        commonLog.LogEntry($"CSSStyleSheet.{this}.__setPropertyByName( {___name} = \'{val}\'");
                     }
                 }
                 string styleValue = commonHTML.GetStringValue(val);

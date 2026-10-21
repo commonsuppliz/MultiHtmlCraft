@@ -810,7 +810,8 @@ namespace MultiHtmlCraft.Core
             CHtmlElement ___WindowHTMLFrameElementPrototype = null;
             CHtmlElement ___WindowHTMLInputElementPrototype = null;
             CHtmlElement ___WindowHTMLFormElementPrototype = null;
-            CHtmlMediaElement ___WindowHTMLVideoElementPrototype = null;
+            CHtmlMediaElement ___WindowHTMLMediaElementPrototype = null;
+            CHtmlVideoElement ___WindowHTMLVideoElementPrototype = null;
             CHtmlMediaElement ___WindowHTMLAudioElementPrototype = null;
             CHtmlElement ___WindowHTMLLinkElementPrototype = null;
             CHtmlElement ___WindowHTMLAnchorElementPrototype = null;
@@ -847,10 +848,10 @@ namespace MultiHtmlCraft.Core
             ___WindowHTMLAudioElementPrototype.___multiversalClassType = IMutilversalObjectType.HTMLAudioElement;
             ___HTMLElementPrototype.___childNodes.Add(___WindowHTMLAudioElementPrototype);
 
-            rootPrototypeNode.___HTMLAudioElementPrototypeWeakReference = new WeakReference(___WindowHTMLAudioElementPrototype, false);
+            rootPrototypeNode.___HTMLAudioElementPrototypeWeakReference = new WeakReference(___WindowHTMLMediaElementPrototype, false);
 
 
-            ___WindowHTMLVideoElementPrototype = new CHtmlMediaElement();
+            ___WindowHTMLVideoElementPrototype = new CHtmlVideoElement();
             ___WindowHTMLVideoElementPrototype.___SetTagNameOnly("VIDEO");
             ___WindowHTMLVideoElementPrototype.___elementTagType = CHtmlElementType.VIDEO;
             ___WindowHTMLVideoElementPrototype.___IsPrototype = true;
@@ -5139,8 +5140,12 @@ s               else
             }
             return null;
         }
-        public ICHtmlCSSStyleDeclaration getComputedStyle(Object[] args)
+        public object getComputedStyle(Object[] args)
         {
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("Window getComputedStyle is called {0}..", args);
+            }
             ICHtmlCSSStyleDeclaration? cHtmlCSSStyleDeclarationResult = null;
             if (this.___document != null)
             {
@@ -7903,7 +7908,15 @@ if (cHtmlMultiversalControl != null)
 
         object Interfaces.IMultiversalWindow.getComputedStyle(params object[] args)
         {
-            return this.getComputedStyle(args);
+            Debug.WriteLine(
+    $"IMultiversalWindow.getComputedStyle called. args.Length={args?.Length ?? 0}");
+
+            var result = this.getComputedStyle(args);
+
+            Debug.WriteLine(
+                $"IMultiversalWindow.getComputedStyle result={result?.GetType().FullName ?? "null"}");
+
+            return result;
         }
 
         object Interfaces.IMultiversalWindow.matchMedia(params object[] args)

@@ -16,7 +16,7 @@ The library is written in C#. It has no dependency on other html parsers and oth
 
 The original "fair[dll='fair'] V1" project was designed for .NET Framework 1.1 and Mono (Windows and Linux) with JavaScript integration using IKVM and Java Rhino Library. This version is no longer supported or maintained.
 
-The modern   "fair[dll='fair'] V2" project targets .NET 9 and later. It offers improved performance, modern .NET APIs, and better script engine integration (async/await, `HttpClient`, and other current APIs).
+The modern   "fair[dll='fair'] V2" project targets .NET 10.0 and later. It offers improved performance, modern .NET APIs, and better script engine integration (async/await, `HttpClient`, and other current APIs).
 
 ## Supported Web APIs
 
@@ -38,6 +38,7 @@ The following table lists representative Web APIs provided by `MultiHtmlCraft.Co
 | `Element.removeChild()` | Implemented | Remove child node |
 | `Element.contains()` | Implemented | Containment check |
 | `Element.getBoundingClientRect()` | Implemented | Returns layout rectangle |
+| `getComputedStyle()`| Implemented | getComputeAStyle style  |
 | `Element.setAttribute()` / `Element.getAttribute()` | Implemented | Attribute manipulation |
 | `DOMParser.parseFromString()` | Implemented | Parse string to DOM |
 | `CSStyleSheet.addRule()` | Implemented | Add basic CSS rule |

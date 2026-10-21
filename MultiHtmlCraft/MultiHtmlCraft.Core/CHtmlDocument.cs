@@ -29776,6 +29776,8 @@ namespace MultiHtmlCraft.Core
                 switch (__evtName)
                 {
                     case "DOMContentLoaded":
+                    case "deviceReady":
+                    case "deviceready":
                         this.___DocumentDOMContentLoadedFunctionWeakReference = new WeakReference(___function);
                         this.___DocumentDOMContentLoadedFunctionStrongRef = ___function;
                         break;
@@ -31962,9 +31964,25 @@ namespace MultiHtmlCraft.Core
                         case "AUDIO":
                         case "TRACK":
                         case "SOURCE":
-                            return new CHtmlMediaElement();
+                            var mediaElement = new CHtmlMediaElement();
+                            if(mediaElement.prototype == null)
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry("TODO: Media Element Prototype is null");
+                                }
+                            }
+                            return mediaElement;
                         case "VIDEO":
-                            return new CHtmlVideoElement();
+                            var videoElement = new CHtmlVideoElement();
+                            if(videoElement.prototype == null)
+                            {
+                                if(commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry("TODO: Video Element Prototype is null");
+                                }
+                            }
+                            return videoElement;
                         case "SVG":
                         case "DEFS":
                         case "RECT":
@@ -33035,7 +33053,7 @@ namespace MultiHtmlCraft.Core
             return ___getComputedStyle_viaWindow(_oElement, _oParam) as ICHtmlCSSStyleDeclaration;
         }
 
-        internal static ICHtmlCSSStyleDeclaration ___getComputedStyle_viaWindow(object ___objectElment, object ___objectParam)
+        internal static CHtmlCSSStyleDeclaration ___getComputedStyle_viaWindow(object ___objectElment, object ___objectParam)
         {
             CHtmlElement _element = null;
             string ___strParam = commonHTML.GetStringValue(___objectParam);
@@ -33045,7 +33063,7 @@ namespace MultiHtmlCraft.Core
                 _element = commonData.convertObjectIntoCHtmlElement(___objectElment);
                 if (_element != null && _element.___style != null)
                 {
-                    return _element.___style as ICHtmlCSSStyleDeclaration;
+                    return _element.___style as CHtmlCSSStyleDeclaration;
                 }
 
             }

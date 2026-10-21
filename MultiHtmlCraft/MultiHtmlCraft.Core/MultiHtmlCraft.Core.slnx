@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="../ClearScriptProcessor/ClearScriptProcessor.csproj" />
+  <Project Path="../Interfaces/MultiHtmlCraft.Interfaces.csproj" />
+  <Project Path="../NilJsProcessor/NilJsProcessor.csproj" />
+  <Project Path="MultiHtmlCraft.Core.csproj" />
+</Solution>

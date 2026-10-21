@@ -208,6 +208,7 @@ namespace MultiHtmlCraft.Interfaces
         HTMLUnknownElement,
         NamedNodeMap,
         ScreenOrientation,
+      
 
         #endregion
         #region SVG

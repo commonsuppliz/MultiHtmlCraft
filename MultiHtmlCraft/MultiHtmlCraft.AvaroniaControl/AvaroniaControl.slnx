@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="../ClearScriptProcessor/ClearScriptProcessor.csproj" />
+  <Project Path="../Interfaces/MultiHtmlCraft.Interfaces.csproj" />
+  <Project Path="../MultiHtmlCraft.Core/MultiHtmlCraft.Core.csproj" />
+  <Project Path="../NilJsProcessor/NilJsProcessor.csproj" />
+  <Project Path="../PythonProssesor/PythonProcessor.csproj" />
+  <Project Path="MultiHtmlCraft.AvaroniaControl.csproj" />
+</Solution>

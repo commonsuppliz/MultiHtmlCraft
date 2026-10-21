@@ -92,7 +92,15 @@ namespace MultiHtmlCraft.Core
                             v8Scope.AddHostType("FontFace", typeof(CHtmlFontFace));
                             // v8Scope.AddHostType("MessageChannel", typeof(CHtmlMessageChannel)); should use ___createObject instead of constructor to avoid passing ScriptObject to constructor
                             // v8Scope.AddHostType("MessagePort", typeof(CHtmlMessagePort));
-
+                            /*
+                            try
+                            {
+                                v8Scope.engine.Execute("console.log(Object.getPrototypeOf(document.createElement('video')) === HTMLVideoElement.prototype)");
+                            }catch (Exception ex)
+                            {
+                                
+                            }
+                            */
 
                             v8Scope.engine.Execute(@"
     Object.defineProperty(SVGElement, Symbol.hasInstance, {
@@ -144,25 +152,7 @@ namespace MultiHtmlCraft.Core
             
                         
                                                   
-                            /*
 
-                            dynamic setupHasInstance = v8Scope.engine.Evaluate("""
-    (
-    function(obj, host, engine){
-    Symbol.hasInstance ??= Symbol("Symbol.hasInstance");
-
-    Object.defineProperty(Object.getPrototypeOf(obj), Symbol.hasInstance, {
-        value: function(instance) {
-            if (instance == null) return false;
-            const genericType = host.type(host.typeOf(this));
-            return host.isType(genericType, instance);
-        },
-        writable: true,
-        configurable: true
-    });
-    )
-    """)
-                            */
                             ;
 
 

@@ -1,0 +1,375 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{3C651058-0FA9-1CFF-2993-F4C5D27F1A8D}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\views\\mainwindow.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3C651058-0FA9-1CFF-2993-F4C5D27F1A8D}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:views\\mainwindow.axaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlcssstyledeclaration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlcssstylesheet.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{47CF743F-957F-A14F-01A1-B672DBF482CE}|..\\MultiHtmlCraft\\Interfaces\\MultiHtmlCraft.Interfaces.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\interfaces\\imutilversalenumtypedefinitions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlwebspeechrecognitionresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlwebgradation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmleventdetail.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmldrawingobject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}|..\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\clearscriptprocessor\\clearscriptprocessorscope.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlnativearray.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmlclearscriptdynamicmetaobject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}|..\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\clearscriptprocessor\\clearscriptprocessor.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3C651058-0FA9-1CFF-2993-F4C5D27F1A8D}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\multihtmlcraft.avaloniacontrol_form_test.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{3C651058-0FA9-1CFF-2993-F4C5D27F1A8D}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:multihtmlcraft.avaloniacontrol_form_test.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3C651058-0FA9-1CFF-2993-F4C5D27F1A8D}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft_avaloniacontrol_form_test\\multihtmlcraft.avaloniacontrol_form_test.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{3C651058-0FA9-1CFF-2993-F4C5D27F1A8D}|MultiHtmlCraft.AvaloniaControl_Form_Test.csproj|solutionrelative:multihtmlcraft.avaloniacontrol_form_test.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E0F44B99-C1D3-AB85-6941-FF80E4ACD56C}|..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.core\\chtmldocument.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C8AC043C-5DFD-2D49-B36C-72F58D4AD303}|..\\MultiHtmlCraft\\PythonProssesor\\PythonProcessor.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\pythonprossesor\\pythonprocessor.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BBC2E3F1-3B57-846E-CE67-ECA00A000808}|..\\MultiHtmlCraft\\NilJsProcessor\\NilJsProcessor.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\niljsprocessor\\niljsprocessor.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5CA2EE9F-D07E-0FD5-EC68-933978DEAD55}|..\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\multihtmlcraft.avaroniacontrol\\multihtmlcraft.avaroniacontrol.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{56E53F33-5A8E-0C7F-E857-3AA98E98A8C6}|..\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj|c:\\users\\user\\source\\repos\\multihtmlcraft\\multihtmlcraft\\clearscriptprocessor\\clearscriptprocessor.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 65,
+          "SelectedChildIndex": 9,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CHtmlCSSStyleSheet.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCSSStyleSheet.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCSSStyleSheet.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCSSStyleSheet.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCSSStyleSheet.cs",
+              "ViewState": "AgIAACMHAAAAAAAAAAAowDYHAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T22:03:34.732Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IMutilversalEnumTypeDefinitions.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\Interfaces\\IMutilversalEnumTypeDefinitions.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\Interfaces\\IMutilversalEnumTypeDefinitions.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\Interfaces\\IMutilversalEnumTypeDefinitions.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\Interfaces\\IMutilversalEnumTypeDefinitions.cs",
+              "ViewState": "AgIAABEAAAAAAAAAAAA6wBgAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T21:50:15.1Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CHtmlWebSpeechRecognitionResult.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlWebSpeechRecognitionResult.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlWebSpeechRecognitionResult.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlWebSpeechRecognitionResult.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlWebSpeechRecognitionResult.cs",
+              "ViewState": "AgIAACUAAAAAAAAAAAAQwCsAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T21:44:14.15Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "CHtmlWebGradation.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlWebGradation.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlWebGradation.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlWebGradation.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlWebGradation.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T21:44:09.43Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CHtmlImage.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlImage.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlImage.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlImage.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlImage.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T21:43:40.58Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "CHtmlEventDetail.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlEventDetail.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlEventDetail.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlEventDetail.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlEventDetail.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T21:43:21.611Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "CHtmlDrawingObject.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDrawingObject.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDrawingObject.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDrawingObject.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDrawingObject.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T21:43:10.926Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CHtmlCSSStyleDeclaration.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCSSStyleDeclaration.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCSSStyleDeclaration.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCSSStyleDeclaration.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlCSSStyleDeclaration.cs",
+              "ViewState": "AgIAACAAAACApPj4hPQgwHEAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T21:37:34.608Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainWindow.axaml.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Views\\MainWindow.axaml.cs",
+              "RelativeDocumentMoniker": "Views\\MainWindow.axaml.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\Views\\MainWindow.axaml.cs",
+              "RelativeToolTip": "Views\\MainWindow.axaml.cs",
+              "ViewState": "AgIAAHoAAAAAAAAAAAAAAIIAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T09:15:22.895Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "CHtmlNativeArray.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlNativeArray.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlNativeArray.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlNativeArray.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlNativeArray.cs",
+              "ViewState": "AgIAAHcAAAAAAAAAAAAqwHcAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T09:15:20.644Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "CHtmlClearScriptDynamicMetaObject.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlClearScriptDynamicMetaObject.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlClearScriptDynamicMetaObject.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlClearScriptDynamicMetaObject.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlClearScriptDynamicMetaObject.cs",
+              "ViewState": "AgIAAN8JAAAAAAAAAAAAAN8JAABvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-21T09:15:10.844Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ClearScriptProcessorScope.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessorScope.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessorScope.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessorScope.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessorScope.cs",
+              "ViewState": "AgIAAAQDAAAAiBzpDMArwAsDAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-20T17:13:42.589Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "MultiHtmlCraft.AvaloniaControl_Form_Test",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\MultiHtmlCraft.AvaloniaControl_Form_Test.csproj",
+              "RelativeDocumentMoniker": "MultiHtmlCraft.AvaloniaControl_Form_Test.csproj",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\MultiHtmlCraft.AvaloniaControl_Form_Test.csproj",
+              "RelativeToolTip": "MultiHtmlCraft.AvaloniaControl_Form_Test.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-20T16:52:49.212Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "CHtmlDocument.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDocument.cs",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDocument.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDocument.cs",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.Core\\CHtmlDocument.cs",
+              "ViewState": "AgIAABd3AAAAAAAAAAAQwCF3AAChAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-20T16:49:25.686Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "PythonProcessor",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\PythonProssesor\\PythonProcessor.csproj",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\PythonProssesor\\PythonProcessor.csproj",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\PythonProssesor\\PythonProcessor.csproj",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\PythonProssesor\\PythonProcessor.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-20T16:45:54.295Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "NilJsProcessor",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\NilJsProcessor\\NilJsProcessor.csproj",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\NilJsProcessor\\NilJsProcessor.csproj",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\NilJsProcessor\\NilJsProcessor.csproj",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\NilJsProcessor\\NilJsProcessor.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-20T16:45:32.617Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "MultiHtmlCraft.AvaroniaControl",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.csproj",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.csproj",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.csproj",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-20T16:44:31.886Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ClearScriptProcessor.csproj",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-20T16:43:05.757Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Microsoft.Common.CurrentVersion.targets",
+              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\18\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ViewState": "AgIAADIVAAAAAAAAAAAcwGIVAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2026-10-20T11:13:30.787Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "ClearScriptProcessor",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj",
+              "RelativeDocumentMoniker": "..\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj",
+              "RelativeToolTip": "..\\MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-20T11:09:50.826Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "MultiHtmlCraft.AvaloniaControl_Form_Test.csproj",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\MultiHtmlCraft.AvaloniaControl_Form_Test.csproj",
+              "RelativeDocumentMoniker": "MultiHtmlCraft.AvaloniaControl_Form_Test.csproj",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\MultiHtmlCraft\\MultiHtmlCraft_AvaloniaControl_Form_Test\\MultiHtmlCraft.AvaloniaControl_Form_Test.csproj",
+              "RelativeToolTip": "MultiHtmlCraft.AvaloniaControl_Form_Test.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAABVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-20T09:28:33.456Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 33,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

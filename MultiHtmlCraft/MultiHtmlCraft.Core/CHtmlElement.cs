@@ -13741,12 +13741,8 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                     {
                         commonLog.LogEntry("___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize SkiaSharp Canvas BitmapSize {0} : {1} x {2}", this, this.___offsetWidth, this.___offsetHeight);
                     }
-                    this.___CanvasSkiaBitmap.Dispose();
-                    this.___CanvasSkiaBitmap = null;
-                    
-                    this.___CanvasSkiaBitmap = new SkiaSharp.SKBitmap((int)this.___offsetWidth, (int)this.___offsetHeight, SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Premul);
-                    this.___canvasContextCurrent2D.___CanvasSkiaBitmapWeakReference = null;
-                    this.___canvasContextCurrent2D.___CanvasSkiaBitmapWeakReference = new WeakReference(___CanvasSkiaBitmap, false);
+                    this.___CanvasSkiaBitmap.Resize(new SkiaSharp.SKSizeI((int)this.___offsetWidth, (int)this.___offsetHeight), SkiaSharp.SKFilterQuality.High);
+            
 
 
 
@@ -14011,10 +14007,13 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
             switch (this.___elementTagType)
             {
                 case CHtmlElementType.AUDIO:
-                case CHtmlElementType.VIDEO:
+            
                 case CHtmlElementType.TRACK:
                 case CHtmlElementType.SOURCE:
                     element = new CHtmlMediaElement();
+                    break;
+                case CHtmlElementType.VIDEO:
+                    element = new CHtmlVideoElement();
                     break;
                 case CHtmlElementType.SVG:
                     element = new CHtmlSVGElement();
@@ -15892,7 +15891,8 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                         goto ExitSet;
 					case "width":
                     case "Width":
-						if(this.___style != null)
+                        double ___oridinalWidth = this.___offsetWidth;
+                        if (this.___style != null)
 						{
 							this.___style.___Width = commonHTML.GetStringValue(val) ;
 						}
@@ -15903,13 +15903,24 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                             {
                                 this.___offsetWidth = (float)doubleWidth;
 #if WINDOWS
-                                ___resetC2DBitmapImageBaseduponOffsetSize();
+                                if (___oridinalWidth != this.___offsetWidth)
+                                {
+                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                    {
+                                        commonLog.LogEntry("Canvas width is changed. reset bitmap image : {0} => {1}", ___oridinalWidth, this.___offsetWidth);
+                                    }
+                                    ___resetC2DBitmapImageBaseduponOffsetSize();
+                                }
+
 #else
                                 switch(commonHTML.GraphicApiType)
                                 {
                                     case GraphicAPIType.Avalonia:
                                     case GraphicAPIType.SkiaSharp:
+                                if (___oridinalWidth != this.___offsetWidth)
+                                {
                                         ___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize();
+                                        }
                                         break;
 
 
@@ -15928,8 +15939,9 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                         }
 						goto ExitSet;
 					case "height":
-                    case "Height":
-						if(this.___style != null)
+                    
+                        double ___oridinalHeight = this.___offsetHeight;
+                        if (this.___style != null)
 						{
 							this.___style.Height =commonHTML.GetStringValue(val);
 						}
@@ -15945,15 +15957,37 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                                 this.___offsetHeight = (float)doubleHeight;
                             }
 #if WINDOWS
-                            ___resetC2DBitmapImageBaseduponOffsetSize();
+                            if(___oridinalHeight != this.___offsetHeight)
+                            {
+                                if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                                {
+                                   commonLog.LogEntry("Canvas height is changed. reset bitmap image : {0} => {1}", ___oridinalHeight, this.___offsetHeight);
+                                }
+                                ___resetC2DBitmapImageBaseduponOffsetSize();
+                            }
+
 #else
-                                switch (commonHTML.GraphicApiType)
+                            switch (commonHTML.GraphicApiType)
                             {
                                 case GraphicAPIType.Avalonia:
                                 case GraphicAPIType.SkiaSharp:
-                                    ___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize();
-                                    break;
-                            }
+                                
+                                                if(___oridinalHeight != this.___offsetHeight)
+                                                {
+                                                    if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
+                                                    {
+                                                       commonLog.LogEntry("Canvas height is changed. reset bitmap image : {0} => {1}", ___oridinalHeight, this.___offsetHeight);
+                                                    }
+                                                }
+                                                ___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize();
+                                                break;
+                             }
+                                               
+ 
+
+                             
+                                     
+                            
 #endif
                             if (this.___canvasContextCurrent2D != null)
                             {

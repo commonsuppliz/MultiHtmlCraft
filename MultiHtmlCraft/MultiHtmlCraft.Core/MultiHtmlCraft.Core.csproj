@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-      <TargetFrameworks>net9.0;net9.0-windows</TargetFrameworks>
+      <TargetFrameworks>net10.0;net10.0-windows</TargetFrameworks>
 
-      <TargetFrameworkVersion>9.0</TargetFrameworkVersion>
+      <TargetFrameworkVersion>10.0</TargetFrameworkVersion>
       <ImplicitUsings>disable</ImplicitUsings>
       <Nullable>enable</Nullable>
       <AssemblyName>MultiHtmlCraft.Core</AssemblyName>
@@ -75,26 +75,26 @@
 
   <!-- Note: Resource files are included by default as EmbeddedResource; no explicit entry required. -->
 
-  <!-- Windows-specific settings applied when targeting net9.0-windows -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0-windows' ">
+  <!-- Windows-specific settings applied when targeting net10.0-windows -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0-windows' ">
     <DefineConstants>WINDOWS;WINFORMS</DefineConstants>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
   <!-- Platform define constants for other TFMs if needed -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
     <!-- No special settings for cross-platform TFM -->
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0' and '$(RuntimeIdentifier)' == 'linux-arm64' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'linux-arm64' ">
     <DefineConstants>LINUX;LINUX_ARM</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0' and '$(RuntimeIdentifier)' == 'osx-arm64' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-arm64' ">
     <DefineConstants>MACOS;MACOS_ARM</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0' and '$(RuntimeIdentifier)' == 'osx-x64' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'osx-x64' ">
     <DefineConstants>MACOS;MACOS_X64</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0' and '$(RuntimeIdentifier)' == 'linux-x64' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' and '$(RuntimeIdentifier)' == 'linux-x64' ">
     <DefineConstants>LINUX;LINUX_X64</DefineConstants>
   </PropertyGroup>
 

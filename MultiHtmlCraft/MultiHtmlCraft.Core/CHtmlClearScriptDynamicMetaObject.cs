@@ -7,6 +7,7 @@ using MultiHtmlCraft.Interfaces;
 using Newtonsoft.Json.Serialization;
 using NiL.JS.BaseLibrary;
 using NiL.JS.Statements;
+using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -342,7 +343,7 @@ namespace MultiHtmlCraft.Core
                     catch { return new DynamicMetaObject(Expression.Constant(null, typeof(object)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)); }
                 }
 
-                // Handle window.getComputedStyle
+                  /*
                 if (this.Value is CHtmlMultiversalWindow window && string.Equals(binder.Name, "getComputedStyle", StringComparison.OrdinalIgnoreCase))
                 {
                     Func<object, object, object> del = (elementArg, pseudoArg) =>
@@ -452,6 +453,7 @@ namespace MultiHtmlCraft.Core
                     };
                     return new DynamicMetaObject(Expression.Constant(del, typeof(Func<object, object, object>)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
                 }
+                  */
 
                 // Handle CHtmlDocument method invocations directly
                 if (this.Value is CHtmlDocument document)
@@ -974,7 +976,7 @@ namespace MultiHtmlCraft.Core
                         {
                             var props = CHtmlElement.CHtmlElementProperties?.Keys ?? Enumerable.Empty<string>();
                             var methods = CHtmlElement.CHtmlElementMethods?.Keys ?? Enumerable.Empty<string>();
-                            var mediaProps = new[] { "canPlayType", "play", "pause", "load", "stop", "addTextTrack", "autoplay", "buffered", "controls", "currentSrc", "currentTime", "duration", "ended", "loop", "muted", "paused", "playbackRate", "played", "preload", "readyState", "seekable", "seeking", "src", "volume" };
+                            var mediaProps = new[] { "canPlayType", "play", "pause", "load", "stop", "addTextTrack", "autoplay", "buffered", "controls", "currentSrc", "currentTime", "duration", "ended", "loop", "muted", "paused", "playbackRate", "played", "preload", "readyState", "seekable", "seeking", "src", "volume" , "prototype", "__proto__" , "__defineGetter__", "__defineSetter__", "__lookupGetter__" };
 
                             var videoprops = CHtmlVideoElement.CHtmlVideoElementProperties.Keys ?? Enumerable.Empty<string>();
                             var videoMethods = CHtmlVideoElement.CHtmlVideoElementMethods.Keys ?? Enumerable.Empty<string>();
@@ -1254,6 +1256,66 @@ namespace MultiHtmlCraft.Core
 
                                         break;
                                     }
+                                case "constructor":
+                                    {
+                                        if (commonLog.LoggingEnabled)
+                                        {
+                                            commonLog.LogEntry("[CHtmlVideoElement.BindGetMember] binder.Name={0}, tagName={1}", binder.Name, self?.tagName);
+                                        }
+
+                                        Func<object, object> videoConstructor = (arg) =>
+                                        {
+                                            try
+                                            {
+                                                var unwrapped = UnwrapValue(arg) ?? arg;
+                                                
+                                                var inst = new CHtmlVideoElement();
+                                              
+                                                return inst;
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("Video Constructor delegate exception: {0}", ex.Message); } catch { }
+                                                return null!;
+                                            }
+                                        };
+
+                                       
+                                        var restrictions = BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType);
+
+                                        // 
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(videoConstructor, typeof(Func<object, object>)),
+                                            restrictions
+                                        );
+                                    }
+                                    ;
+
+                                case "requestVideoFrameCallback":
+                                    {
+                                        if (commonLog.LoggingEnabled)
+                                        {
+                                            commonLog.LogEntry("[CHtmlVideoElement.BindGetMember] binder.Name={0}, tagName={1}", binder.Name, self?.tagName);
+                                        }
+                                        // Return a callable delegate for canPlayType(mediaType)
+                                        Func<object, double> requestVideoFrameCallbackDel = (videoCallBack) =>
+                                        {
+                                            try
+                                            {
+                                                var unwrapped = UnwrapValue(videoCallBack) ?? videoCallBack;
+                                                return self.requestVideoFrameCallback(unwrapped);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                try { if (commonLog.LoggingEnabled) commonLog.LogEntry("requestVideoFrameCallback delegate exception: {0}", ex.Message); } catch { }
+                                                return 0;
+                                            }
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(requestVideoFrameCallbackDel, typeof(Func<object, double>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                            };
+                                    
                                 case "nodeName":
                                     {
                                         var nodeNameStr = self.___tagName ?? self.tagName;
@@ -1318,6 +1380,7 @@ namespace MultiHtmlCraft.Core
                                             BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                         );
                                     }
+                 
                                 case "addTextTrack":
                                     {
                                         Func<object, object, object, object> addTextTrackDel = (kindArg, labelArg, languageArg) =>

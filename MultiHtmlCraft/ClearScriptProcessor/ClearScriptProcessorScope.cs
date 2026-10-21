@@ -256,7 +256,7 @@ namespace ClearScriptProcessor
                     // AllowReflection true to improve interop with hosted dynamic objects (reduces DynamicHelpers errors)
                     AllowReflection = true,
                     DisableExtensionMethods = true,
-                   
+
                 };
 
 #else
@@ -543,33 +543,33 @@ namespace ClearScriptProcessor
                 } catch(e) { console.log('[ClearScript] $ wrap error: ' + e); }
             })();
         ");
-                    
+
                     }
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"execute: post-exec $ wrapper check failed: {ex.Message}");
-        
-                        engine.Execute("console.log('[ClearScript] post-exec wrapper check error" + ex.Message); 
-                    } 
-                }
-                _isInitCompleted = true;
-                // 重要: もし window が先にセットされている場合、ここで proxy 作成処理を確実に実行する
-                try
-                {
-                    if (this._multiversalWindow != null)
-                    {
-                        Debug.WriteLine("initScriptEngine: multiversalWindow already set — calling setMultiversalWindow to create proxy.");
-                        // 呼び出し順に関係なくプロキシが作られるようにする
-                        setMultiversalWindow(this._multiversalWindow);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"initScriptEngine: failed to finalize window proxy creation: {ex.GetType().Name} - {ex.Message}");
+
+                    engine.Execute("console.log('[ClearScript] post-exec wrapper check error" + ex.Message);
                 }
             }
-        
+            _isInitCompleted = true;
+            // 重要: もし window が先にセットされている場合、ここで proxy 作成処理を確実に実行する
+            try
+            {
+                if (this._multiversalWindow != null)
+                {
+                    Debug.WriteLine("initScriptEngine: multiversalWindow already set — calling setMultiversalWindow to create proxy.");
+                    // 呼び出し順に関係なくプロキシが作られるようにする
+                    setMultiversalWindow(this._multiversalWindow);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"initScriptEngine: failed to finalize window proxy creation: {ex.GetType().Name} - {ex.Message}");
+            }
+        }
+
 
         public bool isDefaultMultiversalProcessor()
         {
@@ -605,9 +605,9 @@ namespace ClearScriptProcessor
 
             try
             {
-                
+
                 //_v8Engine.AddHostObject("__host_window", HostItemFlags.GlobalMembers, window);
-                _v8Engine.AddHostObject("__host_window",   window);
+                _v8Engine.AddHostObject("__host_window", window);
                 // Provide host-side delegate shims for timer functions. The window implementation
                 // often implements timers as explicit interface methods which are not visible as
                 // public members to ClearScript's host lookup. Expose small delegates that call
@@ -678,7 +678,14 @@ namespace ClearScriptProcessor
                     }));
                 }
                 catch { }
-
+                try
+                {
+                    _v8Engine.AddHostObject("__host_window_getComputedStyle_delegate", new Func<object, object>((arg) =>
+                    {
+                        try { var a = normalizeHostDelegateArgs(arg); return ((IMultiversalWindow)window).getComputedStyle(a); } catch { return null; }
+                    }));
+                }
+                catch { }
                 // Additionally, try to call document-level interval/timeouts which ultimately
                 // should delegate to CHtmlDocument.setIntervalInner / setTimeoutInner. This
                 // helps in cases where the window implementation does not directly forward to
@@ -768,8 +775,13 @@ namespace ClearScriptProcessor
                 target.setInterval = function(){ try { if (typeof __host_window_setInterval_delegate !== 'undefined') return __host_window_setInterval_delegate(Array.prototype.slice.call(arguments)); if (host && typeof host.setInterval === 'function') return host.setInterval.apply(host, arguments); } catch(e){} return undefined; };
                 target.clearTimeout = function(id){ try { if (host && typeof host.clearTimeout === 'function') return host.clearTimeout(id); } catch(e){} return undefined; };
                 target.clearInterval = function(id){ try { if (host && typeof host.clearInterval === 'function') return host.clearInterval(id); } catch(e){} return undefined; };
-                target.getComputedStyle = function(id){ try { if (host && typeof host.getComputedStyle === 'function') return host.getComputedStyle(element); } catch(e){} return undefined; };
+
+
+                 target.getComputedStyle = function(){ try { if (typeof __host_window_getComputedStyle_delegate !== 'undefined') return __host_window_getComputedStyle_delegate(Array.prototype.slice.call(arguments)); if (host && typeof host.getComputedStyle === 'function') return host.getComputedStyle.apply(host, arguments); } catch(e){} return undefined; };
+
                 target.requestAnimationFrame = function(){ try { if (typeof __host_window_requestAnimationFrame_delegate !== 'undefined') return __host_window_requestAnimationFrame_delegate(Array.prototype.slice.call(arguments)); if (host && typeof host.requestAnimationFrame === 'function') return host.requestAnimationFrame.apply(host, arguments); } catch(e){} return undefined; };
+
+
                 target.cancelAnimationFrame = function(){ try { if (typeof __host_window_cancelAnimationFrame_delegate !== 'undefined') return __host_window_cancelAnimationFrame_delegate(Array.prototype.slice.call(arguments)); if (host && typeof host.cancelAnimationFrame === 'function') return host.cancelAnimationFrame.apply(host, arguments); } catch(e){} return undefined; };
                 target.alert = function(){ try { if (host && typeof host.alert === 'function') return host.alert.apply(host, arguments); } catch(e){} return undefined; };
                 target.confirm = function(){ try { if (host && typeof host.confirm === 'function') return host.confirm.apply(host, arguments); } catch(e){} return undefined; };
@@ -2054,7 +2066,7 @@ if (typeof document === 'undefined' || document === null) {
             DebugLog("Debugger: " + (arg?.ToString() ?? "null"));
         }
 
-        
+
 
         // 特定のオブジェクトに対するプロキシ用デバッグ
         [ScriptMember("debugDumpProxy")]
@@ -2093,44 +2105,46 @@ if (typeof document === 'undefined' || document === null) {
             }
         }
 
-// IMultiversalScriptScope の未実装メンバーを追加
-public bool ScopeHas(string name)
-{
-    try
-    {
-        if (_multiversalWindow != null)
+        // IMultiversalScriptScope の未実装メンバーを追加
+        public bool ScopeHas(string name)
         {
-            try { return _multiversalWindow.has(name); } catch { }
+            try
+            {
+                if (_multiversalWindow != null)
+                {
+                    try { return _multiversalWindow.has(name); } catch { }
                     var global = (ScriptObject)_v8Engine.Script;
                     var value3 = global.GetProperty(name);
-                    if(value3 != null)
+                    if (value3 != null)
                     {
-                        return true; 
+                        return true;
+                    }
                 }
             }
-    }
-    catch { }
-    return false;
-}
+            catch { }
+            return false;
+        }
 
-public object ScopeGet(string name)
-{
-    try
-    {
-        if (_multiversalWindow != null)
+        public object ScopeGet(string name)
         {
-            try {
-                        if(_multiversalWindow.has(name))
+            try
+            {
+                if (_multiversalWindow != null)
+                {
+                    try
+                    {
+                        if (_multiversalWindow.has(name))
                         {
                             return _multiversalWindow.get(name);
                         }
-                    } catch { }
-        }
+                    }
+                    catch { }
+                }
                 var global = (ScriptObject)_v8Engine.Script;
                 var value3 = global.GetProperty(name);
             }
-    catch { }
-    return null;
-}
+            catch { }
+            return null;
+        }
     }
 }

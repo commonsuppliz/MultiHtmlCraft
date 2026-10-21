@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../Interfaces/MultiHtmlCraft.Interfaces.csproj" />
+  <Project Path="ClearScriptProcessor.csproj" />
+</Solution>

@@ -25,12 +25,14 @@ namespace MultiHtmlCraft.Core
         private static Dictionary<string, int> createCHtmlVideoElementProperties()
         {
             Dictionary<string, int> list = new Dictionary<string, int>();
+            list["prototype"] = 0;
             list["disablePictureInPicture"] = 0;
             list["height"] = 1;
             list["poster"] = 2;
             list["videoHeight"] = 3;
             list["videoWidth"] = 4;
             list["width"] = 5;
+            
             return list;
 
         }
@@ -44,10 +46,23 @@ namespace MultiHtmlCraft.Core
             return list;
 
         }
+        public CHtmlVideoElement(): base()
+        {
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"{this}.ctr is called");
+            }
+            base.tagName = "VIDEO";
+            this.___multiversalClassType = IMutilversalObjectType.HTMLVideoElement;
+        }
         
 
         public CHtmlVideoElement(string strTagName, string strTagType) : base()
         {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"{this}.ctr is called with params");
+            }
             base.tagName = strTagName;
             this.___multiversalClassType = IMutilversalObjectType.HTMLVideoElement;
 
@@ -57,21 +72,37 @@ namespace MultiHtmlCraft.Core
 
 
 
-        public void requestVideoFrameCallback(object callback)
+        public double requestVideoFrameCallback(object callback)
         {
-
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"TODO {this},requestVideoFrameCallBack is called with {callback}");
+            }
+            return 0; 
         }
 
         public void requestPictureInPicture()
         {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"TODO {this},requsstPictureInPicture is called");
+            }
 
         }
         public object getVideoPlaybackQuality()
         {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"TODO {this},getVideoPlaybackQuality is called");
+            }
             return null;
         }
         public object cancelVideoFrameCallback(object objid)
         {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"TODO {this},cancelVideoFrameCallBack is called");
+            }
             return null;
         }
 
@@ -146,14 +177,6 @@ namespace MultiHtmlCraft.Core
         }
          * */
 
-        /// <summary>
-        /// Video , Audio , Track Tag
-        /// </summary>
-        public CHtmlVideoElement() : base()
-        {
-
-
-        }
 
 
 
