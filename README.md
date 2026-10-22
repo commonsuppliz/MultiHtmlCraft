@@ -69,9 +69,10 @@ See the solution explorer for the full project list and references.
 
 ## Key settings & dependencies
 
-- Target frameworks: `net9.0;net9.0-windows`.
+- Target frameworks: `net10.0;net10.0-windows`.
 - The current default script processor for `MultiHtmlCraft.Core` is JavaScript.
-- Windows-specific build defines `WINDOWS;WINFORMS` and sets `UseWindowsForms` when targeting `net9.0-windows`.
+- Windows-specific build defines `WINDOWS;WINFORMS` and sets `UseWindowsForms` when targeting `net10.0-windows`.
+- Linux-specific and MacOS-specific build defines `!WINDOWS` and sets the appropriate flags when targeting `net10.0`.
 - Notable NuGet packages (from `MultiHtmlCraft.Core.csproj`):
   - `SkiaSharp`
   - `Avalonia.Skia`

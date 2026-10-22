@@ -301,11 +301,11 @@ namespace ClearScriptProcessor
                     catch (Exception ex) { Debug.WriteLine($"__doc_addEventListener3_so dispatch failed: {ex}"); }
                 }));
 
-                // Release モードでも window, self, globalThis を設定する
+                
                 engine.Execute(@"
-            // グローバルオブジェクトを this として扱う
+            
             (function() {
-                // window, self, globalThis をグローバルオブジェクトに設定
+                
                 this.window = this;
                 this.self = this;
                 this.globalThis = this;
@@ -494,8 +494,7 @@ namespace ClearScriptProcessor
                 createWindowFunctionSortedList();
 
 #if DEBUG
-                // テスト: 各参照が同じオブジェクトを指しているか確認 (console が登録された後に実行)
-                // Note: console.log を使用せず、代わりに Debug.WriteLine を使用
+
                 try
                 {
                     var result1 = engine.Evaluate("window === self");

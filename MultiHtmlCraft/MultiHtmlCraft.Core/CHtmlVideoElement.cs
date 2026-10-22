@@ -19,6 +19,7 @@ namespace MultiHtmlCraft.Core
     /// </summary>
     public class CHtmlVideoElement:  CHtmlMediaElement,  System.IDisposable, IDynamicMetaObjectProvider
     {
+        private object? ___prototype = null;
 
         public static Dictionary<string, int> CHtmlVideoElementProperties = createCHtmlVideoElementProperties();
         public static Dictionary<string, int> CHtmlVideoElementMethods = createCHtmlVideoElementMethods();
@@ -35,6 +36,17 @@ namespace MultiHtmlCraft.Core
             
             return list;
 
+        }
+        public object? prototype
+        {
+            get
+            {
+                return this.___prototype;
+            }
+            set
+            {
+                this.___prototype = value;
+            }
         }
         private static Dictionary<string, int> createCHtmlVideoElementMethods()
         {
@@ -78,7 +90,7 @@ namespace MultiHtmlCraft.Core
             {
                 commonLog.LogEntry($"TODO {this},requestVideoFrameCallBack is called with {callback}");
             }
-            return 0; 
+            return 0;
         }
 
         public void requestPictureInPicture()
@@ -97,13 +109,13 @@ namespace MultiHtmlCraft.Core
             }
             return null;
         }
-        public object cancelVideoFrameCallback(object objid)
+        public void cancelVideoFrameCallback(object objid)
         {
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
-                commonLog.LogEntry($"TODO {this},cancelVideoFrameCallBack is called");
+                commonLog.LogEntry($"TODO {this},cancelVideoFrameCallBack is called with {objid}");
             }
-            return null;
+            return;
         }
 
 

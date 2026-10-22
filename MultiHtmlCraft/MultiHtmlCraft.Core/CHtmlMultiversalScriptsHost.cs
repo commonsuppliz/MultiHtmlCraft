@@ -90,6 +90,100 @@ namespace MultiHtmlCraft.Core
                             v8Scope.AddHostType("CSSStyleSheet", typeof(CHtmlCSSStyleSheet));
                             v8Scope.AddHostType("URLSearchParams", typeof(CHtmlURLSearchParams));
                             v8Scope.AddHostType("FontFace", typeof(CHtmlFontFace));
+                            try
+                            {
+                                v8Scope.engine.Execute(@"(function () {
+    // 元のホスト型を退避（念のため）
+    const NativeHostType = globalThis.HTMLVideoElement;
+
+    // 本物の JavaScript コンストラクタを作る
+    function HTMLVideoElement() {
+        // new された場合の処理（通常は document.createElement 経由なので空でOK）
+    }
+
+    // prototype を明示的に作成
+    HTMLVideoElement.prototype = Object.create(Object.prototype);
+    HTMLVideoElement.prototype.constructor = HTMLVideoElement;
+
+    // requestVideoFrameCallback を prototype に載せる
+    HTMLVideoElement.prototype.requestVideoFrameCallback = function (callback) {
+        // 実際のインスタンス（CHtmlVideoElement）にメソッドがある場合に委譲
+        if (this && typeof this.requestVideoFrameCallback === 'function') {
+            return this.requestVideoFrameCallback(callback);
+        }
+        console.warn(""requestVideoFrameCallback is not implemented on this instance"");
+        return undefined;
+    };
+
+    // グローバルを強制的に差し替え
+    // 複数の方法を試す
+    let success = false;
+
+    // 方法1: 直接代入
+    try {
+        globalThis.HTMLVideoElement = HTMLVideoElement;
+        if (globalThis.HTMLVideoElement === HTMLVideoElement) {
+            success = true;
+            console.log(""Method 1 (direct assignment) succeeded"");
+        }
+    } catch (e) {
+        console.warn(""Method 1 failed:"", e.message);
+    }
+
+    // 方法2: defineProperty
+    if (!success) {
+        try {
+            Object.defineProperty(globalThis, 'HTMLVideoElement', {
+                value: HTMLVideoElement,
+                writable: true,
+                configurable: true,
+                enumerable: false
+            });
+            if (globalThis.HTMLVideoElement === HTMLVideoElement) {
+                success = true;
+                console.log(""Method 2 (defineProperty) succeeded"");
+            }
+        } catch (e) {
+            console.warn(""Method 2 failed:"", e.message);
+        }
+    }
+
+    // 方法3: Reflect.set
+    if (!success) {
+        try {
+            Reflect.set(globalThis, 'HTMLVideoElement', HTMLVideoElement);
+            if (globalThis.HTMLVideoElement === HTMLVideoElement) {
+                success = true;
+                console.log(""Method 3 (Reflect.set) succeeded"");
+            }
+        } catch (e) {
+            console.warn(""Method 3 failed:"", e.message);
+        }
+    }
+
+    // 最終確認
+    console.log(""--- Final check ---"");
+    console.log(""typeof HTMLVideoElement:"", typeof HTMLVideoElement);
+    console.log(""HTMLVideoElement === our wrapper:"", HTMLVideoElement === HTMLVideoElement);
+    console.log(""prototype defined:"", typeof HTMLVideoElement.prototype !== 'undefined' && HTMLVideoElement.prototype !== null);
+    console.log(""'requestVideoFrameCallback' in prototype:"", 'requestVideoFrameCallback' in HTMLVideoElement.prototype);
+    console.log(""typeof prototype.requestVideoFrameCallback:"", typeof HTMLVideoElement.prototype.requestVideoFrameCallback);
+
+    if (!success) {
+        console.error(""Failed to replace HTMLVideoElement on globalThis"");
+    }
+})();");
+
+                            }
+                            catch (Exception ex)
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                                {
+                                    commonLog.LogEntry(" MultiversalScriptsHost register classes error for HTMLVideoElement requestVideoFrameCallback ", ex);
+                                }
+                            }
+
+
                             // v8Scope.AddHostType("MessageChannel", typeof(CHtmlMessageChannel)); should use ___createObject instead of constructor to avoid passing ScriptObject to constructor
                             // v8Scope.AddHostType("MessagePort", typeof(CHtmlMessagePort));
                             /*
