@@ -9,6 +9,12 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Avalonia;
 
 using SkiaSharp;
+using System.Reflection;
+using System.Dynamic;
+using Microsoft.ClearScript;
+
+
+
 
 
 
@@ -127,9 +133,9 @@ namespace MultiHtmlCraft.Core
             return false;
         }
         /*
-        private static bool ConvertOrgMozilaConStringToBool(object obj)
+        private static bool ConvertOrgMozilaConStringToBool(object callObject)
         {
-            org.mozilla.javascript.ConsString conStr = (org.mozilla.javascript.ConsString)obj;
+            org.mozilla.javascript.ConsString conStr = (org.mozilla.javascript.ConsString)callObject;
             return ConvertStringToBoolWithSwitch(conStr.toString());
 
         }
@@ -351,7 +357,7 @@ namespace MultiHtmlCraft.Core
         #endregion
 
 
-        public static  PointFSpec ToPointFSpec(System.Drawing.PointF pt)
+        public static PointFSpec ToPointFSpec(System.Drawing.PointF pt)
         {
             return new PointFSpec(pt.X, pt.Y);
         }
@@ -363,12 +369,12 @@ namespace MultiHtmlCraft.Core
         {
             return new ColorSpec(value.R, value.G, value.B, value.A);
         }
-        
+
         public static Avalonia.Media.Color convertColorSpecToAvaloniaColor(ColorSpec spec)
         {
             return Avalonia.Media.Color.FromArgb(spec.A, spec.R, spec.G, spec.B);
         }
-        
+
         public static Avalonia.Rect convertToRectangleFToAvaloniaRect(RectangleF rectf)
         {
             return new Avalonia.Rect(rectf.X, rectf.Y, rectf.Width, rectf.Height);
@@ -377,13 +383,13 @@ namespace MultiHtmlCraft.Core
         {
             return new SkiaSharp.SKRect(rectf.X, rectf.Y, rectf.X + rectf.Width, rectf.Y + rectf.Height);
         }
-   
+
         // SizeFSpec → System.Drawing.SizeF
         public static System.Drawing.SizeF ToSizeF(SizeFSpec spec)
         {
             return new System.Drawing.SizeF(spec.Width, spec.Height);
         }
-       
+
         // SizeSpec → System.Drawing.SizeF
         public static System.Drawing.SizeF ToSizeF(SizeSpec spec)
         {
@@ -469,11 +475,11 @@ namespace MultiHtmlCraft.Core
             return arr;
         }
         #region FontScpec Convdersion
-        #if WINDOWS
+#if WINDOWS
         public static FontSpec convertGDIFontToFontSpec(Font font)
         {
 
-            switch(font.Style)
+            switch (font.Style)
             {
                 case FontStyle.Regular:
                     return new FontSpec(font.Name, font.Size, FontStyleSpec.Regular);
@@ -493,7 +499,7 @@ namespace MultiHtmlCraft.Core
             return new FontSpec("", 12);
 
         }
-    
+
         public static Font convertFontSpecToGDIFont(FontSpec fontspec)
         {
 
@@ -517,7 +523,7 @@ namespace MultiHtmlCraft.Core
 
             return new Font("", 12);
         }
-        #endif
+#endif
         #endregion
 
 
@@ -686,6 +692,85 @@ namespace MultiHtmlCraft.Core
             ms.Position = 0;
 
             return new Avalonia.Media.Imaging.Bitmap(ms);
+        }
+        internal static Dictionary<string, object> convertScriptCallObjectToDictionary(object objcallback)
+        {
+            var result = new Dictionary<string, object>();
+
+            if (objcallback == null)
+                return result;
+
+            try
+            {
+
+                if (objcallback is ScriptObject scriptObj)
+                {
+                    foreach (string name in scriptObj.PropertyNames)
+                    {
+                        try
+                        {
+                            result[name] = scriptObj[name];   // または scriptObj.GetProperty(name)
+                        }
+                        catch
+                        {
+                         
+                        }
+                    }
+
+
+
+                    return result;
+                }
+
+                
+                if (objcallback is System.Dynamic.DynamicObject dyn)
+                {
+                    dynamic d = objcallback;
+                    foreach (string key in dyn.GetDynamicMemberNames())
+                    {
+                        try
+                        {
+                            result[key] = d[key];
+                        }
+                        catch { }
+                    }
+                    return result;
+                }
+
+
+                var type = objcallback.GetType();
+                var propertyNamesProp = type.GetProperty("PropertyNames");
+                if (propertyNamesProp != null)
+                {
+                    var names = propertyNamesProp.GetValue(objcallback) as System.Collections.IEnumerable;
+                    var getPropertyMethod = type.GetMethod("GetProperty", new[] { typeof(string) })
+                                          ?? type.GetMethod("get_Item", new[] { typeof(string) });
+
+                    if (names != null && getPropertyMethod != null)
+                    {
+                        foreach (var nameObj in names)
+                        {
+                            if (nameObj is string key)
+                            {
+                                try
+                                {
+                                    result[key] = getPropertyMethod.Invoke(objcallback, new object[] { key });
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel > 3)
+                {
+                    commonLog.LogEntry("convertScriptCallObjectToDictionary() Exception : {0}", ex);
+                }
+            }
+
+            return result;
         }
     }
 }

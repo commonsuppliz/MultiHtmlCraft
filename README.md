@@ -1,5 +1,5 @@
 <p align="center">
-<img src="MultiHtmlCraftLogo4.jpg" alt="MultiHtmlCraftProject Logo" width="300" height="300" />
+<img src="MultiHtmlCraftolog6.jpg" alt="MultiHtmlCraftProject Logo" width="300" height="300" />
 </p>
 
 
@@ -53,7 +53,7 @@ The following table lists representative Web APIs provided by `MultiHtmlCraft.Co
 
 ## Solution structure
 
-- `MultiHtmlCraft.Core` — Core library (targets: `net9.0;net9.0-windows`)
+- `MultiHtmlCraft.Core` — Core library (targets: `net10.0;net10.0-windows`)
 - `ClearScriptProcessor` — Script processing integration (referenced)
 - `NilJsProcessor` — JavaScript processing/emulation (referenced)
 - `MultiHtmlCraft.Interfaces` — Shared interfaces (referenced)

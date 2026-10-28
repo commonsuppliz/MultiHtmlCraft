@@ -20,6 +20,9 @@ namespace MultiHtmlCraft.Core
     public class CHtmlVideoElement:  CHtmlMediaElement,  System.IDisposable, IDynamicMetaObjectProvider
     {
         private object? ___prototype = null;
+        private double ___videoWidth = 0;
+        private double ___videHeight = 0;
+        private object? ___requestVideoFrameCallback = null;
 
         public static Dictionary<string, int> CHtmlVideoElementProperties = createCHtmlVideoElementProperties();
         public static Dictionary<string, int> CHtmlVideoElementMethods = createCHtmlVideoElementMethods();
@@ -55,6 +58,7 @@ namespace MultiHtmlCraft.Core
             list["requestPictureInPicture"] = 1;
             list["getVideoPlaybackQuality"] = 2;
             list["requestVideoFrameCallback"] = 3;
+            list["play"] = 4;
             return list;
 
         }
@@ -86,10 +90,14 @@ namespace MultiHtmlCraft.Core
 
         public double requestVideoFrameCallback(object callback)
         {
-            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
-                commonLog.LogEntry($"TODO {this},requestVideoFrameCallBack is called with {callback}");
+                commonLog.LogEntry($"enter {this},requestVideoFrameCallBack is called with {callback} : {callback.GetType().FullName}");
             }
+            this.___requestVideoFrameCallback = callback;
+
+
             return 0;
         }
 
@@ -190,7 +198,24 @@ namespace MultiHtmlCraft.Core
          * */
 
 
+        public Task play()
+        { 
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($" {this}.play() is called");
+            }
+            return ___playAsync();
+        }
+        internal Task ___playAsync()
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"{this.GetType().Name}.___playAsync() is called");
+            }
 
+            
+            return Task.CompletedTask;
+        }
 
 
 
@@ -208,12 +233,12 @@ namespace MultiHtmlCraft.Core
 
         // クリーンアップ処理
 
-     
-   
 
 
-    
-   
+
+
+
+
         public object onloadeddata
         {
             get
@@ -484,6 +509,20 @@ namespace MultiHtmlCraft.Core
         public bool canPlayTime(string ___type)
         {
             return true;
+        }
+        public double videoWidth
+        {
+            get
+            {
+                return ___videoWidth;
+            }
+        }
+        public double videoHight
+        {
+            get
+            {
+                return ___videHeight;
+            }
         }
         /// <summary>
         /// Video and Audio Tag Methods
@@ -976,8 +1015,7 @@ namespace MultiHtmlCraft.Core
                 // Media element methods - return callable delegates for JavaScript invocation
                 case "canPlayType":
                     return new Func<object, string>(this.canPlayType);
-                case "play":
-                    return new Func<Task>(this.play);
+                
                 case "pause":
                     return new Action(this.pause);
                 case "load":
@@ -1050,13 +1088,7 @@ namespace MultiHtmlCraft.Core
         {
             get
             {
-                switch (this.___elementTagType)
-                {
-                    case CHtmlElementType.AUDIO:
-                        return IMutilversalObjectType.HTMLAudioElement;
-                    case CHtmlElementType.VIDEO:
-                        return IMutilversalObjectType.HTMLVideoElement;
-                }
+
                 return IMutilversalObjectType.HTMLVideoElement;
             }
         }

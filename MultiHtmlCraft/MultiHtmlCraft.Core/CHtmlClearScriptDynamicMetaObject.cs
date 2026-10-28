@@ -105,6 +105,7 @@ namespace MultiHtmlCraft.Core
                 return null;
             }
         }
+       
 
         // Helper: safely unwrap DynamicMetaObject wrappers or common script wrappers, return original if nothing to unwrap
         private static object? UnwrapValue(object? v)
@@ -1226,7 +1227,7 @@ namespace MultiHtmlCraft.Core
                             {
                                 commonLog.LogEntry("[CHtmlVideoElement.BindGetMember] binder.Name={0}, tagName={1}", binder.Name, self?.tagName);
                             }
-                            
+
                             switch (binder.Name)
                             {
                                 case "addEventListener":
@@ -1268,9 +1269,9 @@ namespace MultiHtmlCraft.Core
                                             try
                                             {
                                                 var unwrapped = UnwrapValue(arg) ?? arg;
-                                                
+
                                                 var inst = new CHtmlVideoElement();
-                                              
+
                                                 return inst;
                                             }
                                             catch (Exception ex)
@@ -1280,7 +1281,7 @@ namespace MultiHtmlCraft.Core
                                             }
                                         };
 
-                                       
+
                                         var restrictions = BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType);
 
                                         // 
@@ -1314,8 +1315,11 @@ namespace MultiHtmlCraft.Core
                                         return new DynamicMetaObject(
                                             Expression.Constant(requestVideoFrameCallbackDel, typeof(Func<object, double>)),
                                             BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
-                                            };
-                                    
+                                    };
+
+
+
+
                                 case "nodeName":
                                     {
                                         var nodeNameStr = self.___tagName ?? self.tagName;
@@ -1348,16 +1352,7 @@ namespace MultiHtmlCraft.Core
                                             BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                         );
                                     }
-                                case "play":
-                                    {
-                                        Func<Task> mediaPlayDelegate = self.play;
 
-                                        return new DynamicMetaObject(
-                                            Expression.Constant(mediaPlayDelegate, typeof(Func<Task>)),
-                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
-                                        );
-                                    }
-                                    break;
                                 case "pause":
                                     {
                                         Action pauseDel = () =>
@@ -1380,7 +1375,66 @@ namespace MultiHtmlCraft.Core
                                             BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                         );
                                     }
-                 
+                                case "play":
+                                    {
+                                        if (commonLog.LoggingEnabled)
+                                        {
+                                            commonLog.LogEntry("[CHtmlVideoElement.BindGetMember] binder.Name={0}, tagName={1}", binder.Name, self?.tagName);
+                                        }
+
+                                        Func<object> playFunc = () =>
+                                        {
+                                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                            {
+                                                commonLog.LogEntry($" {self}.play() is called");
+                                            }
+
+                                            self.___playAsync();
+
+                                            object promiseMock = null;
+
+                                            promiseMock = new
+                                            {
+                                                then = new Func<object, object>(onFulfilled =>
+                                                {
+                                                    try
+                                                    {
+                                                        if (onFulfilled != null)
+                                                        {
+                                                            // ClearScript の関数オブジェクトを dynamic として直接呼び出す
+                                                            dynamic callback = onFulfilled;
+                                                            callback();
+                                                        }
+                                                    }
+                                                    catch (Exception ex)
+                                                    {
+                                                        if (commonLog.LoggingEnabled)
+                                                        {
+                                                            commonLog.LogEntry($"CHtmlVideoElement.play().then error: {ex.Message}");
+                                                        }
+                                                    }
+
+                                                    return promiseMock;
+                                                }),
+                                                @catch = new Func<object, object>(onRejected =>
+                                                {
+                                                    return promiseMock;
+                                                })
+                                            };
+
+                                            return promiseMock;
+                                        };
+
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(playFunc, typeof(Func<object>)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+
+                                    }
+                                    break;
+
+
+                            
                                 case "addTextTrack":
                                     {
                                         Func<object, object, object, object> addTextTrackDel = (kindArg, labelArg, languageArg) =>

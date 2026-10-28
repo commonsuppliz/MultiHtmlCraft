@@ -6,8 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{46EB2EB3-21B5-4D9D-B352-603C488F48DD}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		..\..\..\Pictures\1774840815209.jpg = ..\..\..\Pictures\1774840815209.jpg
 		LICENSE = LICENSE
-		..\..\..\Pictures\MultiHtmlCraftLogo3_Small.jpg = ..\..\..\Pictures\MultiHtmlCraftLogo3_Small.jpg
+		..\..\..\Pictures\MultiHtmlCraftolog6.jpg = ..\..\..\Pictures\MultiHtmlCraftolog6.jpg
 		README.md = README.md
 	EndProjectSection
 EndProject

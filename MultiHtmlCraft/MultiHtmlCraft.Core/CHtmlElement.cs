@@ -8470,6 +8470,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
             {
                 case "onload":
                 case "load":
+                case "loadedmetadata":
                     this.___ElementLoadFunctionWeakReference = new WeakReference(___function);
                         callElementEventFunctionIfPossibible(__evtName, ___function);
                     break;
