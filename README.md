@@ -47,6 +47,7 @@ The following table lists representative Web APIs provided by `MultiHtmlCraft.Co
 | `WebGLContext` | Present (limited) | Mostly no-op at present |
 | `AudioContext` | Present (limited) | Mostly no-op at present |
 | `XMLHttpRequest` | Implemented (basic) | Basic GET/POST, headers, events (`readyState`, `onload`, `onerror`, etc.) |
+| `fetch` | Implemented |  headers, response handling |
 | Window basic events (`load`, `resize`, `click`, etc.) | Implemented (basic) | Event listener registration and dispatch supported |
 | `Element.addEventListener()` / `Element.removeEventListener()` | Implemented | DOM event handling supported |
 
