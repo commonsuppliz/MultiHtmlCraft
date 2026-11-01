@@ -14,6 +14,12 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection.Metadata.Ecma335;
+using System.Text.Json;
+
+using NiL.JS.BaseLibrary;
+using NLog;
+
+
 
 #if WINDOWS
 using System.Windows.Forms;
@@ -1667,7 +1673,7 @@ namespace MultiHtmlCraft.Core
                         if (___IsTimeout == true && timerEvt.IsCompleted == false)
                         {
                             timerElapsed = DateTime.Now.Subtract(timerEvt.LastCallTime);
-                            if (Math.Abs(timerElapsed.TotalMilliseconds) > timerEvt.Timeout)
+                            if (System.Math.Abs(timerElapsed.TotalMilliseconds) > timerEvt.Timeout)
                             {
                                 CHtmlScriptResult scriptResult = null;
                                 if (commonHTML.MAX_EVENT_RECORD_COUNT < this.___document.___scriptEventList.Count)
@@ -1743,7 +1749,7 @@ namespace MultiHtmlCraft.Core
                         if (___IsInterval == true && timerEvt.IsCompleted == false)
                         {
                             timerElapsed = DateTime.Now.Subtract(timerEvt.LastCallTime);
-                            if (Math.Abs(timerElapsed.TotalMilliseconds) > timerEvt.Timeout)
+                            if (System.Math.Abs(timerElapsed.TotalMilliseconds) > timerEvt.Timeout)
                             {
                                 bool __IntervalSuccess = false;
                                 CHtmlScriptResult scriptResult = null;
@@ -1794,7 +1800,7 @@ namespace MultiHtmlCraft.Core
                                                     __IntervalSuccess = true;
                                                 }
                                                 break;
-                                            case String objStringFunction:
+                                            case System.String objStringFunction:
                         
                                                 {
                                                     // It is string function
@@ -7200,13 +7206,152 @@ s               else
                 }
             }
         }
-        public void fetch(params object[] args)
+        public async Task<CHtmlFetch?> fetch(params object[] args)
         {
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
-                commonLog.LogEntry("window fetch is called  {0}", args);
+                StringBuilder sbsBuilder = new StringBuilder();
+                foreach(var arg in args)
+                {
+                    sbsBuilder.AppendFormat("{0}, ", arg);
+                }
+                commonLog.LogEntry("window.fetch is called with {0}", sbsBuilder.ToString());
             }
+            string ___fetchUrl = string.Empty;
+            string ___fetchOptionJsonString = string.Empty;
 
+            int argPos = 0;
+            foreach(object argobj in args)
+            {
+                if(argPos == 0)
+                {
+                    switch(argobj)
+                    {
+                        case string str:
+                            ___fetchUrl = str;
+                            break;
+                        case CHtmlRequest cHtmlrequest:
+                            ___fetchUrl = cHtmlrequest.Url.ToString();
+                            break;
+                        default:
+                            ___fetchUrl = commonHTML.GetStringValue(argobj);
+                            break;
+                    }
+                    
+                } else if (argPos == 1)
+                {
+                    try
+                    {
+                        ___fetchOptionJsonString = commonTypeConverter.convertScriptingObjectToJsonString(argobj, CHtmlJSonType.FetchData);
+#if DEBUG
+                        commonLog.LogEntry(
+    $"fetch JSON: {___fetchOptionJsonString}");
+                        /*
+                
+                        try
+                        {
+                            string desktopPath =
+                                Environment.GetFolderPath(
+                                    Environment.SpecialFolder.DesktopDirectory);
+
+                            string fileName =
+                                $"fetch-{DateTime.Now:yyyyMMdd-HHmmss-fff}.json";
+
+                            string jsonFilePath =
+                                System.IO.Path.Combine(desktopPath, fileName);
+
+                            System.IO.File.WriteAllText(
+                                jsonFilePath,
+                                ___fetchOptionJsonString,
+                                new System.Text.UTF8Encoding(false));
+
+                            commonLog.LogEntry(
+                                $"fetch JSON file saved: {jsonFilePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            commonLog.LogEntry(
+                                $"fetch JSON file save error: {ex}");
+                        }
+                        */
+#endif
+                        JsonElement doc = JsonSerializer.Deserialize<JsonElement>(___fetchOptionJsonString);
+                        string? method = doc.GetProperty("method").GetString();
+                        
+                       
+
+                        commonLog.LogEntry($"method = {method}");
+
+
+                        JsonElement headers = doc.GetProperty("headers");
+
+                        string? contentType = headers.GetProperty("Content-Type").GetString();
+                        string? auth = headers.GetProperty("Auth").GetString();
+                        string? referer = headers.GetProperty("referer").GetString();
+                        string? fetchOptions = headers.GetProperty("fetchoptions").GetString();
+
+                        JsonElement body = doc.GetProperty("body");
+                        string? title = body.GetProperty("title").GetString();
+                        string? bodyText = body.GetProperty("body").GetString();
+                        int userId = body.GetProperty("userId").GetInt32();
+                        if(commonLog.LoggingEnabled && commonLog.LogLevel > 5)
+                        {
+                            commonLog.LogEntry($"method = {method}");
+                            commonLog.LogEntry($"Content-Type = {contentType}");
+                            commonLog.LogEntry($"Auth = {auth}");
+                            commonLog.LogEntry($"referer = {referer}");
+                            commonLog.LogEntry($"fetchoptions = {fetchOptions}");
+                            commonLog.LogEntry($"title = {title}");
+                            commonLog.LogEntry($"body = {bodyText}");
+                            commonLog.LogEntry($"userId = {userId}");
+                        }
+                        Uri? fetchUriObj = null;
+                        if (!Uri.TryCreate(
+       ___fetchUrl,
+        UriKind.Absolute,
+        out Uri? fetchUriObject))
+                        {
+                            commonLog.LogEntry(
+                                $"fetch URL is invalid: {___fetchUrl}");
+
+                            return null;
+                        }
+
+                        CHtmlFetch fetchClient =
+    new CHtmlFetch(fetchUriObject);
+
+                        CHtmlFetch response =
+                            await fetchClient.ExecuteAsync(
+                                method ?? "GET",
+                                doc);
+
+                        commonLog.LogEntry(
+                            $"fetch status = {response.status}");
+
+                        commonLog.LogEntry(
+                            $"fetch ok = {response.ok}");
+
+                        return response;
+
+
+                    } catch (Exception fetchWindowEx)
+                    {
+                        if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                        {
+                            commonLog.LogEntry($"fetch data convert error {fetchWindowEx.ToString()}");
+                        }
+                    }
+                } else if (argPos > 1)
+                {
+                    break;
+                }
+                argPos++;
+            }
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"window.fetch is called with url : {___fetchUrl} options: {___fetchOptionJsonString}");
+            }
+            return null;
         }
         public object onmsinertiastart
         {
@@ -7908,12 +8053,12 @@ if (cHtmlMultiversalControl != null)
 
         object Interfaces.IMultiversalWindow.getComputedStyle(params object[] args)
         {
-            Debug.WriteLine(
+            System.Diagnostics.Debug.WriteLine(
     $"IMultiversalWindow.getComputedStyle called. args.Length={args?.Length ?? 0}");
 
             var result = this.getComputedStyle(args);
 
-            Debug.WriteLine(
+            System.Diagnostics.Debug.WriteLine(
                 $"IMultiversalWindow.getComputedStyle result={result?.GetType().FullName ?? "null"}");
 
             return result;

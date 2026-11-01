@@ -3,17 +3,10 @@ using MultiHtmlCraft.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-namespace MultiHtmlCraft.Core
-{
-
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Threading.Tasks;
-    using Microsoft.ClearScript.V8;
-
 
     namespace MultiHtmlCraft.Core
     {
@@ -22,7 +15,7 @@ namespace MultiHtmlCraft.Core
         /// </summary>
         public class CHtmlFetch : ICHtmlFetchInterface
         {
-            private readonly HttpClient _httpClient;
+            private static HttpClient ___httpClient = CHtmlMultiversalWindow.getHttpClient();
             private HttpResponseMessage? _responseMessage;
             private byte[]? _rawContent;
             private bool _bodyUsed = false;
@@ -54,42 +47,107 @@ namespace MultiHtmlCraft.Core
             public bool bodyUsed => _bodyUsed;
             public object? bodyResponse => _rawContent;
 
-            public CHtmlFetch(Uri uri, HttpClient httpClient)
+            public CHtmlFetch(Uri uri)
             {
+                if(commonLog.LoggingEnabled) commonLog.LogEntry($"CHtmlFetch: Initialized with URL: {uri}");
                 url = uri;
-                _httpClient = httpClient;
             }
 
-            // --- Internal Fetch Logic ---
-            public async Task<CHtmlFetch> ExecuteAsync(string method, dynamic? options)
+        // --- Internal Fetch Logic ---
+        public async Task<CHtmlFetch> ExecuteAsync(
+            string method,
+            JsonElement options,
+            CancellationToken cancellationToken = default)
+        {
+            this.method = string.IsNullOrWhiteSpace(method)
+                ? "GET"
+                : method.ToUpperInvariant();
+
+            using var request =
+                new HttpRequestMessage(
+                    new HttpMethod(this.method),
+                    url);
+
+            JsonElement headersElement = default;
+            bool hasHeaders =
+                options.TryGetProperty("headers", out headersElement);
+
+            string? contentType = null;
+
+            if (hasHeaders &&
+                headersElement.ValueKind == JsonValueKind.Object)
             {
-                this.method = method?.ToUpper() ?? "GET";
-
-                using var request = new HttpRequestMessage(new HttpMethod(this.method), url);
-
-                // ヘッダーの設定
-                if (options?.headers != null)
+                foreach (JsonProperty header in headersElement.EnumerateObject())
                 {
-                    foreach (var header in options.headers)
+                    string key = header.Name;
+                    string value = header.Value.GetString() ?? string.Empty;
+
+                    headers[key] = value;
+
+                    if (string.Equals(
+                            key,
+                            "Content-Type",
+                            StringComparison.OrdinalIgnoreCase))
                     {
-                        string key = header.Key;
-                        string value = header.Value.ToString();
-                        headers[key] = value;
+                        contentType = value;
+                    }
+                    else
+                    {
                         request.Headers.TryAddWithoutValidation(key, value);
                     }
                 }
-
-                _responseMessage = await _httpClient.SendAsync(request);
-                _rawContent = await _responseMessage.Content.ReadAsByteArrayAsync();
-
-                // レスポンスヘッダーの抽出
-                foreach (var header in _responseMessage.Headers)
-                    responseHeaders[header.Key] = string.Join(", ", header.Value);
-
-                return this;
             }
 
-            // --- Response Methods ---
+            if (options.TryGetProperty("body", out JsonElement bodyElement) &&
+                bodyElement.ValueKind != JsonValueKind.Null &&
+                !string.Equals(this.method, "GET", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(this.method, "HEAD", StringComparison.OrdinalIgnoreCase))
+            {
+                string bodyJson = bodyElement.GetRawText();
+
+                string mediaType = "application/json";
+
+                if (!string.IsNullOrWhiteSpace(contentType))
+                {
+                    int separatorIndex = contentType.IndexOf(';');
+
+                    mediaType = separatorIndex >= 0
+                        ? contentType[..separatorIndex].Trim()
+                        : contentType.Trim();
+                }
+
+                request.Content = new StringContent(
+                    bodyJson,
+                    Encoding.UTF8,
+                    mediaType);
+            }
+
+            _responseMessage =
+                await ___httpClient.SendAsync(
+                    request,
+                    cancellationToken);
+
+            _rawContent =
+                await _responseMessage.Content.ReadAsByteArrayAsync(
+                    cancellationToken);
+
+            foreach (var header in _responseMessage.Headers)
+            {
+                responseHeaders[header.Key] =
+                    string.Join(", ", header.Value);
+            }
+
+            foreach (var header in _responseMessage.Content.Headers)
+            {
+                responseHeaders[header.Key] =
+                    string.Join(", ", header.Value);
+            }
+
+            return this;
+        }
+
+
+
             public async Task<string> text()
             {
                 CheckBodyUsed();
@@ -116,7 +174,7 @@ namespace MultiHtmlCraft.Core
 
             public ICHtmlFetchInterface clone()
             {
-                // インスタンスのコピーを返す
+          
                 return (ICHtmlFetchInterface)this.MemberwiseClone();
             }
 
@@ -128,33 +186,32 @@ namespace MultiHtmlCraft.Core
         }
     }
 
-    /// <summary>
-    /// fetch response
-    /// </summary>
-    public class CHtmlFetchResponse
+/// <summary>
+/// fetch response
+/// </summary>
+public class CHtmlFetchResponse
+{
+    private readonly HttpResponseMessage _res;
+    private readonly string _content;
+
+    public CHtmlFetchResponse(HttpResponseMessage res, string content)
     {
-        private readonly HttpResponseMessage _res;
-        private readonly string _content;
-
-        public CHtmlFetchResponse(HttpResponseMessage res, string content)
-        {
-            _res = res;
-            _content = content;
-        }
-
-  
-        public int status => (int)_res.StatusCode;
-        public bool ok => _res.IsSuccessStatusCode;
-        public string statusText => _res.ReasonPhrase;
+        _res = res;
+        _content = content;
+    }
 
 
-        public Task<string> text() => Task.FromResult(_content);
+    public int status => (int)_res.StatusCode;
+    public bool ok => _res.IsSuccessStatusCode;
+    public string statusText => _res.ReasonPhrase;
 
-        public object json()
-        {
 
-            //return V8ScriptEngine.GetCurrent().Evaluate($"JSON.parse({@$"'{_content.Replace("'", "\\'")}'"})");
-            return string.Empty;
-        }
+    public Task<string> text() => Task.FromResult(_content);
+
+    public object json()
+    {
+
+        //return V8ScriptEngine.GetCurrent().Evaluate($"JSON.parse({@$"'{_content.Replace("'", "\\'")}'"})");
+        return string.Empty;
     }
 }

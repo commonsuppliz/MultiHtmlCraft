@@ -459,6 +459,18 @@ namespace ClearScriptProcessor
                                     return undefined;
                                 };
                             }
+                            if (typeof fetch === 'undefined') {
+                                fetch = function(url, options){
+                                    try {
+                                        if (typeof __host_window !== 'undefined' && __host_window && typeof __host_window.fetch === 'function') {
+                                            return __host_window.fetch(url, options);
+                                        }
+                                    } catch(e) {}
+                                    return undefined;
+                                };
+                            }
+
+                            
                         } catch(e) {}
                     })();
                 ");
@@ -896,14 +908,13 @@ namespace ClearScriptProcessor
         ");
                 engine.Execute(@"
 (function(){
-    // グローバル addEventListener と removeEventListener を定義
-    // document プロキシの委譲関数を使用
+    
     if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
         window.addEventListener_global = window.addEventListener;
         window.removeEventListener_global = window.removeEventListener;
     }
     
-    // グローバル addEventListener: document へ委譲（window ではなく document に）
+    
     addEventListener = function(name, handler, options) {
         try {
             if (arguments.length >= 3) {
@@ -917,7 +928,7 @@ namespace ClearScriptProcessor
                     return;
                 }
             }
-            // フォールバック: window.addEventListener へ委譲
+          
             if (window && typeof window.addEventListener === 'function') {
                 if (arguments.length >= 3) {
                     window.addEventListener(name, handler, options);
@@ -943,7 +954,7 @@ namespace ClearScriptProcessor
                     return;
                 }
             }
-            // フォールバック: window.removeEventListener へ委譲
+        
             if (window && typeof window.removeEventListener === 'function') {
                 if (arguments.length >= 3) {
                     window.removeEventListener(name, handler, options);
@@ -982,13 +993,12 @@ namespace ClearScriptProcessor
 
 
 
-    // 2. C# の _windowHost にあるメソッドを window に紐付ける (必要に応じて)
-    // これにより window.___createObject() が呼べるようになります
+
     if (typeof _windowHost !== 'undefined') {
         window.___createObject = function(name, args) {
             return _windowHost.___createObject(name, args);
         };
-        // 他に window.console などが必要ならここでコピー
+
         window.console = console;
     }
 
@@ -1019,13 +1029,13 @@ namespace ClearScriptProcessor
     "Worker", "SharedWorker", "SpeechSynthesisUtterance", "SpeechRecognition", "MessageChannel"
 };
                 engine.AddHostObject("_classNames", classNames);
-                // JS 側で plain の window オブジェクトを作る（ホストを変更しない）
+  
                 engine.Execute(@"
    (function() {
         var defineCustomClass = function(className) {
             var ctor = function() {
                 var args = Array.prototype.slice.call(arguments);
-                // 優先: _windowHost、次に _host を試す。どちらも無ければエラーを投げて分かりやすくする。
+          
                 if (typeof _windowHost !== 'undefined' && typeof _windowHost.___createObject === 'function') {
                     return _windowHost.___createObject(className, args);
                 } else if (typeof _host !== 'undefined' && typeof _host.___createObject === 'function') {
@@ -1034,9 +1044,9 @@ namespace ClearScriptProcessor
                 throw new Error('createObject host not available: ' + className);
             };
             
-            // window[className] に代入することで 'new className()' を可能にする
+
             window[className] = ctor;
-            this[className] = ctor; // グローバルスコープにも一応登録
+            this[className] = ctor; 
         }
 
         // _classNames の長さを安全に取得
@@ -1047,11 +1057,11 @@ namespace ClearScriptProcessor
         } catch(e) { len = 0; }
 
         for (var i = 0; i < len; i++) {
-            try { defineCustomClass(_classNames[i]); } catch(e) { /* ログ等必要ならここで扱う */ }
+            try { defineCustomClass(_classNames[i]); } catch(e) { / }
         }
     })();
 ");
-                // エンジン初期化時に実行
+                
                 this._v8Engine.Execute(@"
     function ___universalApply(func, args) {
         if (typeof func === 'function') {
@@ -1066,7 +1076,7 @@ namespace ClearScriptProcessor
                 /* verify createObject works 
                 string strCreateObjectScript = @"
 (function() {
-    // C#でバインドしたクラス名リスト
+    
     const classNames = [
         ""Image"",
         ""Audio"",
@@ -1098,12 +1108,12 @@ namespace ClearScriptProcessor
 
     classNames.forEach(function(className) {
         try {
-            // 引数なしでインスタンス化を試みる
+           
             var obj = new (window[className])();
-            // インスタンス生成成功
+            
             console.log(""new "" + className + ""() : OK"", obj);
         } catch (e) {
-            // 失敗した場合
+            
             console.log(""new "" + className + ""() : NG"", e && e.message ? e.message : e);
         }
     });
@@ -1618,7 +1628,7 @@ if (typeof document === 'undefined' || document === null) {
             return getClassNameString;
 
         }
-        // fetch実装
+        /*
         [ScriptMember("fetch")]
         public async Task<object> FetchImpl(object input, object options = null)
         {
@@ -1631,7 +1641,7 @@ if (typeof document === 'undefined' || document === null) {
             IDictionary<string, string> headers = new Dictionary<string, string>();
             object body = null;
 
-            // RequestオブジェクトまたはURL文字列を受け取る
+            
             if (input is string s)
             {
                 url = s;
@@ -1655,7 +1665,7 @@ if (typeof document === 'undefined' || document === null) {
                 throw new ArgumentException("fetch: url is required");
             var handler = new HttpClientHandler
             {
-                // 全てを有効にしておくと、サーバーがサポートする最適なものを自動でネゴシエーションします
+                
                 AutomaticDecompression = DecompressionMethods.All
             };
             using var client = new HttpClient(handler);
@@ -1666,7 +1676,7 @@ if (typeof document === 'undefined' || document === null) {
                 req.Content = new StringContent(body.ToString());
             var resp = await client.SendAsync(req);
             var content = await resp.Content.ReadAsStringAsync();
-            // JSON文字列で返す
+            
             var result = new Dictionary<string, object>
             {
                 ["status"] = (int)resp.StatusCode,
@@ -1680,6 +1690,7 @@ if (typeof document === 'undefined' || document === null) {
 #endif 
             return fetchImplResult;
         }
+        */
 
         public void createStandardObjects()
         {

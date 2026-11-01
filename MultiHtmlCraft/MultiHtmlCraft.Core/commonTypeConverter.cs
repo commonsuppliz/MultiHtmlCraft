@@ -12,12 +12,9 @@ using SkiaSharp;
 using System.Reflection;
 using System.Dynamic;
 using Microsoft.ClearScript;
-
-
-
-
-
-
+using Newtonsoft.Json.Serialization;
+using Microsoft.ClearScript.V8;
+using System.Text.Json;
 
 #if WINDOWS
 using System.Drawing;
@@ -693,6 +690,131 @@ namespace MultiHtmlCraft.Core
 
             return new Avalonia.Media.Imaging.Bitmap(ms);
         }
+
+        internal static string convertScriptingObjectToJsonString(object scriptObj, CHtmlJSonType jsonType)
+        {
+            var jsonsb = new StringBuilder();
+            int objectProperyLevel = 0;
+            switch (scriptObj)
+            {
+                case string str:
+                    jsonsb.Append(str);
+                    break;
+                case CHtmlRequest cHtmlrequest:
+                    jsonsb.Append(cHtmlrequest.ToString());
+                    break;
+                case ScriptObject clearscriptScriptV8Obj:
+                    jsonsb.Append("{");
+                    if(jsonType == CHtmlJSonType.FetchData)
+                    {
+                        foreach (var name in clearscriptScriptV8Obj.PropertyNames)
+                        {
+
+                            switch (name)
+                            {
+                                case "method":
+                                    jsonsb.Append("\"");
+                                    jsonsb.Append(name);
+                                    jsonsb.Append("\"");
+                               
+                                    jsonsb.Append(":\"");
+                                    
+                                    jsonsb.Append(clearscriptScriptV8Obj[name]);
+                                    jsonsb.Append("\"");
+                                    jsonsb.Append(",");
+
+                                    jsonsb.Append("\n");
+
+                                    break;
+                                case "headers":
+                                    jsonsb.Append("\"");
+                                    jsonsb.Append(name);
+                                    jsonsb.Append("\"");
+                                    jsonsb.Append(" : ");
+                                    jsonsb.Append("{");
+                                    var headerobj = clearscriptScriptV8Obj[name];
+                                    if (headerobj is IDictionary<string, object> dict)
+                                    {
+                                        int headercount = dict.Count;
+                                        int headercurrentpos = 0;
+                                        foreach (var kvp in dict)
+                                        {
+                                            string key = kvp.Key;
+                                            object? value = kvp.Value;
+                                            //jsonsb.Append("\"{kvp.Key}\" : \"{kvp.Value}\"");
+                                            jsonsb.Append("\"");
+                                            jsonsb.Append(key);
+                                            jsonsb.Append("\"");
+                                            jsonsb.Append(":");
+                                            jsonsb.Append("\"");
+                                            jsonsb.Append(value);
+                                            jsonsb.Append("\"");
+                                            if (headercurrentpos < headercount -1)
+                                            {
+                                                jsonsb.Append(",");
+                                                jsonsb.Append("\n");
+                                            }
+                                            headercurrentpos++;
+                                        }
+                                   
+                                    }
+                                    jsonsb.Append("}");
+                                    jsonsb.Append(",");
+                                    jsonsb.Append("\n");
+                                    break;
+                                case "body":
+                                    jsonsb.Append("\"");
+                                    jsonsb.Append(name);
+                                    jsonsb.Append("\"");
+                                    jsonsb.Append(":");
+                                    jsonsb.Append(clearscriptScriptV8Obj[name]);
+                                    break;
+                                default:
+                                    break;
+
+
+                            }
+                        }
+
+                    }
+                    /*
+                    var requestData = new
+                    {
+                        method = "POST",
+
+                        headers = new Dictionary<string, string>
+                        {
+                            ["Content-Type"] = "application/json; charset=UTF-8",
+                            ["Auth"] = "hogehoge",
+                            ["referer"] = "http://localhost"
+                        },
+
+                        body = new
+                        {
+                            title = "postTitle",
+                            body = "postBody String",
+                            userId = 1
+                        }
+                    };
+                    */
+
+                    /*
+                    foreach (var index in clearscriptScriptV8Obj.PropertyIndices)
+                    {
+                        dictionary[index.ToString()] = clearscriptScriptV8Obj[index];
+                    }
+                    */
+                    jsonsb.Append("}");
+   
+
+
+                    break;
+                default:
+                    jsonsb.Append(scriptObj.ToString());
+                    break;
+            }
+            return jsonsb.ToString();
+        }
         internal static Dictionary<string, object> convertScriptCallObjectToDictionary(object objcallback)
         {
             var result = new Dictionary<string, object>();
@@ -709,7 +831,7 @@ namespace MultiHtmlCraft.Core
                     {
                         try
                         {
-                            result[name] = scriptObj[name];   // または scriptObj.GetProperty(name)
+                            result[name] = scriptObj[name];
                         }
                         catch
                         {

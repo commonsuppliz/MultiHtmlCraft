@@ -102,6 +102,7 @@ namespace MultiHtmlCraft.Core
     public enum CHtmlEnqeueStatusType : byte { UNKNOWN = 0, ProcessQueueAsync = 9, ProcessQueueDefer= 10, ProcessQueueModule = 11, Template = 12 };
 
     public enum CHtmlWebProxyType : byte { UseDirect = 0, UseIE = 1, UseCustom = 2 };
+    public enum CHtmlJSonType : byte {  Plain= 0, FetchData= 1 };
 
     public enum CHtmlFloatType : byte { Undefined = 0, Left = 1, Right = 2, Center = 3 };
 

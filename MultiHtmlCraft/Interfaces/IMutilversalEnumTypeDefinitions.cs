@@ -208,6 +208,8 @@ namespace MultiHtmlCraft.Interfaces
         HTMLUnknownElement,
         NamedNodeMap,
         ScreenOrientation,
+        Response,
+
       
 
         #endregion

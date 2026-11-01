@@ -132,7 +132,9 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/jstest/VideoElementPrototypeCheck.html"; // Video Element Prototype Check Test 1
                 // txt.Text = "http://localhost/jstest/VideoElementPrototypeCheck3.html";
                 //txt.Text = "http://localhost/canvas/GetComputedStyleTest1.html"; // GetComputedStyle Test 1
-                txt.Text = "http://localhost/canvas/VideoElementRequestVideoFrameCallbackTest1.html"; //VideoFrameCallBackTest 1
+                // txt.Text = "http://localhost/canvas/VideoElementRequestVideoFrameCallbackTest1.html"; //VideoFrameCallBackTest 1
+                // txt.Text = "http://localhost/jstest/JsfetchTest3.html";
+                txt.Text = "http://localhost/jstest/fetchPostTest1.html"; // Jsfetch Post Test 4
 
 
             }
