@@ -65,23 +65,45 @@ namespace MultiHtmlCraft.Core
 #if DEBUG
             try
             {
-                Debug.WriteLine(string.Format(str, args));
+                if(OperatingSystem.IsWindows())
+                {
+                    Debug.WriteLine(string.Format(str, args));
+                }
+                else
+                {
+                    Console.WriteLine(string.Format(str, args));
+                }
+                
             }
             catch { }
 #endif 
 			}
 			public static void LogEntry(string str)
 			{
- #if DEBUG
-                 Debug.WriteLine(str);
-#endif 
-			}
+#if DEBUG
+            if (OperatingSystem.IsWindows())
+            {
+                Debug.WriteLine(string.Format("{0}", str));
+            }
+            else
+            {
+                Console.WriteLine(string.Format("{0}", str));
+            }
+#endif
+        }
 			public static void LogEntry(System.Exception ex)
 			{
 #if DEBUG
-                 Debug.WriteLine(ex);
-#endif 
-			}
+            if (OperatingSystem.IsWindows())
+            {
+                Debug.WriteLine(string.Format("{0}", commonHTML.getExceptionAsString(ex)));
+            }
+            else
+            {
+                Console.WriteLine(string.Format("{0}", commonHTML.getExceptionAsString(ex)));
+            }
+#endif
+        }
 			public static void LogEntry(string strName, Exception ex)
 			{
 #if DEBUG

@@ -1092,6 +1092,12 @@ namespace MultiHtmlCraft.Core
                             var methods = CHtmlMessagePort.CHtmlMessagePortMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
                         }
+                    case CHtmlPerformance performance:
+                        {
+                            var props = CHtmlPerformance.CHtmlPerformanceProperties.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlPerformance.CHtmlPerformanceMethods.Keys ?? Enumerable.Empty<string>();
+                            return props.Concat(methods);
+                        }
 
                     case CHtmlNode node:
                         {
@@ -2945,6 +2951,12 @@ namespace MultiHtmlCraft.Core
                                     BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                 );
                             }
+                            return base.BindGetMember(binder);
+                        }
+                    case CHtmlPerformance cHtmlPerformance:
+                        { 
+                            var self = cHtmlPerformance;
+
                             return base.BindGetMember(binder);
                         }
                     case CHtmlWindowEvent windowEvent:

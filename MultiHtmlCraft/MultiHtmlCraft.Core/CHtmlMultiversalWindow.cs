@@ -64,7 +64,8 @@ namespace MultiHtmlCraft.Core
             { "innerWidth", 19},
             { "innerHeight", 20},
             { "outerWidth", 21},
-            { "outerHeight", 22}
+            { "outerHeight", 22},
+            { "performance", 23}
 
         };
                 return chtmlMultiversalWindowProperties;
@@ -597,6 +598,18 @@ namespace MultiHtmlCraft.Core
                 return this.___locationBase;
             }
         }
+        public object performance
+        {
+            get
+            {
+                if (this.___performance == null)
+                {
+                    this.___performance = new CHtmlPerformance();
+                }
+                return this.___performance;
+            }
+        }
+
         public object history
         {
             get
@@ -4813,6 +4826,7 @@ s               else
         {
             return null;
         }
+
         public object setTimeout(object setTimeoutParam1)
         {
             return ___setTimeoutInner(new object[] { setTimeoutParam1 , 1000});
@@ -5128,6 +5142,7 @@ s               else
             }
             return null;
         }
+
 
         public object requestAnimationFrame(object arg1)
         {

@@ -573,7 +573,7 @@ namespace MultiHtmlCraft.Core
                         }
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                         {
-                            commonLog.LogEntry("object cache updated (200) within getMultiversalContentData {0} {1} {2} ManagedThreadID: {3}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                            commonLog.LogEntry("CHmlMultiversalWebCache updated (200) within getMultiversalContentData {0} {1} {2} ManagedThreadID: {3} ContentLength: {4}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId, newContentData.ContentLength);
                         }
                         return newContentData;
                     }
@@ -581,7 +581,7 @@ namespace MultiHtmlCraft.Core
                     {
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                         {
-                            commonLog.LogEntry($"object cache fallback (status: {response.StatusCode}) within getMultiversalContentData {{0}} {{1}} {{2}} ManagedThreadID: {{3}}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
+                            commonLog.LogEntry($"CHmlMultiversalWebCach fallback (status: {response.StatusCode}) within getMultiversalContentData {{0}} {{1}} {{2}} ManagedThreadID: {{3}}", _url, _contentType, _charset, System.Threading.Thread.CurrentThread.ManagedThreadId);
                         }
                         return multivasalContentData;
                     }

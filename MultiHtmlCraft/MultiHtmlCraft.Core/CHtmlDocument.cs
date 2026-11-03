@@ -1121,7 +1121,12 @@ namespace MultiHtmlCraft.Core
                         scope.AddHostObject("console", doc.___window.___console);
 
 
+
                         processor.put("navigator", doc.___window.navigator);
+                        try { 
+                        processor.put("performance", doc.___window.performance);
+                        }
+                        catch { }
                         // Ensure the document host object is exposed to ClearScript as a host object
                         // so DOM methods (like appendChild) are callable from scripts.
                         processor.put("document", doc);
@@ -7484,6 +7489,10 @@ namespace MultiHtmlCraft.Core
 
         internal async Task<CHtmlDocument> ___parseDocument()
         {
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
+            {
+                commonLog.LogEntry($"___parseDocument() entered : {this.___URL} domtype: {this.___documentDomType}");
+            }
 
 
             this.___isParseDocumentEntered = true;

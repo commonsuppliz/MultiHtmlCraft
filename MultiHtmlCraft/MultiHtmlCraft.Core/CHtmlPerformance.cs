@@ -1,13 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Transactions;
 using MultiHtmlCraft.Interfaces;
 namespace MultiHtmlCraft.Core
 {
     public sealed class CHtmlPerformance : CHtmlNode , ICommonObjectInterface 
     {
         internal System.WeakReference ___ownerDocumentWeakReference = null;
+        internal static Dictionary<string, object> CHtmlPerformanceProperties = createCHtmlPerformancePropertiesList();
 
+        internal static Dictionary<string, object> CHtmlPerformanceMethods = createCHtmlPerformanceMethodsList();
+
+        internal static Dictionary<string, object> createCHtmlPerformancePropertiesList()
+        {
+            Dictionary<string, object> chtmlPerformanceProperties = new Dictionary<string, object>();
+            chtmlPerformanceProperties.Add("timing", 1);
+            chtmlPerformanceProperties.Add("navigation", 2);
+            chtmlPerformanceProperties.Add("duration", 3);
+            return chtmlPerformanceProperties;
+        }
+        internal static Dictionary<string, object> createCHtmlPerformanceMethodsList()
+        {
+            Dictionary<string, object> chtmlPerformanceMethods = new Dictionary<string, object>();
+            chtmlPerformanceMethods.Add("mark", 1);
+            chtmlPerformanceMethods.Add("clearMarks", 2);
+            chtmlPerformanceMethods.Add("clearResourceTimings", 3);
+            chtmlPerformanceMethods.Add("getEntries", 4);
+            chtmlPerformanceMethods.Add("clearMeasures", 5);
+            chtmlPerformanceMethods.Add("getMeasures", 6);
+            chtmlPerformanceMethods.Add("setResourceTimingBufferSize", 7);
+            chtmlPerformanceMethods.Add("now", 8);
+            chtmlPerformanceMethods.Add("measure", 9);
+            chtmlPerformanceMethods.Add("getEntriesByName", 10);
+            chtmlPerformanceMethods.Add("getEntriesByType", 11);
+            return chtmlPerformanceMethods;
+        }
 
         private CHtmlPerformanceTiming ___timing = new CHtmlPerformanceTiming();
         private CHtmlPerformanceNavigation ___navigation = new CHtmlPerformanceNavigation();
@@ -23,6 +51,17 @@ namespace MultiHtmlCraft.Core
             get
             {
                 return this.___timing;
+            }
+        }
+        public object? duration
+        {
+            get
+            {
+                if(commonLog.LoggingEnabled && commonLog.LogLevel > 5)
+                {
+                    commonLog.LogEntry("TODO: performance duration is entered");
+                }
+                return null;
             }
         }
         public object ___getPropertyByName(string ___name)
@@ -125,7 +164,7 @@ namespace MultiHtmlCraft.Core
         {
             if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
             {
-               commonLog.LogEntry("calling {0}.getEntriesByName()", this);
+               commonLog.LogEntry($"calling {this}.getEntriesByName({name}, {entryType})");
             }
             return ___getEntriesByNameInner(name, entryType);
         }
@@ -133,7 +172,7 @@ namespace MultiHtmlCraft.Core
         {
             if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
             {
-               commonLog.LogEntry("caling {0}.getEntriesByName()", this);
+               commonLog.LogEntry($"calling {this}.getEntriesByName({name})");
             }
             return ___getEntriesByNameInner(name, null);
         }
@@ -150,7 +189,7 @@ namespace MultiHtmlCraft.Core
         {
             if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 8)
             {
-               commonLog.LogEntry("TODO: {0}.getEntriesByType()", this);
+               commonLog.LogEntry($"calling {this}.getEntriesByType({___entryType})");
             }
             CHtmlPerformanceEntriesList ___entryCollection = new CHtmlPerformanceEntriesList();
             
@@ -178,10 +217,14 @@ namespace MultiHtmlCraft.Core
 
         public bool ___hasPropertyByName(string ___name)
         {
-            if (___name == null)
+            if (string.IsNullOrEmpty(___name))
+            {
                 return false;
+            }
 
-            return false;
+            return ___name.Equals("timing", StringComparison.OrdinalIgnoreCase)
+                || ___name.Equals("navigation", StringComparison.OrdinalIgnoreCase)
+                || ___properties.ContainsKey(___name);
         }
         public bool ___hasPropertyByIndex(int ___index)
         {
