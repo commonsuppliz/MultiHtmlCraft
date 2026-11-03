@@ -72,14 +72,14 @@ namespace MultiHtmlCraft.Core
         private static object ___canvasCHtmlFontInfoLockingObject = new object();
         private const int ___canvasCHtmlFontInfoMaximumEntries = 10000;
         private const double ___audioContextSampleRate = 48000;
-        internal GraphicAPIType ___CanvasGraphicAPIType = GraphicAPIType.Unknown;
+        internal CHtmlGraphicAPIType ___CanvasGraphicAPIType = CHtmlGraphicAPIType.Unknown;
         internal bool ___needAvoidToCallCanvasActivityIntoDocument = false;
         /// <summary>
         /// Property names for Context Attributes
         /// </summary>
         internal static string[] ____Context_Attribute_Name_Array = new string[] { "alpha", "depth", "stencil", "antialias", "premultipliedAlpha", "preserveDrawingBuffer" };
         /// <summary>
-        /// Graphics Object which is created with target Bitmap (which should be disposed just before drawing)
+        /// CHtmlGraphicContainerGraphics Object which is created with target Bitmap (which should be disposed just before drawing)
         /// </summary>
 
         private System.Drawing.Graphics ___CanvasImageObjectToGdiImage = null;
@@ -1767,8 +1767,8 @@ namespace MultiHtmlCraft.Core
 #else
             switch (commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.Avalonia:
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.Avalonia:
+                case CHtmlGraphicAPIType.SkiaSharp:
                     SkiaSharp.SKCanvas ___grSkiaGraphicsContext = null;
                     break;
             }
@@ -1867,8 +1867,8 @@ namespace MultiHtmlCraft.Core
 
                     switch (commonHTML.GraphicApiType)
                     {
-                        case GraphicAPIType.Avalonia:
-                        case GraphicAPIType.SkiaSharp:
+                        case CHtmlGraphicAPIType.Avalonia:
+                        case CHtmlGraphicAPIType.SkiaSharp:
                             {
                                 SkiaSharp.SKBitmap srcSkiaSharpBitmap = null;
                                 if (this.___CanvasSkiaBitmapWeakReference != null)
@@ -2108,8 +2108,8 @@ namespace MultiHtmlCraft.Core
 #else
             switch(commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.Avalonia:
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.Avalonia:
+                case CHtmlGraphicAPIType.SkiaSharp:
 
 
                     if (this.___CanvasContextModeType == CanvasContextModeType.Canvas2D || this.___CanvasContextModeType == CanvasContextModeType.SVG)
@@ -2406,7 +2406,7 @@ namespace MultiHtmlCraft.Core
                             bool ___isTransformApplied = false;
                             if (___matrixElements[1] == 0 && ___matrixElements[0] == 1 && ___matrixElements[2] == 0 && ___matrixElements[3] == 1 && ___matrixElements[4] == 0 && ___matrixElements[5] == 0)
                             {
-                                 // may be no transform on current Graphics 
+                                 // may be no transform on current CHtmlGraphicContainerGraphics 
                             }
                             else
                             {
@@ -2575,8 +2575,8 @@ namespace MultiHtmlCraft.Core
             {
                 switch (commonHTML.GraphicApiType)
                 {
-                    case GraphicAPIType.Avalonia:
-                    case GraphicAPIType.SkiaSharp:
+                    case CHtmlGraphicAPIType.Avalonia:
+                    case CHtmlGraphicAPIType.SkiaSharp:
                         {
                             if (_image == null || this.___IsDisposing) return;
 
@@ -2887,7 +2887,7 @@ namespace MultiHtmlCraft.Core
                             {
                                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 30)
                                 {
-                                    commonLog.LogEntry("CanvasContext Graphics retry....");
+                                    commonLog.LogEntry("CanvasContext CHtmlGraphicContainerGraphics retry....");
                                 }
                             }
                         }
@@ -2917,7 +2917,7 @@ namespace MultiHtmlCraft.Core
             {
                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
                 {
-                    commonLog.LogEntry("CanvasContext Graphics Failed....", ex);
+                    commonLog.LogEntry("CanvasContext CHtmlGraphicContainerGraphics Failed....", ex);
                 }
             }
             if (grTarget != null)
@@ -2939,7 +2939,7 @@ namespace MultiHtmlCraft.Core
             }
             if (grTarget == null)
             {
-                throw new Exception("CanvasContext Graphics Failed to obtain Graphics from Canvas Image");
+                throw new Exception("CanvasContext CHtmlGraphicContainerGraphics Failed to obtain CHtmlGraphicContainerGraphics from Canvas Image");
             }
             return grTarget;
 
@@ -3155,7 +3155,7 @@ namespace MultiHtmlCraft.Core
                                     {
                                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                                         {
-                                            commonLog.LogEntry("CanvasContext Graphics Transform Operation Error", transException);
+                                            commonLog.LogEntry("CanvasContext CHtmlGraphicContainerGraphics Transform Operation Error", transException);
                                         }
                                         goto ReturnGraphicsPhase;
                                     }
@@ -3173,7 +3173,7 @@ namespace MultiHtmlCraft.Core
                                     {
                                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                                         {
-                                            commonLog.LogEntry("CanvasContext Graphics Transform Operation Error", transException);
+                                            commonLog.LogEntry("CanvasContext CHtmlGraphicContainerGraphics Transform Operation Error", transException);
                                         }
                                         goto ReturnGraphicsPhase;
                                     }
@@ -3192,7 +3192,7 @@ namespace MultiHtmlCraft.Core
                                     {
                                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 30)
                                         {
-                                            commonLog.LogEntry("CanvasContext Graphics Clip Operation Error", clipex);
+                                            commonLog.LogEntry("CanvasContext CHtmlGraphicContainerGraphics Clip Operation Error", clipex);
                                         }
                                     }
                                 }
@@ -3207,7 +3207,7 @@ namespace MultiHtmlCraft.Core
             {
                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 30)
                 {
-                    commonLog.LogEntry("CanvasContext Graphics TransFrom Error", exTransFrom);
+                    commonLog.LogEntry("CanvasContext CHtmlGraphicContainerGraphics TransFrom Error", exTransFrom);
                 }
             }
 
@@ -3356,8 +3356,8 @@ namespace MultiHtmlCraft.Core
 #else
                 switch(___CanvasGraphicAPIType)
                 {
-                    case GraphicAPIType.SkiaSharp:
-                    case GraphicAPIType.Avalonia:
+                    case CHtmlGraphicAPIType.SkiaSharp:
+                    case CHtmlGraphicAPIType.Avalonia:
                         if (this.___CanvasContextModeType == CanvasContextModeType.Canvas2D || this.___CanvasContextModeType == CanvasContextModeType.SVG)
                         {
                             try

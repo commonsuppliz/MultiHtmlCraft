@@ -1,0 +1,200 @@
+﻿## PROCESSES
+Currently debugging:
+- MultiHtmlCraft.AvaloniaControl_Form_Test.exe (PID: 22800)
+
+## EXCEPTION
+Exception Type: System.NullReferenceException
+Exception Message: Object reference not set to an instance of an object.
+Piece of code that has the exception:
+```csharp C:\Users\USER\source\repos\MultiHtmlCraft\MultiHtmlCraft\MultiHtmlCraft.AvaroniaControl\MultiHtmlCraft.AvaroniaControl.cs
+206:         public async Task navigate(string URL, params object[] args)
+207:         {
+208:             if (string.IsNullOrWhiteSpace(URL))
+209:                 throw new ArgumentException("URL is null or empty", nameof(URL));
+210: 
+211:             string strUrl = URL.Trim();
+212:             if (!strUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+213:             {
+214:                 // not throwing here to be tolerant, but log if available
+215:                 if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+216:                 {
+217:                     MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl.navigate: invalid url {strUrl}");
+218:                 }
+219:                 return;
+220:             }
+221: 
+222:             if (___multiversalWindow == null)
+223:             {
+224:                 ___multiversalWindow = new MultiHtmlCraft.Core.CHtmlMultiversalWindow(null, true, IMultiversalWindowType.NormalWindow);
+225:                 ___multiversalWindow.setMultiversalControl(this);
+226:             }
+227: 
+228:             // preserve last requested url
+229:             ___multiversalWindow.___URL_Request_Current = URL;
+230: 
+231:             // ensure shared HttpClient is initialized similar to WinForms control behavior
+232:             if (___multiversalWindow.hasHttpClient == false)
+233:             {
+234:                 var handler = new System.Net.Http.HttpClientHandler
+235:                 {
+236:                     AutomaticDecompression = System.Net.DecompressionMethods.All
+237:                 };
+238:                 var httpClient = new System.Net.Http.HttpClient(handler);
+239:                 commonHTML.setHttpClientDefalutRequestHeaders(httpClient);
+240:                 httpClient.Timeout = TimeSpan.FromMilliseconds(30000);
+241:                 MultiHtmlCraft.Core.CHtmlMultiversalWindow.setHttpClient(httpClient);
+242:             }
+243: 
+244:             try
+245:             {
+246:                 // call into core to create document
+247:                 var requestData = (args != null && args.Length > 0 && args[0] is CHtmlRequestData rd) ? rd : null;
+248:                 ___document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, ___multiversalWindow, requestData);
+249:                 int iControlCount = 0;
+250: 
+251:                 if (___document != null)
+252:                 {
+253:                     if (___document.___ManagedControlPendingElementList != null)
+254:                     {
+255:                         iControlCount = ___document.___ManagedControlPendingElementList.Count;
+256:                         if (iControlCount >= 0)
+257:                         {
+258:                             createAvaloniaControlFromDocument(___document);
+259:                         }
+260:                     }
+261:                     if (___document.body != null)
+262:                     {
+263:                         CHtmlElement _body = ___document.body as CHtmlElement;
+264:                         var bodyBounds = _body.offsetScreenBounds;
+265:                         setScrollViewerSize(bodyBounds);
+266:                     }
+267:                 }
+268: 
+269: 
+270: 
+271:                 // notify listeners that a document was loaded
+272:                 DocumentLoaded?.Invoke(this, EventArgs.Empty);
+273:             }
+274:             catch (Exception ex)
+275:             {
+276:                 if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+277:                 {
+278:                     MultiHtmlCraft.Core.commonLog.LogEntry("MultiversalAvaroniaControl.navigate exception: {0}", ex);
+279:                 }
+280:                 throw;
+281:             }
+282:         }
+```
+Exception is on line 274
+This exception was originally thrown at this call stack:
+[1] MultiHtmlCraft.Core.CHtmlDocument.createDocument(MultiHtmlCraft.Core.CHtmlDomModeType, string, MultiHtmlCraft.Interfaces.IMultiversalWindow, MultiHtmlCraft.CHtmlRequestData) 場所: CHtmlDocument.cs
+[2] MultiHtmlCraft.AvaroniaControl.MultiversalAvaroniaControl.navigate(string, object[]) 場所: [MultiHtmlCraft.AvaroniaControl.cs](navigate-to-context:1) でスローされました
+The callstack context, if included, corresponds to the thread where this exception occurred. There is no need to identify this thread by other means.
+The top most frame in the callstack context should correspond to the place the exception message was thrown from. Code may or may not have been provided for it but can be requested.
+
+## CALLSTACK
+Thread ID: 23900
+[1] MultiHtmlCraft.AvaroniaControl.dll!MultiHtmlCraft.AvaroniaControl.MultiversalAvaroniaControl.navigate
+This is the current user focused stack frame. The provided locals context corresponds to this stack frame, but you may evaluate expressions and retrieve code for any frame.
+Code for the stack frame:
+```csharp MultiHtmlCraft\MultiHtmlCraft.AvaroniaControl\MultiHtmlCraft.AvaroniaControl.cs
+206:         public async Task navigate(string URL, params object[] args)
+207:         {
+208:             if (string.IsNullOrWhiteSpace(URL))
+209:                 throw new ArgumentException("URL is null or empty", nameof(URL));
+210: 
+211:             string strUrl = URL.Trim();
+212:             if (!strUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+213:             {
+214:                 // not throwing here to be tolerant, but log if available
+215:                 if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+216:                 {
+217:                     MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl.navigate: invalid url {strUrl}");
+218:                 }
+219:                 return;
+220:             }
+221: 
+222:             if (___multiversalWindow == null)
+223:             {
+224:                 ___multiversalWindow = new MultiHtmlCraft.Core.CHtmlMultiversalWindow(null, true, IMultiversalWindowType.NormalWindow);
+225:                 ___multiversalWindow.setMultiversalControl(this);
+226:             }
+227: 
+228:             // preserve last requested url
+229:             ___multiversalWindow.___URL_Request_Current = URL;
+230: 
+231:             // ensure shared HttpClient is initialized similar to WinForms control behavior
+232:             if (___multiversalWindow.hasHttpClient == false)
+233:             {
+234:                 var handler = new System.Net.Http.HttpClientHandler
+235:                 {
+236:                     AutomaticDecompression = System.Net.DecompressionMethods.All
+237:                 };
+238:                 var httpClient = new System.Net.Http.HttpClient(handler);
+239:                 commonHTML.setHttpClientDefalutRequestHeaders(httpClient);
+240:                 httpClient.Timeout = TimeSpan.FromMilliseconds(30000);
+241:                 MultiHtmlCraft.Core.CHtmlMultiversalWindow.setHttpClient(httpClient);
+242:             }
+243: 
+244:             try
+245:             {
+246:                 // call into core to create document
+247:                 var requestData = (args != null && args.Length > 0 && args[0] is CHtmlRequestData rd) ? rd : null;
+248:                 ___document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, strUrl, ___multiversalWindow, requestData);
+249:                 int iControlCount = 0;
+250: 
+251:                 if (___document != null)
+252:                 {
+253:                     if (___document.___ManagedControlPendingElementList != null)
+254:                     {
+255:                         iControlCount = ___document.___ManagedControlPendingElementList.Count;
+256:                         if (iControlCount >= 0)
+257:                         {
+258:                             createAvaloniaControlFromDocument(___document);
+259:                         }
+260:                     }
+261:                     if (___document.body != null)
+262:                     {
+263:                         CHtmlElement _body = ___document.body as CHtmlElement;
+264:                         var bodyBounds = _body.offsetScreenBounds;
+265:                         setScrollViewerSize(bodyBounds);
+266:                     }
+267:                 }
+268: 
+269: 
+270: 
+271:                 // notify listeners that a document was loaded
+272:                 DocumentLoaded?.Invoke(this, EventArgs.Empty);
+273:             }
+274:             catch (Exception ex)
+275:             {
+276:                 if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+277:                 {
+278:                     MultiHtmlCraft.Core.commonLog.LogEntry("MultiversalAvaroniaControl.navigate exception: {0}", ex);
+279:                 }
+280:                 throw;
+281:             }
+282:         }
+```
+Current statement: line 279
+[2] [非同期メソッドを再開しています]
+[3] [外部コード]
+[38] MultiHtmlCraft.AvaloniaControl_Form_Test.dll!MultiHtmlCraft.AvaloniaControl_Form_Test.Program.Main
+Code for the stack frame:
+```csharp MultiHtmlCraft_AvaloniaControl_Form_Test\Program.cs
+12:         [STAThread]
+13:         public static void Main(string[] args) => BuildAvaloniaApp()
+14:             .StartWithClassicDesktopLifetime(args);
+```
+Current statement: lines 13-14
+[39] [外部コード]
+
+## LOCALS
+| Name | Type | Value |
+| --- | --- | --- |
+| this | MultiHtmlCraft.AvaroniaControl.MultiversalAvaroniaControl | 評価がタイムアウトしました |
+| URL | string | "http://localhost/j" |
+| args | object[] | {object[0]} |
+| strUrl | string | "http://localhost/j" |
+| ex | System.Exception {System.NullReferenceException} | {"Object reference not set to an instance of an object."} |
+

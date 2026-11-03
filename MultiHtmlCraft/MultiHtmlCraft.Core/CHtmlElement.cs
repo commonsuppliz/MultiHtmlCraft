@@ -10730,8 +10730,8 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 #else
                             switch(commonHTML.GraphicApiType)
                             {
-                               case GraphicAPIType.SkiaSharp:
-                               case GraphicAPIType.Avalonia:
+                               case CHtmlGraphicAPIType.SkiaSharp:
+                               case CHtmlGraphicAPIType.Avalonia:
                               
                                
                                     SkiaSharp.SKBitmap? bitmap = null;
@@ -10801,8 +10801,8 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 #else
                             switch(commonHTML.GraphicApiType)
                             {
-                               case GraphicAPIType.SkiaSharp:
-                               case GraphicAPIType.Avalonia:
+                               case CHtmlGraphicAPIType.SkiaSharp:
+                               case CHtmlGraphicAPIType.Avalonia:
                               
                                
                                     SkiaSharp.SKBitmap? bitmap = null;
@@ -13067,7 +13067,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 
                         switch (commonHTML.GraphicApiType)
                         {
-                            case GraphicAPIType.WinformsGDI:
+                            case CHtmlGraphicAPIType.WinformsGDI:
 #if WINDOWS
                                 System.Drawing.Bitmap canvasBitmap = null;
                                 if (this.___offsetWidth > 0 && this.___offsetHeight > 0)
@@ -13097,8 +13097,8 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                                 this.___canvasContextCurrent2D.___CanvasGdiImageWeakReference = new WeakReference(this.___CanvasGdiImage, false);
                                 break;
 #else
-                            case GraphicAPIType.Avalonia:
-                            case GraphicAPIType.SkiaSharp:
+                            case CHtmlGraphicAPIType.Avalonia:
+                            case CHtmlGraphicAPIType.SkiaSharp:
                                 {
                                     if (this.___offsetWidth > 0 && this.___offsetHeight > 0)
                                     {
@@ -15916,8 +15916,8 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 #else
                                 switch(commonHTML.GraphicApiType)
                                 {
-                                    case GraphicAPIType.Avalonia:
-                                    case GraphicAPIType.SkiaSharp:
+                                    case CHtmlGraphicAPIType.Avalonia:
+                                    case CHtmlGraphicAPIType.SkiaSharp:
                                 if (___oridinalWidth != this.___offsetWidth)
                                 {
                                         ___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize();
@@ -15970,8 +15970,8 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 #else
                             switch (commonHTML.GraphicApiType)
                             {
-                                case GraphicAPIType.Avalonia:
-                                case GraphicAPIType.SkiaSharp:
+                                case CHtmlGraphicAPIType.Avalonia:
+                                case CHtmlGraphicAPIType.SkiaSharp:
                                 
                                                 if(___oridinalHeight != this.___offsetHeight)
                                                 {

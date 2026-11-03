@@ -864,20 +864,57 @@ namespace MultiHtmlCraft.AvaroniaControl
         {
             try
             {
-                if (_avaloniaGraphicContainer == null)
-                    _avaloniaGraphicContainer = new CHtmlGraphicContainer(GraphicAPIType.Avalonia);
+                if (context == null)
+                {
+                    MultiHtmlCraft.Core.commonLog.LogEntry(
+                        "CreateGraphicContainer: DrawingContext is null.");
 
-                _avaloniaGraphicContainer.AvaloniaDrawingContext = context;
-                _avaloniaGraphicContainer.PaintRectangle = commonTypeConverter.ToRectangleFSpec(this.GetPaintRectScrollbar());
-                _avaloniaGraphicContainer.ControlBounds = commonTypeConverter.ToRectangleFSpec(this.GetPaintRectScrollbar());
+                    return null;
+                }
+
+                if (!Dispatcher.UIThread.CheckAccess())
+                {
+                    MultiHtmlCraft.Core.commonLog.LogEntry(
+                        "CreateGraphicContainer: called outside Avalonia UI thread.");
+
+                    return null;
+                }
+
+                if (_avaloniaGraphicContainer == null)
+                {
+                    _avaloniaGraphicContainer =
+                        new CHtmlGraphicContainer(CHtmlGraphicAPIType.Avalonia);
+                }
+
+                var paintRectangle =
+                    commonTypeConverter.ToRectangleFSpec(
+                        GetPaintRectScrollbar());
+
+                _avaloniaGraphicContainer.PlatformGraphicAPIType =
+                    CHtmlGraphicAPIType.Avalonia;
+
+                _avaloniaGraphicContainer.AvaloniaDrawingContext =
+                    context;
+
+                _avaloniaGraphicContainer.PaintRectangle =
+                    paintRectangle;
+
+                _avaloniaGraphicContainer.ControlBounds =
+                    paintRectangle;
+
+                _avaloniaGraphicContainer.IsUIThreadPaint = true;
+
                 return _avaloniaGraphicContainer;
             }
-            catch
+            catch (Exception ex)
             {
+                MultiHtmlCraft.Core.commonLog.LogEntry(
+                    "CreateGraphicContainer failed: {0}",
+                    ex.ToString());
+
                 return null;
             }
         }
-
         public System.Drawing.Rectangle GetPaintRectScrollbar()
         {
             double width = this.Bounds.Width;

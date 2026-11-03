@@ -1128,6 +1128,11 @@ namespace MultiHtmlCraft.Core
                         scope.setMultiversalWindow(window);
                         scope.initScriptEngine();
 #if DEBUG
+                        if(stopwatch == null)
+                        {
+                            stopwatch = new Stopwatch();
+                            stopwatch.Start();
+                        }
                         scope.EnableDebug = true;
 #endif
                         scope.EnableScriptLogging = commonLog.LoggingEnabled;
@@ -1271,10 +1276,13 @@ namespace MultiHtmlCraft.Core
             {
                 stopwatch.Stop();
             }
-            if (stopwatch != null && commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10 && stopwatch !=null)
             {
 
                 commonLog.LogEntry("document.___parseDocument() {0} completed {1} ms...", doc.___UrlShortName, stopwatch.ElapsedMilliseconds);
+            }else if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("document.___parseDocument() {0} completed...", doc.___UrlShortName);
             }
             return doc;
         }
@@ -1351,8 +1359,8 @@ namespace MultiHtmlCraft.Core
 #else
                     switch (commonHTML.GraphicApiType)
                     {
-                        case GraphicAPIType.Avalonia:
-                        case GraphicAPIType.SkiaSharp:
+                        case CHtmlGraphicAPIType.Avalonia:
+                        case CHtmlGraphicAPIType.SkiaSharp:
                             this.___imageRawConcurrentDictionaryForSKBitmap = new System.Collections.Concurrent.ConcurrentDictionary<string, SkiaSharp.SKBitmap>(StringComparer.Ordinal);
                             break;
                     }
@@ -5867,7 +5875,7 @@ namespace MultiHtmlCraft.Core
 
                             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
                             {
-                                commonLog.LogEntry("CHtmlDocument CreateGraphicContainer using Bitmap Graphics : {0} ", this.___TemporayBitmap.Size);
+                                commonLog.LogEntry("CHtmlDocument CreateGraphicContainer using Bitmap CHtmlGraphicContainerGraphics : {0} ", this.___TemporayBitmap.Size);
                             }
                         }
                         else
@@ -5880,9 +5888,9 @@ namespace MultiHtmlCraft.Core
                     try
                     {
 
-                        if (grCon.Graphic == null)
+                        if (grCon.CHtmlGraphicContainerGraphics == null)
                         {
-                            grCon.Graphic = Graphics.FromImage(this.___TemporayBitmap);
+                            grCon.CHtmlGraphicContainerGraphics = Graphics.FromImage(this.___TemporayBitmap);
                         }
                     }
                     catch
@@ -5905,14 +5913,14 @@ namespace MultiHtmlCraft.Core
 
                             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
                             {
-                                commonLog.LogEntry("Retrying CHtmlDocument CreateGraphicContainer using Bitmap Graphics : {0} ", this.___TemporayBitmap.Size);
+                                commonLog.LogEntry("Retrying CHtmlDocument CreateGraphicContainer using Bitmap CHtmlGraphicContainerGraphics : {0} ", this.___TemporayBitmap.Size);
                             }
-                            grCon.Graphic = Graphics.FromImage(this.___TemporayBitmap);
+                            grCon.CHtmlGraphicContainerGraphics = Graphics.FromImage(this.___TemporayBitmap);
                         }
                     }
-                    if (grCon.Graphic != null)
+                    if (grCon.CHtmlGraphicContainerGraphics != null)
                     {
-                        grCon.Graphic.Clear(Color.White);
+                        grCon.CHtmlGraphicContainerGraphics.Clear(Color.White);
                     }
                     grCon.FontSpec = new FontSpec(FontFamily.GenericSansSerif.ToString(), 11f);
                     grCon.StandardStringFormat = StringFormat.GenericTypographic;
@@ -7638,60 +7646,98 @@ namespace MultiHtmlCraft.Core
 
 
 
-
                 if (this.___IsDomModeFullParseMode())
                 {
-                    if (commonHTML.GraphicApiType == GraphicAPIType.WinformsGDI)
+                    if (commonHTML.GraphicApiType == CHtmlGraphicAPIType.WinformsGDI)
                     {
                         this.___HtmlGraphics = this.___createGraphicContainer();
                     }
                     else
                     {
-                        this.___HtmlGraphics = new CHtmlGraphicContainer(commonHTML.GraphicApiType);
+                        this.___HtmlGraphics =
+                            new CHtmlGraphicContainer(commonHTML.GraphicApiType);
                     }
 
-                    if (this.___HtmlGraphics != null && this.___HtmlGraphics.Graphic != null)
+                    if (this.___HtmlGraphics == null)
                     {
-                        goto GraphicCreationDone;
-                    }
-                    else if (this.___HtmlGraphics == null)
-                    {
-
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                         {
-                            commonLog.LogEntry("Unable to obtain Document.HtmlGrahpic with thread. Aborting...");
+                            commonLog.LogEntry(
+                                "Unable to create document graphic container.");
                         }
 
                         goto ___parseDocumentCleanUp;
                     }
-                    else if (this.___HtmlGraphics.Graphic == null)
+
+                    switch (commonHTML.GraphicApiType)
                     {
-                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
-                        {
-                            commonLog.LogEntry("Unable to obtain Graphic Object...");
-                        }
+                        case CHtmlGraphicAPIType.Avalonia:
+                      
+                            if (this.___HtmlGraphics.SkiaCanvas == null)
+                            {
+                                if (commonLog.LoggingEnabled &&
+                                    commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry(
+                                        "Avalonia graphic container has no SkiaCanvas.");
+                                }
+
+                                goto ___parseDocumentCleanUp;
+                            }
+
+                            break;
+
+                        case CHtmlGraphicAPIType.SkiaSharp:
+                            if (this.___HtmlGraphics.SkiaCanvas == null)
+                            {
+                                if (commonLog.LoggingEnabled &&
+                                    commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry(
+                                        "SkiaSharp graphic container has no SkiaCanvas.");
+                                }
+
+                                goto ___parseDocumentCleanUp;
+                            }
+
+                            break;
+
+                        case CHtmlGraphicAPIType.WinformsGDI:
+                            if (this.___HtmlGraphics.CHtmlGraphicContainerGraphics == null)
+                            {
+                                if (commonLog.LoggingEnabled &&
+                                    commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry(
+                                        "WinForms GDI Graphics could not be created.");
+                                }
+
+                                goto ___parseDocumentCleanUp;
+                            }
+
+                            if (this.___HtmlGraphics.CHtmlGraphicContainerGraphics.SmoothingMode !=
+                                System.Drawing.Drawing2D.SmoothingMode.HighSpeed)
+                            {
+                                this.___HtmlGraphics.CHtmlGraphicContainerGraphics.SmoothingMode =
+                                    System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
+                            }
+
+                            if (this.___HtmlGraphics.CHtmlGraphicContainerGraphics.TextRenderingHint !=
+                                System.Drawing.Text.TextRenderingHint.SystemDefault)
+                            {
+                                this.___HtmlGraphics.CHtmlGraphicContainerGraphics.TextRenderingHint =
+                                    System.Drawing.Text.TextRenderingHint.SystemDefault;
+                            }
+
+                            break;
                     }
-                    else
-                    {
-                        if (this.___HtmlGraphics.Graphic.SmoothingMode != System.Drawing.Drawing2D.SmoothingMode.HighSpeed)
-                        {
-                            this.___HtmlGraphics.Graphic.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
-                        }
-                        if (this.___HtmlGraphics.Graphic.TextRenderingHint != System.Drawing.Text.TextRenderingHint.SystemDefault)
-                        {
-                            this.___HtmlGraphics.Graphic.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
-                        }
-
-
-
-                    }
-
                 }
                 else
                 {
-                    // XML or Segment is just create empty container
+              
                     this.___HtmlGraphics = new CHtmlGraphicContainer();
                 }
+
             GraphicCreationDone:
 
 
@@ -9934,8 +9980,8 @@ namespace MultiHtmlCraft.Core
 #else
                                                                     switch (commonHTML.GraphicApiType)
                                                                     {
-                                                                        case GraphicAPIType.Avalonia:
-                                                                        case GraphicAPIType.SkiaSharp:
+                                                                        case CHtmlGraphicAPIType.Avalonia:
+                                                                        case CHtmlGraphicAPIType.SkiaSharp:
                                                                             SkiaSharp.SKBitmap __skBitmap = null;
                                                                             if (this.___imageRawConcurrentDictionaryForSKBitmap.TryGetValue(__srcFullUrl, out SKBitmap ___skBitmap))
                                                                             {
@@ -12492,7 +12538,7 @@ namespace MultiHtmlCraft.Core
                 if (___tagElement != null && ___tagElement.___elementTagType == CHtmlElementType.IMG)
                 {
 #if WINDOWS
-                    if (commonHTML.GraphicApiType == GraphicAPIType.WinformsGDI)
+                    if (commonHTML.GraphicApiType == CHtmlGraphicAPIType.WinformsGDI)
                     {
                         try
                         {
@@ -12531,8 +12577,8 @@ namespace MultiHtmlCraft.Core
                     switch (commonHTML.GraphicApiType)
                     {
 
-                        case GraphicAPIType.Avalonia:
-                        case GraphicAPIType.SkiaSharp:
+                        case CHtmlGraphicAPIType.Avalonia:
+                        case CHtmlGraphicAPIType.SkiaSharp:
                             try
                             {
                                 SKBitmap skBitmap = null;
@@ -14096,9 +14142,9 @@ namespace MultiHtmlCraft.Core
                 __textFormat = this.___HtmlGraphics.StandardStringFormat;
             }
 
-            if (this.___HtmlGraphics != null && this.___HtmlGraphics.Graphic != null)
+            if (this.___HtmlGraphics != null && this.___HtmlGraphics.CHtmlGraphicContainerGraphics != null)
             {
-                grMeasure = this.___HtmlGraphics.Graphic;
+                grMeasure = this.___HtmlGraphics.CHtmlGraphicContainerGraphics;
             }
             else
             {
@@ -14120,7 +14166,7 @@ namespace MultiHtmlCraft.Core
                 __textFormat = null;
                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                 {
-                    commonLog.LogEntry("Graphic Information _textFormat or font is  null. abort");
+                    commonLog.LogEntry("CHtmlGraphicContainerGraphics Information _textFormat or font is  null. abort");
                 }
                 goto MeasureDone;
             }
@@ -17353,8 +17399,8 @@ namespace MultiHtmlCraft.Core
 #else
             switch(commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.Avalonia:
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.Avalonia:
+                case CHtmlGraphicAPIType.SkiaSharp:
                     SkiaSharp.SKBitmap? ___bitmap = null;
                     switch(documentImageObject)
                     {
@@ -18047,8 +18093,8 @@ namespace MultiHtmlCraft.Core
 #else
             switch (commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.SkiaSharp:
-                case GraphicAPIType.Avalonia:
+                case CHtmlGraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.Avalonia:
                     if (___tagElement.___ManagedControlWeakReference != null)
                     {
                         var AvaloniaControl = ___tagElement.___ManagedControlWeakReference.Target as Avalonia.Controls.Control;
@@ -27712,20 +27758,20 @@ namespace MultiHtmlCraft.Core
                 if (___tagElement.___HasOverflowHidden == true && ___tagElement.___StyleOverFlowSize != SizeF.Empty)
                 {
 #if WINDOWS
-                    graphicState = _grCon.Graphic.Save();
+                    graphicState = _grCon.CHtmlGraphicContainerGraphics.Save();
                     RectangleF clipRect = commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen());
                     clipRect.Size = ___tagElement.___StyleOverFlowSize;
-                    _grCon.Graphic.SetClip(clipRect, System.Drawing.Drawing2D.CombineMode.Replace);
+                    _grCon.CHtmlGraphicContainerGraphics.SetClip(clipRect, System.Drawing.Drawing2D.CombineMode.Replace);
 #else
                         switch(commonHTML.GraphicApiType)
                         {
-                            case GraphicAPIType.Avalonia:
+                            case CHtmlGraphicAPIType.Avalonia:
                                 if (_grCon.AvaloniaDrawingContext != null)
                                 {
                                     avaloniaStates = _grCon.AvaloniaDrawingContext.PushClip(commonTypeConverter.convertRectangleFToAvaloniaRect(commonTypeConverter.ToRectangleF(___tagElement.GetElementBoundsOnScreen())));
                                 }
                                 break;
-                            case GraphicAPIType.SkiaSharp:
+                            case CHtmlGraphicAPIType.SkiaSharp:
                                 if (_grCon.SkiaCanvas != null)
                                 {
                                     skiaSaveCount = _grCon.SkiaCanvas.Save();
@@ -27824,7 +27870,7 @@ namespace MultiHtmlCraft.Core
 
                         if (graphicState != null)
                         {
-                            _grCon.Graphic.Restore(graphicState);
+                            _grCon.CHtmlGraphicContainerGraphics.Restore(graphicState);
                         }
                         if (avaloniaStates != null)
                         {
@@ -27939,15 +27985,15 @@ namespace MultiHtmlCraft.Core
                                 {
 
 #if WINDOWS
-                                    if (_grCon.Graphic != null)
+                                    if (_grCon.CHtmlGraphicContainerGraphics != null)
                                     {
-                                        _grCon.Graphic.DrawImageUnscaled(___tagElement.___CanvasGdiImage, Rectangle.Round(elementBounds));
+                                        _grCon.CHtmlGraphicContainerGraphics.DrawImageUnscaled(___tagElement.___CanvasGdiImage, Rectangle.Round(elementBounds));
                                     }
 #else
 
                                         switch(___tagElement.___canvasContextCurrent2D.___CanvasGraphicAPIType)
                                         {
-                                            case GraphicAPIType.Avalonia:
+                                            case CHtmlGraphicAPIType.Avalonia:
                                                 {
                                                     var skBitmap = ___tagElement.___CanvasSkiaBitmap;
                                                     if (skBitmap != null && _grCon.AvaloniaDrawingContext != null)
@@ -27962,7 +28008,7 @@ namespace MultiHtmlCraft.Core
                                                     }
                                                     break;
                                                 }
-                                            case GraphicAPIType.SkiaSharp:
+                                            case CHtmlGraphicAPIType.SkiaSharp:
                                                 {
                                                     var skiaBitmap = ___tagElement.___CanvasSkiaBitmap;
                                                     if (skiaBitmap != null && _grCon.SkiaCanvas != null)
@@ -28020,15 +28066,15 @@ namespace MultiHtmlCraft.Core
                     //System.Drawing.Drawing2D.LinearGradienBrush pluginBrush = new System.Drawing.Drawing2D.LinearGradientBrush(new Rectangle(0,0, 30, 30), Color.Gray, Color.Gainsboro, System.Drawing.Drawing2D.LinearGradientMode.BackwardDiagonal);
                     //pluginBrush.WrapMode = System.Drawing.Drawing2D.WrapMode.TileFlipXY;
                     System.Drawing.Drawing2D.HatchBrush pluginBrush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.Trellis, Color.Gainsboro, Color.White);
-                    if (_grCon.Graphic != null)
+                    if (_grCon.CHtmlGraphicContainerGraphics != null)
                     {
-                        _grCon.Graphic.FillRectangle(pluginBrush, elementBounds);
+                        _grCon.CHtmlGraphicContainerGraphics.FillRectangle(pluginBrush, elementBounds);
                     }
                     if (elementBounds.X > 16 && elementBounds.Y > 16)
                     {
-                        if (_grCon.ImageNA != null && _grCon.Graphic != null)
+                        if (_grCon.ImageNA != null && _grCon.CHtmlGraphicContainerGraphics != null)
                         {
-                            _grCon.Graphic.DrawImageUnscaled(_grCon.ImageNA, (int)elementBounds.X, (int)elementBounds.Y);
+                            _grCon.CHtmlGraphicContainerGraphics.DrawImageUnscaled(_grCon.ImageNA, (int)elementBounds.X, (int)elementBounds.Y);
                         }
                     }
                     pluginBrush.Dispose();
@@ -28055,7 +28101,7 @@ namespace MultiHtmlCraft.Core
                 try
                 {
                     /*
-                    _grCon.Graphic.DrawLine(penBorderLeft, elementBounds.X, elementBounds.Y, elementBounds.X, elementBounds.Y + elementBounds.Height);
+                    _grCon.CHtmlGraphicContainerGraphics.DrawLine(penBorderLeft, elementBounds.X, elementBounds.Y, elementBounds.X, elementBounds.Y + elementBounds.Height);
                     */
                 }
                 catch (Exception ex)
@@ -28146,7 +28192,7 @@ namespace MultiHtmlCraft.Core
                         penHR.EndCap = System.Drawing.Drawing2D.LineCap.Round;
                         try
                         {
-                            //_grCon.Graphic.DrawLine(penHR, elementBounds.X + 10, elementBounds.Y + (elementBounds.Height / 2), elementBounds.Width + elementBounds.X - 20, elementBounds.Y + (elementBounds.Height / 2));
+                            //_grCon.CHtmlGraphicContainerGraphics.DrawLine(penHR, elementBounds.X + 10, elementBounds.Y + (elementBounds.Height / 2), elementBounds.Width + elementBounds.X - 20, elementBounds.Y + (elementBounds.Height / 2));
                         }
                         catch (Exception ex)
                         {
@@ -28180,10 +28226,10 @@ namespace MultiHtmlCraft.Core
 
                 try
                 {
-                    if (_grCon.Graphic != null)
+                    if (_grCon.CHtmlGraphicContainerGraphics != null)
                     {
                         Pen __penGray = new Pen(Color.DimGray, 0.5F);
-                        _grCon.Graphic.DrawRectangle(__penGray, Rectangle.Round(elementBounds));
+                        _grCon.CHtmlGraphicContainerGraphics.DrawRectangle(__penGray, Rectangle.Round(elementBounds));
                         __penGray.Dispose();
                         __penGray = null;
 
@@ -28192,10 +28238,10 @@ namespace MultiHtmlCraft.Core
                         sfRight.Alignment = System.Drawing.StringAlignment.Far;
                         Font fntTagInfo = new Font(FontFamily.GenericSansSerif, 7f);
                         System.Drawing.SolidBrush brushGray = new SolidBrush(Color.Gray);
-                        _grCon.Graphic.DrawString(_Text, fntTagInfo, brushGray, elementBounds.X + elementBounds.Width, elementBounds.Y, sfRight);
+                        _grCon.CHtmlGraphicContainerGraphics.DrawString(_Text, fntTagInfo, brushGray, elementBounds.X + elementBounds.Width, elementBounds.Y, sfRight);
                         brushGray.Dispose();
                         fntTagInfo.Dispose();
-                        //_grCon.Graphic.DrawRectangle(penBorder, elementBounds);
+                        //_grCon.CHtmlGraphicContainerGraphics.DrawRectangle(penBorder, elementBounds);
                         sfRight.Dispose();
                     }
                 }
@@ -28244,15 +28290,15 @@ namespace MultiHtmlCraft.Core
                                         {
 #if WINDOWS
                                             ___multiBrush = new System.Drawing.SolidBrush(commonTypeConverter.convertColorSpecToGDIDrawingColor(___multiData.backgroundColorComputedValue));
-                                            if (_grCon.Graphic != null)
+                                            if (_grCon.CHtmlGraphicContainerGraphics != null)
                                             {
-                                                _grCon.Graphic.FillRectangle(___multiBrush, elementBounds);
+                                                _grCon.CHtmlGraphicContainerGraphics.FillRectangle(___multiBrush, elementBounds);
                                             }
 #else
                                             switch(_grCon.graphicApiType)
                                             {
-                                                case GraphicAPIType.Avalonia:
-                                                case GraphicAPIType.SkiaSharp:
+                                                case CHtmlGraphicAPIType.Avalonia:
+                                                case CHtmlGraphicAPIType.SkiaSharp:
                                                      var avaloniaColor = commonTypeConverter.convertColorSpecToAvaloniaColor(___multiData.backgroundColorComputedValue);
                                                     var ___multiBrushAvalonia = new Avalonia.Media.SolidColorBrush(avaloniaColor);
                                                     _grCon.AvaloniaDrawingContext.FillRectangle(___multiBrushAvalonia, commonTypeConverter.convertRectangleFToAvaloniaRect(elementBounds));
@@ -28265,7 +28311,7 @@ namespace MultiHtmlCraft.Core
                                         else
                                         {
 #if WINDOWS
-                                            // Border-Radius one of values is positive. Use Graphic Path
+                                            // Border-Radius one of values is positive. Use CHtmlGraphicContainerGraphics Path
                                             System.Drawing.Drawing2D.GraphicsPath gfxPath = null;
                                             try
                                             {
@@ -28310,9 +28356,9 @@ namespace MultiHtmlCraft.Core
                                                 }
                                                 gfxPath.CloseAllFigures();
                                                 ___multiBrush = new SolidBrush(commonTypeConverter.convertColorSpecToGDIDrawingColor(___multiData.backgroundColorComputedValue));
-                                                if (_grCon.Graphic != null)
+                                                if (_grCon.CHtmlGraphicContainerGraphics != null)
                                                 {
-                                                    _grCon.Graphic.FillPath(___multiBrush, gfxPath);
+                                                    _grCon.CHtmlGraphicContainerGraphics.FillPath(___multiBrush, gfxPath);
                                                 }
                                                 gfxPath.Dispose();
                                                 gfxPath = null;
@@ -28342,8 +28388,8 @@ namespace MultiHtmlCraft.Core
 #else
                                     switch(commonHTML.GraphicApiType)
                                     {
-                                        case GraphicAPIType.Avalonia:
-                                        case GraphicAPIType.SkiaSharp:
+                                        case CHtmlGraphicAPIType.Avalonia:
+                                        case CHtmlGraphicAPIType.SkiaSharp:
                                             if (_grCon?.SkiaCanvas != null)
                                             {
                                                 var skCanvas = _grCon.SkiaCanvas;
@@ -28591,8 +28637,8 @@ namespace MultiHtmlCraft.Core
 #else
                                                     switch(commonHTML.GraphicApiType)
                                                     {
-                                                        case GraphicAPIType.Avalonia:
-                                                        case GraphicAPIType.SkiaSharp:
+                                                        case CHtmlGraphicAPIType.Avalonia:
+                                                        case CHtmlGraphicAPIType.SkiaSharp:
                                                         if (this.___imageRawConcurrentDictionaryForSKBitmap.TryGetValue(___multiData.background_image_fullUrl, out var skiaCssBackgroundImageBitmap) == true)
                                                         {
                                                             if (skiaCssBackgroundImageBitmap != null)
@@ -28628,7 +28674,7 @@ namespace MultiHtmlCraft.Core
                                         {
 #if WINDOWS
 
-                                            if (___multiData != null && _grCon.Graphic != null)
+                                            if (___multiData != null && _grCon.CHtmlGraphicContainerGraphics != null)
                                             {
                                                 var scaledImage = ___multiData.backgroundImage_WeakReference.Target as  System.Drawing.Image;
                                                 var textureBrush = new System.Drawing.TextureBrush(scaledImage, System.Drawing.Drawing2D.WrapMode.Tile);
@@ -28647,14 +28693,14 @@ namespace MultiHtmlCraft.Core
                                                     textureBrush.TranslateTransform(elementBounds.X - ___imageCSSBackgroundPosition.X, elementBounds.Y - ___imageCSSBackgroundPosition.Y);
                                                     */
                                                 
-                                                _grCon.Graphic.FillRectangle(textureBrush, elementBounds);
+                                                _grCon.CHtmlGraphicContainerGraphics.FillRectangle(textureBrush, elementBounds);
                                             }
                                         }
 #else
                                             switch (commonHTML.GraphicApiType)
                                         {
-                                            case GraphicAPIType.Avalonia:
-                                            case GraphicAPIType.SkiaSharp:
+                                            case CHtmlGraphicAPIType.Avalonia:
+                                            case CHtmlGraphicAPIType.SkiaSharp:
                                                 
                                                 if (___multiData != null && _grCon.SkiaCanvas != null && ___multiData.backgroundImage_WeakReference != null)
                                                 {
@@ -28694,9 +28740,9 @@ namespace MultiHtmlCraft.Core
                                         }
                                         else
                                         {
-                                            if (___multiBrush != null && _grCon.Graphic != null)
+                                            if (___multiBrush != null && _grCon.CHtmlGraphicContainerGraphics != null)
                                             {
-                                                _grCon.Graphic.FillRectangle(___multiBrush, new Rectangle((int)elementBounds.X - (int)___imageCSSBackgroundPosition.X, (int)elementBounds.Y - (int)___imageCSSBackgroundPosition.Y, (int)___imageCSSBackgroundSize.Width, (int)___imageCSSBackgroundSize.Height));
+                                                _grCon.CHtmlGraphicContainerGraphics.FillRectangle(___multiBrush, new Rectangle((int)elementBounds.X - (int)___imageCSSBackgroundPosition.X, (int)elementBounds.Y - (int)___imageCSSBackgroundPosition.Y, (int)___imageCSSBackgroundSize.Width, (int)___imageCSSBackgroundSize.Height));
                                             }
                                         }
                                         break;
@@ -28704,23 +28750,23 @@ namespace MultiHtmlCraft.Core
                                     case CSSImageRepeatType.norepeat:
                                         if (___multiData.ImageType == CSSMultipleImageDataType.Image)
                                         {
-                                            if (___multiImage != null && _grCon.Graphic != null)
+                                            if (___multiImage != null && _grCon.CHtmlGraphicContainerGraphics != null)
                                             {
                                                 if (___multiImage.Width == elementBounds.Width && ___multiImage.Height == elementBounds.Height)
                                                 {
-                                                    _grCon.Graphic.DrawImage(___multiImage, elementBounds, new RectangleF(0 - (int)___imageCSSBackgroundPosition.X, 0 - (int)___imageCSSBackgroundPosition.Y, elementBounds.Width, elementBounds.Height), GraphicsUnit.Pixel);
+                                                    _grCon.CHtmlGraphicContainerGraphics.DrawImage(___multiImage, elementBounds, new RectangleF(0 - (int)___imageCSSBackgroundPosition.X, 0 - (int)___imageCSSBackgroundPosition.Y, elementBounds.Width, elementBounds.Height), GraphicsUnit.Pixel);
                                                 }
                                                 else
                                                 {
-                                                    _grCon.Graphic.DrawImage(___multiImage, elementBounds, new RectangleF(0 - (int)___imageCSSBackgroundPosition.X, 0 - (int)___imageCSSBackgroundPosition.Y, elementBounds.Width, elementBounds.Height), GraphicsUnit.Pixel);
+                                                    _grCon.CHtmlGraphicContainerGraphics.DrawImage(___multiImage, elementBounds, new RectangleF(0 - (int)___imageCSSBackgroundPosition.X, 0 - (int)___imageCSSBackgroundPosition.Y, elementBounds.Width, elementBounds.Height), GraphicsUnit.Pixel);
                                                 }
                                             }
                                         }
                                         else
                                         {
-                                            if (___multiBrush != null && _grCon.Graphic != null)
+                                            if (___multiBrush != null && _grCon.CHtmlGraphicContainerGraphics != null)
                                             {
-                                                _grCon.Graphic.FillRectangle(___multiBrush, new Rectangle((int)elementBounds.X - (int)___imageCSSBackgroundPosition.X, (int)elementBounds.Y - (int)___imageCSSBackgroundPosition.Y, (int)___imageCSSBackgroundSize.Width, (int)___imageCSSBackgroundSize.Height));
+                                                _grCon.CHtmlGraphicContainerGraphics.FillRectangle(___multiBrush, new Rectangle((int)elementBounds.X - (int)___imageCSSBackgroundPosition.X, (int)elementBounds.Y - (int)___imageCSSBackgroundPosition.Y, (int)___imageCSSBackgroundSize.Width, (int)___imageCSSBackgroundSize.Height));
                                             }
                                         }
                                         break;
@@ -28738,9 +28784,9 @@ namespace MultiHtmlCraft.Core
                                         }
                                         else
                                         {
-                                            if (___multiBrush != null && _grCon.Graphic != null)
+                                            if (___multiBrush != null && _grCon.CHtmlGraphicContainerGraphics != null)
                                             {
-                                                _grCon.Graphic.FillRectangle(___multiBrush, new Rectangle((int)elementBounds.X - (int)___imageCSSBackgroundPosition.X, (int)elementBounds.Y - (int)___imageCSSBackgroundPosition.Y, (int)___imageCSSBackgroundSize.Width, (int)___imageCSSBackgroundSize.Height));
+                                                _grCon.CHtmlGraphicContainerGraphics.FillRectangle(___multiBrush, new Rectangle((int)elementBounds.X - (int)___imageCSSBackgroundPosition.X, (int)elementBounds.Y - (int)___imageCSSBackgroundPosition.Y, (int)___imageCSSBackgroundSize.Width, (int)___imageCSSBackgroundSize.Height));
                                             }
                                         }
 
@@ -28762,9 +28808,9 @@ namespace MultiHtmlCraft.Core
                                         }
                                         else
                                         {
-                                            if (___multiBrush != null && _grCon.Graphic != null)
+                                            if (___multiBrush != null && _grCon.CHtmlGraphicContainerGraphics != null)
                                             {
-                                                _grCon.Graphic.FillRectangle(___multiBrush, new Rectangle((int)elementBounds.X - (int)___imageCSSBackgroundPosition.X, (int)elementBounds.Y - (int)___imageCSSBackgroundPosition.Y, (int)___imageCSSBackgroundSize.Width, (int)___imageCSSBackgroundSize.Height));
+                                                _grCon.CHtmlGraphicContainerGraphics.FillRectangle(___multiBrush, new Rectangle((int)elementBounds.X - (int)___imageCSSBackgroundPosition.X, (int)elementBounds.Y - (int)___imageCSSBackgroundPosition.Y, (int)___imageCSSBackgroundSize.Width, (int)___imageCSSBackgroundSize.Height));
                                             }
                                         }
 
@@ -29048,10 +29094,10 @@ namespace MultiHtmlCraft.Core
                             // ====================================================================================
                             if (___tagElement.___elementTagType == CHtmlElementType.IMG || ___tagElement.___elementTagType == CHtmlElementType.INPUT)
                             {
-                                if (_grCon.ImageNA != null && styleSelected.___IsBackgroundColorSpecified == true && _grCon.Graphic != null)
+                                if (_grCon.ImageNA != null && styleSelected.___IsBackgroundColorSpecified == true && _grCon.CHtmlGraphicContainerGraphics != null)
                                 {
                                     SolidBrush eraseBrush = new SolidBrush(commonTypeConverter.convertColorSpecToGDIDrawingColor(styleSelected.___BackgroundSysColor));
-                                    _grCon.Graphic.FillRectangle(eraseBrush, elementBounds.X, elementBounds.Y, _grCon.ImageNA.Width, _grCon.ImageNA.Height);
+                                    _grCon.CHtmlGraphicContainerGraphics.FillRectangle(eraseBrush, elementBounds.X, elementBounds.Y, _grCon.ImageNA.Width, _grCon.ImageNA.Height);
 
                                     eraseBrush.Dispose();
                                     eraseBrush = null;
@@ -29084,11 +29130,11 @@ namespace MultiHtmlCraft.Core
                                         Rectangle imgRect = Rectangle.Round(elementBounds);
                                         if (imgRect.Size.Equals(__img.Size) == false)
                                         {
-                                            _grCon.Graphic.DrawImage(__img, Rectangle.Round(elementBounds), imgRectangle, System.Drawing.GraphicsUnit.Pixel);
+                                            _grCon.CHtmlGraphicContainerGraphics.DrawImage(__img, Rectangle.Round(elementBounds), imgRectangle, System.Drawing.GraphicsUnit.Pixel);
                                         }
                                         else
                                         {
-                                            _grCon.Graphic.DrawImageUnscaled(__img, imgRect);
+                                            _grCon.CHtmlGraphicContainerGraphics.DrawImageUnscaled(__img, imgRect);
                                         }
 
                                     }
@@ -29111,7 +29157,7 @@ namespace MultiHtmlCraft.Core
                                     }
 
 
-                                    _grCon.Graphic.DrawImage(__img, Rectangle.Round(elementBounds), imgRectangle, System.Drawing.GraphicsUnit.Pixel);
+                                    _grCon.CHtmlGraphicContainerGraphics.DrawImage(__img, Rectangle.Round(elementBounds), imgRectangle, System.Drawing.GraphicsUnit.Pixel);
                                     goto DrawImageDone;
 
                                 }
@@ -29165,8 +29211,8 @@ namespace MultiHtmlCraft.Core
 #else
                     switch (commonHTML.GraphicApiType)
                 {
-                    case GraphicAPIType.SkiaSharp:
-                    case GraphicAPIType.Avalonia:
+                    case CHtmlGraphicAPIType.SkiaSharp:
+                    case CHtmlGraphicAPIType.Avalonia:
                        SKBitmap? skBitmap = null;
                        if( ___tagElement.___style.___IMG_SkiaBitmapWeakReference != null)
                        {
@@ -29193,7 +29239,7 @@ namespace MultiHtmlCraft.Core
                             SKRect sourceRect = new SKRect(0, 0, skBitmap.Width, skBitmap.Height);
                                 switch (commonHTML.GraphicApiType)
                                 {
-                                    case GraphicAPIType.Avalonia:
+                                    case CHtmlGraphicAPIType.Avalonia:
                                         {
                                             
                                             if (skBitmap != null && _grCon.AvaloniaDrawingContext != null)
@@ -29208,7 +29254,7 @@ namespace MultiHtmlCraft.Core
                                             }
                                             break;
                                         }
-                                    case GraphicAPIType.SkiaSharp:
+                                    case CHtmlGraphicAPIType.SkiaSharp:
                                         {
                                             var skiaBitmap = ___tagElement.___CanvasSkiaBitmap;
                                             if (skiaBitmap != null && _grCon.SkiaCanvas != null)
@@ -29262,16 +29308,16 @@ namespace MultiHtmlCraft.Core
                                         altTextBounds.Inflate(-10, 0);
                                         System.Drawing.SolidBrush brushGray = new SolidBrush(Color.Gray);
 #if WINDOWS
-                                        _grCon.Graphic.DrawString(strAlt, commonTypeConverter.convertFontSpecToGDIFont(_grCon.FontSpec), brushGray, altTextBounds);
+                                        _grCon.CHtmlGraphicContainerGraphics.DrawString(strAlt, commonTypeConverter.convertFontSpecToGDIFont(_grCon.FontSpec), brushGray, altTextBounds);
 #endif
                                         brushGray.Dispose();
                                     }
                                 }
 
                             }
-                            _grCon.Graphic.DrawRectangle(penNABorder, (int)elementBounds.X, (int)elementBounds.Y, (int)elementBounds.Width, (int)elementBounds.Height);
+                            _grCon.CHtmlGraphicContainerGraphics.DrawRectangle(penNABorder, (int)elementBounds.X, (int)elementBounds.Y, (int)elementBounds.Width, (int)elementBounds.Height);
                             penNABorder.Dispose();
-                            _grCon.Graphic.DrawImageUnscaled(_grCon.ImageNA, (int)elementBounds.X, (int)elementBounds.Y);
+                            _grCon.CHtmlGraphicContainerGraphics.DrawImageUnscaled(_grCon.ImageNA, (int)elementBounds.X, (int)elementBounds.Y);
                             if (penNABorder != null)
                             {
                                 penNABorder.Dispose();
@@ -29331,8 +29377,8 @@ namespace MultiHtmlCraft.Core
                             if (itemSize.Width > 0 && itemSize.Height > 0)
                             {
                                 // NDP 1.1 Has bug do not use unsalled mode
-                                //_grCon.Graphic.DrawImageUnscaled(__imgListItem, (int)elementBounds.X, (int)elementBounds.Y, itemSize.Width, itemSize.Height);
-                                _grCon.Graphic.DrawImage(__imgListItem, (int)elementBounds.X, (int)elementBounds.Y, itemSize.Width, itemSize.Height);
+                                //_grCon.CHtmlGraphicContainerGraphics.DrawImageUnscaled(__imgListItem, (int)elementBounds.X, (int)elementBounds.Y, itemSize.Width, itemSize.Height);
+                                _grCon.CHtmlGraphicContainerGraphics.DrawImage(__imgListItem, (int)elementBounds.X, (int)elementBounds.Y, itemSize.Width, itemSize.Height);
 
                             }
                             if (IsImageSearchedOutofList == true)
@@ -29357,7 +29403,7 @@ namespace MultiHtmlCraft.Core
 
             if (SkipText == false)
             {
-                //_grCon.Graphic.DrawString(___textElement.innerText, _grCon.FontSpec, Brushes.Black, elementBounds);
+                //_grCon.CHtmlGraphicContainerGraphics.DrawString(___textElement.innerText, _grCon.FontSpec, Brushes.Black, elementBounds);
             }
             //this.MeasureAndDrawChildSentences(___textElement, 1000, true,ref _grCon);
 
@@ -35286,7 +35332,7 @@ namespace MultiHtmlCraft.Core
                 switch (_grCon.graphicApiType)
                 {
 #if WINDOWS
-                    case GraphicAPIType.WinformsGDI:
+                    case CHtmlGraphicAPIType.WinformsGDI:
                         Font fnt = null;
                         Color fntColor = Color.Black;
                         SolidBrush backBrush = null;
@@ -35529,7 +35575,7 @@ namespace MultiHtmlCraft.Core
                                     {
                                         if(elementBounds.Width > 0 && elementBounds.Height > 0)
                                         {
-                                            _grCon.Graphic.FillRectangle(backBrush,elementBounds);
+                                            _grCon.CHtmlGraphicContainerGraphics.FillRectangle(backBrush,elementBounds);
                                         }
                                     }
                                     */
@@ -35556,24 +35602,24 @@ namespace MultiHtmlCraft.Core
                                                 {
                                                     if (backBrush != null)
                                                     {
-                                                        _grCon.Graphic.FillRectangle(backBrush, elementBounds);
+                                                        _grCon.CHtmlGraphicContainerGraphics.FillRectangle(backBrush, elementBounds);
                                                     }
                                                 }
 
-                                                _grCon.Graphic.DrawString(drawingElement.DrawingText, fnt, fntBrush, elementBounds, _grCon.StandardStringFormat);
+                                                _grCon.CHtmlGraphicContainerGraphics.DrawString(drawingElement.DrawingText, fnt, fntBrush, elementBounds, _grCon.StandardStringFormat);
                                                 if (___IsTextUnderLineRequied == true)
                                                 {
-                                                    _grCon.Graphic.DrawLine(___penUnderLine, new Point((int)elementBounds.X, (int)(elementBounds.Y + elementBounds.Height)), new Point((int)(elementBounds.X + elementBounds.Width), (int)(elementBounds.Y + elementBounds.Height)));
+                                                    _grCon.CHtmlGraphicContainerGraphics.DrawLine(___penUnderLine, new Point((int)elementBounds.X, (int)(elementBounds.Y + elementBounds.Height)), new Point((int)(elementBounds.X + elementBounds.Width), (int)(elementBounds.Y + elementBounds.Height)));
                                                 }
                                             }
                                             else
                                             {
 
 
-                                                System.Windows.Forms.TextRenderer.DrawText(_grCon.Graphic, drawingElement.DrawingText, fnt, new Point((int)elementBounds.X, (int)elementBounds.Y), fntColor, ___FontBackColor, 0);
+                                                System.Windows.Forms.TextRenderer.DrawText(_grCon.CHtmlGraphicContainerGraphics, drawingElement.DrawingText, fnt, new Point((int)elementBounds.X, (int)elementBounds.Y), fntColor, ___FontBackColor, 0);
                                                 if (___IsTextUnderLineRequied == true)
                                                 {
-                                                    _grCon.Graphic.DrawLine(___penUnderLine, new Point((int)elementBounds.X, (int)(elementBounds.Y + elementBounds.Height)), new Point((int)(elementBounds.X + elementBounds.Width), (int)(elementBounds.Y + elementBounds.Height)));
+                                                    _grCon.CHtmlGraphicContainerGraphics.DrawLine(___penUnderLine, new Point((int)elementBounds.X, (int)(elementBounds.Y + elementBounds.Height)), new Point((int)(elementBounds.X + elementBounds.Width), (int)(elementBounds.Y + elementBounds.Height)));
                                                 }
 
                                             }
@@ -35651,10 +35697,10 @@ namespace MultiHtmlCraft.Core
                         }
                         break;
 #endif
-                    case GraphicAPIType.WPF:
+                    case CHtmlGraphicAPIType.WPF:
                         break;
-                    case GraphicAPIType.SkiaSharp:
-                    case GraphicAPIType.Avalonia:
+                    case CHtmlGraphicAPIType.SkiaSharp:
+                    case CHtmlGraphicAPIType.Avalonia:
                         {
                             // Avalonia/SkiaSharp implementation equivalent to WinformsGDI case
                             SKPaint skPaint = null;
@@ -35847,7 +35893,7 @@ namespace MultiHtmlCraft.Core
                                             // Draw background if needed
                                             if (__WillPaintBackGround == true && skBackgroundPaint != null)
                                             {
-                                                if (_grCon.graphicApiType == GraphicAPIType.Avalonia && _grCon.AvaloniaDrawingContext != null)
+                                                if (_grCon.graphicApiType == CHtmlGraphicAPIType.Avalonia && _grCon.AvaloniaDrawingContext != null)
                                                 {
                                                     var avaloniaColor = commonTypeConverter.convertColorSpecToAvaloniaColor(skiaBackgroundColor);
                                                     var avaloniaBrush = new Avalonia.Media.SolidColorBrush(avaloniaColor);
@@ -35864,7 +35910,7 @@ namespace MultiHtmlCraft.Core
                                             }
 
                                             // Draw text
-                                            if (_grCon.graphicApiType == GraphicAPIType.Avalonia && _grCon.AvaloniaDrawingContext != null)
+                                            if (_grCon.graphicApiType == CHtmlGraphicAPIType.Avalonia && _grCon.AvaloniaDrawingContext != null)
                                             {
                                                 // For Avalonia, we need to create FormattedText properly
                                                 var avaloniaColor = commonTypeConverter.convertColorSpecToAvaloniaColor(skiaFontColor);
@@ -35945,7 +35991,7 @@ namespace MultiHtmlCraft.Core
                                             // Draw underline if needed
                                             if (skiaIsTextUnderLineRequired && skUnderLinePaint != null)
                                             {
-                                                if (_grCon.graphicApiType == GraphicAPIType.Avalonia && _grCon.AvaloniaDrawingContext != null)
+                                                if (_grCon.graphicApiType == CHtmlGraphicAPIType.Avalonia && _grCon.AvaloniaDrawingContext != null)
                                                 {
                                                     var avaloniaColor = commonTypeConverter.convertColorSpecToAvaloniaColor(skiaFontColor);
                                                     var pen = new Avalonia.Media.Pen(new Avalonia.Media.SolidColorBrush(avaloniaColor), 1);

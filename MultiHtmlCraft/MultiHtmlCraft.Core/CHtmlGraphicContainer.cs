@@ -24,7 +24,11 @@ namespace MultiHtmlCraft.Core
     {
 
 
-        public Graphics Graphic = null;
+
+
+public Graphics? CHtmlGraphicContainerGraphics = null;
+
+
         public FontSpec? FontSpec = null;
         public System.Drawing.StringFormat StandardStringFormat = null;
         private Bitmap ___bitmapForGDI = null;
@@ -32,6 +36,7 @@ namespace MultiHtmlCraft.Core
         // Avalonia/SkiaSharp
         public SKCanvas SkiaCanvas = null;
         public SKPaint SkiaPaint = null;
+        private SKBitmap ___skiaBitmap = null;
 
         public ColorSpec BackgroundColor;
         public ColorSpec ForegroundColor;
@@ -51,7 +56,7 @@ namespace MultiHtmlCraft.Core
         public RectangleFSpec ScreenMaximunBounds = RectangleFSpec.Empty;
         public int CurrentElementDepth = 0;
         public bool IsHoverPaintMode = false;
-        public GraphicAPIType PlatformGraphicAPIType = GraphicAPIType.Unknown;
+        public CHtmlGraphicAPIType PlatformGraphicAPIType = CHtmlGraphicAPIType.Unknown;
         public Avalonia.Media.DrawingContext? AvaloniaDrawingContext = null;
 
         public CHtmlGraphicContainer() : this(commonHTML.GraphicApiType)
@@ -59,99 +64,88 @@ namespace MultiHtmlCraft.Core
 
         }
 
-        public CHtmlGraphicContainer(GraphicAPIType graphicAPIType)
+        public CHtmlGraphicContainer(CHtmlGraphicAPIType graphicAPIType)
         {
-            if (graphicAPIType != GraphicAPIType.Unknown && commonHTML.GraphicApiType != graphicAPIType)
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
-                commonHTML.GraphicApiType = graphicAPIType;
-                PlatformGraphicAPIType = graphicAPIType;
+                commonLog.LogEntry("CHtmlGraphicContainer", $"Initializing with CHtmlGraphicAPIType: {graphicAPIType}");
+
             }
-            else if (graphicAPIType != GraphicAPIType.Unknown)
-            {
-                PlatformGraphicAPIType = graphicAPIType;
-            }
+
+            commonHTML.GraphicApiType = graphicAPIType;
+            PlatformGraphicAPIType = graphicAPIType;
 
 
 
             switch (commonHTML.GraphicApiType)
             {
 
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.SkiaSharp:
                     {
-                        SKBitmap skBitmap = new SKBitmap();
-                        this.SkiaCanvas = new SKCanvas(skBitmap);
+                        this.___skiaBitmap  =  new SKBitmap();
+                        this.SkiaCanvas = new SKCanvas(this.___skiaBitmap);
                         this.SkiaPaint = new SKPaint();
                     }
                     break;
-                case GraphicAPIType.Avalonia:
+                case CHtmlGraphicAPIType.Avalonia:
                     {
-                        // Avalonia
-                        SKBitmap skBitmap = new SKBitmap();
-                        this.SkiaCanvas = new SKCanvas(skBitmap);
-                        this.SkiaPaint = new SKPaint();
-                        // Provide a minimal System.Drawing.Graphics fallback so existing
-                        // GDI-based drawing code paths won't throw NullReferenceException.
-                        try
+
+                        this.FontSpec = new FontSpec(
+                            "sans-serif",
+                            9f,
+                            FontStyleSpec.Regular);
+
+                        this.StandardStringFormat = null;
+       
+                        
+
+                        this.___skiaBitmap = new SKBitmap(1, 1);
+                        this.SkiaCanvas = new SKCanvas(this.___skiaBitmap);
+                        this.SkiaPaint = new SKPaint
                         {
-                            if (___bitmapForGDI == null)
-                                ___bitmapForGDI = new Bitmap(1, 1);
-                            if (this.Graphic == null)
-                                this.AvaloniaDrawingContext = null; // No direct mapping; set to null or provide a mock if needed   
-                            if (this.FontSpec == null)
-                            {
-                                try
-                                {
-                                    var df = SystemFonts.DefaultFont;
-                                    var style = FontStyleSpec.Regular;
-                                    if ((df.Style & System.Drawing.FontStyle.Bold) != 0 && (df.Style & System.Drawing.FontStyle.Italic) != 0)
-                                        style = FontStyleSpec.BoldItalic;
-                                    else if ((df.Style & System.Drawing.FontStyle.Bold) != 0)
-                                        style = FontStyleSpec.Bold;
-                                    else if ((df.Style & System.Drawing.FontStyle.Italic) != 0)
-                                        style = FontStyleSpec.Italic;
-                                    this.FontSpec = new FontSpec(df.FontFamily.Name, df.Size, style);
-                                }
-                                catch
-                                {
-                                    this.FontSpec = new FontSpec("Segoe UI", 9f, FontStyleSpec.Regular);
-                                }
-                            }
-                            if (this.StandardStringFormat == null)
-                                this.StandardStringFormat = new System.Drawing.StringFormat();
-                        }
-                        catch
-                        {
-                            // ignore failures; Skia drawing will still be available
-                        }
+                            IsAntialias = true
+                        };
+
+                        // Avalonia の DrawingContext は Render() から設定する。
+                        this.AvaloniaDrawingContext = null;
+
+                        // System.Drawing の SystemFonts.DefaultFont は使用しない。
+                        this.FontSpec = new FontSpec(
+                            "sans-serif",
+                            9f,
+                            FontStyleSpec.Regular);
+
+                        // Avalonia では System.Drawing.StringFormat を使用しない。
+                        this.StandardStringFormat = null;
                     }
                     break;
-                case GraphicAPIType.UnoPlatform:
+                case CHtmlGraphicAPIType.UnoPlatform:
                     {
                         throw new NotImplementedException();
                     }
                     break;
-                case GraphicAPIType.Maui:
+                case CHtmlGraphicAPIType.Maui:
                     {
                         throw new NotImplementedException();
                     }
                     break;
-                case GraphicAPIType.WPF:
+                case CHtmlGraphicAPIType.WPF:
                     {
                         throw new NotImplementedException();
 
                     }
                     break;
-                case GraphicAPIType.ETO:
+                case CHtmlGraphicAPIType.ETO:
                     {
                         throw new NotImplementedException();
 
                     }
                     break;
 #if WINDOWS
-                case GraphicAPIType.WinformsGDI:
+                case CHtmlGraphicAPIType.WinformsGDI:
                     {
                         ___bitmapForGDI = new Bitmap(1, 1);
-                        this.Graphic = Graphics.FromImage(___bitmapForGDI);
+                        this.CHtmlGraphicContainerGraphics = Graphics.FromImage(___bitmapForGDI);
                         if (this.FontSpec == null)
                         {
                             try
@@ -191,7 +185,7 @@ namespace MultiHtmlCraft.Core
 
             return;
         }
-        public GraphicAPIType graphicApiType
+        public CHtmlGraphicAPIType graphicApiType
         {
             get { return commonHTML.GraphicApiType; }
             set { commonHTML.GraphicApiType = value; }
@@ -200,8 +194,25 @@ namespace MultiHtmlCraft.Core
         #region IDisposable 
         public void Dispose()
         {
+            try
+            {
+                if (this.___skiaBitmap != null)
+                {
+                    this.___skiaBitmap.Dispose();
+                    this.___skiaBitmap = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled)
+                {
+                    commonLog.LogEntry(
+                        "CHtmlGraphicContainer SKBitmap dispose failed: {0}",
+                        ex.ToString());
+                }
+            }
 #if WINDOWS
-            if (commonHTML.GraphicApiType == GraphicAPIType.WinformsGDI)
+            if (commonHTML.GraphicApiType == CHtmlGraphicAPIType.WinformsGDI)
             {
                 if (this.StandardStringFormat != null)
                 {
@@ -218,10 +229,10 @@ namespace MultiHtmlCraft.Core
                 ___bitmapForGDI = null;
             }
 
-            if (this.Graphic != null)
+            if (this.CHtmlGraphicContainerGraphics != null)
             {
-                this.Graphic.Dispose();
-                this.Graphic = null;
+                this.CHtmlGraphicContainerGraphics.Dispose();
+                this.CHtmlGraphicContainerGraphics = null;
             }
 
 #elif LINUX
@@ -263,13 +274,13 @@ namespace MultiHtmlCraft.Core
             }
             catch { }
 
-            // Ensure Graphic is disposed if it wasn't already
+            // Ensure CHtmlGraphicContainerGraphics is disposed if it wasn't already
             try
             {
-                if (this.Graphic != null)
+                if (this.CHtmlGraphicContainerGraphics != null)
                 {
-                    this.Graphic.Dispose();
-                    this.Graphic = null;
+                    this.CHtmlGraphicContainerGraphics.Dispose();
+                    this.CHtmlGraphicContainerGraphics = null;
                 }
             }
             catch { }
@@ -285,7 +296,7 @@ namespace MultiHtmlCraft.Core
         {
             switch (commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.SkiaSharp:
                     SkiaCanvas?.Clear(SKColors.Transparent);
                     break;
 
@@ -298,7 +309,7 @@ namespace MultiHtmlCraft.Core
 {
     switch (commonHTML.GraphicApiType)
     {
-        case GraphicAPIType.SkiaSharp:
+        case CHtmlGraphicAPIType.SkiaSharp:
             SkiaCanvas?.Restore();
             break;
 
@@ -310,7 +321,7 @@ public void DrawLine(PenSpec pen, float x1, float y1, float x2, float y2)
         {
             switch (commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.SkiaSharp:
                     if (SkiaCanvas != null)
                     {
                         using var paint = new SKPaint
@@ -330,7 +341,7 @@ public void DrawLine(PenSpec pen, float x1, float y1, float x2, float y2)
         {
             switch (commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.SkiaSharp:
                     if (SkiaCanvas != null)
                     {
                         using var paint = new SKPaint
@@ -348,7 +359,7 @@ public void DrawLine(PenSpec pen, float x1, float y1, float x2, float y2)
         {
             switch (commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.SkiaSharp:
                     if (SkiaCanvas != null)
                     {
                         using var paint = new SKPaint
@@ -367,7 +378,7 @@ public void DrawLine(PenSpec pen, float x1, float y1, float x2, float y2)
         {
             switch (commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.SkiaSharp:
                     if (SkiaCanvas != null && image is SKBitmap bitmap)
                     {
                         var destRect = new SKRect(x, y, x + width, y + height);
@@ -381,7 +392,7 @@ public void DrawLine(PenSpec pen, float x1, float y1, float x2, float y2)
         {
             switch (commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.SkiaSharp:
                     if (SkiaCanvas != null)
                     {
                         using var paint = new SKPaint
@@ -402,16 +413,16 @@ public void DrawLine(PenSpec pen, float x1, float y1, float x2, float y2)
         {
             switch (commonHTML.GraphicApiType)
             {
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.SkiaSharp:
                     SkiaCanvas?.Save();
                     SkiaCanvas?.ClipRect(new SKRect(rect.Left, rect.Top, rect.Right, rect.Bottom));
                     break;
 #if WINDOWS
-                case GraphicAPIType.WinformsGDI:
-                    if (Graphic != null)
+                case CHtmlGraphicAPIType.WinformsGDI:
+                    if (CHtmlGraphicContainerGraphics != null)
                     {
                         var gdiRect = commonTypeConverter.ToRectangleF(rect);
-                        Graphic.SetClip(gdiRect);
+                        CHtmlGraphicContainerGraphics.SetClip(gdiRect);
                     }
                     break;
 #endif

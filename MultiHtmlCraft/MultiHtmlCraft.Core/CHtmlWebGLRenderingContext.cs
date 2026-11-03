@@ -971,7 +971,7 @@ namespace MultiHtmlCraft.Core
             using (Bitmap bmp32 = new Bitmap(bmp.Width, bmp.Height))
             {
                 // bmp が 32bitARGB 形式ではない場合でも 32bitARGBに変換
-                using (Graphics g = Graphics.FromImage(bmp32))
+                using (CHtmlGraphicContainerGraphics g = CHtmlGraphicContainerGraphics.FromImage(bmp32))
                 {
                     g.DrawImage(bmp,
                         new Rectangle(0, 0, bmp32.Width, bmp32.Height),
@@ -4107,8 +4107,8 @@ namespace MultiHtmlCraft.Core
 #else
                                     switch (commonHTML.GraphicApiType)
                                     {
-                                        case GraphicAPIType.Avalonia:
-                                        case GraphicAPIType.SkiaSharp:
+                                        case CHtmlGraphicAPIType.Avalonia:
+                                        case CHtmlGraphicAPIType.SkiaSharp:
                                             ___owerElement.___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize();
                                             break;
                                     }

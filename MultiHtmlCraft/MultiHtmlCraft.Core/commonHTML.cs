@@ -290,7 +290,7 @@ namespace MultiHtmlCraft.Core
         Both = 4
     }
 
-    public enum GraphicAPIType  
+    public enum CHtmlGraphicAPIType  
 
     {
         Unknown,
@@ -557,7 +557,7 @@ namespace MultiHtmlCraft.Core
         /// <summary>
         /// Load SVG DOM Only
         /// </summary>
-        SVGDOM // Vector Graphics Dom
+        SVGDOM // Vector CHtmlGraphicContainerGraphics Dom
     }
 
     public enum CHtmlEventOriginatorType : short
@@ -8329,11 +8329,11 @@ namespace MultiHtmlCraft.Core
             return sb.ToString();
         }
 
-        public static GraphicAPIType GraphicApiType = detectGraphicAPIType();
-        private static GraphicAPIType detectGraphicAPIType()
+        public static CHtmlGraphicAPIType GraphicApiType = detectGraphicAPIType();
+        private static CHtmlGraphicAPIType detectGraphicAPIType()
         {
-            GraphicAPIType guiGrapicApiType = GraphicAPIType.Unknown;
-            if (GraphicApiType != GraphicAPIType.Unknown)
+            CHtmlGraphicAPIType guiGrapicApiType = CHtmlGraphicAPIType.Unknown;
+            if (GraphicApiType != CHtmlGraphicAPIType.Unknown)
             {
                 guiGrapicApiType = GraphicApiType;
                 goto GuiAPIDetected;
@@ -8343,34 +8343,34 @@ namespace MultiHtmlCraft.Core
             // Avalonia
             if (assemblies.Any(a => a.GetName().Name?.StartsWith("Avalonia", StringComparison.OrdinalIgnoreCase) == true))
             {
-                guiGrapicApiType = GraphicAPIType.Avalonia;
+                guiGrapicApiType = CHtmlGraphicAPIType.Avalonia;
                 goto GuiAPIDetected;
             }
 
             // UnoPlatform
             if (assemblies.Any(a => a.GetName().Name?.StartsWith("Uno.", StringComparison.OrdinalIgnoreCase) == true))
             {
-                guiGrapicApiType = GraphicAPIType.UnoPlatform;
+                guiGrapicApiType = CHtmlGraphicAPIType.UnoPlatform;
                 goto GuiAPIDetected;
             }
 
             // MAUI
             if (assemblies.Any(a => a.GetName().Name?.StartsWith("Microsoft.Maui", StringComparison.OrdinalIgnoreCase) == true))
             {
-                guiGrapicApiType = GraphicAPIType.Maui;
+                guiGrapicApiType = CHtmlGraphicAPIType.Maui;
                 goto GuiAPIDetected;
             }
             // WinForms GDI
             if (assemblies.Any(a => a.GetName().Name?.StartsWith("System.Windows.Forms") == true))
             {
-                guiGrapicApiType = GraphicAPIType.WinformsGDI;
+                guiGrapicApiType = CHtmlGraphicAPIType.WinformsGDI;
                 goto GuiAPIDetected;
             }
 
             // SkiaSharp
             if (assemblies.Any(a => a.GetName().Name?.StartsWith("SkiaSharp", StringComparison.OrdinalIgnoreCase) == true))
             {
-                guiGrapicApiType = GraphicAPIType.SkiaSharp;
+                guiGrapicApiType = CHtmlGraphicAPIType.SkiaSharp;
                 goto GuiAPIDetected;
             }
 
@@ -8378,20 +8378,20 @@ namespace MultiHtmlCraft.Core
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
 
-                guiGrapicApiType = GraphicAPIType.WinformsGDI;
+                guiGrapicApiType = CHtmlGraphicAPIType.WinformsGDI;
                 goto GuiAPIDetected;
             }
 
             // Linux, Mac
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                guiGrapicApiType = GraphicAPIType.SkiaSharp;
+                guiGrapicApiType = CHtmlGraphicAPIType.SkiaSharp;
                 goto GuiAPIDetected;
             }
         GuiAPIDetected:
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
             {
-                commonLog.LogEntry("Platform Graphic API is set : \"{0}\"", guiGrapicApiType);
+                commonLog.LogEntry("Platform CHtmlGraphicContainerGraphics API is set : \"{0}\"", guiGrapicApiType);
             }
             return guiGrapicApiType;
         }
@@ -21968,37 +21968,37 @@ namespace MultiHtmlCraft.Core
 
             return string.Empty;
         }
-        public static GraphicAPIType GetySystemGUType()
+        public static CHtmlGraphicAPIType GetySystemGUType()
         {
             // WinformsGDI
             if (Type.GetType("System.Windows.Forms.Form, System.Windows.Forms") != null)
-                return GraphicAPIType.WinformsGDI;
+                return CHtmlGraphicAPIType.WinformsGDI;
 
             // WPF
             if (Type.GetType("System.Windows.Application, PresentationFramework") != null)
-                return GraphicAPIType.WPF;
+                return CHtmlGraphicAPIType.WPF;
 
             // Avalonia
             if (Type.GetType("Avalonia.Application, Avalonia") != null)
-                return GraphicAPIType.Avalonia;
+                return CHtmlGraphicAPIType.Avalonia;
 
             // Uno Platform
             if (Type.GetType("Windows.UI.Xaml.Application, Uno.UI") != null)
-                return GraphicAPIType.UnoPlatform;
+                return CHtmlGraphicAPIType.UnoPlatform;
 
             // MAUI
             if (Type.GetType("Microsoft.Maui.Controls.Application, Microsoft.Maui.Controls") != null)
-                return GraphicAPIType.Maui;
+                return CHtmlGraphicAPIType.Maui;
 
             // SkiaSharp（SkiaSharp自体はGUIではないが、SkiaSharp.Viewsなどで判別可）
             if (Type.GetType("SkiaSharp.Views.Desktop.SKGLControl, SkiaSharp.Views.Desktop") != null)
-                return GraphicAPIType.SkiaSharp;
+                return CHtmlGraphicAPIType.SkiaSharp;
 
             // ETO.Forms
             if (Type.GetType("Eto.Forms.Application, Eto") != null)
-                return GraphicAPIType.ETO;
+                return CHtmlGraphicAPIType.ETO;
 
-            return GraphicAPIType.Unknown;
+            return CHtmlGraphicAPIType.Unknown;
         }
         public static bool IsContentTypeValidWinFormsImage(string _contentType)
         {

@@ -252,8 +252,8 @@ namespace MultiHtmlCraft.Core
             switch(commonHTML.GraphicApiType)
             {
 #if WINDOWS
-                case  GraphicAPIType.WinformsGDI:
-                case GraphicAPIType.WPF:
+                case  CHtmlGraphicAPIType.WinformsGDI:
+                case CHtmlGraphicAPIType.WPF:
                
 
                     ___initWindowsCHtmlMediaIntegrationElementHostType();
@@ -262,8 +262,8 @@ namespace MultiHtmlCraft.Core
 #else
 
 
-                case GraphicAPIType.Avalonia:
-                case GraphicAPIType.SkiaSharp:
+                case CHtmlGraphicAPIType.Avalonia:
+                case CHtmlGraphicAPIType.SkiaSharp:
 
                     ___defineBassNetAudioVideoFormmats();
                     ___hostLibraryLoadStatus = CHtmlAssemblyLoadStatusType.Loaded;
@@ -1028,8 +1028,8 @@ namespace MultiHtmlCraft.Core
                     {
                         switch(commonHTML.GraphicApiType)
                         {
-                            case GraphicAPIType.Avalonia:
-                            case GraphicAPIType.SkiaSharp:
+                            case CHtmlGraphicAPIType.Avalonia:
+                            case CHtmlGraphicAPIType.SkiaSharp:
                                 if(this.___elementTagType == CHtmlElementType.AUDIO)
                                 {
                                     string baseDir = AppDomain.CurrentDomain.BaseDirectory;

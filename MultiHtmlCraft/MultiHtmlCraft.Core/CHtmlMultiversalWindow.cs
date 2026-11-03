@@ -113,12 +113,8 @@ namespace MultiHtmlCraft.Core
                 { "webkitResolveLocalFileSystemURL", 27 },
                 { "webkitStorageInfo", 28 },
                 { "webkitRequestAnimationFrame", 29 },
-                { "webkitCancelAnimationFrame", 30 },
-                { "webkitRequestFileSystem", 31 },
-                { "webkitResolveLocalFileSystemURL", 32 },
-                { "webkitStorageInfo", 33 },
-                { "webkitRequestAnimationFrame", 34 },
-                { "webkitCancelAnimationFrame", 35 }
+                { "webkitCancelAnimationFrame", 30 }
+
 
 
             };
@@ -7704,8 +7700,8 @@ if (cHtmlMultiversalControl != null)
                             }
                             switch (commonHTML.GraphicApiType)
                             {
-                                case GraphicAPIType.Avalonia:
-                                case GraphicAPIType.SkiaSharp:
+                                case CHtmlGraphicAPIType.Avalonia:
+                                case CHtmlGraphicAPIType.SkiaSharp:
                                     cHtmlMultiversalControl.DrawImage(canvasElement.___CanvasSkiaBitmap, canvasElement.___ScreenRectangle);
 
                                     break;

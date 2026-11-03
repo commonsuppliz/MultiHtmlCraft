@@ -59,7 +59,7 @@ namespace MultiHtmlCraft.Core
                     myBuffer.Render();
                     /*
                     Bitmap bmp = new Bitmap(_Control.Width, _Control.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-                    Graphics grCon = Graphics.FromImage(bmp as Image);
+                    CHtmlGraphicContainerGraphics grCon = CHtmlGraphicContainerGraphics.FromImage(bmp as Image);
                     myBuffer.Render(grCon);
 
                     grCon.Dispose();

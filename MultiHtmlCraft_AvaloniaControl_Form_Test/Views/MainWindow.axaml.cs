@@ -61,7 +61,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text ="http://localhost/canvas/jagarikin/angelic_weapon_RGBA.html";// Angelic Weapon Test by jagarikin RGBA
                 // txt.Text = "http://localhost/canvas/CanvasBeginPathClosePathMove.html"; // Canvas BeginPath ClosePath MoveTo Test OK
 
-                //txt.Text = "http://localhost/phoria.js-master/test1t_noGUI.html"; // Phoria Textbure
+                txt.Text = "http://localhost/phoria.js-master/test1t_noGUI.html"; // Phoria Textbure
                 // txt.Text = "http://localhost/canvas/CanvasClipTest1.html"; // Canvas Clip Test OK
                 //txt.Text = "http://localhost/mariohtml5-master/minTest.html"; // Mario HTML5 Test OnProgress
                 ///txt.Text = "http://localhost/canvas/CanvasMouseMoveTest1.html"; //
@@ -135,7 +135,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/canvas/VideoElementRequestVideoFrameCallbackTest1.html"; //VideoFrameCallBackTest 1
                 // txt.Text = "http://localhost/jstest/JsfetchTest3.html";
                 //txt.Text = "http://localhost/jstest/fetchPostTest1.html"; // Jsfetch Post Test 4
-                txt.Text = "http://localhost/jstest/PerformanceAPITest1.html"; // Performance API Test 1
+                //txt.Text = "http://localhost/jstest/PerformanceAPITest1.html"; // Performance API Test 1
 
 
             }

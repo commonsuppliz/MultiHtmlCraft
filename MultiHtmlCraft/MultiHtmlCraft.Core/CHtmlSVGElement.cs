@@ -1137,7 +1137,7 @@ namespace MultiHtmlCraft.Core
                 {
                     if (___svgRoot.___CanvasGdiImage != null)
                     {
-                        _grCon.Graphic.DrawImageUnscaledAndClipped(___svgRoot.___CanvasGdiImage, Rectangle.Round(elementBounds));
+                        _grCon.CHtmlGraphicContainerGraphics.DrawImageUnscaledAndClipped(___svgRoot.___CanvasGdiImage, Rectangle.Round(elementBounds));
                         return;
                     }
                     else
@@ -1300,7 +1300,7 @@ namespace MultiHtmlCraft.Core
                 ___svgStopWatch.Stop();
                 if (_grCon != null && ___svgRoot.___CanvasGdiImage != null)
                 {
-                    _grCon.Graphic.DrawImageUnscaledAndClipped(___svgRoot.___CanvasGdiImage, Rectangle.Round(elementBounds));
+                    _grCon.CHtmlGraphicContainerGraphics.DrawImageUnscaledAndClipped(___svgRoot.___CanvasGdiImage, Rectangle.Round(elementBounds));
                 }
                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
                 {
