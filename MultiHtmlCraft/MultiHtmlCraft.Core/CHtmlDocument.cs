@@ -1066,13 +1066,30 @@ namespace MultiHtmlCraft.Core
             // var contentData = await CHmlMultiversalWebCache.getMultiversalContentData(url, string.Empty).ConfigureAwait(false);
             var contentData = await CHmlMultiversalWebCache.getMultiversalContentData(url, string.Empty, string.Empty, _requestData);
             Stopwatch? stopwatch = null;
-            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
+                commonLog.LogEntry($"document.createDocument received document data from getMultiversalContentData({contentData}) for URL: {url}");
+                commonLog.LogEntry(
+    "contentData: HtmlContentLength={0}, RawDataLength={1}, ContentLength={2}, Charset={3}, ContentType={4}",
+    contentData.HtmlContent?.Length ?? 0,
+    contentData.RawData?.Length ?? 0,
+    contentData.ContentLength,
+    contentData.Charset,
+    contentData.ContentType);
                 stopwatch = new Stopwatch();
                 stopwatch.Start();
             }
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("Before creating CHtmlDocument. URL: {0}", url);
+            }
+
 
             var doc = new CHtmlDocument(domtype);
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("After creating CHtmlDocument. URL: {0}", url);
+            }
             doc.___URL = url;
             doc.___locationBase = new CHtmlLocationBase();
             doc.___locationBase.href = url;
@@ -1245,6 +1262,10 @@ namespace MultiHtmlCraft.Core
             doc.___IsMultiversalDocument = true;
 
             //await doc.___parseDocument().ConfigureAwait(false);
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry("document.___parseDocument() {0} started...", doc.___UrlShortName);
+            }
             await doc.___parseDocument();
             if (stopwatch != null)
             {

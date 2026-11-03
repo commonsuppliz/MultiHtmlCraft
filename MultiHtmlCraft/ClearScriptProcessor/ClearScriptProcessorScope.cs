@@ -1057,7 +1057,7 @@ namespace ClearScriptProcessor
         } catch(e) { len = 0; }
 
         for (var i = 0; i < len; i++) {
-            try { defineCustomClass(_classNames[i]); } catch(e) { / }
+            try { defineCustomClass(_classNames[i]); } catch(e) {}
         }
     })();
 ");
