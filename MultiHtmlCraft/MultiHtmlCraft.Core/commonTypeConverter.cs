@@ -279,8 +279,26 @@ namespace MultiHtmlCraft.Core
         {
             return new Avalonia.Rect(rect.Left, rect.Top, rect.Width, rect.Height);
         }
+        public static SkiaSharp.SKBitmap convertBytesIntoSKBitmap(byte[] bts, string contentType, int contentLength)
+        {
+            try
+            {
+                using (var ms = new MemoryStream(bts))
+                {
+                    return SkiaSharp.SKBitmap.Decode(ms);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel > 8)
+                {
+                    commonLog.LogEntry("convertBytesIntoSKBitmap(bytes, {0}, {1}) SKBitmap exception Reason : {2}", contentType, contentLength, ex.Message);
+                }
+            }
+            return null;
+        }
 
-        public static System.Drawing.Image convertBytesIntoImage(byte[] bts, string contentType, int contentLength)
+        public static System.Drawing.Image convertBytesIntoGDIImage(byte[] bts, string contentType, int contentLength)
         {
             ImageContentTypeHander handler = null;
             try
@@ -293,7 +311,7 @@ namespace MultiHtmlCraft.Core
                 {
                     if (commonLog.LoggingEnabled && commonLog.LogLevel > 8)
                     {
-                        commonLog.LogEntry("convertBytesIntoImage(bytes, {0}, {1}) image handler is not set", contentType, contentLength);
+                        commonLog.LogEntry("convertBytesIntoGDIImage(bytes, {0}, {1}) image handler is not set", contentType, contentLength);
                     }
                 }
             }
@@ -301,7 +319,7 @@ namespace MultiHtmlCraft.Core
             {
                 if (commonLog.LoggingEnabled && commonLog.LogLevel > 8)
                 {
-                    commonLog.LogEntry("convertBytesIntoImage(bytes, {0}, {1}) image exception Reason : {2}", contentType, contentLength, ex.Message);
+                    commonLog.LogEntry("convertBytesIntoGDIImage(bytes, {0}, {1}) image exception Reason : {2}", contentType, contentLength, ex.Message);
                 }
             }
             return null;

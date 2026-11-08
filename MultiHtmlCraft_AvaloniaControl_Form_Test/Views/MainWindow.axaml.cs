@@ -61,7 +61,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text ="http://localhost/canvas/jagarikin/angelic_weapon_RGBA.html";// Angelic Weapon Test by jagarikin RGBA
                 // txt.Text = "http://localhost/canvas/CanvasBeginPathClosePathMove.html"; // Canvas BeginPath ClosePath MoveTo Test OK
 
-                txt.Text = "http://localhost/phoria.js-master/test1t_noGUI.html"; // Phoria Textbure
+               // txt.Text = "http://localhost/phoria.js-master/test1t_noGUI.html"; // Phoria Textbure
                 // txt.Text = "http://localhost/canvas/CanvasClipTest1.html"; // Canvas Clip Test OK
                 //txt.Text = "http://localhost/mariohtml5-master/minTest.html"; // Mario HTML5 Test OnProgress
                 ///txt.Text = "http://localhost/canvas/CanvasMouseMoveTest1.html"; //
@@ -80,7 +80,11 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/jstest/WindowDocumentAddEventListenerTesst1.html"; // Window Document AddEventListener Test OK
                 //txt.Text = "http://localhost/canvas/CanvasBackBufferTest1.html";// Canvas Back Buffer Test 1 OK
                 // txt.Text = "http://localhost/canvas/CanvasBackBufferTest3.html";// Canvas Back Buffer Test 3 OK
-                //txt.Text = "http://localhost/mariohtml5-master/minTest_NonJquery.html"; // Mario HTML5 Test Non JQuery Test 
+
+
+                txt.Text = "http://localhost/mariohtml5-master/minTest_NonJquery.html"; // Mario HTML5 Test Non JQuery Test 
+
+
                 //txt.Text = "https://www.joshuakgoldberg.com/FullScreenMario/Source/"; // Canvas Fill Style Test OKÅEìÔΩÅE
                 //txt.Text = "http://localhost/jstest/AudioPlayTest1.html"; // Audio Play Test 1 OK
                 //  txt.Text = "http://localhost/html/HtmlControlTest1.html"; // Html Control Test 1 OK
@@ -136,6 +140,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/jstest/JsfetchTest3.html";
                 //txt.Text = "http://localhost/jstest/fetchPostTest1.html"; // Jsfetch Post Test 4
                 //txt.Text = "http://localhost/jstest/PerformanceAPITest1.html"; // Performance API Test 1
+                //txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test 4 
 
 
             }

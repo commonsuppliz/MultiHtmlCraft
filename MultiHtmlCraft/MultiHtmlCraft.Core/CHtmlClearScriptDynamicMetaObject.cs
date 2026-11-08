@@ -1648,6 +1648,17 @@ namespace MultiHtmlCraft.Core
 
                                 switch (binder.Name )
                                 {
+                                    case "complete":
+                                        bool completeValue = self.complete;
+                                        if(commonLog.LoggingEnabled)
+                                        {
+                                            commonLog.LogEntry($"[CHtmlElement.BindGetMember] complete accessed, value={completeValue}");
+                                        };
+                                        return new DynamicMetaObject(
+                                            Expression.Constant(completeValue, typeof(bool)),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                        break;
 
                                     case "nodeType":
                                         double nodeTypeValue = (double)self.nodeType;

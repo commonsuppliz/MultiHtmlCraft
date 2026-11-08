@@ -2157,6 +2157,7 @@ namespace MultiHtmlCraft.Core
         }
         private void ___drawImage_inner(object _image, double sx, double sy, double sw, double sh, double dx, double dy, double dw, double dh, int ____methodType)
         {
+            bool ___drawImage_inner_Success = false;
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
             {
                 commonLog.LogEntry("entering {0}.drawImage_inner({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10})...", this, _image.GetType().FullName, sx, sy, sw, sh, dx, dy, dw, dh, ____methodType);
@@ -2462,7 +2463,7 @@ namespace MultiHtmlCraft.Core
                                         {
 
                                             ___gractiveContext.DrawImage(___imageObject, new RectangleF((float)dx, (float)dy, (float)dw, (float)dh), new RectangleF((float)sx, (float)sy, (float)(___imageObject.Width - 1), (float)(___imageObject.Height - 1)), GraphicsUnit.Pixel);
-
+                                             ___drawImage_inner_Success = true;
                                         }
                                         else if ((dw >= ___imageObject.Width) && (dh < ___imageObject.Height))
 
@@ -2470,20 +2471,23 @@ namespace MultiHtmlCraft.Core
 
                                             ___gractiveContext.DrawImage(___imageObject, new RectangleF((float)dx, (float)dy, (float)dw, (float)dh), new RectangleF((float)sx, (float)sy, (float)(___imageObject.Width - 1), (float)sh), GraphicsUnit.Pixel);
 
-
+                                             ___drawImage_inner_Success = true;
                                         }
                                         else
                                         {
                                             ___gractiveContext.DrawImage(___imageObject, new RectangleF((float)dx, (float)dy, (float)dw, (float)dh), new RectangleF((float)sx, (float)sy, (float)sw, (float)(___imageObject.Height - 1)), GraphicsUnit.Pixel);
-
+                                            
+                                            ___drawImage_inner_Success = true;
                                         }
                                     }
                                     // ___activeGraphics.DrawImageUnscaled(___imageObject, (int)dx, (int)dy, (int)dw, (int)dh);
+                                     ___drawImage_inner_Success = true;
                                     break;
                                 default:
 
 
                                     ___gractiveContext.DrawImageUnscaled(___imageObject, (int)dx, (int)dy);
+                                     ___drawImage_inner_Success = true;
 
                                     break;
                             }
@@ -2588,6 +2592,15 @@ namespace MultiHtmlCraft.Core
                             dy = double.IsNaN(dy) ? 0 : dy;
                             dw = double.IsNaN(dw) ? 0 : dw;
                             dh = double.IsNaN(dh) ? 0 : dh;
+#if DEBUG
+                            if(dx == 16 && dw == 16 && dh == 16)
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry("drawImage: Drawing at (16,16) with size (16,16). This may be a debug case.");
+                                }
+                            }
+#endif
 
                             SKBitmap skBitmapToDraw = null;
                             CHtmlElement imgElement = null;
@@ -2654,14 +2667,84 @@ namespace MultiHtmlCraft.Core
                                 // Handle IMG element
                                 if (imgElement.___style.___IMG_SkiaBitmapWeakReference != null)
                                 {
+                                    bool ismageObtained = imgElement.___style.___IMG_SkiaBitmapWeakReference.TryGetTarget(out skBitmapToDraw);
+                                    if(skBitmapToDraw != null)
+                                    {
+                                        goto ImageObjectFound;
+                                    }
+                                    else
+                                    {
 
+                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                        {
+                                            commonLog.LogEntry("CHtmlCanvasContext drawImage: IMG element's SkiaBitmap weak reference is null or target is collected for element {0} (elementTagType={1}). This may occur when: 1) The image is still loading, 2) The image source is invalid, or 3) There is an issue with caching.", imgElement.toLogString(), imgElement.___elementTagType);
+                                        }
+                                        if (this.___ownerDocumentWeakReference != null && imgElement.___src != null)
+                                        {
+                                            CHtmlDocument ___ownerDocument = this.___ownerDocumentWeakReference.Target as CHtmlDocument;
+                                            if (___ownerDocument != null && ___ownerDocument.___imageRawConcurrentDictionaryForSKBitmap.TryGetValue(imgElement.___src, out skBitmapToDraw))
+                                            {
+                                                imgElement.___style.___IMG_SkiaBitmapWeakReference = new WeakReference<SKBitmap>(skBitmapToDraw, false);
+                                                goto ImageObjectFound;
+                                            }
+
+                                        }if (skBitmapToDraw == null && !string.IsNullOrEmpty(imgElement.___src))
+                                        {
+                                            if(commonLog.LoggingEnabled && commonLog.LogLevel >=5)
+                                            {
+                                                commonLog.LogEntry("CHtmlCanvasContext drawImage: Image Reference is lost trying from Document cache...");
+                                            }
+                                            if(this.___ownerDocumentWeakReference != null)
+                                            {
+                                                CHtmlDocument imgDocument = this.___ownerDocumentWeakReference.Target as CHtmlDocument;
+                                                if(imgDocument != null)
+                                                {
+                                                    if(imgDocument.___imageRawConcurrentDictionaryForSKBitmap.TryGetValue(imgElement.___src, out skBitmapToDraw))
+                                                    {
+                                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                        {
+                                                            commonLog.LogEntry("CHtmlCanvasContext drawImage: Image Reference is lost but found from ___imageRawConcurrentDictionaryForSKBitmap");
+                                                        }
+                                                    }
+                                                    if (skBitmapToDraw != null)
+                                                    {
+                                                
+                                                        imgElement.___style.___IMG_SkiaBitmapWeakReference = new WeakReference<SKBitmap>(skBitmapToDraw, false);
+                                                    }
+                                                    else
+                                                    {
+
+                                                        string srcImageUrl = commonHTML.GetAbsoluteUri(imgDocument.URL.ToString(), null, imgElement.___src);
+                                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                        {
+                                                            commonLog.LogEntry($"CHtmlCanvasContext drawImage: Image WeakReference is lost, looks for from CHtmlMultiversalCache with {srcImageUrl}...");
+                                                        }
+                                                        var imagedata = CHmlMultiversalWebCache.getMultiversalContentDataSync(srcImageUrl);
+
+                                                        skBitmapToDraw = commonTypeConverter.convertBytesIntoSKBitmap(imagedata.RawData, imagedata.ContentType, (int)imagedata.ContentLength);
+                                                        imgDocument.___imageRawConcurrentDictionaryForSKBitmap[imgElement.___src] = skBitmapToDraw;
+                                                        // reset weak reference
+                                                        imgElement.___style.___IMG_SkiaBitmapWeakReference = new WeakReference<SKBitmap>(skBitmapToDraw, true);
+                                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                        {
+                                                            commonLog.LogEntry($"CHtmlCanvasContext drawImage: Image WeakReference has been reset, CHtmlMultiversalCache with {srcImageUrl}...");
+                                                        }
+                                                    }
+
+                                                    goto ImageObjectFound;
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                    /*
                                     if (imgElement.___style.___IMG_SkiaBitmapWeakReference is WeakReference<SKBitmap> weakRef)
                                     {
                                         if (weakRef.TryGetTarget(out skBitmapToDraw))
                                         {
                                             goto ImageObjectFound;
                                         }
-                                    }
+                                    }]*/
                                 }
                                 if (this.___ownerDocumentWeakReference != null && imgElement.___src != null)
                                 {
@@ -2703,18 +2786,26 @@ namespace MultiHtmlCraft.Core
                                             {
                                                 case 1:
                                                     skCanvas.DrawBitmap(skBitmapToDraw, (float)dx, (float)dy, paint);
+
+                                                    ___drawImage_inner_Success = true;
                                                     break;
                                                 case 2:
                                                     skCanvas.DrawBitmap(skBitmapToDraw, new SKRect((float)dx, (float)dy, (float)(dx + dw), (float)(dy + dh)), paint);
+
+                                                    ___drawImage_inner_Success = true;
                                                     break;
                                                 case 3:
                                                     skCanvas.DrawBitmap(skBitmapToDraw,
                                                         new SKRect((float)sx, (float)sy, (float)(sx + sw), (float)(sy + sh)),
                                                         new SKRect((float)dx, (float)dy, (float)(dx + dw), (float)(dy + dh)),
                                                         paint);
+
+                                                    ___drawImage_inner_Success = true;
                                                     break;
                                                 default:
                                                     skCanvas.DrawBitmap(skBitmapToDraw, (float)dx, (float)dy, paint);
+
+                                                    ___drawImage_inner_Success = true;
                                                     break;
                                             }
                                         }
@@ -2746,6 +2837,20 @@ namespace MultiHtmlCraft.Core
 #endif
 
             ___setCanvasActivityIntoDocument();
+            if(___drawImage_inner_Success)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                {
+                    commonLog.LogEntry("CHtmlCanvasContext ___drawImage_inner_Success : true ");
+                }
+            }
+            else
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                {
+                    commonLog.LogEntry("CHtmlCanvasContext ___drawImage_inner_Success : false ");
+                }
+            }
 
         }
         internal static System.Drawing.Bitmap ___changeOpacityImage(System.Drawing.Image img, float opacityvalue)

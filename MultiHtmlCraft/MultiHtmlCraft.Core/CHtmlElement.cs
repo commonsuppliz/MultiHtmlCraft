@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using NiL.JS.Core.Interop;
 using NiL.JS.Statements;
 using NLog;
+using SkiaSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -4678,7 +4679,9 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
         internal bool ___IsComplete;
         public bool complete
         {             
-            get { return this.___IsComplete; }
+            get {
+                return this.___complete;
+            }
         }
 
         public override string src
@@ -4877,7 +4880,54 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                                                 var imgCache = CHmlMultiversalWebCache.getMultiversalContentDataSync(this.___srcBase.href, null);
                                                 if (imgCache != null)
                                                 {
-                                                    this.___Document.___setDocumentUrlImage(__srcFullUrl, imgCache);
+#if WINDOWS
+                                                 if (commonHTML.GraphicApiType == CHtmlGraphicAPIType.WinformsGDI)
+                                                    {
+                                                        System.Drawing.Bitmap? bitmap =
+                                                        bitmap = commonTypeConverter.convertBytesIntoGDIImage(imgCache.RawData, imgCache.ContentType, (int)imgCache.ContentLength) as System.Drawing.Bitmap;
+                                                        this.___Document.___setDocumentUrlImage(__srcFullUrl, bitmap);
+                                                        if(bitmap != null)
+                                                        {
+                                                            this.___style.___IMG_ImageWeakReference = new WeakReference(bitmap, false);
+                                                            this.___elementResourceDownloadStatus = CHtmlHttpResourceResultStatusType.OK;
+                                                            this.___complete = true;
+                                                        
+
+                                                        }
+                                                    }   
+
+
+#else
+                                                    switch (commonHTML.GraphicApiType)
+                                                    {
+                                                        case CHtmlGraphicAPIType.Avalonia:
+                                                        case CHtmlGraphicAPIType.SkiaSharp:
+                                                            SkiaSharp.SKBitmap? skbitmap =
+                                                        skbitmap = commonTypeConverter.convertBytesIntoSKBitmap(imgCache.RawData, imgCache.ContentType, (int)imgCache.ContentLength) as SkiaSharp.SKBitmap;
+                                                            if(skbitmap != null)
+                                                            {
+                                                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                                {
+                                                                    commonLog.LogEntry($"IMG src {this.___src} has been altered, SKBitmap created successfully");
+                                                                }
+                                                                this.___Document.___setDocumentUrlImage(__srcFullUrl, skbitmap);
+                                                                this.___style.___IMG_SkiaBitmapWeakReference = new WeakReference<SKBitmap>(skbitmap, false);
+                                                            }
+                                                            else
+                                                            {
+                                                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                                {
+                                                                    commonLog.LogEntry($"IMG src {this.___src} has been altered, SKBitmap creation failed");
+                                                                }
+                                                            }
+                                                            this.___elementResourceDownloadStatus = CHtmlHttpResourceResultStatusType.OK;
+
+                                                            break;
+                                                    }
+#endif
+                                                    
+                                                    this.___IsDownloadComplete = true;
+                                                    this.___IsComplete = true;
                                                     this.___complete = true;
                                                 }
                                             }
@@ -9702,7 +9752,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 			return cloneElement;
 		}
 
-		#region GetVaiable
+        #region GetVaiable
 		/// <summary>
 		/// [object] element support function
 		/// </summary>
@@ -9807,7 +9857,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 			}
 			return (object)"";
 		}
-		#endregion
+        #endregion
 
         /*
    
@@ -15977,7 +16027,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                                                 {
                                                     if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
                                                     {
-                                                       commonLog.LogEntry("Canvas height is changed. reset bitmap image : {0} => {1}", ___oridinalHeight, this.___offsetHeight);
+                                                       commonLog.LogEntry("Canvas height is changed. reset skbitmap image : {0} => {1}", ___oridinalHeight, this.___offsetHeight);
                                                     }
                                                 }
                                                 ___resetSkiaBitmapCanvasImageSizeBaseduponOffsetSize();
