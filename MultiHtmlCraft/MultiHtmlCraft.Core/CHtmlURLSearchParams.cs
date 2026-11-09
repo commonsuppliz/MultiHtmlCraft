@@ -14,6 +14,24 @@ namespace MultiHtmlCraft.Core
 {
     public class CHtmlURLSearchParams : ICommonObjectInterface, IDynamicMetaObjectProvider, IEnumerable
     {
+        internal static Dictionary<string, object> CHtmlURLSearchParamsMethods = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "append", null },
+            { "delete", null },
+            { "get", null },
+            { "getAll", null },
+            { "has", null },
+            { "set", null },
+            { "toString", null }
+        };
+        internal static Dictionary<string, object> CHtmlURLSearchParamsProperties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "size", null },
+            { "length", null }
+            
+
+
+        };
         private readonly Dictionary<string, List<string>> _params;
 
         public CHtmlURLSearchParams()

@@ -50,7 +50,10 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/canvas/RequestAnimationFrameTest1.html"; // Animation Frame Test
                 //txt.Text = "http://localhost/canvas/CanvasFillRectTest2.html"; // Fill Rect Test OK
                 // txt.Text = "http://localhost/canvas/CanvasMeasureTextTest.html";
+
+
                 // txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test OK
+
                 // txt.Text = "http://localhost/jstest/SetIntervalTestSimple.html";
                 //txt.Text = "http://localhost/canvas/CanvasClipTest1.html";// Canvas Clip Test OK
                 //txt.Text = "http://localhost/jstest/SetTimeoutTest1.html";// SetTimeout Test OK

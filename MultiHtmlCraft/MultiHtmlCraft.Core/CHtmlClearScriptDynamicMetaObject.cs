@@ -1042,7 +1042,13 @@ namespace MultiHtmlCraft.Core
                     case CHtmlTextMetrics textMetrics:
                         return CHtmlTextMetrics.CHtmlTextMetricsProperties?.Keys ?? Enumerable.Empty<string>();
 
+                    case CHtmlLocationBase location:
+                    {
+                            var props = CHtmlLocationBase.CHtmlLocationBaseProperties.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlLocationBase.CHtmlLocationBaseMethods.Keys ?? Enumerable.Empty<string>();
+                            return props.Concat(methods);
 
+                        }
                     case CHtmlNativeArray nativeArray:
                         {
                             var props = CHtmlNativeArray.CHtmlNativeArrayProperties?.Keys ?? Enumerable.Empty<string>(); 
@@ -1056,18 +1062,20 @@ namespace MultiHtmlCraft.Core
                             return props.Concat(methods);  
                             
                         }
+                    case CHtmlURLSearchParams urlparams:
+                        {
+                            var props = CHtmlURLSearchParams.CHtmlURLSearchParamsProperties.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlURLSearchParams.CHtmlURLSearchParamsMethods.Keys ?? Enumerable.Empty<string>();
+                            return props.Concat(methods);
+                        }
+
                     case CHtmlCSSStyleSheet csheet:
                         {
                             var props = CHtmlCSSStyleSheet.CHtmlCSSStyleSheetProperties.Keys ?? Enumerable.Empty<string>();
                             var methods = CHtmlCSSStyleSheet.CHtmlCSSStyleSheetMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
                         }
-                    case CHtmlLocationBase location:
-                        {
-                            var props = CHtmlLocationBase.CHtmlLocationBaseProperties.Keys ?? Enumerable.Empty<string>();
-                            var methods = CHtmlLocationBase.CHtmlLocationBaseMethods.Keys ?? Enumerable.Empty<string>();
-                            return props.Concat(methods);
-                        }
+
                     case CHtmlMultiversalWindow window:
                         {
                             var props = CHtmlMultiversalWindow.CHtmlMultiversalWindowProperties.Keys ?? Enumerable.Empty<string>();

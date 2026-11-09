@@ -519,9 +519,12 @@ namespace MultiHtmlCraft.Core
                                 ?? CHtmlMultiversalContentData.GetCharsetFromHtmlHeader(await response.Content.ReadAsByteArrayAsync(), newContentData.FileLocation)
                                 ?? "UTF-8";
                             ___currentEncodingString = encodingName;
+                            ___currentEncodingString = commonData.GetCharsetFromHTMLCharset(___currentEncodingString);
                             
+
                             try
                             {
+                                
                                 ___currentEncoding = Encoding.GetEncoding(___currentEncodingString);
                             }
                             catch
@@ -695,7 +698,7 @@ namespace MultiHtmlCraft.Core
                             EncodingDetectCompleted:
                                 try
                                 {
-                     
+                                    ___currentEncodingString = commonData.GetCharsetFromHTMLCharset(___currentEncodingString);
                                     _encoding = System.Text.Encoding.GetEncoding(___currentEncodingString);
                                     if (_encoding == null)
                                     {
