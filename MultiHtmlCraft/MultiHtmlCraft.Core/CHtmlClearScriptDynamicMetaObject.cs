@@ -2972,6 +2972,64 @@ namespace MultiHtmlCraft.Core
                             }
                             return base.BindGetMember(binder);
                         }
+                    case CHtmlURLSearchParams urlSearchParams:
+                        {
+                            var self = urlSearchParams;
+                            var name = binder.Name;
+                            if (string.Equals(name, "toString", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Func<string> delToString = () => { try { return self.ToString() ?? string.Empty; } catch { return string.Empty; } };
+                                return new DynamicMetaObject(Expression.Constant(delToString), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "append", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action<object, object> delAppend = (key, value) => { try { self.append(key?.ToString() ?? string.Empty, value?.ToString() ?? string.Empty); } catch { } };
+                                return new DynamicMetaObject(Expression.Constant(delAppend), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "get", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Func<object, object?> delGet = (key) => { try { return self.get(key?.ToString() ?? string.Empty); } catch { return null; } };
+                                return new DynamicMetaObject(Expression.Constant(delGet), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "set", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action<object, object> delSet = (key, value) => { try { self.set(key?.ToString() ?? string.Empty, value?.ToString() ?? string.Empty); } catch { } };
+                                return new DynamicMetaObject(Expression.Constant(delSet), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "delete", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action<object> delDelete = (key) => { try { self.delete(key?.ToString() ?? string.Empty); } catch { } };
+                                return new DynamicMetaObject(Expression.Constant(delDelete), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if(string.Equals(name, "clear", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action delClear = () => { try { self.clear(); } catch { } };
+                                return new DynamicMetaObject(Expression.Constant(delClear), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "sort", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Action delSort = () => { try { self.sort(); } catch { } };
+                                return new DynamicMetaObject(Expression.Constant(delSort), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "has", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Func<object, object?> delHas = (key) => { try { return self.has(key?.ToString() ?? string.Empty); } catch { return false ; } };
+                                return new DynamicMetaObject(Expression.Constant(delHas), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                            }
+                            if (string.Equals(name, "size", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return new DynamicMetaObject(Expression.Constant(self.size, typeof(int)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                            }
+                            if (string.Equals(name, "getAll", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Func<object, object?> delGetAll = (key) => { try { return self.getAll(key?.ToString() ?? string.Empty); } catch { return null; } };
+                                return new DynamicMetaObject(Expression.Constant(delGetAll), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+
+                            }
+
+                        }
+                        break;
                     case CHtmlPerformance cHtmlPerformance:
                         { 
                             var self = cHtmlPerformance;

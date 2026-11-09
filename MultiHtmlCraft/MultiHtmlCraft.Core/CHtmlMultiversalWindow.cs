@@ -113,7 +113,8 @@ namespace MultiHtmlCraft.Core
                 { "webkitResolveLocalFileSystemURL", 27 },
                 { "webkitStorageInfo", 28 },
                 { "webkitRequestAnimationFrame", 29 },
-                { "webkitCancelAnimationFrame", 30 }
+                { "webkitCancelAnimationFrame", 30 },
+                { "get", 31}
 
 
 

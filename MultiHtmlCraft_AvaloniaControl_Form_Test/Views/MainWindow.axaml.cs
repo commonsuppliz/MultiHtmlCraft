@@ -145,7 +145,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/jstest/PerformanceAPITest1.html"; // Performance API Test 1
                 //txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test 4 
 
-
+                txt.Text = "http://localhost/jstest/URLSearchParamsTest1.html"; // URLSearchParams Test 1
             }
 
             if (btnGo != null && txt != null && _multiView != null)

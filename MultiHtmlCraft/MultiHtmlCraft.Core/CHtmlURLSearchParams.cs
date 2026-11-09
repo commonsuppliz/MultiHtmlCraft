@@ -99,6 +99,11 @@ namespace MultiHtmlCraft.Core
 
         public void append(string key, string value)
         {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel <= 10)
+            {
+                commonLog.LogEntry("enter {0}.URLSearchParams.append ({1}, {2}) ...", this, key, value);
+            };
+        
             if (!_params.ContainsKey(key))
             {
                 _params[key] = new List<string>();
@@ -129,7 +134,7 @@ namespace MultiHtmlCraft.Core
                 commonLog.LogEntry("enter {0}.URLSearchParams.___getInner ({1}) ...", this, key);
             }
             var resultOfKey =  _params.ContainsKey(key) ? _params[key].FirstOrDefault() : null;
-            if (commonLog.LoggingEnabled && commonLog.LogLevel <= 10)
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
                 commonLog.LogEntry(" {0}.URLSearchParams.___getInner ({1}) returns {2}...", this, key, resultOfKey);
             }
@@ -139,8 +144,21 @@ namespace MultiHtmlCraft.Core
         {
             return ___getInner(key);
         }
+        public void clear()
+        {
+            _params.Clear();
+        }
+        public void sort()
+        {
+            var sortedParams = _params.OrderBy(kvp => kvp.Key).ToList();
+            _params.Clear();
+            foreach (var kvp in sortedParams)
+            {
+                _params[kvp.Key] = kvp.Value;
+            }
+        }
 
- 
+
 
         /*
 
@@ -160,7 +178,12 @@ namespace MultiHtmlCraft.Core
             }
             return _params.ContainsKey(commonHTML.GetStringValue(keyObject));
         }*/
-
+        public double size
+        {
+            get {
+                return this._params.Count;
+            }
+        }
         public bool has(string key)
         {
             if (commonLog.LoggingEnabled && commonLog.LogLevel <= 10)
