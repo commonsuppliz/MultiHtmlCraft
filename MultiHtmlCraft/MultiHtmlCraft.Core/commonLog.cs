@@ -19,9 +19,9 @@ namespace MultiHtmlCraft.Core
     /// commonLog 
     /// </summary>
 #pragma warning disable IDE1006 // 命名スタイル
-		public static class commonLog
+		public static class commonLog 
 #pragma warning restore IDE1006 // 命名スタイル
-		{
+    {
 			private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
 		    public static bool LoggingEnabled
@@ -60,7 +60,8 @@ namespace MultiHtmlCraft.Core
             }	
         }
 
-			public static void LogEntry(string str, params object[] args)
+
+        public static void LogEntry(string str, params object[] args)
 			{
 #if DEBUG
             try
@@ -131,7 +132,8 @@ namespace MultiHtmlCraft.Core
         {
             NLog.LogManager.Shutdown();
         }
-  
+
+
     }
 	}
 

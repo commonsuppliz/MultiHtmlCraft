@@ -8,6 +8,7 @@ using MultiHtmlCraft.AvaloniaControl_Form_Test.Controls;
 using MultiHtmlCraft.Core;
 using System;
 using static System.Net.WebRequestMethods;
+using System.Runtime.InteropServices;
 
 namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
 {
@@ -133,9 +134,9 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/canvas/CanvasRotateTest1.html";//
                 //txt.Text = "http://localhost/canvas/phaser/phaserGameText1.html"; // Phaser Game Text Test 
                 //  txt.Text = "http://localhost/html/HTMLVideoElementTest1.html"; // HTML Video Element Test 1 Basic ok
-                //txt.Text = "http://localhost/canvas/phaser/Gamedev-Phaser-Content-Kit-gh-pages/demos/lesson16.html"; // Phaser Game Text Test 1
+               // txt.Text = "http://localhost/canvas/phaser/Gamedev-Phaser-Content-Kit-gh-pages/demos/lesson16.html"; // Phaser Game Text Test 1
 
-                //txt.Text = "http://localhost/canvas/phaser/phaser-4-planet-defense-main/index.html";
+                txt.Text = "http://localhost/canvas/phaser/phaser-4-planet-defense-main/index.html";
                 //txt.Text = "http://localhost/jstest/VideoElementPrototypeCheck.html"; // Video Element Prototype Check Test 1
                 // txt.Text = "http://localhost/jstest/VideoElementPrototypeCheck3.html";
                 //txt.Text = "http://localhost/canvas/GetComputedStyleTest1.html"; // GetComputedStyle Test 1
@@ -145,7 +146,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/jstest/PerformanceAPITest1.html"; // Performance API Test 1
                 //txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test 4 
 
-                txt.Text = "http://localhost/jstest/URLSearchParamsTest1.html"; // URLSearchParams Test 1
+               // txt.Text = "http://localhost/jstest/URLSearchParamsTest1.html"; // URLSearchParams Test 1
             }
 
             if (btnGo != null && txt != null && _multiView != null)
@@ -186,7 +187,7 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
             try
             {
                 var scriptEngineType = _multiView?.getMultiversalScriptScriptEngineType()?.ToString() ?? "(none)";
-                string strMultiHtmlCraftLibraries = $"MultiHtmlCraft .Net: {System.Environment.Version} GraphicAPI: {commonHTML.GraphicApiType} ScriptEngines: {scriptEngineType} Managed Thread ID {System.Threading.Thread.CurrentThread.ManagedThreadId}";
+                string strMultiHtmlCraftLibraries = $"MultiHtmlCraft .Net: {System.Environment.Version} GraphicAPI: {commonHTML.GraphicApiType} ScriptEngines: {scriptEngineType} Managed Thread ID {System.Threading.Thread.CurrentThread.ManagedThreadId} OS : {RuntimeInformation.OSDescription} OS Architecture: {RuntimeInformation.OSArchitecture}";
 
                 // set the window title
                 this.Title = strMultiHtmlCraftLibraries;

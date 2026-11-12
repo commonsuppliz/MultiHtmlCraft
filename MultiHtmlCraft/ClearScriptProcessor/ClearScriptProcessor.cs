@@ -218,7 +218,7 @@ namespace ClearScriptProcessor
 
                 if (mi == null)
                 {
-                    Debug.WriteLine("V8ObjectImpl: Invoke(bool,object[]) NOT FOUND");
+                    Debug.WriteLine("V8ObjectImpl: mi or Invoke(bool,object[]) NOT FOUND");
                     return null;
                 }
 
@@ -736,8 +736,20 @@ namespace ClearScriptProcessor
             // Detect if this is likely a jQuery/library script
             bool isCommonJsScript = script.Contains("module.exports") || script.Contains("exports.");
             bool isJQueryScript = script.Contains("jQuery") && (script.Contains("factory") || script.Contains("noConflict"));
-
-            _v8ScriptEngine.Execute(scriptToExecute);
+            try
+            {
+                _v8ScriptEngine.Execute(scriptToExecute);
+            }
+            catch (Microsoft.ClearScript.ScriptEngineException scriptError)
+            {
+                Debug.WriteLine($"execute: ScriptEngineException: {scriptError.ErrorDetails ?? scriptError.Message} {scriptError.StackTrace}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"execute: Exception: {ex.Message} StackTrace: {ex.StackTrace}");
+                throw;
+            }
 
             // After executing potential library scripts, check and fix $ callable nature
             if (isCommonJsScript || isJQueryScript)
@@ -878,7 +890,7 @@ namespace ClearScriptProcessor
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"execute: jQuery wrapper creation failed: {ex.Message}");
+                    Debug.WriteLine($"execute: jQuery wrapper creation failed: {ex.Message} {ex.StackTrace}");
                     try { _v8ScriptEngine.Execute($"console.log('[ClearScript] Wrapper creation error: {ex.Message.Replace("'", "\\'")}');"); } catch { }
                 }
             }

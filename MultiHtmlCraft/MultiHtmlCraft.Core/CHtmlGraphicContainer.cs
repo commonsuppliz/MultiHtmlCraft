@@ -57,8 +57,14 @@ public Graphics? CHtmlGraphicContainerGraphics = null;
         public int CurrentElementDepth = 0;
         public bool IsHoverPaintMode = false;
         public CHtmlGraphicAPIType PlatformGraphicAPIType = CHtmlGraphicAPIType.Unknown;
+        /// <summary>
+        /// Graphics Context for Avalonia and Skia 
+        /// </summary>
         public Avalonia.Media.DrawingContext? AvaloniaDrawingContext = null;
-
+#if WINDOWS
+/// <summary>Graphics object for WinForms GDI+ rendering. This is only available when the graphic API type is set to WinformsGDI.</summary>
+        public System.Drawing.Graphics? Graphic =null;
+#endif
         public CHtmlGraphicContainer() : this(commonHTML.GraphicApiType)
         {
 
@@ -441,6 +447,6 @@ public void DrawLine(PenSpec pen, float x1, float y1, float x2, float y2)
             };
         }
 
-        #endregion 
+        #endregion
     }
 }

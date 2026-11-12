@@ -78,6 +78,7 @@ namespace MultiHtmlCraft.Core
                             v8Scope.AddHostObject("host", new HostFunctions());
                             v8Scope.AddHostType("Element", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLElement", typeof(CHtmlElement));
+                            v8Scope.AddHostType("HTMLCanvasElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLBodyElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLIFrameElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLVideoElement", typeof(CHtmlVideoElement));
@@ -90,6 +91,7 @@ namespace MultiHtmlCraft.Core
                             v8Scope.AddHostType("CSSStyleSheet", typeof(CHtmlCSSStyleSheet));
                             v8Scope.AddHostType("URLSearchParams", typeof(CHtmlURLSearchParams));
                             v8Scope.AddHostType("FontFace", typeof(CHtmlFontFace));
+                            #region HTMLVideoElement protype defition
                             try
                             {
                                 v8Scope.engine.Execute(@"(function () {
@@ -182,6 +184,36 @@ namespace MultiHtmlCraft.Core
                                     commonLog.LogEntry(" MultiversalScriptsHost register classes error for HTMLVideoElement requestVideoFrameCallback ", ex);
                                 }
                             }
+                            #endregion
+
+
+                            #region HTMLCanvasElement protype defition
+                            try
+                            {
+                                v8Scope.engine.Execute(@"// 純粋な JavaScript のコンストラクタとして定義
+function HTMLCanvasElement() {
+    // 必要に応じて C# 側のインスタンスを内部で生成・紐付け
+    // 例: this._nativeElement = new CInternalCanvasElement();
+}
+
+// 標準的なプロトタイプの設定
+HTMLCanvasElement.prototype = Object.create(Object.prototype);
+HTMLCanvasElement.prototype.constructor = HTMLCanvasElement;
+
+// グローバルに配置
+globalThis.HTMLCanvasElement = HTMLCanvasElement;
+    
+");
+
+                            }
+                            catch (Exception ex)
+                            {
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+                                {
+                                    commonLog.LogEntry(" MultiversalScriptsHost register classes error for HTMLCanvasElement prototype definition ", ex);
+                                }
+                            }
+                            #endregion
 
 
                             // v8Scope.AddHostType("MessageChannel", typeof(CHtmlMessageChannel)); should use ___createObject instead of constructor to avoid passing ScriptObject to constructor

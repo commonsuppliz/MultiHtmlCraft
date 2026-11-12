@@ -100,6 +100,22 @@ namespace MultiHtmlCraft.AvaroniaControl
                 {
                     ___multiversalWindow.setMultiversalControl(this);
                     setMultiversalScriptScriptEngineType(IMultiversalScriptScriptEngineType.ClearScriptV8);
+
+                    this.SizeChanged += (sender, e) =>
+                    {
+                        // e.NewSize.Width と e.NewSize.Height で新しいサイズを取得できます
+                        double width = e.NewSize.Width;
+                        double height = e.NewSize.Height;
+
+                        if (width > 0 && height > 0)
+                        {
+                            if(commonLog.LoggingEnabled && commonLog.LogLevel >=3)
+                            {
+                                commonLog.LogEntry($"MultiversalControl size changed to {width}x{height}");
+                            }
+                        }
+                    };
+
                 }
             }
             catch
@@ -288,7 +304,7 @@ namespace MultiHtmlCraft.AvaroniaControl
                 MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl.setScrollViewerSize: {rectSpec.X}, {rectSpec.Y}, {rectSpec.Width}, {rectSpec.Height}");
             }
 
-            // VisualTree が確立されるまで遅延
+            
             Dispatcher.UIThread.InvokeAsync(() =>
             {
                 if (_cachedScrollViewer == null)
@@ -298,12 +314,25 @@ namespace MultiHtmlCraft.AvaroniaControl
 
                 if (_cachedScrollViewer != null)
                 {
-                    // Canvas のサイズを設定
+                    
                     if (rectSpec.Width > 0 && rectSpec.Height > 0)
                     {
                         _canvas.Width = rectSpec.Width;
                         _canvas.Height = rectSpec.Height;
                         _extent = new Avalonia.Size(rectSpec.Width, rectSpec.Height);
+                    }else if(rectSpec.Width <=0 || rectSpec.Height <= 0)
+                    {
+                        _canvas.Width = 800; // default width
+                        _canvas.Height = 600; // default height
+                        rectSpec = new RectangleFSpec(0, 0, 800, 600);
+                        if (MultiHtmlCraft.Core.commonLog.LoggingEnabled)
+                        {
+                            MultiHtmlCraft.Core.commonLog.LogEntry($"MultiversalAvaroniaControl.setScrollViewerSize: Invalid size,resetting to  {rectSpec.Width}x{rectSpec.Height}, skipping size set.");
+                        }
+                        this.Width = _canvas.Width;
+                        this.Height = _canvas.Height;
+                        
+
                     }
 
                     // スクロールバーの表示設定

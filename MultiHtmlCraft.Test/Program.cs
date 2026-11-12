@@ -181,8 +181,12 @@ namespace Core.Test
             {
                 commonLog.LogEntry($"Requesting {url} Managed Thread ID :{System.Threading.Thread.CurrentThread.ManagedThreadId}");
             }
-       
-            var document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, url, window);
+            var requestData = new MultiHtmlCraft.CHtmlRequestData();
+            requestData.fields.Add("Method", "GET");
+            requestData.fields.Add("Url", url);
+            
+
+            var document = await MultiHtmlCraft.Core.CHtmlDocument.createDocument(CHtmlDomModeType.HTMLDOM, url, window, requestData);
             Console.WriteLine("App is completed");
             Console.ReadLine();
         }

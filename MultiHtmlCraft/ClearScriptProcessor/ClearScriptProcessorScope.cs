@@ -271,6 +271,17 @@ namespace ClearScriptProcessor
 #endif
 
                 _v8Engine.DisableExtensionMethods = false;
+                
+                try
+                {
+                    engine.Execute("$ = undefined;");
+                    Debug.WriteLine($"$ = undefiened call success");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"initScriptEngine: Jquery failed to set $ to undefined: {ex.GetType().Name} - {ex.Message}");
+                }
+                
                 // Register placeholder host functions for ScriptObject overloads early so JS can call them before document is bound.
                 // These placeholders dispatch to delegates that are assigned when setDcoument is called.
                 _v8Engine.AddHostObject("__doc_addEventListener_so", new Action<string, ScriptObject>((eventName, handler) =>

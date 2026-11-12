@@ -1106,7 +1106,6 @@ namespace MultiHtmlCraft.Core
                             var methods = CHtmlPerformance.CHtmlPerformanceMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
                         }
-
                     case CHtmlNode node:
                         {
                             var props = CHtmlNode.CHtmlNodeProperties.Keys ?? Enumerable.Empty<string>();
@@ -3018,7 +3017,7 @@ namespace MultiHtmlCraft.Core
                             }
                             if (string.Equals(name, "size", StringComparison.OrdinalIgnoreCase))
                             {
-                                return new DynamicMetaObject(Expression.Constant(self.size, typeof(int)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                return new DynamicMetaObject(Expression.Constant(self.size, typeof(double)), BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
 
                             }
                             if (string.Equals(name, "getAll", StringComparison.OrdinalIgnoreCase))
@@ -3715,6 +3714,7 @@ namespace MultiHtmlCraft.Core
             List<int> indexArrayCol = new List<int>();
             int? intIndex = null;
             string strIndex = string.Empty;
+            string? binderName = null;
 
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
@@ -3752,13 +3752,13 @@ namespace MultiHtmlCraft.Core
                     string typeName = "(null)";
                     try
                     {
-                        // 1) まず DynamicMetaObject.Value を試す
+                        
                         if (idx?.Value != null)
                         {
                             rawValue = UnwrapValue(idx.Value) ?? idx.Value;
                         }
 
-                        // 2) idx.Value が null の場合、Expression に定数が埋め込まれているケースを試す
+                        
                         if (rawValue == null && idx?.Expression != null)
                         {
                             var expr = idx.Expression;
@@ -3771,8 +3771,7 @@ namespace MultiHtmlCraft.Core
                                     rawValue = oce.Value;
                                     break;
                                 default:
-                                    // 最後の手段: 式をコンパイルして評価（高コストなのでログし必要なら有効化）
-                                    // try { rawValue = System.Linq.Expressions.Expression.Lambda(expr).Compile().DynamicInvoke(); } catch { }
+
                                     break;
                             }
                         }
@@ -3787,11 +3786,11 @@ namespace MultiHtmlCraft.Core
 
                         if (rawValue == null)
                         {
-                            // 文字列インデックス等は後段の TryResolveIndex で再処理するため続行
+                        
                             continue;
                         }
 
-                        // 数値へ安全に変換
+                        
                         int indexValue;
                         switch (rawValue)
                         {
@@ -3854,6 +3853,11 @@ namespace MultiHtmlCraft.Core
                                 }
 
                                 // If you need to return or handle something here, do it before the break.
+                                break;
+                            }
+                        case CHtmlNavigator navigator:
+                            {
+                                return null;
                                 break;
                             }
 
@@ -3992,6 +3996,38 @@ namespace MultiHtmlCraft.Core
 
                                 return base.BindGetIndex(binder, indexes);
                             }
+                        case CHtmlURLSearchParams urlParams:
+                            {
+                                int pos = -1;
+                                pos = (int)commonData.GetDoubleFromObject(strIndex);
+                                if (!string.IsNullOrEmpty(strIndex))
+                                {
+                                    var result = urlParams.get(strIndex);
+                                    return new DynamicMetaObject(
+                                        Expression.Constant(result ?? string.Empty, typeof(object)),
+                                        BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                    );
+                                }
+                                break;
+                            }
+                        case CHtmlPerformance cperformance:
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+                            {
+                                commonLog.LogEntry($"TODO performance BindGetIndex {this.Value.GetType()}");
+                            }
+                            int pos = (int)commonData.GetDoubleFromObject(strIndex);
+                            if (!string.IsNullOrEmpty(strIndex))
+                            {
+                                    //var result = cperformance.get(strIndex);
+                                    var result = 0;
+                                return new DynamicMetaObject(
+                                    Expression.Constant(result , typeof(double)),
+                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                );
+                            }
+                            break;
+                        }
 
                         default:
                             {

@@ -606,7 +606,7 @@ namespace MultiHtmlCraft.Core
         private string ___dir = "ltr";
         /// <summary>
         /// Flag to Ignore HTML tag Element entirely after body started
-        /// ex. document.write may write html body unintentionally
+        /// exNavigator. document.write may write html body unintentionally
         /// </summary>
         //private bool ___SkipHTMLTagAfterBodyStarts = true;
         /// <summary>
@@ -1008,7 +1008,7 @@ namespace MultiHtmlCraft.Core
         /// </summary>
         internal int ___ThreadSuspentCurrentWaitTime = commonHTML.DOCUMENT_THREADSUSPEND_INITAL_INTERVAL;
         /// <summary>
-        /// List of Disabled Link ex.style List
+        /// List of Disabled Link exNavigator.style List
         /// </summary>
         internal System.Collections.Generic.Dictionary<string, string> ___LinkDisabledHerfList = null;
         internal readonly object ___LinkDisabledLockingObject = new object();
@@ -1143,8 +1143,45 @@ namespace MultiHtmlCraft.Core
                         scope.AddHostObject("console", doc.___window.___console);
 
 
+                        try
+                        {
+                            CHtmlNavigator windowNavigator = doc.___window.navigator as CHtmlNavigator;
+                            if(windowNavigator == null)
+                            {
+                                windowNavigator = new CHtmlNavigator();
+                            }
+                            string userAgent = windowNavigator.userAgent;
+                            string safeUserAgent = System.Text.Json.JsonSerializer.Serialize(userAgent);
+                            string platform = windowNavigator.platform;
+                            string language = windowNavigator.language;
+                            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("windowNavigator.safeUserAgent: {0}", userAgent);
+                            }
+                            
+                            processor.execute($@"
+                            globalThis.navigator = {{
+                                userAgent: '{safeUserAgent}',
+                                platform: '{platform}',
+                                language: '{language}',
+                                vendor: 'Google Inc.',
+                                maxTouchPoints: 0,
+                                onLine: true
+                            }};
+   
 
-                        processor.put("navigator", doc.___window.navigator);
+
+                       
+                            
+                        ");
+                        }
+                        catch ( Exception exNavigator)
+                        {
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                            {
+                                commonLog.LogEntry("ClearScript Error adding navigator to script processor: {0}", exNavigator.Message);
+                            }
+                        }
                         try { 
                         processor.put("performance", doc.___window.performance);
                         }
@@ -3902,7 +3939,7 @@ namespace MultiHtmlCraft.Core
                 }
                 // =============================================================
                 // Some Elements are not added to body
-                // Some times the element reference may be lost. ex canvas element.
+                // Some times the element reference may be lost. exNavigator canvas element.
                 // To keep track the element 
                 // ___ElementDynamicallyCreatedList is created.
                 // =============================================================
@@ -5290,11 +5327,11 @@ namespace MultiHtmlCraft.Core
 
                       //   this.___styleSheets.Clear();
                      }
-                     catch (Exception ex)
+                     catch (Exception exNavigator)
                      {
                          if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                          {
-                             commonLog.LogEntry("{0} ___hasInner error {1}", this, commonData.GetExceptionAsString(ex));
+                             commonLog.LogEntry("{0} ___hasInner error {1}", this, commonData.GetExceptionAsString(exNavigator));
                          }
                      }
                      */
@@ -9389,7 +9426,7 @@ namespace MultiHtmlCraft.Core
                                                                 {
                                                                     // If tagType exists on the .___CSSNthOfTypeTagTypesList use
                                                                     // normal accumulation. otherwise, it may be clonable.
-                                                                    // ex.
+                                                                    // exNavigator.
                                                                     //     :nth-of-type
                                                                     //     :last-of-type
                                                                     //     :fist-of-type
@@ -11406,7 +11443,7 @@ namespace MultiHtmlCraft.Core
                                     {
                                         sbCSSTagTypes.Remove(sbCSSTagTypes.Length - 2, 2);
                                     }
-                                    commonLog.LogEntry("| CSS Pseudo TagName (ex :nth-type)                 :\t\t{0}", sbCSSTagTypes.ToString());
+                                    commonLog.LogEntry("| CSS Pseudo TagName (exNavigator :nth-type)                 :\t\t{0}", sbCSSTagTypes.ToString());
 
                                 }
                                 else
@@ -12330,11 +12367,11 @@ namespace MultiHtmlCraft.Core
 
 					}
 				}
-				catch(Exception ex)
+				catch(Exception exNavigator)
 				{
 					if(commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
 					{
-						commonLog.LogEntry("StringBuilderIndexOf invoke failed {0} Value: {1} StartIndex: {2} Case: {3} ", ex.Message, __value, startIndex, ignoreCase);
+						commonLog.LogEntry("StringBuilderIndexOf invoke failed {0} Value: {1} StartIndex: {2} Case: {3} ", exNavigator.Message, __value, startIndex, ignoreCase);
 					}
 				}
 			}
@@ -13089,7 +13126,7 @@ namespace MultiHtmlCraft.Core
                                             else
                                             {
                                                 // Means it is normal inline element
-                                                // it may not contains any child node.ex [Img]
+                                                // it may not contains any child node.exNavigator [Img]
                                                 if (___priorElementOfparentparentElement.___childNodes.Count > 0)
                                                 {
                                                     CHtmlElement ___SearchedInlineTextElement = null;
@@ -27060,7 +27097,7 @@ namespace MultiHtmlCraft.Core
 
 
         /// <summary>
-        /// Process Script Action ex. onclick onmousemove onmousedown etc
+        /// Process Script Action exNavigator. onclick onmousemove onmousedown etc
         /// </summary>
         /// <param name="eventElement"></param>
         /// <param name="__actionName"></param>
@@ -31384,14 +31421,14 @@ namespace MultiHtmlCraft.Core
 
 
                                     }
-                                    catch (Exception ex)
+                                    catch (Exception exNavigator)
                                     {
                                         if (scriptResult != null)
                                         {
                                             scriptResult.result = 500;
 
-                                            scriptResult.resultText = "Timer Function Error " + timerEvt.ToString() + " Compile Error " + ex.Message.ToString();
-                                            scriptResult.errorDetail = commonData.GetExceptionAsString(ex);
+                                            scriptResult.resultText = "Timer Function Error " + timerEvt.ToString() + " Compile Error " + exNavigator.Message.ToString();
+                                            scriptResult.errorDetail = commonData.GetExceptionAsString(exNavigator);
 
                                         }
                                     }
@@ -31458,7 +31495,7 @@ namespace MultiHtmlCraft.Core
                                         this.___processTimerScriptOrFunction(objFunction);
                                         scriptResult.result = 200;
                                     }
-                                    catch (Exception ex)
+                                    catch (Exception exNavigator)
                                     {
                                         __IntervalSuccess = false;
                                         if (scriptResult != null)
@@ -31466,7 +31503,7 @@ namespace MultiHtmlCraft.Core
                                             scriptResult.result = 500;
 
 
-                                            scriptResult.resultText = string.Format("Script Onload Segment '{0}' Compile Error {1}", timerEvt, ex.Message);
+                                            scriptResult.resultText = string.Format("Script Onload Segment '{0}' Compile Error {1}", timerEvt, exNavigator.Message);
 
                                         }
                                     }
@@ -31510,11 +31547,11 @@ namespace MultiHtmlCraft.Core
 
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception exNavigator)
                     {
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
                         {
-                            commonLog.LogEntry("DocumentTimer_Elapsed Error. ", ex);
+                            commonLog.LogEntry("DocumentTimer_Elapsed Error. ", exNavigator);
                         }
                     }
 
@@ -31612,9 +31649,9 @@ namespace MultiHtmlCraft.Core
                     // just cont
 
                 }
-                catch (Exception ex)
+                catch (Exception exNavigator)
                 {
-                    if (ex is System.Threading.ThreadAbortException)
+                    if (exNavigator is System.Threading.ThreadAbortException)
                     {
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 30)
                         {
@@ -31624,7 +31661,7 @@ namespace MultiHtmlCraft.Core
                     }
                     else if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
                     {
-                        commonLog.LogEntry("DocumentTimerThread_Elapsed", ex);
+                        commonLog.LogEntry("DocumentTimerThread_Elapsed", exNavigator);
                     }
                 }
                 finally
@@ -32113,7 +32150,11 @@ namespace MultiHtmlCraft.Core
                         case "TEMPLATE":
                             return new CHtmlTemplateElement();
                         case "CANVAS":
-                            return new CHtmlElement();
+                            var canvasElement =  new CHtmlElement();
+
+                            canvasElement.___tagName = ___tagNameUpper;
+
+                            return canvasElement;
                         case "INPUT":
                         case "TEXTAREA":
 
@@ -36049,7 +36090,7 @@ namespace MultiHtmlCraft.Core
             {
                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 1)
                 {
-                    commonLog.LogEntry($"___drawTextElement Exception graphicApiType {_grCon.graphicApiType}: String : {___textElement.ToString()} , ex : {ex}");
+                    commonLog.LogEntry($"___drawTextElement Exception graphicApiType {_grCon.graphicApiType}: String : {___textElement.ToString()} , exNavigator : {ex}");
                 }
 
 

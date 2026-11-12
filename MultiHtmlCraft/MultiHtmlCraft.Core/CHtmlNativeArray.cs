@@ -30,6 +30,17 @@ namespace MultiHtmlCraft.Core
             list["height"] = null;
             return list;
         }
+        public static Dictionary<string, object> CHtmlNativeArrayMethods = createCHtmlNativeArrayMethodsList();
+        private static Dictionary<string, object> createCHtmlNativeArrayMethodsList()
+        { 
+
+
+        var list = new Dictionary<string, object>();
+            list["subarray"] = null;
+            list["set"] = null;
+            return list;{ }
+        }
+
 
 
         internal System.Int16[] ___int16Array;

@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace MultiHtmlCraft.Interfaces
 {
-    internal interface CHtmlMultiversalLogger
+    public interface CHtmlMultiversalLogger
     {
+        bool LoggingEnabled { get; set; }
+        int LogLevel { get; set; }
         void LogEntry(string message);
         void LogEntry(string message, int level);
         void LogEntry(string message, int level, Exception ex);

@@ -9,11 +9,13 @@ using Newtonsoft.Json.Linq;
 using System.Xml.Linq;
 using System.Collections;
 using NiL.JS.Core;
+using NiL.JS.Expressions;
 
 namespace MultiHtmlCraft.Core
 {
-    public class CHtmlURLSearchParams : ICommonObjectInterface, IDynamicMetaObjectProvider, IEnumerable
+    public class CHtmlURLSearchParams : CHtmlNode, ICommonObjectInterface, IDynamicMetaObjectProvider, IEnumerable
     {
+       
         internal static Dictionary<string, object> CHtmlURLSearchParamsMethods = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             { "append", null },
@@ -41,7 +43,7 @@ namespace MultiHtmlCraft.Core
             {
                 commonLog.LogEntry("constructor {0}.URLSearchParams() returns is done ...", this);
             }
-
+            base.___multiversalClassType = IMutilversalObjectType.URLSearchParams;
         }
         public CHtmlURLSearchParams(string query = "")
         {
@@ -60,6 +62,7 @@ namespace MultiHtmlCraft.Core
                     commonLog.LogEntry("constructor{0}.URLSearchParams ___hasInner error {1}", this,ex);
                 }
             }
+            base.___multiversalClassType = IMutilversalObjectType.URLSearchParams;
         }
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
         {
@@ -356,7 +359,7 @@ namespace MultiHtmlCraft.Core
         public IMutilversalObjectType multiversalClassType => IMutilversalObjectType.URLSearchParams;
 
         #region IDyamicMetaObjectProvider support to get and set properties
-        public DynamicMetaObject GetMetaObject(Expression parameter)
+        public DynamicMetaObject GetMetaObject(System.Linq.Expressions.Expression parameter)
         {
             return new CHtmlClearScriptDynamicMetaObject<CHtmlURLSearchParams>(parameter, this);
         }

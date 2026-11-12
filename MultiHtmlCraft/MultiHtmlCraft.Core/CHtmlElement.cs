@@ -13042,16 +13042,39 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                 }
 
             }
+            switch (_canvasType)
+            {
+                case CanvasContextModeType.Canvas2D:
+                    if (this.___style.___IsForegroundSysColorSpecified == true)
+                    {
+                        this.___canvasContextCurrent2D.___CanvasForegroundSysColor = this.___style.___ForegroundSysColor;
+                    }
+                    else
+                    {
 
-            if (this.___style.___IsForegroundSysColorSpecified == true)
-            {
-                this.___canvasContextCurrent2D.___CanvasForegroundSysColor = this.___style.___ForegroundSysColor;
+                        this.___canvasContextCurrent2D.___CanvasForegroundSysColor = ColorSpec.Black;
+                    }
+                    break;
+                case CanvasContextModeType.WebGL:
+                    {
+                        break;
+                    }
+                case CanvasContextModeType.AudioContext:
+                    {
+                        break;
+                    }
+                case CanvasContextModeType.SVG:
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+
             }
-            else
-            {
-                
-                this.___canvasContextCurrent2D.___CanvasForegroundSysColor = ColorSpec.Black;
-            }
+            if(_canvasType == CanvasContextModeType.Canvas2D)
+            { 
             this.___canvasContextCurrent2D.ContextMode = _contenxtName;
             this.___canvasContextCurrent2D.___CanvasContextModeType = _canvasType;
             this.___canvasContextCurrent2D.___parentElementWeakReference = new WeakReference(this, false);
@@ -13093,31 +13116,31 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                 }
             }
 
-            if (this.___canvasContextCurrent2D.___CanvasContextModeType  == CanvasContextModeType.Canvas2D || this.___canvasContextCurrent2D.___CanvasContextModeType == CanvasContextModeType.SVG)
-            {
-                if (this.___CanvasGdiImage == null)
+                if (this.___canvasContextCurrent2D.___CanvasContextModeType == CanvasContextModeType.Canvas2D || this.___canvasContextCurrent2D.___CanvasContextModeType == CanvasContextModeType.SVG)
                 {
-
-                    if (this.___offsetHeight > 0 && this.___offsetWidth > 0)
-                    {
-                        bool ___IsStartupCanvasSizeMayBeWrong = false;
-                        if (this.___offsetWidth > 5000)
-                        {
-                            ___IsStartupCanvasSizeMayBeWrong = true;
-                        }
-                        if (this.___offsetHeight > 5000)
-                        {
-                            ___IsStartupCanvasSizeMayBeWrong = true;
-                        }
-
-                    }
-
-                    try
+                    if (this.___CanvasGdiImage == null)
                     {
 
-                        switch (commonHTML.GraphicApiType)
+                        if (this.___offsetHeight > 0 && this.___offsetWidth > 0)
                         {
-                            case CHtmlGraphicAPIType.WinformsGDI:
+                            bool ___IsStartupCanvasSizeMayBeWrong = false;
+                            if (this.___offsetWidth > 5000)
+                            {
+                                ___IsStartupCanvasSizeMayBeWrong = true;
+                            }
+                            if (this.___offsetHeight > 5000)
+                            {
+                                ___IsStartupCanvasSizeMayBeWrong = true;
+                            }
+
+                        }
+
+                        try
+                        {
+
+                            switch (commonHTML.GraphicApiType)
+                            {
+                                case CHtmlGraphicAPIType.WinformsGDI:
 #if WINDOWS
                                 System.Drawing.Bitmap canvasBitmap = null;
                                 if (this.___offsetWidth > 0 && this.___offsetHeight > 0)
@@ -13147,44 +13170,45 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                                 this.___canvasContextCurrent2D.___CanvasGdiImageWeakReference = new WeakReference(this.___CanvasGdiImage, false);
                                 break;
 #else
-                            case CHtmlGraphicAPIType.Avalonia:
-                            case CHtmlGraphicAPIType.SkiaSharp:
-                                {
-                                    if (this.___offsetWidth > 0 && this.___offsetHeight > 0)
+                                case CHtmlGraphicAPIType.Avalonia:
+                                case CHtmlGraphicAPIType.SkiaSharp:
                                     {
+                                        if (this.___offsetWidth > 0 && this.___offsetHeight > 0)
+                                        {
 
-                                        this.___CanvasSkiaBitmap = new SkiaSharp.SKBitmap((int)this.___offsetWidth, (int)this.___offsetHeight, SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Premul);
-                                        this.___canvasContextCurrent2D.___CanvasSkiaBitmapWeakReference = new WeakReference(this.___CanvasSkiaBitmap, false);
+                                            this.___CanvasSkiaBitmap = new SkiaSharp.SKBitmap((int)this.___offsetWidth, (int)this.___offsetHeight, SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Premul);
+                                            this.___canvasContextCurrent2D.___CanvasSkiaBitmapWeakReference = new WeakReference(this.___CanvasSkiaBitmap, false);
+                                        }
+                                        else
+                                        {
+                                            this.___CanvasSkiaBitmap = new SkiaSharp.SKBitmap(1, 1, SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Premul);
+                                            this.___canvasContextCurrent2D.___CanvasSkiaBitmapWeakReference = new WeakReference(this.___CanvasSkiaBitmap, false);
+                                        }
                                     }
-                                    else
-                                    {
-                                        this.___CanvasSkiaBitmap = new SkiaSharp.SKBitmap(1, 1, SkiaSharp.SKColorType.Bgra8888, SkiaSharp.SKAlphaType.Premul);
-                                        this.___canvasContextCurrent2D.___CanvasSkiaBitmapWeakReference = new WeakReference(this.___CanvasSkiaBitmap, false);
-                                    }
-                                }
-                                this.___canvasContextCurrent2D.___CanvasGraphicAPIType = commonHTML.GraphicApiType;
+                                    this.___canvasContextCurrent2D.___CanvasGraphicAPIType = commonHTML.GraphicApiType;
 
 
-                                break;
+                                    break;
 #endif
-                            default:
-                                break;
+                                default:
+                                    break;
+                            }
+
+
                         }
-
-
-                    }
-                    catch (Exception ex)
-                    {
-                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        catch (Exception ex)
                         {
-                            commonLog.LogEntry("getContext({0})__getContext_inner exception {1}", ___contextID, ex);
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry("getContext({0})__getContext_inner exception {1}", ___contextID, ex);
+                            }
                         }
                     }
                 }
-        
 
-            }
-            else
+
+                }
+                else
             {
                 if (commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
                 {
@@ -13192,9 +13216,32 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
                 }
 
             }
-            this.___canvasContextActiveWeakReference = new WeakReference(this.___canvasContextCurrent2D);
-            this.___ElementCanvasContextType = _canvasType;
-            return this.___canvasContextCurrent2D;
+            switch (_canvasType)
+            {
+                case CanvasContextModeType.Canvas2D:
+                case CanvasContextModeType.Canvas2DPrototype:
+                case CanvasContextModeType.SVG:
+                    this.___canvasContextActiveWeakReference = new WeakReference(this.___canvasContextCurrent2D);
+                    this.___ElementCanvasContextType = _canvasType;
+                    return this.___canvasContextCurrent2D;
+                    break;
+                case CanvasContextModeType.AudioContext:
+                    this.___audioBasedContext.___CanvasContextModeType = _canvasType;
+                    this.___canvasContextActiveWeakReference = new WeakReference(this.___audioBasedContext);
+                    this.___ElementCanvasContextType = _canvasType;
+                    return this.___audioBasedContext;
+                    break;
+                case CanvasContextModeType.WebGL:
+                case CanvasContextModeType.WebGLPrototype:
+                    this.__canvasContextCurrentWebGL.___CanvasContextModeType = _canvasType;
+                    this.___canvasContextActiveWeakReference = new WeakReference(this.__canvasContextCurrentWebGL);
+                    this.___ElementCanvasContextType = _canvasType;
+                    return this.__canvasContextCurrentWebGL;
+                    break;
+                default:
+                    return null;
+            }
+
 		}
 
 		/// <summary>

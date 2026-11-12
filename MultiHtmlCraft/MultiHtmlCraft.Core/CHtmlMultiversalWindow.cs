@@ -2644,19 +2644,63 @@ namespace MultiHtmlCraft.Core
             }
         }
 #endif
-        public object get(string ___name)
+        public object get(params object[] ___nameArgs)
+        {
+            return this.____get_Inner(___nameArgs);
+        }
+
+        internal object ____get_Inner(params object[] ___nameArgs)
         {
 
             object __objectInList;
+            string ___name = "";
+            if (___nameArgs != null && ___nameArgs.Length > 0)
+            {
+                if (___nameArgs[0] != null)
+                {
+                    ___name = ___nameArgs[0].ToString();
+                }
+            };
 
 #if DEBUG
-            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 50)
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {
-                commonLog.LogEntry("CHtmlMultiversalWindow entering {0}.___getInner(\'{1}\')", this, ___name);
+                commonLog.LogEntry($"{this} CHtmlMultiversalWindow entering ___get_Inner('{___name} args: {string.Join(", ", ___nameArgs)}')");
 
             }
 #endif
+            try
+            {
+                switch (___name)
+                {
+                    case "cordova":
+                    case "ejecta":
+                    case "requestFileSystem":
+                        return null; 
 
+                    case "devicePixelRatio":
+                        return 1.0;
+
+                    case "CanvasRenderingContext2D":
+                        return new CHtmlCanvasContext2D();
+
+                    case "WebGLRenderingContext":
+                        return new CHtmlWebGLRenderingContext();
+
+                    case "FileList":
+                        return new CHtmlFileList();
+
+                    default:
+                        
+                        break;
+                }
+            } catch (Exception ex)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
+                {
+                    commonLog.LogEntry("CHtmlMultiversalWindow ___getInner switch error ", ex);
+                }
+            }
             try
             {
                 if (this.___WindowsPropertiesList != null && this.___WindowsPropertiesList.TryGetValue(___name, out __objectInList) == true)
@@ -2964,6 +3008,7 @@ namespace MultiHtmlCraft.Core
         {
               return scope.ScopeGet(name);
         }
+        /*
         public object get(int ___index)
         {
             if (___index >= 0 && this.___WindowsPropertiesList.Count > ___index)
@@ -2973,6 +3018,7 @@ namespace MultiHtmlCraft.Core
 
             return MultiversalUniqueTag.UniqueType.Not_Found;
         }
+        */
         public void Dispose()
         {
             this.___IsDispoing = true;

@@ -5,6 +5,11 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <PropertyGroup>
+		<AssemblyVersion>2.5.5</AssemblyVersion>
+		<FileVersion>2.5.5</FileVersion>
+		<Version>2.5.5</Version>
+	</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Skia" Version="11.3.11" />
