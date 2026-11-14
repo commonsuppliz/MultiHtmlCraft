@@ -13772,6 +13772,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 		/// <returns>One CHtmlTextRectangle</returns>
 		public CHtmlTextRectangle getBoundingClientRect()
 		{
+
             if(commonLog.LoggingEnabled &&commonLog.LogLevel >= 10)
             {
                commonLog.LogEntry("{0}.getBoundingClientRect() called...", this);

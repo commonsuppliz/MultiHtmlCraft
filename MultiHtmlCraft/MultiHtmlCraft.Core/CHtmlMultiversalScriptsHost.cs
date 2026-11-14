@@ -79,8 +79,13 @@ namespace MultiHtmlCraft.Core
                             v8Scope.AddHostType("Element", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLCanvasElement", typeof(CHtmlElement));
+                            v8Scope.AddHostType("HTMLAudioElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLBodyElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLIFrameElement", typeof(CHtmlElement));
+                            v8Scope.AddHostType("AudioContext", typeof(CHtmlAudioContext));
+                            v8Scope.AddHostType("XMLHttpRequest", typeof(CHtmlXMLHttpRequest));
+
+
                             v8Scope.AddHostType("HTMLVideoElement", typeof(CHtmlVideoElement));
                             v8Scope.AddHostType("HTMLDivElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLInputElement", typeof(CHtmlInputElement));

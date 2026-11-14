@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 
 using MultiHtmlCraft.Interfaces;
@@ -9,11 +12,26 @@ namespace MultiHtmlCraft.Core
 	/// </summary>
 	[ComVisible(true)]
 	
-	public sealed class CHtmlTextRectangle : ICommonObjectInterface 
+	public sealed class CHtmlTextRectangle : CHtmlNode,  ICommonObjectInterface , IDynamicMetaObjectProvider
 	{
+		internal static Dictionary<string, int> CHtmlTextRectangleProperties = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+            {
+            {"left", 1},
+            {"top", 2},
+            {"right", 3},
+            {"bottom", 4},
+            {"width", 5},
+            {"height", 6}
+        };
 
 
-		public CHtmlTextRectangle()
+
+
+
+
+
+
+        public CHtmlTextRectangle()
 		{
 
 		}
@@ -42,12 +60,20 @@ namespace MultiHtmlCraft.Core
 			get{return this._bottom;}
 			set{this._bottom = value;}
 		}
-		
-		#region IPropertBox ÉÅÉìÉo
+		public double width
+        {
+            get { return this._right - this._left; }
+        }
+        public double height
+        {
+            get { return this._bottom - this._top; }
+        }
+
+        #region IPropertBox ÉÅÉìÉo
 
 
-		
-		public object ___getPropertyByName(string ___name)
+
+        public object ___getPropertyByName(string ___name)
 		{
 			switch(___name)
 			{
@@ -232,6 +258,12 @@ namespace MultiHtmlCraft.Core
 				commonLog.LogEntry("___setProtoType {0} {1} called : {2}",this.GetType(), this, ___object);
 			}
 		}
+
+        public DynamicMetaObject GetMetaObject(Expression parameter)
+        {
+            return new CHtmlClearScriptDynamicMetaObject<CHtmlTextRectangle>(parameter, this);
+        }
+
         public IMutilversalObjectType multiversalClassType
         {
             get

@@ -750,8 +750,10 @@ namespace ClearScriptProcessor
                 Debug.WriteLine($"execute: Exception: {ex.Message} StackTrace: {ex.StackTrace}");
                 throw;
             }
+        
 
             // After executing potential library scripts, check and fix $ callable nature
+            /*
             if (isCommonJsScript || isJQueryScript)
             {
                 try
@@ -799,6 +801,7 @@ namespace ClearScriptProcessor
                                 };
 
                                 // Expose the invoker to JavaScript
+                                
                                 _v8ScriptEngine.AddHostObject("___jqueryHostInvoker", jqueryInvoker);
                                 _v8ScriptEngine.AddHostObject("___jqueryScriptObject", so);
 
@@ -894,9 +897,11 @@ namespace ClearScriptProcessor
                     try { _v8ScriptEngine.Execute($"console.log('[ClearScript] Wrapper creation error: {ex.Message.Replace("'", "\\'")}');"); } catch { }
                 }
             }
+            */
 
             return null;
         }
+        
 
         public object get(string name)
         {

@@ -65,7 +65,29 @@ namespace MultiHtmlCraft.Core
             { "innerHeight", 20},
             { "outerWidth", 21},
             { "outerHeight", 22},
-            { "performance", 23}
+            { "performance", 23},
+            { "screenX", 24},
+            { "screenY", 25},
+            { "scrollX", 26},
+            { "scrollY", 27},
+            { "pageXOffset", 28},
+            { "pageYOffset", 29},
+            { "scrollLeft", 30},
+            { "scrollTop", 31},
+            { "devicePixelRatio", 32},
+            {"localStorage", 33 },
+            {"sessionStorage", 34 },
+            {"indexedDB", 35 },
+            {"crypto", 36 },
+            {"speechSynthesis", 37 },
+            {"navigator", 38 },
+            {"location", 39 },
+            {"history", 40 },
+            {"console", 41 },
+            {"external", 42 },
+            {"event", 43 },
+            
+
 
         };
                 return chtmlMultiversalWindowProperties;
@@ -3093,8 +3115,35 @@ namespace MultiHtmlCraft.Core
 
             return (object)this.has(___name);
         }
-        public bool has(string ___name)
+        public void set(params object[] args)
         {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"{this} CHtmlMultiversalWindow.set({0}) called", args);
+            }
+            
+        }
+        public void put(params object[] args)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry($"{this} CHtmlMultiversalWindow.put({0}) called", args);
+            }
+
+        }
+        public void setPrototype(object ___prototype)
+        {
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            {
+                commonLog.LogEntry("CHtmlMultiversalWindow.setPrototype({0}) called", ___prototype);
+            }
+        }   
+        public bool has(string ___name)
+        {   if(commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+          
+           {
+                commonLog.LogEntry("CHtmlMultiversalWindow.has(\'{0}\') called", ___name);
+            }
             switch (___name)
             {
                 case "window":

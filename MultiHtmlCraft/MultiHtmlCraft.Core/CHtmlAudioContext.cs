@@ -17,6 +17,34 @@ namespace MultiHtmlCraft.Core
     
     public class CHtmlAudioContext : CHtmlNode, ICommonObjectInterface, System.IDisposable
     {
+        internal static Dictionary<string, int> CHtmlAudioContextProperties = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "destination", 1 },
+            { "sampleRate", 2 },
+            { "onstatechange", 3 },
+            { "currentTime", 4 },
+            { "state", 5 },
+            { "canvas", 6 },
+        };
+        internal static Dictionary<string, int> CHtmlAudioContextMethods = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "createBiquadFilter", 1 },
+            { "createDynamicsCompressor", 2 },
+            { "bindBuffer", 3 },
+            { "bufferData", 4 },
+            { "blendFuncSeparate", 5 },
+            { "blendEquation", 6 },
+            { "cullFace", 7 },
+            { "viewport", 8 },
+            { "shaderSource", 9 },
+            { "compileShader", 10 },
+            { "attachShader", 11 },
+            { "linkProgram", 12 },
+            { "getProgramParameter", 13 },
+            { "useProgram", 14 },
+            { "getAttribLocation", 15 },
+            { "vertexAttribPointer", 16 },
+        };
 
 
         internal CHtmlCanvasContextAttributes ___contextAttributes = null;

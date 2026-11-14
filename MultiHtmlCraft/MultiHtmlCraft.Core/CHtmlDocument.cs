@@ -400,7 +400,7 @@ namespace MultiHtmlCraft.Core
         /// </summary>
         internal int ___DeferredEnqueuedScriptCount = 0;
         private object ___DeferEnqueueProcessEnqueuedLockingObject = new object();
-        private System.Collections.Generic.List<CHtmlScriptResult> ___EnqueuedScriptList = null;
+        private System.Collections.Generic.Dictionary<String, CHtmlScriptResult> ___EnqueuedScriptList = null;
         internal string ___contentType;
         private int ___ExpectedDeferScriptCount = 0;
         private TaskCompletionSource<bool> ___AllDeferScriptsLoadedTcs
@@ -1450,7 +1450,7 @@ namespace MultiHtmlCraft.Core
                     this.___CurrentParentNodeStackList = new System.Collections.Generic.List<WeakReference>();
                     this.___framesAsMultiversalWindow = new CHtmlDictionaryWithIndexEasyAssigned();
                     this.___framesAsMultiversalWindow.___CollectionType = CHtmlHTMLCollectionType.WindowFramesAsMultiversalWindow;
-                    this.___EnqueuedScriptList = new System.Collections.Generic.List<CHtmlScriptResult>();
+                    this.___EnqueuedScriptList = new System.Collections.Generic.Dictionary<string, CHtmlScriptResult>(StringComparer.OrdinalIgnoreCase);
 
                     this.___AdHocBitmapGraphicListLockingObject = new object();
                     this.___ElementsNeedsEventFireOnLoadQueueWeakReferenceList = new System.Collections.Generic.List<WeakReference>();
@@ -10267,10 +10267,13 @@ namespace MultiHtmlCraft.Core
                                                                                                 httpAsyncMode = commonHTML.HttpAsyncDeferMode.Async;
                                                                                                 isAsyncOrDeferScript = true;
                                                                                             }
-                                                                                            else if (cscriptElement.___attributes.ContainsKey("defer"))
+                                                                                            if (cscriptElement.___attributes.ContainsKey("defer"))
                                                                                             {
                                                                                                 ___ExpectedDeferScriptCount++;
-                                                                                                httpAsyncMode = commonHTML.HttpAsyncDeferMode.Defer;
+                                                                                                if (httpAsyncMode != commonHTML.HttpAsyncDeferMode.Async)
+                                                                                                { 
+                                                                                                    httpAsyncMode = commonHTML.HttpAsyncDeferMode.Defer;
+                                                                                                 }
                                                                                                 isAsyncOrDeferScript = true;
                                                                                             }
                                                                                             string typevalue = string.Empty;
@@ -10323,6 +10326,7 @@ namespace MultiHtmlCraft.Core
                                                                                                 Task<TaskResultElement> task = ___downloadElementContentStringWithTask(cscriptElement, __absScriptUrl, typevalue, httpAsyncMode);
                                                                                                 task.ContinueWith((Task<TaskResultElement> t) =>
                                                                                                 {
+                                                                                                    bool isDeferScriptDownloaded = false;
                                                                                                     TaskResultElement __taskResult = t.Result as TaskResultElement;
                                                                                                     if (__taskResult != null && __taskResult.IsCompletedSuccessfully)
                                                                                                     {
@@ -10351,7 +10355,7 @@ namespace MultiHtmlCraft.Core
                                                                                                             deferScript.IsCompiled = false;
                                                                                                             lock (this.___EnqueuedScriptList)
                                                                                                             {
-                                                                                                                this.___EnqueuedScriptList.Add(deferScript);
+                                                                                                                this.___EnqueuedScriptList.Add(__absScriptUrl, deferScript);
                                                                                                                 this.___DeferredEnqueuedScriptCount++;
                                                                                                                 if (this.___DeferredEnqueuedScriptCount >= this.___ExpectedDeferScriptCount)
                                                                                                                 {
@@ -10361,26 +10365,32 @@ namespace MultiHtmlCraft.Core
                                                                                                             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                                                                                                             {
 
-                                                                                                                commonLog.LogEntry("defer script {0} has been downloaded and added to script queue Thread ID :{1}", __absScriptUrl, Thread.CurrentThread.ManagedThreadId);
+                                                                                                                commonLog.LogEntry($"defer script {__absScriptUrl} has been downloaded and added  Current EnquedScriptCount: {this.___EnqueuedScriptList.Count} Thread ID :{Thread.CurrentThread.ManagedThreadId} ");
 
 
                                                                                                             }
+                                                                                                            isDeferScriptDownloaded = true;
+                                                                                                            
 
                                                                                                         }
                                                                                                     }
-                                                                                                    else if (t.IsFaulted)
+                                                                                                    else if (isDeferScriptDownloaded == false)
                                                                                                     {
-                                                                                                        // エラー処理
-                                                                                                        var ex = t.Exception;
-                                                                                                    }
-                                                                                                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
-                                                                                                    {
+                                                                                                        if (!this.___EnqueuedScriptList.TryGetValue(__absScriptUrl, out var __deferScript))
+                                                                                                        {
+                                                                                                            var ex = t.Exception;
+                                                                                                        }
+                                                                                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                                                                                                        {
 
-                                                                                                        commonLog.LogEntry("Done! script {0} has been downloaded", __absScriptUrl);
+                                                                                                            commonLog.LogEntry("defer script {0} has not been downloaded", __absScriptUrl);
+                                                                                                        }
                                                                                                     }
+
+ 
                                                                                                 });
 
-
+                                                                                            
 
                                                                                             }
                                                                                             else
@@ -11019,6 +11029,10 @@ namespace MultiHtmlCraft.Core
                         {
                             commonLog.LogEntry("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                             commonLog.LogEntry("entering load or DcomContentLoaded fuction call process : {0}", this.___UrlShortName);
+                            if(this.___EnqueuedScriptList!= null && this.___EnqueuedScriptList.Count >0)
+                            {
+                                commonLog.LogEntry("TODO Enqueued Script Count : {0}", this.___EnqueuedScriptList.Count);
+                            }
                             commonLog.LogEntry("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                         }
 
@@ -12439,6 +12453,10 @@ namespace MultiHtmlCraft.Core
 
         internal void ___processDocumentEnqueuedScripts(CHtmlEnqeueStatusType __TargetProcessStatus)
         {
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
+            {
+                commonLog.LogEntry("___processDocumentEnqueuedScripts {0} {1}", __TargetProcessStatus, this.___EnqueuedScriptList.Count);
+            }
             if (System.Threading.Monitor.TryEnter(this.___DeferEnqueueProcessEnqueuedLockingObject, 0))
             {
                 int ___OriginalAysncScriptCount = this.___DeferredEnqueuedScriptCount;
@@ -12446,9 +12464,9 @@ namespace MultiHtmlCraft.Core
                 try
                 {
                     int ___OriginalScriptEventListCount = this.___EnqueuedScriptList.Count;
-                    for (int i = ___OriginalScriptEventListCount - 1; i >= 0; i--)
+                    foreach(CHtmlScriptResult _scriptElement in this.___EnqueuedScriptList.Values)
                     {
-                        CHtmlScriptResult _scriptElement = this.___EnqueuedScriptList[i] as CHtmlScriptResult;
+                        
 
                         DateTime ___dtStart = DateTime.Now;
                         if (_scriptElement.IsCompiled == false)
@@ -12465,7 +12483,7 @@ namespace MultiHtmlCraft.Core
                                 if (___currentWindow != null)
                                 {
                                     this.___scriptEventList.Add(_scriptElement);
-                                    this.___EnqueuedScriptList.RemoveAt(i);
+                                    
 
                                     ___EnqueueRunCount++;
                                     CHtmlElement scriptElement = null;

@@ -961,6 +961,12 @@ namespace MultiHtmlCraft.Core
             {
                 switch (this.Value)
                 {
+                    case CHtmlAudioContext audioContext:
+                        {
+                            var props = CHtmlAudioContext.CHtmlAudioContextProperties.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlAudioContext.CHtmlAudioContextMethods.Keys ?? Enumerable.Empty<string>();
+                            return props.Concat(methods);
+                        }
                     case CHtmlWindowEvent evt:
                         {
 
@@ -1075,7 +1081,11 @@ namespace MultiHtmlCraft.Core
                             var methods = CHtmlCSSStyleSheet.CHtmlCSSStyleSheetMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
                         }
-
+                    case CHtmlTextRectangle textRect:
+                        {
+                            var props = CHtmlTextRectangle.CHtmlTextRectangleProperties.Keys ?? Enumerable.Empty<string>();
+                            return props;
+                        }
                     case CHtmlMultiversalWindow window:
                         {
                             var props = CHtmlMultiversalWindow.CHtmlMultiversalWindowProperties.Keys ?? Enumerable.Empty<string>();
@@ -1112,6 +1122,10 @@ namespace MultiHtmlCraft.Core
 
                             return props;
                         }
+
+
+
+
 
                     default:
                         var obj = this.Value;
@@ -2302,21 +2316,38 @@ namespace MultiHtmlCraft.Core
                                         }
                                     case "querySelectorAll":
                                         {
-                                            // Return a callable delegate for querySelectorAll(selector)
                                             Func<object, object> querySelectorAllDel = (selectorArg) =>
                                             {
                                                 try
                                                 {
                                                     var unwrapped = UnwrapValue(selectorArg) ?? selectorArg;
                                                     var selector = unwrapped?.ToString() ?? "*";
-                                                    return self.querySelectorAll(selector);
+
+                                                    // 内部コレクションを取得
+                                                    var rawResult = self.querySelectorAll(selector);
+
+                                                    // 必ず C# の配列（CHtmlElement[]）に変換して返す
+                                                    if (rawResult is System.Collections.IEnumerable enumerable)
+                                                    {
+                                                        var list = new System.Collections.Generic.List<CHtmlElement>();
+                                                        foreach (var item in enumerable)
+                                                        {
+                                                            if (item is CHtmlElement elem)
+                                                            {
+                                                                list.Add(elem);
+                                                            }
+                                                        }
+                                                        return list.ToArray(); // ★ここで配列を返すと、JS側で [0] が完全に機能するようになります
+                                                    }
+
+                                                    return new CHtmlElement[0];
                                                 }
                                                 catch (Exception ex)
                                                 {
-                                                    try { if (commonLog.LoggingEnabled) commonLog.LogEntry("querySelectorAll delegate exception: {0}", ex.Message); } catch { }
-                                                    return new CHtmlCollection();
+                                                    return new CHtmlElement[0];
                                                 }
                                             };
+
                                             return new DynamicMetaObject(
                                                 Expression.Constant(querySelectorAllDel, typeof(Func<object, object>)),
                                                 BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
@@ -2344,8 +2375,22 @@ namespace MultiHtmlCraft.Core
                                                 BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                             );
                                         }
-                                
-           
+                                    case "getBoundingClientRect":
+                                        {
+
+                                            Func<object> getRectFunc = () => self.getBoundingClientRect();
+
+
+                                           return new DynamicMetaObject(
+                                           Expression.Constant(getRectFunc, typeof(Func<object>)),
+                                           BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                       );
+                                        }
+
+                                        
+
+
+
 
                                 } // end switch (binder.Name)
                             } // end if (CHtmlElementMethods.ContainsKey)
@@ -2883,27 +2928,86 @@ namespace MultiHtmlCraft.Core
                                         break;
                                     case "querySelectorAll":
                                         {
-                                            Func<object, object?> querySelectorAllDel = (eventTypeArg) =>
+                                            
+                                            Func<object, object> querySelectorAllDel = (selectorArg) =>
                                             {
                                                 try
                                                 {
-                                                    var unwrapped = UnwrapValue(eventTypeArg);
+                                                    var unwrapped = UnwrapValue(selectorArg) ?? selectorArg;
+                                                    var selector = unwrapped?.ToString() ?? "*";
 
-                                                    return self.querySelectorAll(unwrapped);
+                                                    // 内部コレクションを取得
+                                                    var rawResult = self.querySelectorAll(selector);
+                                                    if (rawResult is System.Collections.IList listObj)
+                                                    {
+                                                        var list = new System.Collections.Generic.List<object>();
+                                                        for (int i = 0; i < listObj.Count; i++)
+                                                        {
+                                                            var item = listObj[i];
+                                                            if (item != null)
+                                                            {
+                                                                if (commonLog.LoggingEnabled && commonLog.LogLevel > 3)
+                                                                {
+                                                                    commonLog.LogEntry($"CHtmlCollection item[{i}]: {item.GetType()}");
+                                                                }
+                                                                list.Add(item);
+                                                            }
+                                                        }
 
+                                                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                                                        {
+                                                            commonLog.LogEntry($"document.querySelectorAll({selector}) will return array with {list.Count}");
+                                                        }
+                                                        return list.ToArray();
+                                                    }
+
+                                                    // 必ず C# の配列（CHtmlElement[]）に変換して返す
+                                                    if (rawResult is System.Collections.IEnumerable enumerable)
+                                                    {
+                                                        var list = new System.Collections.Generic.List<object>();
+                                                        foreach (var item in enumerable)
+                                                        {
+                                                            if (item != null)
+                                                            {
+                                                                if (item is CHtmlElement)
+                                                                {
+                                                                    if (commonLog.LoggingEnabled && commonLog.LogLevel > 3)
+                                                                    {
+                                                                        commonLog.LogEntry($"CHtmlCollection item is CHtmlElement : {item.GetType()}");
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+
+                                                                    if (commonLog.LoggingEnabled && commonLog.LogLevel > 3)
+                                                                    {
+                                                                        commonLog.LogEntry($"CHtmlCollection item is not CHtmlElement : {item.GetType()}");
+                                                                    }
+                                                                }
+                                                            
+                                                                list.Add(item); // フィルタリングせず、取得できた要素をそのまま配列に積む
+                                                            }
+                                                        }
+                                                        if(commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                                                        {
+                                                            commonLog.LogEntry($"document.querySelectorAll({selector}) will retern CHtmlElement[] array with {list.Count}");
+                                                        }
+                                                        return list.ToArray(); // ★ここで配列を返すと、JS側で [0] が完全に機能するようになります
+                                                    }
+
+                                                    return new CHtmlElement[0];
                                                 }
                                                 catch (Exception ex)
                                                 {
-                                                    try { if (commonLog.LoggingEnabled) commonLog.LogEntry("createEvent delegate exception: {0}", ex.Message); } catch { }
+                                                    return new CHtmlElement[0];
                                                 }
-                                                return null;
                                             };
+
                                             return new DynamicMetaObject(
-                                                Expression.Constant(querySelectorAllDel, typeof(Func<object, object?>)),
+                                                Expression.Constant(querySelectorAllDel, typeof(Func<object, object>)),
                                                 BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                             );
                                         }
-                                        ;
 
 
                                         break;
@@ -3027,6 +3131,48 @@ namespace MultiHtmlCraft.Core
 
                             }
 
+                        }
+                        break;
+                    case CHtmlTextRectangle textRectangle:
+                        {
+                            var self = textRectangle;
+                            var targetExpression = Expression.Convert(this.Expression, this.LimitType);
+                            switch (binder.Name)
+                            {
+                                case "width":
+                                    {
+                                        var propExpr = Expression.Property(targetExpression, nameof(CHtmlTextRectangle.width)); // または "Width"
+                                        return new DynamicMetaObject(
+                                            propExpr,
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                case "height":
+                                    {
+                                        var propExpr = Expression.Property(targetExpression, nameof(CHtmlTextRectangle.height));
+                                        return new DynamicMetaObject(
+                                            propExpr,
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                case "left":
+                                    {
+                                        var propExpr = Expression.Property(targetExpression, nameof(CHtmlTextRectangle.left));
+                                        return new DynamicMetaObject(
+                                            propExpr,
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+                                case "top":
+                                    {
+                                        var propExpr = Expression.Property(targetExpression, nameof(CHtmlTextRectangle.top));
+                                        return new DynamicMetaObject(
+                                            propExpr,
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                    }
+
+                            }
                         }
                         break;
                     case CHtmlPerformance cHtmlPerformance:
