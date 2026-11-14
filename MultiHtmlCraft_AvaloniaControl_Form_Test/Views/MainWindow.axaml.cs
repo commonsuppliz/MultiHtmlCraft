@@ -134,21 +134,22 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 //txt.Text = "http://localhost/canvas/CanvasRotateTest1.html";//
                 //txt.Text = "http://localhost/canvas/phaser/phaserGameText1.html"; // Phaser Game Text Test 
                 //  txt.Text = "http://localhost/html/HTMLVideoElementTest1.html"; // HTML Video Element Test 1 Basic ok
-                 txt.Text = "http://localhost/canvas/phaser/Gamedev-Phaser-Content-Kit-gh-pages/demos/lesson16.html"; // Phaser Game Text Test 1
-                                                                                                                      //txt.Text = "http://localhost/canvas/phaser/phaser-games-collection-master/games-master/learn3/index.html"; //Phase Game Collection Test 1
-                                                                                                                      //txt.Text = "http://localhost/canvas/phaser/phaser-4-planet-defense-main/index.html";
-                                                                                                                      //txt.Text = "http://localhost/jstest/VideoElementPrototypeCheck.html"; // Video Element Prototype Check Test 1
-                                                                                                                      // txt.Text = "http://localhost/jstest/VideoElementPrototypeCheck3.html";
-                                                                                                                      //txt.Text = "http://localhost/canvas/GetComputedStyleTest1.html"; // GetComputedStyle Test 1
-                                                                                                                      //txt.Text = "http://localhost/canvas/VideoElementRequestVideoFrameCallbackTest1.html"; //VideoFrameCallBackTest 1
-                                                                                                                      // txt.Text = "http://localhost/jstest/JsfetchTest3.html";
-                                                                                                                      //txt.Text = "http://localhost/jstest/fetchPostTest1.html"; // Jsfetch Post Test 4
-                                                                                                                      //txt.Text = "http://localhost/jstest/PerformanceAPITest1.html"; // Performance API Test 1
-                                                                                                                      //txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test 4 
+                 //txt.Text = "http://localhost/canvas/phaser/Gamedev-Phaser-Content-Kit-gh-pages/demos/lesson16.html"; // Phaser Game Text Test 1
+
+                 //txt.Text = "http://localhost/canvas/phaser/phaser-games-collection-master/games-master/learn3/index.html"; //Phase Game Collection Test 1
+                 //txt.Text = "http://localhost/canvas/phaser/phaser-4-planet-defense-main/index.html";
+                 //txt.Text = "http://localhost/jstest/VideoElementPrototypeCheck.html"; // Video Element Prototype Check Test 1
+                // txt.Text = "http://localhost/jstest/VideoElementPrototypeCheck3.html";
+                //txt.Text = "http://localhost/canvas/GetComputedStyleTest1.html"; // GetComputedStyle Test 1
+               //txt.Text = "http://localhost/canvas/VideoElementRequestVideoFrameCallbackTest1.html"; //VideoFrameCallBackTest 1
+               // txt.Text = "http://localhost/jstest/JsfetchTest3.html";
+               //txt.Text = "http://localhost/jstest/fetchPostTest1.html"; // Jsfetch Post Test 4
+               //txt.Text = "http://localhost/jstest/PerformanceAPITest1.html"; // Performance API Test 1
+               //txt.Text = "http://localhost/canvas/CanvasImageMove4.html"; // Canvas Image Move Test 4 
 
                 // txt.Text = "http://localhost/jstest/URLSearchParamsTest1.html"; // URLSearchParams Test 1
-                //txt.Text = "http://localhost/jstest/AsyncDeferSyncTest/index.html"; // Async Defer Sync Test 1
-                txt.Text = "http://localhost/jstest/ElementGetBouncingRestTest1.html";// getElementById Bouncing Rest Test 1
+                //txt.Text = "http://localhost/jstest/AsyncDeferSyncTest/index.html"; // Async Defer Sync Test 1 OK
+                txt.Text = "http://localhost/jstest/ElementGetBouncingRestTest1.html";// getElementById Bouncing Rest Test 1 OK
             }
 
             if (btnGo != null && txt != null && _multiView != null)

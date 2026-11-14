@@ -135,8 +135,8 @@ namespace MultiHtmlCraft.Core
                 { "webkitResolveLocalFileSystemURL", 27 },
                 { "webkitStorageInfo", 28 },
                 { "webkitRequestAnimationFrame", 29 },
-                { "webkitCancelAnimationFrame", 30 },
-                { "get", 31}
+                { "webkitCancelAnimationFrame", 30 }
+
 
 
 
@@ -2683,6 +2683,11 @@ namespace MultiHtmlCraft.Core
                     ___name = ___nameArgs[0].ToString();
                 }
             };
+            if(___name == "[undefined]" || ___name == "undefined" || string.IsNullOrEmpty(___name))
+            {
+                // it maybe binder bug to get object with underfinged, just ignore currently.
+                 return null;
+            }
 
 #if DEBUG
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
