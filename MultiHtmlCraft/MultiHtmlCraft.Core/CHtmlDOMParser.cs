@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Text;
 using System.Threading.Tasks;
 using MultiHtmlCraft.Interfaces;
 namespace MultiHtmlCraft.Core
 {
-    public sealed class CHtmlDOMParser : CHtmlNode, ICommonObjectInterface 
+    public sealed class CHtmlDOMParser : CHtmlNode, ICommonObjectInterface ,  IDynamicMetaObjectProvider
     {
         internal System.WeakReference ___MultiversalWindowWeakReference = null;
         internal string ___baseThreadURL = "";
@@ -13,9 +14,13 @@ namespace MultiHtmlCraft.Core
         /// holds strong reference for document
         /// </summary>
 
-        public async Task<CHtmlDocument> parseFromString(object ___strContentObject, object ___domtype)
+        public  CHtmlDocument parseFromString(object ___strContentObject, object ___domtype)
         {
-            CHtmlDocument ___xmldom = null;
+            if(commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+            {
+                commonLog.LogEntry($"{this} parseFromString is called with content: \r\n {___strContentObject} domtype: {___domtype} ");
+            }
+            CHtmlDocument ___domParserParseFrinStrringDOM = null;
             string ___strContent = commonHTML.GetStringValue(___strContentObject);
             string ___strDomType = commonHTML.GetStringValue(___domtype);
             try
@@ -54,18 +59,22 @@ namespace MultiHtmlCraft.Core
                 switch (___targetDOMType)
                 {
                     case CHtmlDomModeType.SVGDOM:
-                        ___xmldom = new CHtmlDocument(CHtmlDomModeType.SVGDOM);
+                        ___domParserParseFrinStrringDOM = new CHtmlDocument(CHtmlDomModeType.SVGDOM);
                         ___xmlCharset = commonHTML.GetXMLEncodingStringFromBytes(System.Text.UTF8Encoding.UTF8.GetBytes(___strContent));
                         break;
                     case CHtmlDomModeType.XMLDOM:
-                        ___xmldom = new CHtmlDocument(CHtmlDomModeType.XMLDOM);
+                        ___domParserParseFrinStrringDOM = new CHtmlDocument(CHtmlDomModeType.XMLDOM);
                         ___xmlCharset = commonHTML.GetXMLEncodingStringFromBytes(System.Text.UTF8Encoding.UTF8.GetBytes(___strContent));
                         break;
                     case CHtmlDomModeType.HTML:
-                        ___xmldom = new CHtmlDocument(CHtmlDomModeType.HTMLSegment);
+                    case CHtmlDomModeType.HTMLDOM:
+                    case CHtmlDomModeType.HTMLSegment:
+                    case CHtmlDomModeType.HTMLDOM_NoGUI:
+                    case CHtmlDomModeType.HTMLDocumentFragment:
+                        ___domParserParseFrinStrringDOM = new CHtmlDocument(CHtmlDomModeType.HTMLSegment);
                         break;
                     default:
-                        ___xmldom = new CHtmlDocument(CHtmlDomModeType.XMLDOM);
+                        ___domParserParseFrinStrringDOM = new CHtmlDocument(CHtmlDomModeType.XMLDOM);
                         ___xmlCharset = commonHTML.GetXMLEncodingStringFromBytes(System.Text.UTF8Encoding.UTF8.GetBytes(___strContent));
          
                         break;
@@ -80,7 +89,7 @@ namespace MultiHtmlCraft.Core
                         {
                             ___multiversalWindow.___dynamicallyCreateObjectList = new System.Collections.ArrayList();
                         }
-                        ___multiversalWindow.___dynamicallyCreateObjectList.Add(___xmldom);
+                        ___multiversalWindow.___dynamicallyCreateObjectList.Add(___domParserParseFrinStrringDOM);
 
                     }
                 }
@@ -89,24 +98,24 @@ namespace MultiHtmlCraft.Core
                 {
                     if (string.IsNullOrEmpty(___xmlCharset) == false)
                     {
-                        ___xmldom.___charset = ___xmlCharset;
+                        ___domParserParseFrinStrringDOM.___charset = ___xmlCharset;
                     }
                     else
                     {
-                        ___xmldom.___charset = "utf-8";
+                        ___domParserParseFrinStrringDOM.___charset = "utf-8";
                     }
-                    ___xmldom.___IsHtmlCharSetDetectionCompleted = true;
+                    ___domParserParseFrinStrringDOM.___IsHtmlCharSetDetectionCompleted = true;
                 }
-                ___xmldom.___IsElementCreationNeedsToBeDynamic = true;
-                ___xmldom.___IsHtmlResponseCompleted = true;
-                ___xmldom.___responseStartTime = DateTime.Now;
-                ___xmldom.___IsHtm1stHttpResponseCompleted = true;
+                ___domParserParseFrinStrringDOM.___IsElementCreationNeedsToBeDynamic = true;
+                ___domParserParseFrinStrringDOM.___IsHtmlResponseCompleted = true;
+                ___domParserParseFrinStrringDOM.___responseStartTime = DateTime.Now;
+                ___domParserParseFrinStrringDOM.___IsHtm1stHttpResponseCompleted = true;
                 if (string.IsNullOrEmpty(___strDomType) == false)
                 {
-                    ___xmldom.___contentType = string.Copy(___strDomType);
+                    ___domParserParseFrinStrringDOM.___contentType = string.Copy(___strDomType);
                 }
-                ___xmldom.___HtmlBuilder.Append(___strContent);
-                ___xmldom.___HtmlBuilderLength = ___xmldom.___HtmlBuilder.Length;
+                ___domParserParseFrinStrringDOM.___HtmlBuilder.Append(___strContent);
+                ___domParserParseFrinStrringDOM.___HtmlBuilderLength = ___domParserParseFrinStrringDOM.___HtmlBuilder.Length;
                 CHtmlDocument ____xmldoc = new CHtmlDocument(___targetDOMType);
                 
 
@@ -119,7 +128,7 @@ namespace MultiHtmlCraft.Core
                    commonLog.LogEntry("parseFromString() Exception ", ex);
                 }
             }
-            return ___xmldom;
+            return ___domParserParseFrinStrringDOM;
         }
 
         #region IPropertBox メンバ

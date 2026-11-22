@@ -22,7 +22,10 @@ namespace ClearScriptProcessor
         private V8ScriptEngine? _v8ScriptEngine = null;
         private bool _isDisposed = false;
 
-
+        public V8ScriptEngine engine
+        {
+            get { return _v8ScriptEngine; }
+        }
 
 
         public IMultiversalScriptScope multiversalscope
@@ -52,7 +55,9 @@ namespace ClearScriptProcessor
         public IMultiversalWindow Window { get; }
         public ICHtmlDocumentInterface Document { get; set; } = null;
 
+        public bool LoggingEnabled => throw new NotImplementedException();
 
+        public int LogLevel => throw new NotImplementedException();
 
         public object callfunction(object functionobject, object scope, object thisObj, object[] args)
         {
@@ -125,7 +130,10 @@ namespace ClearScriptProcessor
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"EnsureUniversalApplyFunction: presence check failed: {ex.GetType().Name} {ex.Message}");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"EnsureUniversalApplyFunction: presence check failed: {ex.GetType().Name} {ex.Message}");
+                    }
                     exists = false;
                 }
 
@@ -170,35 +178,17 @@ namespace ClearScriptProcessor
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"EnsureUniversalApplyFunction Error: {ex.Message}");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry($"EnsureUniversalApplyFunction Error: {ex.Message}");
+                }
              
             }
         }
 
         internal static bool IsFunctionBridgeDefined = false;
 
-        // #region agent log
-        private static void AgentDebugLog(string hypothesisId, string location, string message, object? data = null)
-        {
-            try
-            {
-                var payload = new Dictionary<string, object?>
-                {
-                    ["sessionId"] = "b0830d",
-                    ["hypothesisId"] = hypothesisId,
-                    ["location"] = location,
-                    ["message"] = message,
-                    ["data"] = data,
-                    ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                };
-                var line = JsonSerializer.Serialize(payload) + Environment.NewLine;
-                Debug.WriteLine($"[AgentDebugLog] {line}");
-                return;
 
-            }
-            catch { }
-        }
-        // #endregion
 
         private object CallFunctionInternal(object functionobject, object[] args)
         {
@@ -207,7 +197,10 @@ namespace ClearScriptProcessor
             ScriptObject? ___scriptObject = null;
             if(functionobject.GetType().FullName == "Microsoft.ClearScript.V8.SplitProxy.V8ObjectImpl")
             {
-                Debug.WriteLine("CallFunctionInternal: functionobject.GetType().FullName is Microsoft.ClearScript.V8.SplitProxy.V8ObjectImpl is called");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("CallFunctionInternal: functionobject.GetType().FullName is Microsoft.ClearScript.V8.SplitProxy.V8ObjectImpl is called");
+                }
                 // ここで return する（下の universalApply に落とさない）
                 var mi = functionobject.GetType().GetMethod(
                     "Invoke",
@@ -218,25 +211,37 @@ namespace ClearScriptProcessor
 
                 if (mi == null)
                 {
-                    Debug.WriteLine("V8ObjectImpl: mi or Invoke(bool,object[]) NOT FOUND");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("V8ObjectImpl: mi or Invoke(bool,object[]) NOT FOUND");
+                    }
                     return null;
                 }
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
 
-                Debug.WriteLine("V8ObjectImpl: calling Invoke(false, args) — NOT universalApply");
+                    commonLog.LogEntry("V8ObjectImpl: calling Invoke(false, args) — NOT universalApply");
+                }
                 try
                 {
                     return mi.Invoke(functionobject, new object[] { false, args ?? Array.Empty<object>() });
                 }
                 catch (TargetInvocationException tie)
                 {
-                    Debug.WriteLine("V8ObjectImpl Invoke inner: " + (tie.InnerException?.Message ?? tie.Message));
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("V8ObjectImpl Invoke inner: " + (tie.InnerException?.Message ?? tie.Message));
+                    }
                     return null;
                 }
 
             }
             if (functionobject is Microsoft.ClearScript.Undefined)
             {
-                Debug.WriteLine("CallFunctionInternal: functionobject is ClearScript.Undefined - skipping invocation.");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("CallFunctionInternal: functionobject is ClearScript.Undefined - skipping invocation.");
+                }
                 return null;
             }
 
@@ -244,16 +249,12 @@ namespace ClearScriptProcessor
             int ___callfunctionStage = -1;
             try
             {
-                Debug.WriteLine($"CallFunctionInternal: functionobject type = {functionobject.GetType().FullName} Thread ID :{System.Threading.Thread.CurrentThread.ManagedThreadId}");
-
-                // #region agent log
-                AgentDebugLog("A", "CallFunctionInternal:entry", "callfunction entry", new
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                 {
-                    typeName = functionobject.GetType().FullName,
-                    isScriptObject = functionobject is ScriptObject,
-                    threadId = System.Threading.Thread.CurrentThread.ManagedThreadId,
-                    argCount = args?.Length ?? 0
-                });
+                    commonLog.LogEntry($"CallFunctionInternal: functionobject type = {functionobject.GetType().FullName} Thread ID :{System.Threading.Thread.CurrentThread.ManagedThreadId}");
+                }
+                // #region agent log
+
                 // #endregion
 
                 if (functionobject is Microsoft.ClearScript.ScriptObject scriptObject)
@@ -262,14 +263,19 @@ namespace ClearScriptProcessor
                     try
                     {
 #if DEBUG
-
-                        Debug.WriteLine("CallFunctionInternal: Detected ScriptObject, invoking directly.");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("CallFunctionInternal: Detected ScriptObject, invoking directly.");
+                        }
 #endif
                         return scriptObject.InvokeAsFunction(args ?? Array.Empty<object>());
 
                     }
                     catch (Exception ex){
-                        Debug.WriteLine(ex.Message);
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry(ex.Message);
+                        }
                     }
 
                 }
@@ -302,17 +308,13 @@ namespace ClearScriptProcessor
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"CallFunctionInternal: ObjectKind check failed: {ex.Message}");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"CallFunctionInternal: ObjectKind check failed: {ex.Message}");
+                    }
                 }
 
-                // #region agent log
-                AgentDebugLog("B", "CallFunctionInternal:objectKind", "ObjectKind check result", new
-                {
-                    isFunction,
-                    hasScriptObjectCast = ___scriptObject != null,
-                    stage = ___callfunctionStage
-                });
-                // #endregion
+
 
            
                 try
@@ -337,14 +339,7 @@ namespace ClearScriptProcessor
 
                     if (directInvoke != null)
                     {
-                        // #region agent log
-                        AgentDebugLog("C", "CallFunctionInternal:directInvoke", "directInvoke found", new
-                        {
-                            methodName = directInvoke.Name,
-                            isPublic = directInvoke.IsPublic,
-                            argCount = (args ?? Array.Empty<object>()).Length
-                        });
-                        // #endregion
+
                         try
                         {
                             var invokeArgs = args ?? Array.Empty<object>();
@@ -407,13 +402,7 @@ namespace ClearScriptProcessor
                                 }
                             };
 
-                            // #region agent log
-                            AgentDebugLog("C", "CallFunctionInternal:bridgeAction", "bridge action created but not yet invoked", new
-                            {
-                                willUseScriptObject = functionobject is ScriptObject,
-                                hasGlobalScript = _v8ScriptEngine?.Script is ScriptObject
-                            });
-                            // #endregion
+
                             
                             //___dynamicFunctionObject.apply(args);
 
@@ -453,18 +442,27 @@ namespace ClearScriptProcessor
                         }
                         catch (TargetInvocationException tie)
                         {
-                            Debug.WriteLine($"CallFunctionInternal directInvoke TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry($"CallFunctionInternal directInvoke TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
+                            }
              
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine($"CallFunctionInternal directInvoke failed: {ex.Message}");
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry($"CallFunctionInternal directInvoke failed: {ex.Message}");
+                            }
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"CallFunctionInternal: direct Invoke(bool,object[]) check failed: {ex.Message}");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"CallFunctionInternal: direct Invoke(bool,object[]) check failed: {ex.Message}");
+                    }
                 }
 
                 
@@ -477,35 +475,36 @@ namespace ClearScriptProcessor
                         try
                         {
                             // #region agent log
-                            AgentDebugLog("D", "CallFunctionInternal:universalApply", "attempting engine.Invoke ___universalApply", new { argCount = args?.Length ?? 0 });
+
                             // #endregion
                             // 第二引数に args 配列を渡す（JS 側で配列として受け取る）
                             var uaResult = engine.Invoke("___universalApply", functionobject, args ?? Array.Empty<object>());
                             // #region agent log
-                            AgentDebugLog("D", "CallFunctionInternal:universalApply:ok", "___universalApply succeeded", null);
+                   
                             // #endregion
                             return uaResult;
                         }
                         catch (Microsoft.ClearScript.ScriptEngineException sex)
                         {
-                            Debug.WriteLine($"CallFunctionInternal ScriptEngineException: {sex.ErrorDetails ?? sex.Message}");
-                            // #region agent log
-                            AgentDebugLog("D", "CallFunctionInternal:universalApply:fail", "___universalApply ScriptEngineException", new { error = sex.Message });
-                            // #endregion
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry($"CallFunctionInternal ScriptEngineException: {sex.ErrorDetails ?? sex.Message}");
+                            }
+    
                             // fallthrough -> 下のフォールバックを試す
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine($"CallFunctionInternal Critical (engine.Invoke): {ex.Message}");
-                            // #region agent log
-                            AgentDebugLog("D", "CallFunctionInternal:universalApply:critical", "___universalApply critical exception", new { error = ex.GetType().Name, message = ex.Message });
-                            // #endregion
+          
                             // fallthrough -> 下のフォールバックを試す
                         }
                     }
                     else
                     {
-                        Debug.WriteLine("CallFunctionInternal: target is not a JS function according to ObjectKind - skip engine.Invoke to avoid ClearScript errors. : " + tcheck);
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("CallFunctionInternal: target is not a JS function according to ObjectKind - skip engine.Invoke to avoid ClearScript errors. : " + tcheck);
+                        }
                     }
                 }
 
@@ -525,14 +524,20 @@ namespace ClearScriptProcessor
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine($"CallFunctionInternal engine.Invoke fallback failed: {ex.Message}");
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry($"CallFunctionInternal engine.Invoke fallback failed: {ex.Message}");
+                                }
                                 // fallthrough -> reflection fallback
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"CallFunctionInternal: engine proxy check failed: {ex.Message}");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry($"CallFunctionInternal: engine proxy check failed: {ex.Message}");
+                        }
                     }
                 }
 
@@ -557,7 +562,7 @@ namespace ClearScriptProcessor
                             {
                                 var param0 = invokeArgs.Length == 0 ? null : (object)invokeArgs;
                                 // #region agent log
-                                AgentDebugLog("E", "CallFunctionInternal:reflection", "attempting reflection Invoke(object[])", new { method = mi.ToString() });
+                 
                                 // #endregion
                                 return mi.Invoke(functionobject, new object[] { param0 });
                             }
@@ -569,15 +574,25 @@ namespace ClearScriptProcessor
                         }
                         catch (TargetParameterCountException)
                         {
-                            Debug.WriteLine($"CallFunctionInternal reflection overload parameter mismatch for {mi}.");
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry ($"CallFunctionInternal reflection overload parameter mismatch for {mi}.");
+                            }
                         }
                         catch (TargetInvocationException tie)
                         {
-                            Debug.WriteLine($"CallFunctionInternal reflection target invocation exception: {tie.InnerException?.Message ?? tie.Message}");
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry($"CallFunctionInternal reflection target invocation exception: {tie.InnerException?.Message ?? tie.Message}");
+                            }
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+                            }
+
                         }
                     }
 
@@ -597,12 +612,18 @@ namespace ClearScriptProcessor
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+                                }
                             }
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry($"CallFunctionInternal reflection Invoke failed: {ex.Message}");
+                            }
                         }
                     }
 
@@ -620,11 +641,17 @@ namespace ClearScriptProcessor
                             }
                             catch (TargetInvocationException tie)
                             {
-                                Debug.WriteLine($"CallFunctionInternal apply TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry($"CallFunctionInternal apply TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
+                                }
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine($"CallFunctionInternal apply invoke failed: {ex.Message}");
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry($"CallFunctionInternal apply invoke failed: {ex.Message}");
+                                }
                             }
                         }
 
@@ -642,11 +669,17 @@ namespace ClearScriptProcessor
                             }
                             catch (TargetInvocationException tie)
                             {
-                                Debug.WriteLine($"CallFunctionInternal call TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry($"CallFunctionInternal call TargetInvocationException: {tie.InnerException?.Message ?? tie.Message}");
+                                }
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine($"CallFunctionInternal call invoke failed: {ex.Message}");
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                                {
+                                    commonLog.LogEntry($"CallFunctionInternal call invoke failed: {ex.Message}");
+                                }
                             }
                         }
 
@@ -654,24 +687,31 @@ namespace ClearScriptProcessor
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"CallFunctionInternal reflection fallback failed: {ex.Message}");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry($"CallFunctionInternal reflection fallback failed: {ex.Message}");
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"CallFunctionInternal fallback failed: {ex.Message}");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"CallFunctionInternal fallback failed: {ex.Message}");
+                    }
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"CallFunctionInternal Critical: {ex.Message}");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry($"CallFunctionInternal Critical: {ex.Message}");
+                }
                 // #region agent log
-                AgentDebugLog("F", "CallFunctionInternal:outerCatch", "outer exception", new { error = ex.GetType().Name, message = ex.Message });
+              
                 // #endregion
             }
-            // #region agent log
-            AgentDebugLog("F", "CallFunctionInternal:exitNull", "returning null - all paths failed", new { stage = ___callfunctionStage });
-            // #endregion
+
             return null;
         }
 
@@ -683,32 +723,53 @@ namespace ClearScriptProcessor
             try
             {
                 Type t = obj.GetType();
-                Debug.WriteLine($"DumpProxyInfo: Type = {t.FullName}");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry($"DumpProxyInfo: Type = {t.FullName}");
+                }
 
                 var methods = t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                Debug.WriteLine($"DumpProxyInfo: Methods ({methods.Length})");
-                foreach (var m in methods)
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                 {
-                    Debug.WriteLine($"  M: {m.Name} ({string.Join(", ", m.GetParameters().Select(p => p.ParameterType.Name))})");
+                    commonLog.LogEntry($"DumpProxyInfo: Methods ({methods.Length})");
+                }
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    foreach (var m in methods)
+                    {
+                        commonLog.LogEntry($"  M: {m.Name} ({string.Join(", ", m.GetParameters().Select(p => p.ParameterType.Name))})");
+                    }
                 }
 
                 var fields = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                Debug.WriteLine($"DumpProxyInfo: Fields ({fields.Length})");
-                foreach (var f in fields)
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                 {
-                    Debug.WriteLine($"  F: {f.Name} : {f.FieldType.FullName}");
+                    commonLog.LogEntry($"DumpProxyInfo: Fields ({fields.Length})");
+                }
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    foreach (var f in fields)
+                    {
+                        commonLog.LogEntry($"  F: {f.Name} : {f.FieldType.FullName}");
+                    }
                 }
 
                 var props = t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                Debug.WriteLine($"DumpProxyInfo: Properties ({props.Length})");
-                foreach (var p in props)
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
                 {
-                    Debug.WriteLine($"  P: {p.Name} : {p.PropertyType.FullName}");
+                    commonLog.LogEntry($"DumpProxyInfo: Properties ({props.Length})");
+                    foreach (var p in props)
+                    {
+                        commonLog.LogEntry($"  P: {p.Name} : {p.PropertyType.FullName}");
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"DumpProxyInfo Error: {ex.Message}");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry($"DumpProxyInfo Error: {ex.Message}");
+                }
             }
         }
 
@@ -725,13 +786,15 @@ namespace ClearScriptProcessor
             }
 
             var scriptToExecute = WrapIfCommonJs(script, "");
-            if (_scope != null && _scope.EnableScriptLogging)
-            {
-                Debug.WriteLine("Executing Javascript script:");
-                Debug.WriteLine("========================= Start Script ===================================");
-                Debug.WriteLine(scriptToExecute);
-                Debug.WriteLine("========================= End Script   ===================================");
-            }
+
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("Executing Javascript script:");
+                    commonLog.LogEntry("========================= Start Script ===================================");
+                    commonLog.LogEntry(scriptToExecute);
+                    commonLog.LogEntry("========================= End Script   ===================================");
+                }
+            
 
             // Detect if this is likely a jQuery/library script
             bool isCommonJsScript = script.Contains("module.exports") || script.Contains("exports.");
@@ -742,162 +805,23 @@ namespace ClearScriptProcessor
             }
             catch (Microsoft.ClearScript.ScriptEngineException scriptError)
             {
-                Debug.WriteLine($"execute: ScriptEngineException: {scriptError.ErrorDetails ?? scriptError.Message} {scriptError.StackTrace}");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry($"execute: ScriptEngineException: {scriptError.ErrorDetails ?? scriptError.Message} {scriptError.StackTrace}");
+                }
                 throw;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"execute: Exception: {ex.Message} StackTrace: {ex.StackTrace}");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry($"execute: Exception: {ex.Message} StackTrace: {ex.StackTrace}");
+                }
                 throw;
             }
         
 
-            // After executing potential library scripts, check and fix $ callable nature
-            /*
-            if (isCommonJsScript || isJQueryScript)
-            {
-                try
-                {
-                    // Use console.log for visible output since Debug.WriteLine may not show
-                    _v8ScriptEngine.Execute("console.log('[ClearScript] Checking jQuery callable status...');");
 
-                    // Check if $ exists but is not callable
-                    var dollarType = _v8ScriptEngine.Evaluate("typeof $");
-                    _v8ScriptEngine.Execute($"console.log('[ClearScript] typeof $ = ' + (typeof $));");
-
-                    if (dollarType?.ToString() != "function")
-                    {
-                        _v8ScriptEngine.Execute("console.log('[ClearScript] $ is not a function, attempting wrapper creation...');");
-
-                        // Get the $ object from global scope
-                        var dollarObj = _v8ScriptEngine.Global["$"];
-
-                        if (dollarObj == null)
-                        {
-                            _v8ScriptEngine.Execute("console.log('[ClearScript] $ is null in engine.Global');");
-                        }
-                        else
-                        {
-                            var dollarObjType = dollarObj.GetType().FullName;
-                            _v8ScriptEngine.Execute($"console.log('[ClearScript] $ CLR type = {dollarObjType}');");
-
-                            // Check if it's a ScriptObject (V8 function wrapper)
-                            if (dollarObj is Microsoft.ClearScript.ScriptObject so)
-                            {
-                                _v8ScriptEngine.Execute("console.log('[ClearScript] $ is ScriptObject, creating host invoker...');");
-
-                                // Create a host delegate that can invoke the ScriptObject
-                                Func<object[], object> jqueryInvoker = (args) =>
-                                {
-                                    try
-                                    {
-                                        return so.InvokeAsFunction(args ?? Array.Empty<object>());
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Debug.WriteLine($"jqueryInvoker error: {ex.Message}");
-                                        return null;
-                                    }
-                                };
-
-                                // Expose the invoker to JavaScript
-                                
-                                _v8ScriptEngine.AddHostObject("___jqueryHostInvoker", jqueryInvoker);
-                                _v8ScriptEngine.AddHostObject("___jqueryScriptObject", so);
-
-                                // Create a JavaScript wrapper function
-                                _v8ScriptEngine.Execute(@"
-                                    (function() {
-                                        console.log('[ClearScript] Creating jQuery wrapper function...');
-                                        var origJQ = ___jqueryScriptObject;
-                                        var invoker = ___jqueryHostInvoker;
-
-                                        // Create the wrapper function
-                                        var wrapper = function() {
-                                            var args = Array.prototype.slice.call(arguments);
-                                            return invoker(args);
-                                        };
-
-                                        // Copy all properties from original jQuery
-                                        if (origJQ) {
-                                            for (var key in origJQ) {
-                                                try { wrapper[key] = origJQ[key]; } catch(e) {}
-                                            }
-                                            try { wrapper.prototype = origJQ.prototype; } catch(e) {}
-                                            try { wrapper.fn = origJQ.fn; } catch(e) {}
-                                        }
-
-                                        // Assign to global scope using bare identifier
-                                        $ = wrapper;
-                                        jQuery = wrapper;
-
-                                        // Also update window
-                                        if (typeof window !== 'undefined') {
-                                            window.$ = wrapper;
-                                            window.jQuery = wrapper;
-                                        }
-
-                                        console.log('[ClearScript] jQuery wrapper created, typeof $ = ' + typeof $);
-                                    })();
-                                ");
-                            }
-                            else
-                            {
-                                // Not a ScriptObject - try to create wrapper using engine.Invoke
-                                _v8ScriptEngine.Execute("console.log('[ClearScript] $ is not ScriptObject, trying alternative approach...');");
-
-                                // Store the object and create an invoker that uses engine.Script
-                                _v8ScriptEngine.AddHostObject("___jqueryRawObject", dollarObj);
-
-                                _v8ScriptEngine.Execute(@"
-                                    (function() {
-                                        console.log('[ClearScript] Creating alternative wrapper...');
-                                        var origJQ = ___jqueryRawObject;
-
-                                        // Try to invoke via .apply if available
-                                        var wrapper = function() {
-                                            var args = Array.prototype.slice.call(arguments);
-                                            if (origJQ && typeof origJQ.apply === 'function') {
-                                                return origJQ.apply(this, args);
-                                            }
-                                            if (origJQ && typeof origJQ.Invoke === 'function') {
-                                                return origJQ.Invoke(args);
-                                            }
-                                            throw new Error('Cannot invoke jQuery: no callable method found');
-                                        };
-
-                                        // Copy properties
-                                        if (origJQ) {
-                                            for (var key in origJQ) {
-                                                try { wrapper[key] = origJQ[key]; } catch(e) {}
-                                            }
-                                        }
-
-                                        $ = wrapper;
-                                        jQuery = wrapper;
-                                        if (typeof window !== 'undefined') {
-                                            window.$ = wrapper;
-                                            window.jQuery = wrapper;
-                                        }
-
-                                        console.log('[ClearScript] Alternative wrapper created, typeof $ = ' + typeof $);
-                                    })();
-                                ");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _v8ScriptEngine.Execute("console.log('[ClearScript] $ is already a function, no wrapper needed');");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"execute: jQuery wrapper creation failed: {ex.Message} {ex.StackTrace}");
-                    try { _v8ScriptEngine.Execute($"console.log('[ClearScript] Wrapper creation error: {ex.Message.Replace("'", "\\'")}');"); } catch { }
-                }
-            }
-            */
 
             return null;
         }
@@ -1075,6 +999,11 @@ try {
             }
             catch { }
             return null;
+        }
+
+        public void LogEntry(string message)
+        {
+            throw new NotImplementedException();
         }
     }
 }

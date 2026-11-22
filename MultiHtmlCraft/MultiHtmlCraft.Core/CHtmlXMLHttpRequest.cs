@@ -80,7 +80,7 @@ namespace MultiHtmlCraft.Core
         internal string ___functionName = null;
         internal Stream ___responseStream = null;
         internal string ___responseText = string.Empty;
-        internal string ___Response_Content_Type = string.Empty; // content-type header full value
+        internal string ___Response_Content_Type = string.Empty; // byteContent-type header full value
         internal string ___ResponseTextCachedEncodingName = string.Empty; // detected encoding name
 
         internal Dictionary<string, object> ___responseHeaders = new Dictionary<string, object>();
@@ -413,6 +413,27 @@ namespace MultiHtmlCraft.Core
 
 
 
+        }
+        public void open(params object[] args)
+        {
+            string _method = commonHTML.GetStringValue(args[0]);
+            string _url = commonHTML.GetStringValue(args[1]);
+            bool _async = false;
+            if (args == null || args.Length < 2)
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
+                {
+                    commonLog.LogEntry($"CHtmlXMLHttpResust {this}.open is called with invalid arguments count: {args?.Length ?? 0}, returning void");
+                }
+                return;
+            }
+
+            _async = args.Length > 2 ? commonTypeConverter.convertObjectToBoolean(args[2], false) : true;
+            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
+            {
+                commonLog.LogEntry($"CHtmlXMLHttpResust {this}.open is called with method: {_method} url: {_url} async: {_async}");
+            }
+            ___open_inner(new object[] { _method, _url, _async });
         }
 
         public void open(object _method, object _url, object _async)

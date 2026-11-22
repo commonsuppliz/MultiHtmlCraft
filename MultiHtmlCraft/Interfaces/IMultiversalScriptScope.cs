@@ -46,7 +46,7 @@ namespace MultiHtmlCraft.Interfaces
             Python = 16,
         }
         bool EnableDebug { get; set; }
-        bool EnableScriptLogging { get; set; }
+
         //IMultiversalScriptScope constructorMultiversalScope(IMultiversalWindow multi);
         void relaseMultiversal();
         string getMultivasalScopeName();

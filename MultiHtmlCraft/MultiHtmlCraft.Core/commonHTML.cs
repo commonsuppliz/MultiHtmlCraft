@@ -1573,7 +1573,7 @@ namespace MultiHtmlCraft.Core
         /// </summary>
         RunIn = 6,
         /// <summary>
-        /// Element is placed as linline element ( on the same line as adjacenet content), but it behaves as a block element
+        /// Element is placed as linline element ( on the same line as adjacenet byteContent), but it behaves as a block element
         /// </summary>
         InlineBlock = 7,
         /// <summary>
@@ -2946,7 +2946,7 @@ namespace MultiHtmlCraft.Core
         internal static string[] ElementFieldsNeedsToTypeConversion = new string[] { "async", "defer", "multiple", "rows", "columns", "cells", "tablindex", "maxlength", "cells", "iscontentedit", "contenteditable", "iscontenteditable", "disabled", "isdisabled", "istextedit", "checked", "multiple", "required", "readonly", "selected", "defaultselected", "autofocus", "autoplay" };
         internal static readonly System.Collections.Generic.Dictionary<string, string> ElementFieldsNeedsToTypeConversionSortedList = commonHTML.CreateDictionaryListFromStringArray(ElementFieldsNeedsToTypeConversion);
 
-        internal static string[] StyleElementFieldsCaseSensitveArray = new string[] { "background-image", "backgroundimage", "background", "xbackground", "list-style-image", "liststyleimage", "mask-image", "mask-box-image", "content", "text-content", "textcontent", "src" };
+        internal static string[] StyleElementFieldsCaseSensitveArray = new string[] { "background-image", "backgroundimage", "background", "xbackground", "list-style-image", "liststyleimage", "mask-image", "mask-box-image", "byteContent", "text-byteContent", "textcontent", "src" };
         internal static readonly System.Collections.Generic.Dictionary<string, string> StyleElementFieldsCaseSensitveSortedList = commonHTML.CreateDictionaryListFromStringArray(StyleElementFieldsCaseSensitveArray);
 
 
@@ -2969,7 +2969,7 @@ namespace MultiHtmlCraft.Core
          * This element requires a closing tag.
          * 
          * <address>
-         * Internet Explorer displays the content of an address element in italics.
+         * Internet Explorer displays the byteContent of an address element in italics.
          * This element is available in HTML as of Internet Explorer 3.0, and in script as of               * Internet Explorer 4.0.
          * This element is a block element.
          * This element requires a closing tag.
@@ -15861,7 +15861,7 @@ namespace MultiHtmlCraft.Core
                                             }
                                         }
 
-                                        //"charset=utf-8\" http-equiv=\"content-type\"/"
+                                        //"charset=utf-8\" http-equiv=\"byteContent-type\"/"
                                         _charset = commonData.GetCharsetFromHTMLCharset(sbCharset.ToString());
                                         goto MergeMemoryStreamIntoHtmlBuilder;
 
@@ -21040,7 +21040,7 @@ namespace MultiHtmlCraft.Core
 
 
         /// <summary>
-        /// if content type is webP ContentType
+        /// if byteContent type is webP ContentType
         /// </summary>
         /// <param name="___strContentType"></param>
         /// <returns></returns>
@@ -21510,7 +21510,7 @@ namespace MultiHtmlCraft.Core
         /// <summary>
         /// Checks if DOM Element build is required or not
         /// </summary>
-        /// <param name="___contentLength">content length</param>
+        /// <param name="___contentLength">byteContent length</param>
         /// <returns>true : preload false : normal </returns>
         internal static bool isDOMDocumentPreLoadBuildMode(long ___contentLength)
         {

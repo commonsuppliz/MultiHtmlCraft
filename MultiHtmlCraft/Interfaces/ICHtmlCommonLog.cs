@@ -14,9 +14,5 @@ namespace MultiHtmlCraft.Interfaces
         bool LoggingEnabled { get; }
         int LogLevel { get; }
 
-        
-
-
-
     }
 }

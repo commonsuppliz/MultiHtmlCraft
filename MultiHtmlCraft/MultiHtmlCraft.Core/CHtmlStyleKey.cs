@@ -34,7 +34,7 @@ namespace MultiHtmlCraft.Core
 
 		/// <summary>
 		/// Combinator may be 
-		/// 'greater' child combinator : style the content of elements contained within other specified elements.
+		/// 'greater' child combinator : style the byteContent of elements contained within other specified elements.
 		/// '+' direct adjacent combinator : For example, imagine you want to indent all paragraphs 
 		/// in a document except for ones immediately following a sub-heading (<h2>). 
 		/// The second rule below shows an h2 selector combined with a p selector using a plus sign as the combinator

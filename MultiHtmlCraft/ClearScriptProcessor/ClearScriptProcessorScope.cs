@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -39,7 +40,30 @@ namespace ClearScriptProcessor
             public bool Equals(T x, T y) => object.ReferenceEquals(x, y);
             public int GetHashCode(T obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
         }
-
+        public Action<string> Logger {
+            get { return commonLog.commonLogLogger; }
+            set { commonLog.commonLogLogger = value; }
+        }
+        public bool LoggingEnabled {
+            get { return commonLog.LoggingEnabled; }
+            set { 
+                if(value != null)
+                {
+                    commonLog.LoggingEnabled = value;
+                }
+            }
+        }
+        public int LogLevel
+        {
+            get { return commonLog.LogLevel; }
+            set
+            {
+                if (value != null)
+                {
+                    commonLog.LogLevel = value;
+                }
+            }
+        }
         // Handler wrapper with a public Invoke method so host reflection can call it safely
         private class HandlerWrapper
         {
@@ -62,7 +86,10 @@ namespace ClearScriptProcessor
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"HandlerWrapper.Invoke: InvokeAsFunction failed: {ex.GetType().Name} {ex.Message}");
+                        if(commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        { 
+                            commonLog.LogEntry($"HandlerWrapper.Invoke: InvokeAsFunction failed: {ex.GetType().Name} {ex.Message}");
+                        }
                     }
 
                     // Fallback: check for a global helper without triggering the dynamic binder
@@ -74,7 +101,10 @@ namespace ClearScriptProcessor
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"HandlerWrapper.Invoke: evaluate presence check failed: {ex.GetType().Name} {ex.Message}");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry($"HandlerWrapper.Invoke: evaluate presence check failed: {ex.GetType().Name} {ex.Message}");
+                        }
                         exists = false;
                     }
 
@@ -87,7 +117,10 @@ namespace ClearScriptProcessor
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine($"HandlerWrapper.Invoke: failed to inject ___universalApply: {ex.GetType().Name} {ex.Message}");
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry($"HandlerWrapper.Invoke: failed to inject ___universalApply: {ex.GetType().Name} {ex.Message}");
+                            }
                         }
                     }
 
@@ -99,13 +132,19 @@ namespace ClearScriptProcessor
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine($"HandlerWrapper.Invoke fallback engine.Invoke failed: {ex.GetType().Name} {ex.Message}");
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry($"HandlerWrapper.Invoke fallback engine.Invoke failed: {ex.GetType().Name} {ex.Message}");
+                            }
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"HandlerWrapper.Invoke failed: {ex.GetType().Name} {ex.Message}");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"HandlerWrapper.Invoke failed: {ex.GetType().Name} {ex.Message}");
+                    }
                 }
                 return null;
             }
@@ -132,7 +171,10 @@ namespace ClearScriptProcessor
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Dispose engine failed: {ex.GetType().Name} - {ex.Message}");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry($"Dispose engine failed: {ex.GetType().Name} - {ex.Message}");
+                }
             }
             _isDisposed = true;
         }
@@ -147,7 +189,12 @@ namespace ClearScriptProcessor
                 _v8Engine?.Dispose();
             }
             catch (ObjectDisposedException) { }
-            catch (Exception ex) { Debug.WriteLine($"disposeScriptEngine failed: {ex}"); }
+            catch (Exception ex) {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                   commonLog.LogEntry($"disposeScriptEngine failed: {ex}");
+                }
+            }
             _isDisposed = true;
         }
 
@@ -157,18 +204,7 @@ namespace ClearScriptProcessor
         }
         private bool _enableDebug = false;
         private bool _enableScriptLogging = false;
-        public bool EnableScriptLogging
-        {
-            get
-            {
-                return _enableScriptLogging;
-            }
-            set
-            {
-                _enableScriptLogging = value;
 
-            }
-        }
         public bool EnableDebug
         {
             get
@@ -180,6 +216,8 @@ namespace ClearScriptProcessor
                 _enableDebug = value;
             }
         }
+
+
 
         private static List<string> _multiversalInvokeScriptNames = createNames();
         private static List<string> createNames()
@@ -241,6 +279,7 @@ namespace ClearScriptProcessor
 
         public void initScriptEngine()
         {
+
             if (!_isInitCompleted)
             {
                 if (this._multiversalWindow == null)
@@ -275,11 +314,17 @@ namespace ClearScriptProcessor
                 try
                 {
                     engine.Execute("$ = undefined;");
-                    Debug.WriteLine($"$ = undefiened call success");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"$ = undefiened call success");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"initScriptEngine: Jquery failed to set $ to undefined: {ex.GetType().Name} - {ex.Message}");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"initScriptEngine: Jquery failed to set $ to undefined: {ex.GetType().Name} - {ex.Message}");
+                    }
                 }
                 
                 // Register placeholder host functions for ScriptObject overloads early so JS can call them before document is bound.
@@ -293,9 +338,17 @@ namespace ClearScriptProcessor
                             _docAddSoHandler(eventName, handler);
                             return;
                         }
-                        Debug.WriteLine("__doc_addEventListener_so called but no handler assigned yet.");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                             commonLog.LogEntry("__doc_addEventListener_so called but no handler assigned yet.");
+                        }
                     }
-                    catch (Exception ex) { Debug.WriteLine($"__doc_addEventListener_so dispatch failed: {ex}"); }
+                    catch (Exception ex) {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                             commonLog.LogEntry($"__doc_addEventListener_so dispatch failed: {ex}");
+                        }
+                    }
                 }));
 
                 _v8Engine.AddHostObject("__doc_addEventListener3_so", new Action<string, ScriptObject, object>((eventName, handler, options) =>
@@ -307,9 +360,17 @@ namespace ClearScriptProcessor
                             _docAdd3SoHandler(eventName, handler, options);
                             return;
                         }
-                        Debug.WriteLine("__doc_addEventListener3_so called but no handler assigned yet.");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("__doc_addEventListener3_so called but no handler assigned yet.");
+                        }
                     }
-                    catch (Exception ex) { Debug.WriteLine($"__doc_addEventListener3_so dispatch failed: {ex}"); }
+                    catch (Exception ex) {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry($"__doc_addEventListener3_so dispatch failed: {ex}");
+                        }
+                    }
                 }));
 
                 
@@ -522,12 +583,19 @@ namespace ClearScriptProcessor
                 {
                     var result1 = engine.Evaluate("window === self");
                     var result2 = engine.Evaluate("self === globalThis");
-                    Debug.WriteLine($"window === self: {result1}");
-                    Debug.WriteLine($"self === globalThis: {result2}");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    { 
+
+                        commonLog.LogEntry($"window === self: {result1}");
+                        commonLog.LogEntry($"self === globalThis: {result2}");
+                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"initScriptEngine debug test failed: {ex.Message}");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"initScriptEngine debug test failed: {ex.Message}");
+                    }
                 }
 #endif
 
@@ -570,25 +638,34 @@ namespace ClearScriptProcessor
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"execute: post-exec $ wrapper check failed: {ex.Message}");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"execute: post-exec $ wrapper check failed: {ex.Message}");
+                    }
 
                     engine.Execute("console.log('[ClearScript] post-exec wrapper check error" + ex.Message);
                 }
             }
             _isInitCompleted = true;
-            // 重要: もし window が先にセットされている場合、ここで proxy 作成処理を確実に実行する
+
             try
             {
                 if (this._multiversalWindow != null)
                 {
-                    Debug.WriteLine("initScriptEngine: multiversalWindow already set — calling setMultiversalWindow to create proxy.");
-                    // 呼び出し順に関係なくプロキシが作られるようにする
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry("initScriptEngine: multiversalWindow already set — calling setMultiversalWindow to create proxy.");
+                    }
+           
                     setMultiversalWindow(this._multiversalWindow);
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"initScriptEngine: failed to finalize window proxy creation: {ex.GetType().Name} - {ex.Message}");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry($"initScriptEngine: failed to finalize window proxy creation: {ex.GetType().Name} - {ex.Message}");
+                }
             }
         }
 
@@ -616,12 +693,17 @@ namespace ClearScriptProcessor
         public void setMultiversalWindow(IMultiversalWindow window)
         {
             this._multiversalWindow = window;
-
-            Debug.WriteLine($"setMultiversalWindow called. window: {window?.ToString() ?? "null"}, isInitCompleted: {_isInitCompleted}");
+            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+            {
+                commonLog.LogEntry($"setMultiversalWindow called. window: {window?.ToString() ?? "null"}, isInitCompleted: {_isInitCompleted}");
+            }
 
             if (!_isInitCompleted || _v8Engine == null)
             {
-                Debug.WriteLine("setMultiversalWindow: engine not initialized yet - proxy will be created later.");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry("setMultiversalWindow: engine not initialized yet - proxy will be created later.");
+                }
                 return;
             }
 
@@ -719,7 +801,10 @@ namespace ClearScriptProcessor
                         try
                         {
                             var a = normalizeHostDelegateArgs(arg);
-                            Debug.WriteLine($"__host_window_document_setInterval_delegate called, args.Length={a?.Length}");
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry($"__host_window_document_setInterval_delegate called, args.Length={a?.Length}");
+                            }
                             if (_v8Engine != null)
                             {
                                 try
@@ -744,7 +829,10 @@ namespace ClearScriptProcessor
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine("__host_window_document_setInterval_delegate error: " + ex.Message);
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry("__host_window_document_setInterval_delegate error: " + ex.Message);
+                            }
                         }
                         return null;
                     }));
@@ -757,7 +845,10 @@ namespace ClearScriptProcessor
                         try
                         {
                             var a = normalizeHostDelegateArgs(arg);
-                            Debug.WriteLine($"__host_window_document_setTimeout_delegate called, args.Length={a?.Length}");
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry($"__host_window_document_setTimeout_delegate called, args.Length={a?.Length}");
+                            }
                             if (_v8Engine != null)
                             {
                                 try
@@ -780,7 +871,10 @@ namespace ClearScriptProcessor
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine("__host_window_document_setTimeout_delegate error: " + ex.Message);
+                            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                            {
+                                commonLog.LogEntry("__host_window_document_setTimeout_delegate error: " + ex.Message);
+                            }
                         }
                         return null;
                     }));
@@ -994,8 +1088,11 @@ namespace ClearScriptProcessor
     }
 })();
 ");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
 
-                Debug.WriteLine("setMultiversalWindow: window proxy created.");
+                    commonLog.LogEntry("setMultiversalWindow: window proxy created.");
+                }
 
                 engine.AddHostObject("_windowHost", window);
                 //engine.AddHostObject("_host", window); // use __host_window instead
@@ -1129,14 +1226,17 @@ namespace ClearScriptProcessor
         }
     });
 })();";
-                Debug.WriteLine($"Test Script: {strCreateObjectScript}");
+
                 engine.Execute(strCreateObjectScript);
                 */
             }
 
             catch (Exception ex)
             {
-                Debug.WriteLine($"setMultiversalWindow: failed to create window proxy: {ex.GetType().Name} - {ex.Message}");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                {
+                    commonLog.LogEntry($"setMultiversalWindow: failed to create window proxy: {ex.GetType().Name} - {ex.Message}");
+                }
             }
         }
         public void setMultiversalWindowType(IMultiversalWindowType windowType)
@@ -1163,11 +1263,17 @@ namespace ClearScriptProcessor
                     //  _v8Engine.Execute("document= null;"); // Attempt to overwrite document to test protection
                     _v8Engine.Execute("console.log('Checks setDcoument typeof document :' + typeof document);");
                     _v8Engine.Execute("console.log('Checks setDcoument typeof document.createElement :' + typeof document.createElement);");
-                    System.Diagnostics.Debug.WriteLine($"setDocument Success!");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"setDocument Success!");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"setDocument Error :{ex.ToString()}");
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry($"setDocument Error :{ex.ToString()}");
+                    }
                 }
 
 
@@ -1247,7 +1353,10 @@ namespace ClearScriptProcessor
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"invokeDocMethod error: {ex.Message}");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry($"invokeDocMethod error: {ex.Message}");
+                        }
                     }
                     return null;
                 };
@@ -1275,7 +1384,10 @@ namespace ClearScriptProcessor
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"__doc_addEventListener_so dispatch failed: {ex}");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry($"__doc_addEventListener_so dispatch failed: {ex}");
+                        }
                     }
                 };
 
@@ -1298,7 +1410,10 @@ namespace ClearScriptProcessor
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"__doc_addEventListener3_so dispatch failed: {ex}");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry($"__doc_addEventListener3_so dispatch failed: {ex}");
+                        }
                     }
                 };
 
@@ -1322,7 +1437,10 @@ namespace ClearScriptProcessor
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"__doc_removeEventListener dispatch failed: {ex}");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                             commonLog.LogEntry($"__doc_removeEventListener dispatch failed: {ex}");
+                        }
                     }
                 }));
 
@@ -1344,7 +1462,10 @@ namespace ClearScriptProcessor
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"__doc_removeEventListener3 dispatch failed: {ex}");
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry($"__doc_removeEventListener3 dispatch failed: {ex}");
+                        }
                     }
                 }));
 
@@ -1507,6 +1628,14 @@ if (typeof document === 'undefined' || document === null) {
         {
             _v8Engine.AddHostObject(_className, obj);
         }
+        public V8ScriptEngine v8engine
+            {
+            get
+            {
+                return _v8Engine;
+
+            }
+            }
 
         private static System.Collections.Generic.SortedList<string, ushort> createWindowFunctionSortedList()
         {
@@ -1639,69 +1768,7 @@ if (typeof document === 'undefined' || document === null) {
             return getClassNameString;
 
         }
-        /*
-        [ScriptMember("fetch")]
-        public async Task<object> FetchImpl(object input, object options = null)
-        {
-#if DEBUG
 
-            Debug.WriteLine($"FetchImpl called with input: {input}, options: {options}");
-#endif 
-            string url = null;
-            string method = "GET";
-            IDictionary<string, string> headers = new Dictionary<string, string>();
-            object body = null;
-
-            
-            if (input is string s)
-            {
-                url = s;
-            }
-            else if (input != null && input.GetType().GetProperty("Url") != null)
-            {
-                var urlProp = input.GetType().GetProperty("Url");
-                url = urlProp?.GetValue(input)?.ToString();
-                var methodProp = input.GetType().GetProperty("Method");
-                if (methodProp != null) method = methodProp.GetValue(input)?.ToString() ?? "GET";
-                var headersProp = input.GetType().GetProperty("Headers");
-                if (headersProp != null)
-                {
-                    var h = headersProp.GetValue(input) as IDictionary<string, string>;
-                    if (h != null) headers = h;
-                }
-                var bodyProp = input.GetType().GetProperty("Body");
-                if (bodyProp != null) body = bodyProp.GetValue(input);
-            }
-            if (string.IsNullOrEmpty(url))
-                throw new ArgumentException("fetch: url is required");
-            var handler = new HttpClientHandler
-            {
-                
-                AutomaticDecompression = DecompressionMethods.All
-            };
-            using var client = new HttpClient(handler);
-            var req = new HttpRequestMessage(new HttpMethod(method), url);
-            foreach (var kv in headers)
-                req.Headers.TryAddWithoutValidation(kv.Key, kv.Value);
-            if (body != null && method != "GET" && method != "HEAD")
-                req.Content = new StringContent(body.ToString());
-            var resp = await client.SendAsync(req);
-            var content = await resp.Content.ReadAsStringAsync();
-            
-            var result = new Dictionary<string, object>
-            {
-                ["status"] = (int)resp.StatusCode,
-                ["ok"] = resp.IsSuccessStatusCode,
-                ["text"] = content
-            };
-            var fetchImplResult = System.Text.Json.JsonSerializer.Serialize(result);
-#if DEBUG
-
-            Debug.WriteLine($"FetchImpl returns : {fetchImplResult}");
-#endif 
-            return fetchImplResult;
-        }
-        */
 
         public void createStandardObjects()
         {
@@ -1897,8 +1964,11 @@ if (typeof document === 'undefined' || document === null) {
                         }
                         catch { }
                     }
-                    // Fallback: Debug.WriteLine so we still see console output even when host console not ready
-                    Debug.WriteLine(text);
+                  
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                    {
+                        commonLog.LogEntry(text);
+                    }
                 }
                 catch { }
             };
@@ -2065,14 +2135,18 @@ if (typeof document === 'undefined' || document === null) {
                     {
                         // MultiversalWindowがセットされている場合はそこに出力
 #if DEBUG
-
-                        System.Diagnostics.Debug.WriteLine(msg);
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry(msg);
+                        }
 #endif
                     }
                     else
                     {
-                        // それ以外はとりあえずDebug.WriteLine
-                        Debug.WriteLine(msg);
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry(msg);
+                        }
                     }
                 }
                 catch { /* swallow */ }
@@ -2166,6 +2240,11 @@ if (typeof document === 'undefined' || document === null) {
             }
             catch { }
             return null;
+        }
+
+        public void LogEntry(string message)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -138,7 +138,7 @@ namespace MultiHtmlCraft.Core
         /// <summary>
         /// Windows Media Video and VC-1 formatsWMV1: Windows Media Video 7
         /// Supports Simple, Main, and Advanced Profiles.
-        /// Supports only progressive (non-interlaced) content.
+        /// Supports only progressive (non-interlaced) byteContent.
         /// </summary>
         public static bool ___isVideo_Windows_Media_Video_VC_1_supported = false;
 

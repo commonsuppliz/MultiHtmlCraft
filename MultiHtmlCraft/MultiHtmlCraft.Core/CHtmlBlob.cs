@@ -108,7 +108,7 @@ namespace MultiHtmlCraft.Core
                 {
                     if (this.___type != newContentType)
                     {
-                       commonLog.LogEntry("{0}.slice() content-type is different {1} : {2} . additional conversion may be required....", this, this.___type, newContentType);
+                       commonLog.LogEntry("{0}.slice() byteContent-type is different {1} : {2} . additional conversion may be required....", this, this.___type, newContentType);
                     }
                 }
             }

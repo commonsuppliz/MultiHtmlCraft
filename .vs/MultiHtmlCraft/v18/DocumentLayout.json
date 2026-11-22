@@ -68,6 +68,18 @@
           "SelectedChildIndex": 17,
           "Children": [
             {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MultiHtmlCraftolog6.jpg",
+              "DocumentMoniker": "C:\\Users\\USER\\Pictures\\MultiHtmlCraftolog6.jpg",
+              "RelativeDocumentMoniker": "..\\..\\..\\Pictures\\MultiHtmlCraftolog6.jpg",
+              "ToolTip": "C:\\Users\\USER\\Pictures\\MultiHtmlCraftolog6.jpg",
+              "RelativeToolTip": "..\\..\\..\\Pictures\\MultiHtmlCraftolog6.jpg",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001533|",
+              "WhenOpened": "2026-10-28T07:10:57.026Z",
+              "IsPinned": true
+            },
+            {
               "$type": "Bookmark",
               "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
             },
@@ -121,8 +133,7 @@
               "RelativeToolTip": "MultiHtmlCraft.Test\\MulversalRenderer.Core.Test.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAA6AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-11-09T18:29:34.908Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-09T18:29:34.908Z"
             },
             {
               "$type": "Document",
@@ -134,8 +145,7 @@
               "RelativeToolTip": "MultiHtmlCraft_Winforms_Test\\MultiHtmlCraft_WinFormsTest.csproj",
               "ViewState": "AgIAACEAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-11-09T18:28:21.261Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-09T18:28:21.261Z"
             },
             {
               "$type": "Document",
@@ -159,8 +169,7 @@
               "RelativeToolTip": "MultiHtmlCraft\\MultiHtmlCraft.WinformsControl\\MultiHtmlCraft.WinformsControl.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-11-09T18:25:31.844Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-09T18:25:31.844Z"
             },
             {
               "$type": "Document",
@@ -172,8 +181,7 @@
               "RelativeToolTip": "MultiHtmlCraft\\MultiHtmlCraft.AvaroniaControl\\MultiHtmlCraft.AvaroniaControl.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-11-09T18:24:34.422Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-09T18:24:34.422Z"
             },
             {
               "$type": "Document",
@@ -185,8 +193,7 @@
               "RelativeToolTip": "MultiHtmlCraft\\ClearScriptProcessor\\ClearScriptProcessor.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-11-09T18:24:24.752Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-09T18:24:24.752Z"
             },
             {
               "$type": "Document",
@@ -198,20 +205,7 @@
               "RelativeToolTip": "MultiHtmlCraft\\MultiHtmlCraft.Core\\MultiHtmlCraft.Core.csproj",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-11-09T18:21:36.346Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MultiHtmlCraftolog6.jpg",
-              "DocumentMoniker": "C:\\Users\\USER\\Pictures\\MultiHtmlCraftolog6.jpg",
-              "RelativeDocumentMoniker": "..\\..\\..\\Pictures\\MultiHtmlCraftolog6.jpg",
-              "ToolTip": "C:\\Users\\USER\\Pictures\\MultiHtmlCraftolog6.jpg",
-              "RelativeToolTip": "..\\..\\..\\Pictures\\MultiHtmlCraftolog6.jpg",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001533|",
-              "WhenOpened": "2026-10-28T07:10:57.026Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-09T18:21:36.346Z"
             },
             {
               "$type": "Document",
@@ -259,8 +253,7 @@
               "RelativeToolTip": "README.md",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2026-08-08T20:26:57.953Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-08T20:26:57.953Z"
             }
           ]
         },

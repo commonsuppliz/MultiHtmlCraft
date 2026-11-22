@@ -620,7 +620,7 @@ namespace MultiHtmlCraft.Core
                 case "position":
                 case "xposition":
                    return CSSAttributeType.position;
-                case "content":
+                case "byteContent":
                    return CSSAttributeType.content;
                 case "visibility":
                 case "visiblity":
@@ -785,7 +785,7 @@ namespace MultiHtmlCraft.Core
                 case "flexflow":
                 case "flex-Flow":
                   return CSSAttributeType.flexflow;
-                case "align-content":
+                case "align-byteContent":
                 case "aligncontent":
                   return CSSAttributeType.aligncontent;
                 case "flexwrap":

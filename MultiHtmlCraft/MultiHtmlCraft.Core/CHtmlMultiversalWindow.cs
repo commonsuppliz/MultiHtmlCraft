@@ -18,6 +18,18 @@ using System.Text.Json;
 
 using NiL.JS.BaseLibrary;
 using NLog;
+using Avalonia.Controls;
+using System.Drawing.Imaging;
+using System.Net.Sockets;
+using Microsoft.ClearScript.JavaScript;
+using ClearScriptProcessor;
+using Microsoft.ClearScript.V8;
+
+
+
+
+
+
 
 
 
@@ -3502,8 +3514,8 @@ namespace MultiHtmlCraft.Core
                 iscope.setMutilversalWindowType(this.___multiversalWindowType);
                 if (commonLog.LoggingEnabled == true)
                 {
-                    //  iscope.___enableLogging(true);
-                    //  iscope.___setLoggingLevel(commonLog.LogLevel);
+                    //  iprosessor.___enableLogging(true);
+                    //  iprosessor.___setLoggingLevel(commonLog.LogLevel);
                 }
                 if (strCallingNames != null)
                 {
@@ -7318,124 +7330,173 @@ s               else
                 }
             }
         }
-        public async Task<CHtmlFetch?> fetch(params object[] args)
+        
+        public object fetch(params object[] args)
         {
-            if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
-            {
-                StringBuilder sbsBuilder = new StringBuilder();
-                foreach(var arg in args)
-                {
-                    sbsBuilder.AppendFormat("{0}, ", arg);
-                }
-                commonLog.LogEntry("window.fetch is called with {0}", sbsBuilder.ToString());
-            }
-            string ___fetchUrl = string.Empty;
-            string ___fetchOptionJsonString = string.Empty;
+            IMultiversalScriptProcessor iprosessor = this.MultiversalScriptsHost.GetMultiversalScriptProcessor("text/javascript");
 
-            int argPos = 0;
-            foreach(object argobj in args)
+           
+            Task<CHtmlFetchResponse?> task = ___fetch_Aysnc_Inner(args);
+
+
+            if (iprosessor is ClearScriptProcessor.ClearScriptProcessor)
             {
-                if(argPos == 0)
+                ClearScriptProcessor.ClearScriptProcessor clearScriptProcessor = iprosessor as ClearScriptProcessor.ClearScriptProcessor;
+                ScriptEngine? engine = null;
+
+                engine = clearScriptProcessor.engine;
+
+                return task.ToPromise(engine);
+            }
+                
+            
+
+            // engine が取れない場合のフォールバック
+            return task;
+
+
+        }
+        
+        //  public async Task<CHtmlFetchResponse?> fetch(params object[] args)  << Original
+        private async Task<CHtmlFetchResponse?> ___fetch_Aysnc_Inner(params object[] args)
+        {
+            IMultiversalScriptProcessor iprosessor = this.MultiversalScriptsHost.GetMultiversalScriptProcessor("text/javascript");
+            ScriptEngine? clearScriptEngine = null;
+            if (iprosessor is ClearScriptProcessor.ClearScriptProcessor)
+            {
+                ClearScriptProcessor.ClearScriptProcessor clearScriptProcessor = iprosessor as ClearScriptProcessor.ClearScriptProcessor;
+                ScriptEngine? engine = null;
+
+                clearScriptEngine = clearScriptProcessor.engine;
+
+                
+            }
+            bool isJsonPrameterExists = false;
+            string? ___fetchMethod = "GET";
+            try
+            {
+                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
                 {
-                    switch(argobj)
+                    StringBuilder sbsBuilder = new StringBuilder();
+                    foreach (var arg in args)
                     {
-                        case string str:
-                            ___fetchUrl = str;
-                            break;
-                        case CHtmlRequest cHtmlrequest:
-                            ___fetchUrl = cHtmlrequest.Url.ToString();
-                            break;
-                        default:
-                            ___fetchUrl = commonHTML.GetStringValue(argobj);
-                            break;
+                        sbsBuilder.AppendFormat("{0}, ", arg);
                     }
-                    
-                } else if (argPos == 1)
+                    commonLog.LogEntry("window.fetch is called with {0}", sbsBuilder.ToString());
+                }
+                string ___fetchUrl = string.Empty;
+                string ___fetchOptionJsonString = string.Empty;
+
+                int argPos = 0;
+                foreach (object argobj in args)
+                {
+                    if (argPos <= args.Length)
+                    {
+                        if (argPos == 0)
+                        {
+                            switch (argobj)
+                            {
+                                case string str:
+                                    ___fetchUrl = str;
+                                    break;
+                                case CHtmlRequest cHtmlrequest:
+                                    ___fetchUrl = cHtmlrequest.Url.ToString();
+                                    break;
+                                default:
+                                    ___fetchUrl = commonHTML.GetStringValue(argobj);
+                                    break;
+                            }
+
+                        }
+                        else if (argPos == 1)
+                        {
+                            string stringJsonArg = commonHTML.GetStringValue(argobj);
+                            if (string.IsNullOrEmpty(stringJsonArg) || stringJsonArg == "null" || stringJsonArg == "[undefined]" || stringJsonArg == "undefined" || stringJsonArg.StartsWith("{") == false)
+                            {
+                                isJsonPrameterExists = false;
+                                goto fetchParseCompleted;
+
+
+
+                                ___fetchOptionJsonString = commonTypeConverter.convertScriptingObjectToJsonString(argobj, CHtmlJSonType.FetchData);
+                                isJsonPrameterExists = true;
+
+
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        argPos++;
+                    }
+                }
+
+            fetchParseCompleted:
+
+
+                if (!isJsonPrameterExists)
                 {
                     try
                     {
-                        ___fetchOptionJsonString = commonTypeConverter.convertScriptingObjectToJsonString(argobj, CHtmlJSonType.FetchData);
-#if DEBUG
-                        commonLog.LogEntry(
-    $"fetch JSON: {___fetchOptionJsonString}");
-                        /*
-                
-                        try
-                        {
-                            string desktopPath =
-                                Environment.GetFolderPath(
-                                    Environment.SpecialFolder.DesktopDirectory);
-
-                            string fileName =
-                                $"fetch-{DateTime.Now:yyyyMMdd-HHmmss-fff}.json";
-
-                            string jsonFilePath =
-                                System.IO.Path.Combine(desktopPath, fileName);
-
-                            System.IO.File.WriteAllText(
-                                jsonFilePath,
-                                ___fetchOptionJsonString,
-                                new System.Text.UTF8Encoding(false));
-
-                            commonLog.LogEntry(
-                                $"fetch JSON file saved: {jsonFilePath}");
-                        }
-                        catch (Exception ex)
-                        {
-                            commonLog.LogEntry(
-                                $"fetch JSON file save error: {ex}");
-                        }
-                        */
-#endif
-                        JsonElement doc = JsonSerializer.Deserialize<JsonElement>(___fetchOptionJsonString);
-                        string? method = doc.GetProperty("method").GetString();
-                        
-                       
-
-                        commonLog.LogEntry($"method = {method}");
-
-
-                        JsonElement headers = doc.GetProperty("headers");
-
-                        string? contentType = headers.GetProperty("Content-Type").GetString();
-                        string? auth = headers.GetProperty("Auth").GetString();
-                        string? referer = headers.GetProperty("referer").GetString();
-                        string? fetchOptions = headers.GetProperty("fetchoptions").GetString();
-
-                        JsonElement body = doc.GetProperty("body");
-                        string? title = body.GetProperty("title").GetString();
-                        string? bodyText = body.GetProperty("body").GetString();
-                        int userId = body.GetProperty("userId").GetInt32();
-                        if(commonLog.LoggingEnabled && commonLog.LogLevel > 5)
-                        {
-                            commonLog.LogEntry($"method = {method}");
-                            commonLog.LogEntry($"Content-Type = {contentType}");
-                            commonLog.LogEntry($"Auth = {auth}");
-                            commonLog.LogEntry($"referer = {referer}");
-                            commonLog.LogEntry($"fetchoptions = {fetchOptions}");
-                            commonLog.LogEntry($"title = {title}");
-                            commonLog.LogEntry($"body = {bodyText}");
-                            commonLog.LogEntry($"userId = {userId}");
-                        }
-                        Uri? fetchUriObj = null;
-                        if (!Uri.TryCreate(
-       ___fetchUrl,
-        UriKind.Absolute,
-        out Uri? fetchUriObject))
-                        {
-                            commonLog.LogEntry(
-                                $"fetch URL is invalid: {___fetchUrl}");
-
-                            return null;
-                        }
-
+                        Uri fetchUriObj = new Uri(___fetchUrl);
+                        Dictionary<string, object> requestHeaders = new Dictionary<string, object>();
                         CHtmlFetch fetchClient =
-    new CHtmlFetch(fetchUriObject);
+    new CHtmlFetch(fetchUriObj);
 
-                        CHtmlFetch response =
-                            await fetchClient.ExecuteAsync(
-                                method ?? "GET",
-                                doc);
+                        fetchClient.v8ScriptEngine = clearScriptEngine;
+                        
+                        CHtmlFetchResponse fetchResponse =
+            await fetchClient.____fetchExecuteAsync(
+                ___fetchMethod ?? "GET", requestHeaders
+                      );
+                        if (fetchResponse != null)
+                        {
+                            fetchResponse.v8ScriptEngine = clearScriptEngine;
+                            
+
+                            return fetchResponse;
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+                        {
+                            commonLog.LogEntry($"fetch GET error : Message: {ex.Message}");
+                        }
+                    };
+
+
+
+                }
+
+                else
+                {
+                    try
+                    {
+                        Uri fetchUriObj = new Uri(___fetchUrl);
+                        JsonElement jsonElement = JsonSerializer.Deserialize<JsonElement>(___fetchOptionJsonString);
+                        // JSon Element
+                        CHtmlFetch fetchClient =
+    new CHtmlFetch(fetchUriObj);
+                        if (iprosessor != null)
+                        {
+                            if (iprosessor is ClearScriptProcessor.ClearScriptProcessor)
+                            {
+                                ClearScriptProcessor.ClearScriptProcessor clearScriptProcessor = iprosessor as ClearScriptProcessor.ClearScriptProcessor;
+                                ScriptEngine? engine = null;
+
+                                engine = clearScriptProcessor.engine;
+                                fetchClient.v8ScriptEngine = engine;
+                            }
+                        }
+                        CHtmlFetchResponse response =
+                            await fetchClient.____fetchExecuteAsync(
+                                ___fetchMethod ?? "GET",
+                                jsonElement);
+                        
+                    ExecuteFetchActionGet:
 
                         commonLog.LogEntry(
                             $"fetch status = {response.status}");
@@ -7444,26 +7505,27 @@ s               else
                             $"fetch ok = {response.ok}");
 
                         return response;
-
-
-                    } catch (Exception fetchWindowEx)
+                    }
+                    catch (Exception ex)
                     {
-                        if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel > 7)
                         {
-                            commonLog.LogEntry($"fetch data convert error {fetchWindowEx.ToString()}");
+                            commonLog.LogEntry($"fetch json error :{___fetchOptionJsonString} Message: {ex.Message}");
                         }
                     }
-                } else if (argPos > 1)
-                {
-                    break;
-                }
-                argPos++;
+                }               
             }
-            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
+            catch (Exception ex)
             {
-                commonLog.LogEntry($"window.fetch is called with url : {___fetchUrl} options: {___fetchOptionJsonString}");
+                if (commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+                {
+                    commonLog.LogEntry($"fetch json error final Message: {ex.Message}");
+                }
             }
             return null;
+                 
+                            
+
         }
         public object onmsinertiastart
         {
@@ -7675,47 +7737,9 @@ s               else
         }
         object IMultiversalWindow.fetch(params object[] args)
         {
-            return this.___fetch_Inner(args);
+            return this.___fetch_Aysnc_Inner(args);
         }
-        private object ___fetch_Inner(params object[] args)
-        {
-            int i = 0;
-            foreach (var arg in args)
-            {
-                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
-                {
-                    commonLog.LogEntry("fetch called with argument: {0} {1}", i, args[i]);
-                }
-                switch(arg)
-                {
-                    case CHtmlRequest cHtmlrequest:
-                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
-                        {
-                            commonLog.LogEntry("fetch called with CHtmlRequest: {0}", cHtmlrequest);
-                        }
 
-
-                        var self = cHtmlrequest;
-                        
-                        break;
-                    case string s:
-                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
-                        {
-                            commonLog.LogEntry("TODO : fetch called with string: {0}", s);
-                        }
-                        // Handle string case, possibly as a URL
-                        break;
-                    default:
-                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
-                        {
-                            commonLog.LogEntry("TODO: fetch called with unknown argument: {0} {1}", i, arg);
-                        }
-                        break;
-                }
-                i++;
-            }
-            return null;
-        }
         internal void ___drawCanvasCreatedElements(CHtmlDocument ___activeDocument)
         {
             if (this.___Disposing == true)

@@ -1124,9 +1124,16 @@ namespace MultiHtmlCraft.Core
                          * =========================================================================
                          * */
                         var scope = new ClearScriptProcessor.ClearScriptProcessorScope();
+                        scope.LoggingEnabled = commonLog.LoggingEnabled;
+#if DEBUG
+                        
+                        scope.EnableDebug = true;
+#endif
 
+                        scope.Logger = args => MultiHtmlCraft.Core.commonLog.LogEntry(args);
                         scope.setMultiversalWindow(window);
                         scope.initScriptEngine();
+
 #if DEBUG
                         if(stopwatch == null)
                         {
@@ -1135,7 +1142,7 @@ namespace MultiHtmlCraft.Core
                         }
                         scope.EnableDebug = true;
 #endif
-                        scope.EnableScriptLogging = commonLog.LoggingEnabled;
+                      
                         var processor = scope.getMultiversalScriptProcessor();
                         scope.setDcoument(doc);
 
@@ -3214,7 +3221,7 @@ namespace MultiHtmlCraft.Core
                         {
                             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 8)
                             {
-                                commonLog.LogEntry("document.write content \"{0}\" non-head tag written before body [{1}] Reason : {2}", this.___DocumentWriteBuilder.ToString(), __FirstTag, ___ReasonString);
+                                commonLog.LogEntry("document.write byteContent \"{0}\" non-head tag written before body [{1}] Reason : {2}", this.___DocumentWriteBuilder.ToString(), __FirstTag, ___ReasonString);
                                 commonLog.LogEntry("Inserting Postion : {0} HTMLBuilder Length {1}", __pos, this.___HtmlBuilder.Length);
                             }
 
@@ -6033,7 +6040,7 @@ namespace MultiHtmlCraft.Core
         {
             get { return commonHTML.___convertNullToEmpty(this.___charset); }
         }
-        //document.body is the element that contains the content for the document. In documents with <body> contents, returns the <body> element, and in frameset documents, this returns the outermost <frameset> element.		// Though body is settable, setting a new body on a document will effectively remove all the current children of the existing <body> element.
+        //document.body is the element that contains the byteContent for the document. In documents with <body> contents, returns the <body> element, and in frameset documents, this returns the outermost <frameset> element.		// Though body is settable, setting a new body on a document will effectively remove all the current children of the existing <body> element.
         public ICHtmlElementInterface body
         {
 
@@ -6874,7 +6881,7 @@ namespace MultiHtmlCraft.Core
                 __strCharSet = commonHTML.GetElementAttributeInString(ele, "charset");
                 goto CharsetObtained;
             }
-            string __strContent = commonHTML.GetElementAttributeInString(ele, "content");
+            string __strContent = commonHTML.GetElementAttributeInString(ele, "byteContent");
 
             if (__strContent.Length == 0)
                 return "";
@@ -7093,7 +7100,7 @@ namespace MultiHtmlCraft.Core
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja" dir="ltr">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta http-equiv="byteContent-type" byteContent="text/html; charset=utf-8">
 									*/
                                     /* XMLHTTP may ___hasInner charset after header. just continue.*/
                                     goto NextLine;
@@ -9132,7 +9139,7 @@ namespace MultiHtmlCraft.Core
                                                             {
                                                                 if (this.___charset_position_in_html == -1 || this.___charset_position_in_html + 36 < this.___curHTMLParsePosition)
                                                                 {
-                                                                    if (tagElement.___attributes.ContainsKey("charset") == true || (tagElement.___attributes.ContainsKey("content") == true && tagElement.___attributes.ContainsKey("http-equiv") == true && commonHTML.GetElementAttributeInString(tagElement, "http-equiv").Equals("content-type", StringComparison.OrdinalIgnoreCase) == true))
+                                                                    if (tagElement.___attributes.ContainsKey("charset") == true || (tagElement.___attributes.ContainsKey("byteContent") == true && tagElement.___attributes.ContainsKey("http-equiv") == true && commonHTML.GetElementAttributeInString(tagElement, "http-equiv").Equals("byteContent-type", StringComparison.OrdinalIgnoreCase) == true))
                                                                     {
                                                                         string _newcharset = GetEncodingByElement(tagElement);
                                                                         this.___charset = _newcharset;
@@ -9192,9 +9199,9 @@ namespace MultiHtmlCraft.Core
                                                                     string ____nameValue = commonHTML.GetElementAttributeInString(tagElement, "name");
                                                                     if (string.Equals(____nameValue, "keywords", StringComparison.OrdinalIgnoreCase) == true)
                                                                     {
-                                                                        if (tagElement.___attributes.ContainsKey("content"))
+                                                                        if (tagElement.___attributes.ContainsKey("byteContent"))
                                                                         {
-                                                                            this.___keywords = commonHTML.GetElementAttributeInString(tagElement, "content");
+                                                                            this.___keywords = commonHTML.GetElementAttributeInString(tagElement, "byteContent");
 
                                                                         }
 
@@ -9217,9 +9224,9 @@ namespace MultiHtmlCraft.Core
                                                                                     goto BeginSyleSheetLookupSection;
 
                                                                                 }
-                                                                                if (tagElement.___attributes.ContainsKey("content"))
+                                                                                if (tagElement.___attributes.ContainsKey("byteContent"))
                                                                                 {
-                                                                                    string strRefreshContent = commonHTML.GetElementAttributeInString(tagElement, "content");
+                                                                                    string strRefreshContent = commonHTML.GetElementAttributeInString(tagElement, "byteContent");
                                                                                     if (strRefreshContent.Length > 3)
                                                                                     {
                                                                                         string[] strRefreshSp = strRefreshContent.Split(';');
@@ -9293,7 +9300,7 @@ namespace MultiHtmlCraft.Core
                                                                             {
                                                                                 try
                                                                                 {
-                                                                                    string strCookieContent = commonHTML.GetElementAttributeInString(tagElement, "content");
+                                                                                    string strCookieContent = commonHTML.GetElementAttributeInString(tagElement, "byteContent");
                                                                                     if (strCookieContent.Length != 0)
                                                                                     {
                                                                                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 20)
@@ -15376,7 +15383,7 @@ namespace MultiHtmlCraft.Core
                      to absolute or relative).
 
                     Setting the property to relative places the object in the natural HTML flow of 
-                    the document, but offsets the position of the object based on the preceding content. 
+                    the document, but offsets the position of the object based on the preceding byteContent. 
                     The following syntax shows how to create superscript text by placing the text in a
                     span that is positioned relative to the remaining text in the paragraph.
                     */
@@ -19518,7 +19525,7 @@ namespace MultiHtmlCraft.Core
                 The parent is positioned (that is, its position property is set to absolute or relative).
 
                 Setting the property to relative places the object in the natural HTML flow of the document,
-                but offsets the position of the object based on the preceding content. The following syntax
+                but offsets the position of the object based on the preceding byteContent. The following syntax
                 shows how to create superscript text by placing the text in a span that is positioned relative
                 to the remaining text in the paragraph.
 
@@ -19533,9 +19540,9 @@ namespace MultiHtmlCraft.Core
                 viewable area of the window causes a scroll bar to appear. When relatively positioned objects are
                  placed beyond the viewable area, a scroll bar is not shown.
 
-                The size of the content determines the size of objects with layout. For example, setting the 
-                height and position properties on a div object gives it layout. The content of the div determines
-                the size. In this case, the content determines the size of the width.
+                The size of the byteContent determines the size of objects with layout. For example, setting the 
+                height and position properties on a div object gives it layout. The byteContent of the div determines
+                the size. In this case, the byteContent determines the size of the width.
 
                 For an overview about how to use dynamic positioning, see About Element Positioning.
 

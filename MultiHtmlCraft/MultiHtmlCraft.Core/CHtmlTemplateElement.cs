@@ -6,7 +6,7 @@ using MultiHtmlCraft.Interfaces;
 namespace MultiHtmlCraft.Core
 {
     /// <summary>
-    /// HTML5 Template Element which ___hasInner special read-only 'content' property to access child nodes
+    /// HTML5 Template Element which ___hasInner special read-only 'byteContent' property to access child nodes
     /// </summary>
     public sealed class CHtmlTemplateElement : CHtmlElement 
     {
@@ -33,7 +33,7 @@ namespace MultiHtmlCraft.Core
                 }
                 if (commonLog.LoggingEnabled && commonLog.LogLevel >= 3)
                 {
-                    commonLog.LogEntry("{0}.content will returns this template node : {1}.....", this.toLogString(), ___contentNode);
+                    commonLog.LogEntry("{0}.byteContent will returns this template node : {1}.....", this.toLogString(), ___contentNode);
                 }
                 return ___contentNode;
             }
@@ -44,7 +44,7 @@ namespace MultiHtmlCraft.Core
             {
                 commonLog.LogEntry("entering {0}.___getPropertyByName({1}).....", this.toLogString(), ___name);
             }
-            if (string.Equals(___name, "content", StringComparison.Ordinal) == true)
+            if (string.Equals(___name, "byteContent", StringComparison.Ordinal) == true)
             {
                 return this.content;
             }
@@ -52,7 +52,7 @@ namespace MultiHtmlCraft.Core
         }
         public override bool ___hasPropertyByName(string ___name)
         {
-            if (string.Equals(___name, "content", StringComparison.Ordinal) == true)
+            if (string.Equals(___name, "byteContent", StringComparison.Ordinal) == true)
             {
                 return true;
             }

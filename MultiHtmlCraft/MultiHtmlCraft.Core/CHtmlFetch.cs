@@ -1,21 +1,42 @@
-﻿using Microsoft.ClearScript.V8;
+﻿using Avalonia.Input;
+using Microsoft.ClearScript;
+using Microsoft.ClearScript.V8;
+using MultiHtmlCraft.Core;
+using MultiHtmlCraft.Interfaces;
 using MultiHtmlCraft.Interfaces;
 using System;
+using System;
 using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Dynamic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
+using System.Text;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks;
 
-    namespace MultiHtmlCraft.Core
+namespace MultiHtmlCraft.Core
     {
         /// <summary>
         /// JavaScript Fetch class 
         /// </summary>
-        public class CHtmlFetch : ICHtmlFetchInterface
+        public class CHtmlFetch : ICHtmlFetchInterface, IDynamicMetaObjectProvider
         {
-            private static HttpClient ___httpClient = CHtmlMultiversalWindow.getHttpClient();
+
+        private WeakReference<ScriptEngine>? _engineRef;
+
+        public ScriptEngine? v8ScriptEngine
+        {
+            get => _engineRef != null && _engineRef.TryGetTarget(out var eng) ? eng : null;
+            set => _engineRef = value != null ? new WeakReference<ScriptEngine>(value) : null;
+        }
+
+        private static HttpClient ___httpClient = CHtmlMultiversalWindow.getHttpClient();
             private HttpResponseMessage? _responseMessage;
             private byte[]? _rawContent;
             private bool _bodyUsed = false;
@@ -47,13 +68,20 @@ using System.Threading.Tasks;
             public bool bodyUsed => _bodyUsed;
             public object? bodyResponse => _rawContent;
 
+       
+        
             public CHtmlFetch(Uri uri)
             {
                 if(commonLog.LoggingEnabled) commonLog.LogEntry($"CHtmlFetch: Initialized with URL: {uri}");
                 url = uri;
             }
+        public DynamicMetaObject GetMetaObject(Expression parameter)
+        {
+            return new CHtmlClearScriptDynamicMetaObject<CHtmlFetch>(parameter, this);
+        }
 
         // --- Internal Fetch Logic ---
+
         public async Task<CHtmlFetch> ExecuteAsync(
             string method,
             JsonElement options,
@@ -70,7 +98,7 @@ using System.Threading.Tasks;
 
             JsonElement headersElement = default;
             bool hasHeaders =
-                options.TryGetProperty("headers", out headersElement);
+                options.TryGetProperty("resquestGetHeaders", out headersElement);
 
             string? contentType = null;
 
@@ -148,35 +176,113 @@ using System.Threading.Tasks;
 
 
 
-            public async Task<string> text()
+        public async Task<CHtmlFetchResponse> ____fetchExecuteAsync(
+string method,
+JsonElement jsonElement,
+CancellationToken cancellationToken = default)
+        {
+            return new CHtmlFetchResponse();
+        }
+
+        public async Task<CHtmlFetchResponse> ____fetchExecuteAsync(
+    string method,
+    Dictionary<string, object>? resquestGetHeaders,
+    CancellationToken cancellationToken = default)
+        {
+            this.method = string.IsNullOrWhiteSpace(method)
+                ? "GET"
+                : method.ToUpperInvariant();
+
+            using var request =
+                new HttpRequestMessage(
+                    new HttpMethod(this.method),
+                    url);
+            foreach(string headerKey in resquestGetHeaders.Keys)
+            {
+                if (!string.IsNullOrEmpty(headerKey))
+                {
+                    object? headerValue = null;
+                    if (resquestGetHeaders.TryGetValue(headerKey, out headerValue))
+                    {
+                        switch(headerKey)
+                        {
+                            default:
+                                break;
+                        }
+
+                    }
+                }
+            }
+
+
+
+            string? contentType = null;
+     
+
+
+
+           
+   using HttpResponseMessage httpclientresponse = await ___httpClient.SendAsync(
+    request,
+    HttpCompletionOption.ResponseHeadersRead,
+    cancellationToken);
+
+            _rawContent =
+                await httpclientresponse.Content.ReadAsByteArrayAsync(
+                    cancellationToken);
+            CHtmlFetchResponse fetchResponse = new CHtmlFetchResponse(httpclientresponse, _rawContent);
+            if (this.v8ScriptEngine != null)
+            {
+                fetchResponse.v8ScriptEngine = this.v8ScriptEngine;
+            }
+
+            return fetchResponse;
+        }
+
+
+
+        public Task<object> json()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<byte[]> arrayBuffer()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<object> blob()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<object> formData()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICHtmlFetchInterface clone()
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
+
+        public async Task<string> text()
             {
                 CheckBodyUsed();
                 return await Task.FromResult(System.Text.Encoding.UTF8.GetString(_rawContent ?? Array.Empty<byte>()));
             }
 
-            public async Task<object> json()
-            {
-                var txt = await text();
-             
-                //return V8ScriptEngine.GetCurrent().Evaluate($"JSON.parse({@$"'{txt.Replace("'", "\\'")}'"})");
-                return string.Empty;
-            }
 
-            public async Task<byte[]> arrayBuffer()
-            {
-                CheckBodyUsed();
-                return await Task.FromResult(_rawContent ?? Array.Empty<byte>());
-            }
 
-            public async Task<object> blob() => throw new NotImplementedException("Blob implementation requires additional JS-binding logic.");
 
-            public async Task<object> formData() => throw new NotImplementedException("FormData parsing logic is complex and requires multipart/form-data parsing.");
 
-            public ICHtmlFetchInterface clone()
-            {
-          
-                return (ICHtmlFetchInterface)this.MemberwiseClone();
-            }
+ 
+
+
 
             private void CheckBodyUsed()
             {
@@ -187,31 +293,5 @@ using System.Threading.Tasks;
     }
 
 /// <summary>
-/// fetch response
+/// fetch httpclientresponse
 /// </summary>
-public class CHtmlFetchResponse
-{
-    private readonly HttpResponseMessage _res;
-    private readonly string _content;
-
-    public CHtmlFetchResponse(HttpResponseMessage res, string content)
-    {
-        _res = res;
-        _content = content;
-    }
-
-
-    public int status => (int)_res.StatusCode;
-    public bool ok => _res.IsSuccessStatusCode;
-    public string statusText => _res.ReasonPhrase;
-
-
-    public Task<string> text() => Task.FromResult(_content);
-
-    public object json()
-    {
-
-        //return V8ScriptEngine.GetCurrent().Evaluate($"JSON.parse({@$"'{_content.Replace("'", "\\'")}'"})");
-        return string.Empty;
-    }
-}

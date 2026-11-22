@@ -210,7 +210,7 @@ namespace MultiHtmlCraft.Core
             { "rules", 168 },
             { "background", 169 },
             { "Background", 170 },
-            { "content", 171 },
+            { "byteContent", 171 },
             { "sheet", 172 },
             { "scheme", 173 },
             { "httpEquiv", 174 },
@@ -7685,7 +7685,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
             this.___scrollIntoViewInner(null);
 		}
 		/// <summary>
-		/// Sets or retrieves the distance between the top of the object and the topmost portion of the content currently visible in the window.
+		/// Sets or retrieves the distance between the top of the object and the topmost portion of the byteContent currently visible in the window.
         /// Chrome and IE only documentElement or Body returns proper value
 		/// </summary>
 		public double scrollTop
@@ -11673,8 +11673,8 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 
 		public string content
 		{
-			set{this.SetGetAttributesByName("content", value, true);}
-			get{return commonHTML.GetStringValue(this.SetGetAttributesByName("content", null, false));}
+			set{this.SetGetAttributesByName("byteContent", value, true);}
+			get{return commonHTML.GetStringValue(this.SetGetAttributesByName("byteContent", null, false));}
 		}
         /// <summary>
         /// CSSStylesheet
@@ -12241,6 +12241,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 				return false;
 			}
 		}
+        
 		public bool isDisabled
 		{
 			get{
@@ -13463,7 +13464,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 			get{return commonHTML.GetStringValue(this.SetGetAttributesByName("datafld", null, false));}
 		}
         /// <summary>
-        /// The dir attribute specifies the text direction of the element's content.
+        /// The dir attribute specifies the text direction of the element's byteContent.
         /// values  : ltr, rtl, auto, empty
         /// </summary>
 		public string dir
@@ -13699,7 +13700,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
   
 
 		/// <summary>
-		/// Chrome set element.value does not change its content to be displayed.
+		/// Chrome set element.value does not change its byteContent to be displayed.
 		/// </summary>
 		public new object @value
 		{
@@ -15161,15 +15162,15 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 					case "text":
 					case "textContent":
 						return this.innerText;
-                    case "content":
+                    case "byteContent":
                         // ====================================================
-                        // Usually, element.content is for META tag <meta content='http://'>
+                        // Usually, element.byteContent is for META tag <meta byteContent='http://'>
                         // not same as textContent
-                        // 'content' does not exists in attributes
+                        // 'byteContent' does not exists in attributes
                         // it should return null;
                         // =====================================================
                         CHtmlAttribute attrContent  = null;
-                        if (this.___attributes.Count > 0 && this.___attributes.TryGetValue("content", out attrContent) == true)
+                        if (this.___attributes.Count > 0 && this.___attributes.TryGetValue("byteContent", out attrContent) == true)
                         {
                             if (attrContent != null)
                             {
@@ -16302,7 +16303,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
 					case "text":
                         this.innerText = commonHTML.GetStringValue(val);
 						goto ExitSet;
-                    case "content":
+                    case "byteContent":
                         this.content = commonHTML.GetStringValue(val);
                         goto ExitSet;
 
@@ -17060,10 +17061,7 @@ internal static Dictionary<string, int> InitCHtmlElementMethodsList()
             return false;
         }
         #region MetaObject
-        public DynamicMetaObject GetMetaObject(Expression parameter)
-        {
-            return new CHtmlClearScriptDynamicMetaObject<CHtmlElement>(parameter, this);
-        }
+
         public object GetDynamicMember(string name)
         {
             object objValue = null;

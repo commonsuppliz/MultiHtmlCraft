@@ -270,7 +270,7 @@ namespace MultiHtmlCraft.Core
             return true;
         }
 
-        // JS からプロパティが代入された時 (div.style.backgroundClip = "content-box" など)
+        // JS からプロパティが代入された時 (div.style.backgroundClip = "byteContent-box" など)
         public bool OnSetProperty(string name, object value)
         {
             throw new NotImplementedException();
@@ -7695,7 +7695,7 @@ namespace MultiHtmlCraft.Core
                     return this.___nodeTypeDummy;
                 case "pointerevents":
                     return ___convertNullToEmpty(this.___PointerEvents);
-                case "content":
+                case "byteContent":
                     return ___convertNullToEmpty(this.___Content);
                 case "outlineoffset":
                 case "outline-offset":
@@ -7769,13 +7769,13 @@ namespace MultiHtmlCraft.Core
 
                 case "textindex":
                     return ___convertNullToEmpty(this.___TextIndex);
-                case "content-zooming":
+                case "byteContent-zooming":
                 case "contentzooming":
-                case "-ms-content-zooming":
-                case "-khtml-content-zooming":
-                case "-webkit-content-zooming":
-                case "-moz-content-zooming":
-                case "-o-content-zooming":
+                case "-ms-byteContent-zooming":
+                case "-khtml-byteContent-zooming":
+                case "-webkit-byteContent-zooming":
+                case "-moz-byteContent-zooming":
+                case "-o-byteContent-zooming":
                     return ___convertNullToEmpty(this.___contentZooming);
 
                 case "overflowwrap":
@@ -7918,7 +7918,7 @@ namespace MultiHtmlCraft.Core
                 case "text-justification":
                 case "textjustification":
                     return ___convertNullToEmpty(this.___TextJustification);
-                case "align-content":
+                case "align-byteContent":
                 case "aligncontent":
                     return ___convertNullToEmpty(this.___alignContent);
                 case "boxreflect":
@@ -8197,7 +8197,7 @@ namespace MultiHtmlCraft.Core
                     case "pointerevents":
                         this.___PointerEvents = styleValue;
                         return;
-                    case "content":
+                    case "byteContent":
                         this.___Content = styleValue;
                         return;
                     case "boxdirection":
@@ -8729,7 +8729,7 @@ namespace MultiHtmlCraft.Core
                     case "order":
                         this.___flexOrder = styleValue;
                         return;
-                    case "align-content":
+                    case "align-byteContent":
                     case "aligncontent":
                         this.___alignContent = styleValue;
                         return;
@@ -8737,13 +8737,13 @@ namespace MultiHtmlCraft.Core
                     case "flexlinepack":
                         this.___flexLinePack = styleValue;
                         return;
-                    case "content-zooming":
+                    case "byteContent-zooming":
                     case "contentzooming":
-                    case "-ms-content-zooming":
-                    case "-khtml-content-zooming":
-                    case "-webkit-content-zooming":
-                    case "-moz-content-zooming":
-                    case "-o-content-zooming":
+                    case "-ms-byteContent-zooming":
+                    case "-khtml-byteContent-zooming":
+                    case "-webkit-byteContent-zooming":
+                    case "-moz-byteContent-zooming":
+                    case "-o-byteContent-zooming":
                         this.___contentZooming = styleValue;
                         return;
 
