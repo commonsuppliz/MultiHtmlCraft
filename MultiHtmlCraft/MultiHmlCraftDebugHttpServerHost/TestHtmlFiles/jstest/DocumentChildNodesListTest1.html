@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>body.childNodes forループサンプル</title>
+    <script>
+        window.onload = function() {
+            var nodes = document.body.childNodes;
+            for (var i = 0; i < nodes.length; i++) {
+                console.log('body.childNodes[' + i + ']:', nodes[i]);
+            }
+        };
+    </script>
+</head>
+<body>
+    <div>ノード1</div>
+    <div>ノード2</div>
+    <div>ノード3</div>
+    <div>ノード4</div>
+    <div>ノード5</div>
+</body>
+</html>

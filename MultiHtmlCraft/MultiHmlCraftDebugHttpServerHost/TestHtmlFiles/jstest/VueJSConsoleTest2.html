@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Vue.js 機能テストサンプル</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .box { border: 1px solid #ccc; padding: 12px; margin: 10px 0; border-radius: 6px; }
+    button { margin: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Vue.js 各機能テスト</h1>
+  <p>コンソールを開いて結果を確認してください。</p>
+
+  <div id="app">
+    <!-- テンプレート部分 -->
+    <div class="box">
+      <h3>1. リアクティブデータ & v-model</h3>
+      <p>メッセージ: {{ message }}</p>
+      <input v-model="message" placeholder="メッセージを入力">
+    </div>
+
+    <div class="box">
+      <h3>2. Computed（算出プロパティ）</h3>
+      <p>逆順メッセージ: {{ reversedMessage }}</p>
+      <p>文字数: {{ messageLength }}</p>
+    </div>
+
+    <div class="box">
+      <h3>3. Methods（メソッド）</h3>
+      <button @click="reverseMessage">メッセージを反転</button>
+      <button @click="addTodo">Todo追加</button>
+    </div>
+
+    <div class="box">
+      <h3>4. v-if / v-show</h3>
+      <button @click="show = !show">表示切替 (現在: {{ show }})</button>
+      <p v-if="show">v-if で表示中</p>
+      <p v-show="show">v-show で表示中</p>
+    </div>
+
+    <div class="box">
+      <h3>5. v-for（リスト描画）</h3>
+      <ul>
+        <li v-for="(todo, index) in todos" :key="todo.id">
+          {{ index + 1 }}. {{ todo.text }}
+          <button @click="removeTodo(index)">削除</button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h3>6. v-bind（属性バインディング）</h3>
+      <p :style="{ color: textColor, fontSize: fontSize + 'px' }">
+        動的スタイルのテキスト
+      </p>
+      <button @click="changeStyle">スタイル変更</button>
+    </div>
+
+    <div class="box">
+      <h3>7. コンポーネント</h3>
+      <hello-component :name="message"></hello-component>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('=== DOMContentLoaded 発火 ===');
+
+      const { createApp, ref, reactive, computed, watch, watchEffect, onMounted, onUpdated } = Vue;
+
+      // 子コンポーネント定義
+      const HelloComponent = {
+        props: ['name'],
+        template: `<p>Hello, {{ name }}! （子コンポーネント）</p>`,
+        setup(props) {
+          console.log('【コンポーネント】setup実行, props:', props.name);
+          return {};
+        }
+      };
+
+      const app = createApp({
+        components: {
+          HelloComponent
+        },
+        setup() {
+          console.log('【setup】実行開始');
+
+          // 1. リアクティブデータ (ref)
+          const message = ref('Hello Vue.js!');
+          console.log('【ref】message 初期値:', message.value);
+
+          // reactive の例
+          const state = reactive({ count: 0 });
+          console.log('【reactive】state:', state);
+
+          // 2. Computed
+          const reversedMessage = computed(() => {
+            return message.value.split('').reverse().join('');
+          });
+          const messageLength = computed(() => message.value.length);
+          console.log('【computed】reversedMessage 初期値:', reversedMessage.value);
+
+          // 3. Methods
+          const reverseMessage = () => {
+            message.value = message.value.split('').reverse().join('');
+            console.log('【methods】メッセージ反転 →', message.value);
+          };
+
+          const todos = ref([
+            { id: 1, text: 'Vueを学ぶ' },
+            { id: 2, text: 'サンプルを作る' }
+          ]);
+
+          const addTodo = () => {
+            const id = Date.now();
+            todos.value.push({ id, text: `新しいTodo ${id}` });
+            console.log('【methods】Todo追加:', todos.value);
+          };
+
+          const removeTodo = (index) => {
+            const removed = todos.value.splice(index, 1);
+            console.log('【methods】Todo削除:', removed);
+          };
+
+          // 4. v-if / v-show 用
+          const show = ref(true);
+
+          // 6. v-bind 用
+          const textColor = ref('blue');
+          const fontSize = ref(16);
+          const changeStyle = () => {
+            textColor.value = textColor.value === 'blue' ? 'red' : 'blue';
+            fontSize.value = fontSize.value === 16 ? 24 : 16;
+            console.log('【methods】スタイル変更:', textColor.value, fontSize.value);
+          };
+
+          // 5. Watch
+          watch(message, (newVal, oldVal) => {
+            console.log('【watch】message 変化:', oldVal, '→', newVal);
+          });
+
+          // watchEffect
+          watchEffect(() => {
+            console.log('【watchEffect】現在の文字数:', message.value.length);
+          });
+
+          // ライフサイクル
+          onMounted(() => {
+            console.log('【onMounted】コンポーネントがマウントされました');
+          });
+
+          onUpdated(() => {
+            console.log('【onUpdated】コンポーネントが更新されました');
+          });
+
+          console.log('【setup】完了 - 返却する値を準備');
+
+          return {
+            message,
+            reversedMessage,
+            messageLength,
+            reverseMessage,
+            todos,
+            addTodo,
+            removeTodo,
+            show,
+            textColor,
+            fontSize,
+            changeStyle
+          };
+        }
+      });
+
+      app.mount('#app');
+      console.log('=== Vueアプリをマウントしました ===');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>DOM Prototype Diagnostic Test</title>
+</head>
+<body>
+    <h1>DOM Prototype Check</h1>
+    <div id="output" style="font-family: monospace; white-space: pre-wrap; background: #222; color: #0f0; padding: 10px;"></div>
+
+    <script>
+ function logMessage(msg) {
+        const out = document.getElementById('output');
+        if (out) out.textContent += msg + '\n';
+        console.log(msg);
+    }
+
+    const targetClasses = [
+        'HTMLElement', 'HTMLCanvasElement', 'HTMLVideoElement',
+        'HTMLAudioElement', 'HTMLImageElement', 'HTMLDivElement',
+        'Element', 'Document'
+    ];
+
+    logMessage("=== DOM Constructor & Prototype Check Start ===");
+
+    targetClasses.forEach(className => {
+        const ctor = window[className];
+        if (!ctor) {
+            logMessage(`[MISSING] window.${className} is undefined or null`);
+            return;
+        }
+
+        logMessage(`[FOUND] window.${className}: typeof = ${typeof ctor}`);
+
+        let proto = null;
+        try {
+            proto = ctor.prototype;
+        } catch (err) {
+            logMessage(`  - prototype read error: ${err.message}`);
+        }
+
+        if (!proto) {
+            logMessage(`  -> WARNING: .prototype is missing! Attempting fix...`);
+            try {
+                ctor.prototype = {};
+                logMessage(`  -> FIX SUCCESS`);
+            } catch (e) {
+                logMessage(`  -> FIX FAILED: ${e.message}`);
+            }
+        } else {
+            logMessage(`  -> OK`);
+        }
+    });
+
+    // 実際のインスタンス生成と instanceof チェックのテスト
+    logMessage("\n=== Instanceof Check Test ===");
+    try {
+        const canvas = document.createElement('canvas');
+        logMessage(`document.createElement('canvas') created.`);
+        logMessage(`  - canvas constructor name: ${canvas.constructor ? canvas.constructor.name : 'Unknown'}`);
+        
+        if (typeof HTMLCanvasElement !== 'undefined' && HTMLCanvasElement !== null) {
+            const isInst = canvas instanceof HTMLCanvasElement;
+            logMessage(`  - canvas instanceof HTMLCanvasElement: ${isInst}`);
+        } else {
+            logMessage(`  - HTMLCanvasElement is undefined/null, skipping instanceof check.`);
+        }
+    } catch (e) {
+        logMessage(`[ERROR during instance test]: ${e.message}`);
+    }
+
+    logMessage("=== Diagnostic Complete ===");
+    </script>
+</body>
+</html>

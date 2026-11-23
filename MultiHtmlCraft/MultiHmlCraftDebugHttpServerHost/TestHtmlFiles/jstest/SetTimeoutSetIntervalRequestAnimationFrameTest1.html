@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Timer Stop After 20 Calls</title>
+</head>
+<body>
+  <script>
+    let callCount = 0;
+    const maxCalls = 7;
+
+    // タイマーIDを保持
+    const timeoutIds = [];
+    const intervalIds = [];
+    let rafId = null;
+
+    // タイマー停止関数
+    function stopAllTimers() {
+      timeoutIds.forEach(id => clearTimeout(id));
+      intervalIds.forEach(id => clearInterval(id));
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      console.log('すべてのタイマーを停止しました');
+    }
+
+    // コールカウント管理
+    function onTimerCalled(label) {
+      callCount++;
+      console.log(`${label} 呼び出し: ${callCount}回目`);
+      if (callCount >= maxCalls) {
+        stopAllTimers();
+      }
+    }
+
+    // setTimeout 3つ
+    
+    timeoutIds.push(setTimeout(() => onTimerCalled('setTimeout 200ms'), 200));
+    timeoutIds.push(setTimeout(() => onTimerCalled('setTimeout 400ms'), 400));
+    timeoutIds.push(setTimeout(() => onTimerCalled('setTimeout 600ms'), 600));
+    
+
+    // setInterval 3つ
+    intervalIds.push(setInterval(() => onTimerCalled('setInterval 50ms'), 50));
+    intervalIds.push(setInterval(() => onTimerCalled('setInterval 300ms'), 300));
+    intervalIds.push(setInterval(() => onTimerCalled('setInterval 500ms'), 500));
+   
+    // requestAnimationFrame
+    
+    function rafCallback() {
+      onTimerCalled('requestAnimationFrame');
+      if (callCount < maxCalls) {
+        rafId = requestAnimationFrame(rafCallback);
+      } else {
+        cancelAnimationFrame(rafId);
+      }
+    }
+
+    rafId = requestAnimationFrame(rafCallback);
+        
+  </script>
+</body>
+</html>

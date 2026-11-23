@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <title>sample</title>
+  <style>
+    button {
+      width: 50px;
+      height: 50px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="div1"></div>
+
+  <script language="javascript" type="text/javascript">
+    const div1 = document.getElementById("div1");
+       console.log('getElement id returns  : ' + div1);
+       const newDiv = document.createElement("div");
+   
+        const newBtn = document.createElement("button");
+        console.log('createElement is called');
+        newBtn.innerText = 'hellow world';
+        console.log('set innerText is called');
+        console.log('javascript section 1 is called succesully');
+
+        console.log("newBtn : " + typeof newBtn);
+        console.log("newDiv : " + typeof newDiv);
+        //console.log("newBtn instanceof Node: " + (newBtn instanceof Node));
+        //console.log("newDiv instanceof Node: " + (newDiv instanceof Node));
+        
+        newBtn.onclick = () => {
+          console.log("Button ${newBtn.innerHTML} has been pressed！");
+        }
+        console.log("newBtn.onclick mwthod has been set");
+
+
+        console.log("newBtn : " + typeof newBtn);
+        console.log("newDiv : " + typeof newDiv);
+        try {
+             newDiv.appendChild(newBtn);
+             }
+              catch (e)
+             {
+            console.log("Error: " + e.message);
+            console.log("Stack: " + e.stack);
+        }
+        console.log("calling appendChild(newBtn);");
+        try
+        {
+        newDiv.appendChild(newBtn);
+        } catch (e)
+        {
+            console.log("Error: " + e.message);
+            console.log("Stack: " + e.stack);
+        }
+
+        console.log("newDiv Child has length : " + newDiv.childNodes.length);
+        
+        
+        console.log("newDiv.appendChild(newBtn) is called");
+        console.log('appendChidld for new Buttoon  called');
+        console.log("calling div1.AppendChild(newDiv) is calling");   
+        try
+        {
+      div1.appendChild(newDiv);
+      } catch (e)
+        {
+            console.log("Error: " + e.message);
+            console.log("Stack: " + e.stack);
+        }
+      console.log('appendChidld for newDiv called');
+      console.log('javascript section 2 is called succesully');
+      console.log("div1 Child has length : " + div1.childNodes.length);
+  </script>
+</body>
+
+</html>

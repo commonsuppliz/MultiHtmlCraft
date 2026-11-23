@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRAYCODE JavaScript</title>
+  <script>
+      function sayHello() {
+      alert("Hello");
+    }
+  </script>
+  <script>
+    window.addEventListener('load', function(){
+
+      // イベントリスナー登録
+      document.addEventListener('DOMContentLoaded', sayHello);
+      console.log("load is registered");
+
+    });
+
+
+  </script>
+<script>
+
+      // イベントリスナー解除
+      document.removeEventListener('DOMContentLoaded', sayHello);
+          console.log("load is removed");
+</script>
+</head>
+<body>
+<h1>JavaScriptレシピ</h1>
+<section id="content1"></section>
+</body>
+</html>

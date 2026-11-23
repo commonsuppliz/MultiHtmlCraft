@@ -1,0 +1,1 @@
+console.log('🛑 [normal-body.js] 実行（Body途中の通常スクリプト：HTMLパースをブロック）');

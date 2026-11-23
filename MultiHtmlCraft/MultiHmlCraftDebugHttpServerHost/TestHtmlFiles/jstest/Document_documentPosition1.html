@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>compareDocumentPosition テスト</title>
+</head>
+<body>
+  <div id="root">
+    <section id="section1">
+      <div id="div1">
+        <span id="span1">A</span>
+        <span id="span2">B</span>
+      </div>
+    </section>
+    <section id="section2">
+      <div id="div2">
+        <span id="span3">C</span>
+        <span id="span4">D</span>
+        <div id="div3">
+          <span id="span5">E</span>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+    // 深さ3: #root > #section1 > #div1
+    // 深さ4: #root > #section2 > #div2 > #span3
+    // 深さ5: #root > #section2 > #div2 > #div3 > #span5
+
+    const root = document.getElementById('root');
+    const section1 = document.getElementById('section1');
+    const div1 = document.getElementById('div1');
+    const span1 = document.getElementById('span1');
+    const span2 = document.getElementById('span2');
+    const section2 = document.getElementById('section2');
+    const div2 = document.getElementById('div2');
+    const span3 = document.getElementById('span3');
+    const span4 = document.getElementById('span4');
+    const div3 = document.getElementById('div3');
+    const span5 = document.getElementById('span5');
+
+    // 例: 深さ3と深さ4のノード比較
+    console.log(div1.compareDocumentPosition(span3));
+    console.log('div1 vs span3:', div1.compareDocumentPosition(span3));
+    // 例: 深さ4と深さ5のノード比較
+    console.log('span3 vs span5:', span3.compareDocumentPosition(span5));
+    // 例: 深さ3と深さ5のノード比較
+    console.log('div1 vs span5:', div1.compareDocumentPosition(span5));
+    // 例: 同じ親を持つノード
+    console.log('span1 vs span2:', span1.compareDocumentPosition(span2));
+    // 例: 親子関係
+    console.log('div2 vs span5:', div2.compareDocumentPosition(span5));
+    // 例: 自分自身
+    console.log('span5 vs span5:', span5.compareDocumentPosition(span5));
+  </script>
+</body>
+</html>

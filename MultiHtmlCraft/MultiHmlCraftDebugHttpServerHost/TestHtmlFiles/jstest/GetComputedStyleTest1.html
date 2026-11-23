@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>スタイルを取得</title>
+<style type="text/css">
+p{
+  color:red;
+}
+</style>
+</head>
+<body>
+<p id="address" style="font-weight:bold;">東京都港区南青山</p>
+
+
+
+<script>
+function setElement(){
+  console.log("setElement start....");
+  const element = document.getElementById('address');
+  console.log("HERE3 :", typeof element);
+  console.log("Address:", element);
+
+  if (!element) {
+    console.error("address 要素が見つかりません。id='address' の要素が HTML に存在するか確認してください。");
+    return;
+  }
+
+  if (typeof window.getComputedStyle !== "function") {
+    console.error("window.getComputedStyle が未実装です。レンダラ側の実装を確認してください。");
+    return;
+  }
+
+
+  console.log("HERE4 :", typeof element);
+
+ 
+  const styleABC = window.getComputedStyle(element);
+   console.log("HERE5 window.getComputedStyle(element) is called");
+   if(!styleABC)
+   {
+         console.log("styleABC:  is null", styleABC);
+         return;
+   
+   }
+   console.log("typeof styleABC: ", typeof styleABC);
+   /*
+  console.log("HERE6 getting propertyof styleABC...");
+  console.log("typeof styleABC:", typeof styleABC);
+  console.log("styleABC:", styleABC.toString());
+  console.log("HERE7 success of call propertyof styleABC...");
+  */
+  
+  const isFn = typeof styleABC?.getPropertyValue === 'function';
+console.log('is function:', isFn);
+
+const colorByFunc = isFn ? styleABC.getPropertyValue('color') : '(no function)';
+const colorByIdx  = styleABC ? styleABC['color'] : '(styleABC null)';
+
+console.log('colorByFunc:', colorByFunc);
+console.log('colorByIndexer:', colorByIdx);
+console.log('equal:', colorByFunc === colorByIdx);
+
+
+
+  const fn = styleABC && styleABC.getPropertyValue;
+console.log('typeof styleABC.getPropertyValue:', typeof fn);
+console.log('styleABC.getPropertyValue is function:', typeof fn === 'function');
+
+try {
+  const colorByFunc = typeof fn === 'function' ? styleABC.getPropertyValue('color') : '(no function)';
+  console.log('colorByFunc:', colorByFunc);
+} catch (e) {
+  console.log('colorByFunc threw:', e && e.message);
+}
+
+try {
+  const colorByIndexer = styleABC ? styleABC['color'] : '(styleABC null)';
+  console.log('colorByIndexer:', colorByIndexer);
+} catch (e) {
+  console.log('colorByIndexer threw:', e && e.message);
+}
+
+// 両者の比較
+try {
+  const a = typeof fn === 'function' ? styleABC.getPropertyValue('color') : '';
+  const b = styleABC ? styleABC['color'] : '';
+  console.log('equals(getPropertyValue, indexer):', a === b, 'a=', a, 'b=', b);
+} catch (e) {
+  console.log('compare threw:', e && e.message);
+} 
+  console.log("HERE8 getting styleABC.getPropertyValue value...");
+  const color =  styleABC.getPropertyValue('color');
+  const fontWeight =  styleABC.getPropertyValue('font-weight');
+
+  console.log('color:', color);
+  console.log('font-weight:', fontWeight);
+  console.log('HE99 success of getComputedStyle()...');
+}
+
+console.log("HERE2 window.addEventListener");
+window.addEventListener("load", setElement);
+</script>
+</body>
+</html>

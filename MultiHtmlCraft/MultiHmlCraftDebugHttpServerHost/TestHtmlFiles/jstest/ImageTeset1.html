@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>console.log サンプル</title>
+</head>
+<body>
+  <h1>console.log サンプル</h1>
+<script>
+var imgLoaded = 0;
+async function loadImageAndCount() {
+  const imageUrls = [
+    'https://picsum.photos/200/300?random=1',
+    'https://picsum.photos/200/300?random=2',
+    'https://picsum.photos/200/300?random=3'
+  ];
+
+  // 1. 各URLをImageオブジェクトの読み込みPromiseに変換
+  const loadImages = imageUrls.map(url => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = url;
+      
+      // 読み込み成功時
+      img.onload =  function(){ 
+         imgLoaded++;
+         console.log('onload called image count: ' +  imgLoaded);
+         
+       }
+      // 読み込み失敗時
+      img.onerror = (e) => reject(new Error(`Failed to load: ${url}`));
+    });
+  });
+
+  try {
+    console.log("画像のロードを開始します...");
+
+    // 2. すべてのImageがロードされるのを待機
+    const images = await Promise.all(loadImages);
+
+    // 3. ロードされたファイル数（Imageオブジェクトの数）を出力
+    console.log(`完了！ロードされたImage数: ${images.length}`);
+    
+    // （おまけ）せっかくなので、1枚目のサイズを表示してみる
+    console.log(`1枚目のサイズ: ${images[0].width}x${images[0].height}px`);
+
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+  }
+}
+
+// 実行
+loadImageAndCount();
+  </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMLコントロール サンプル（ランダム背景色付き）</title>
+    <style>
+        body {  background-color: #f9f9f9; height:3000px; }
+        .control-group { margin-bottom: 20px; padding: 15px; background: white; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .inline-label { display: inline; margin-right: 15px; font-weight: normal; }
+        
+        /* hr（水平線）のデザイン */
+        hr { border: 0; height: 3px; background: #ccc; margin: 25px 0; }
+        
+        /* 追加：高さ100pxのカラーボックス用のスタイル */
+        .color-box {
+            height: 8px;
+            width:800px;
+            background-color: #89e4a8; /* 色が変わる時のアニメーション */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>HTMLコントロール イベント一覧</h1>
+    <p>※コントロールを操作すると、ブラウザのコンソール（F12）にログが出力されます。</p>
+    
+    
+        <div class="color-box"></div>
+
+    <div class="control-group">
+    <span>通常のボタンXYZ</span>
+        <label>ボタン (button / input type="button")</label>
+        <button id="btn-click" width="300" height="50">通常のボタン</button>
+    </div>
+    <hr/>
+    <div class="color-box"></div> 
+    <div class="control-group">
+        <label for="txt-input">テキスト入力 (input type="text")</label>
+        <input type="text" id="txt-input" placeholder="文字を入力してください">
+    </div>
+    <hr/>
+        <div class="color-box"></div> 
+    <div class="control-group">
+        <label for="txt-input">テキスト入力II (input type="text")</label>
+        <input type="text" id="txt-input" placeholder="文字を入力してください">
+    </div>
+    <hr/>
+    <div class="color-box"></div> <div class="control-group">
+        <label for="pwd-input">パスワード入力 (input type="password")</label>
+        <input type="password" id="pwd-input">
+    </div>
+    <hr/>
+    <div class="color-box"></div>
+
+    <div class="control-group">
+        <label for="textarea-input">複数行テキスト (textarea)</label>
+        <textarea id="textarea-input" rows="3" cols="30"></textarea>
+    </div>
+    <hr/>
+    <div class="color-box"></div>
+
+    <div class="control-group">
+        <label for="select-single">セレクトボックス (select)</label>
+        <select id="select-single">
+            <option value="">選択してください</option>
+            <option value="apple">リンゴ</option>
+            <option value="banana">バナナ</option>
+        </select>
+    </div>
+    <hr/>
+    <div class="color-box"></div>
+
+    <div class="control-group">
+        <label>チェックボックス (input type="checkbox")</label>
+        <label class="inline-label"><input type="checkbox" class="chk-input" value="red"> 赤</label>
+        <label class="inline-label"><input type="checkbox" class="chk-input" value="blue"> 青</label>
+    </div>
+    <hr/>
+    <div class="color-box"></div>
+
+    <div class="control-group">
+        <label>ラジオボタン (input type="radio")</label>
+        <label class="inline-label"><input type="radio" name="gender" class="rad-input" value="male"> 男性</label>
+        <label class="inline-label"><input type="radio" name="gender" class="rad-input" value="female"> 女性</label>
+    </div>
+    <hr/>
+    <div class="color-box"></div>
+
+    <div class="control-group">
+        <label for="num-input">数値入力 (input type="number")</label>
+        <input type="number" id="num-input" min="0" max="100" value="0">
+    </div>
+    <hr/>
+    <div class="color-box"></div>
+
+    <div class="control-group">
+        <label for="range-input">スライダー (input type="range")</label>
+        <input type="range" id="range-input" min="0" max="100" value="50">
+    </div>
+    <hr/>
+
+    <div class="color-box"></div>
+
+    <div class="control-group">
+        <label for="color-input">カラーピッカー (input type="color")</label>
+        <input type="color" id="color-input" value="#ff0000">
+    </div>
+    <hr/>
+    <div class="color-box"></div>
+
+    <div class="control-group">
+        <label for="file-input">ファイル選択 (input type="file")</label>
+        <input type="file" id="file-input">
+    </div>
+    <hr/>
+        <div class="color-box"></div> 
+    <div class="control-group">
+        <label for="txt-input">テキスト  Textbox</label>
+        <textbox id="txt-input"  width="200" height="300">
+        </textbox>
+    </div>
+    <hr/>
+    <div class="color-box"></div>
+
+    <div class="control-group">
+    <span>通常のボタンXYZ</span>
+        <label>ボタン (button / input type="button")</label>
+        <button id="btn-click" width="400" height="200">クリックのボタン</button>
+    </div>
+    <hr/>
+    <div class="color-box"></div>
+
+    <div class="control-group">
+        <label for="date-input">日付入力 (input type="date")</label>
+        <input type="date" id="date-input" width="200" height="30" />
+    </div>
+    <hr/>
+
+
+
+    <script>
+        // --- 背景色をランダムにするスクリプト ---
+        function setRandomBackgrounds() {
+            const boxes = document.querySelectorAll('.color-box');
+            boxes.forEach(box => {
+                // 0〜255の数値をランダムに生成
+                const r = Math.floor(Math.random() * 256);
+                const g = Math.floor(Math.random() * 256);
+                const b = Math.floor(Math.random() * 256);
+                // 変更しやすいように、少し明るめの色にしたい場合は以下のように調整も可能です
+                box.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+                console.log("box.style.backgroundColor :" +box.style.backgroundColor );
+            });
+        }
+
+        // ページが読み込まれた時にランダム色を設定
+        window.addEventListener('DOMContentLoaded', setRandomBackgrounds);
+
+
+        // --- イベント登録共通関数（ログ出力用） ---
+        function logEvent(elementIdOrClass, eventName, getValueFn, isClass = false) {
+            if (isClass) {
+                const elements = document.querySelectorAll(elementIdOrClass);
+                elements.forEach(el => {
+                    el.addEventListener(eventName, (e) => {
+                        console.log(`[${el.name || el.className}] ${eventName}イベント発生:`, getValueFn(e.target));
+                    });
+                });
+            } else {
+                const element = document.getElementById(elementIdOrClass);
+                if (element) {
+                    element.addEventListener(eventName, (e) => {
+                        console.log(`[#${elementIdOrClass}] ${eventName}イベント発生:`, getValueFn(e.target));
+                    });
+                }
+            }
+        }
+
+        // --- 各コントロールのイベントを設定 ---
+        logEvent('txt-input', 'input', el => el.value);
+        logEvent('pwd-input', 'change', el => el.value);
+        logEvent('textarea-input', 'input', el => el.value);
+        logEvent('select-single', 'change', el => el.value);
+        logEvent('.chk-input', 'change', el => ({ value: el.value, checked: el.checked }), true);
+        logEvent('.rad-input', 'change', el => el.value, true);
+        logEvent('num-input', 'input', el => el.value);
+        logEvent('range-input', 'input', el => el.value);
+        logEvent('date-input', 'change', el => el.value);
+        logEvent('color-input', 'input', el => el.value);
+        logEvent('file-input', 'change', el => el.files[0] ? el.files[0].name : 'ファイルなし');
+        logEvent('btn-click', 'click', el => 'クリックされました！');
+    </script>
+    
+    <span>あいぷえほ</span>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>querySelectorAll() サンプル</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 16px; }
+    .box { padding: 8px; margin: 6px 0; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>querySelectorAll() サンプル</h1>
+
+  <!-- 異なる id / class を持つ div を 10 個配置 -->
+  <div id="item-1" class="group-a box">Item 1 (group-a)</div>
+  <div id="item-2" class="group-b box">Item 2 (group-b)</div>
+  <div id="item-3" class="group-a box">Item 3 (group-a)</div>
+  <div id="item-4" class="group-c box">Item 4 (group-c)</div>
+  <div id="item-5" class="group-b box">Item 5 (group-b)</div>
+  <div id="item-6" class="group-a box">Item 6 (group-a)</div>
+  <div id="item-7" class="group-d box">Item 7 (group-d)</div>
+  <div id="item-8" class="group-c box">Item 8 (group-c)</div>
+  <div id="item-9" class="group-b box">Item 9 (group-b)</div>
+  <div id="item-10" class="group-e box">Item 10 (group-e)</div>
+
+
+</body>
+  <script>
+    window.addEventListener("DOMContentLoaded", function() {
+      // 全ての div を取得
+      var nodes = document.querySelectorAll('div');
+    console.log('nodes is', nodes);
+	console.log('typeof nodes.length', typeof nodes.length);
+	console.log('nodes.length value', nodes.length);
+	console.log('nodes[0] is', nodes[0]); 
+    console.log('querySelectorAll(\'div\') length :', nodes.length);
+
+
+      
+    });
+  </script>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset=utf-8>
+<title>Constant Fall</title>
+</head>
+<body>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <br/>
+
+<script>
+var canvas;
+var ctx;
+var startTime = Date.now();
+
+var ball = {
+    "x": 0,
+    "y": 0
+};
+
+function init()
+{
+    canvas = document.getElementById("canvas");
+    if ( ! canvas || ! canvas.getContext ) { return false; }
+    ctx = canvas.getContext('2d');
+}
+
+function update()
+{
+    if ( ! canvas || ! canvas.getContext ) { return false; }
+    ctx.fillStyle = "gray";
+    ctx.fillRect( 0, 0, canvas.clientWidth, canvas.clientHeight );
+
+    var currentTime = Date.now();
+    var diff = currentTime - startTime;
+
+    ctx.fillStyle = "rgb(255, 0, 0)";
+    ctx.fillRect( 100, (diff % 960) / 2, 40, 20 );
+}
+
+(function loop(){
+    update();
+    window.requestAnimationFrame(loop);
+}());
+
+init();
+</script>
+</body>
+</html>
+

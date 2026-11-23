@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Listener Sample</title>
+</head>
+<body>
+
+  <button id="myButton">ここをクリック！</button>
+  <p id="log"></p>
+
+  <script>
+    
+    // 1. DOMContentLoaded (HTMLの解析が終わったタイミング)
+    /*
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('HTML（DOM）の読み込みが完了しました。');
+    });
+    */
+    
+    function docLoaded()
+    {
+    console.log('HTML（DOM）の読み込みが完了しました。');
+    }
+    document.addEventListener('DOMContentLoaded', docLoaded, false);
+
+    // 2. load (画像なども含めたすべてのリソースが読み込まれたタイミング)
+    // ※loadイベントは window オブジェクトに対して設定します
+    /*
+    window.addEventListener('load', () => {
+      console.log('ページ全体の読み込みが完了しました。');
+    });
+    */
+
+    // 3. click (ボタンが押されたタイミング)
+    const button = document.getElementById('myButton');
+    const log = document.getElementById('log');
+
+    button.addEventListener('click', () => {
+      // ログを出力
+      log.textContent = 'ボタンがクリックされました！';
+      console.log('クリックイベント:');
+    });
+  </script>
+
+</body>
+</html>

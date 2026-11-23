@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>StyleSheet 列挙サンプル</title>
+    <link rel="stylesheet" href="sampleCSS.css">
+    <style>
+        body { background-color: #f0f0f0; }
+
+        div { background-color: #f0f0f0; }
+  
+        span { background-color: #f0f0f0; }
+        
+        p { background-color: #f0f0f0; }
+
+    </style>
+</head>
+<body>
+    <h1>読み込まれたStyleSheetの一覧</h1>
+
+    <script>
+      // スタイルシートを列挙する関数
+function funclistStyleSheets() {
+    if(document.styleSheets == null) {
+        console.log("document.styleSheets is null");
+        return;
+    } else {
+        console.log("document.styleSheets is found...");
+    }
+    
+    const styleSheetList = document.styleSheets;  // const → var
+    if(styleSheetList == null) {
+        console.log("styleSheetList is not found...");
+        return;
+    }
+    
+    console.log("styleSheetList Length: " + styleSheetList.length);
+    
+    for (var i = 0; i < styleSheetList.length; i++) {  // 正しい波括弧
+        var mySheet = styleSheetList[i];
+        
+        // スタイルシートの基本情報を収集
+        var info = "StyleSheet " + (i + 1) + ": ";  // テンプレートリテラル → 文字列連結
+        info += "href: " + (mySheet.href || 'inline') + ", ";
+        info += "type: " + (mySheet.type || 'text/css') + ", ";
+        info += "disabled: " + mySheet.disabled + ", ";
+        info += "title: " + (mySheet.title || 'none');
+
+        // スタイルシート内のルール数
+        try {
+            var cssRules = mySheet.cssRules || mySheet.rules;
+            if (cssRules && cssRules.length !== undefined) {
+                info += ", rules: " + cssRules.length;
+            } else {
+                info += ", rules: (cssRules undefined)";
+            }
+        } catch (e) {
+            info += ", rules: (アクセス不可 - CORS制限)";
+        }
+
+        // コンソールに出力
+        console.log(info);
+    }
+}
+
+// DOMContentLoadedイベントでスタイルシートを列挙
+document.addEventListener('DOMContentLoaded', funclistStyleSheets);
+    </script>
+</body>
+</html>

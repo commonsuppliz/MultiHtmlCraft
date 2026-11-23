@@ -1,0 +1,20 @@
+<html lang="jp">
+<header>
+    <meta charset="utf-8"/>
+    <script>
+
+        window.addEventListener('DOMContentLoaded', function () {
+            var div = document.querySelector("div");
+            var p = document.createElement('p');
+            p.innerText = "DOMContentLoadedイベントが実行されました。";
+            div.appendChild(p);
+                       dummmyFunction();
+            console.log("DOMContentLoadedイベントが実行されました。");
+ 
+        });
+    </script>
+</header>
+<body>
+    <div>Error Script Test</div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance API Sample</title>
+</head>
+<body>
+    <h1>Performance API デモ</h1>
+    <p>コンソール（F12 キー → Console タブ）を開いて結果を確認してください。</p>
+
+    <script>
+        // 1. 独自のタイム計測 (performance.mark / performance.measure)
+        performance.mark('task-start');
+
+        // 計測用のダミー処理
+        let sum = 0;
+        for (let i = 0; i < 1000000; i++) {
+            sum += i;
+        }
+
+        performance.mark('task-end');
+        performance.measure('重い処理の実行時間', 'task-start', 'task-end');
+
+        // 計測結果の取得とログ出力
+        /*
+        const measures = performance.getEntriesByName('重い処理の実行時間');
+        console.log('--- 独自計測 (Measure) ---');
+        console.log(`実行時間: ${measures[0].duration.toFixed(2)} ms`);
+        */
+
+        // 2. ページのナビゲーションタイミング (Navigation Timing API)
+        window.addEventListener('load', () => {
+            // イベントループの完了を待って正確なデータを取得
+            setTimeout(() => {
+                console.log('--- ページ読み込みパフォーマンス (Navigation Timing) ---');
+                
+                const [navEntry] = performance.getEntriesByType('navigation');
+                if (navEntry) {
+                    console.log(`DNS解決時間: ${(navEntry.domainLookupEnd - navEntry.domainLookupStart).toFixed(2)} ms`);
+                    console.log(`TCP接続時間: ${(navEntry.connectEnd - navEntry.connectStart).toFixed(2)} ms`);
+                    console.log(`レスポンス受信時間 (TTFB): ${(navEntry.responseStart - navEntry.requestStart).toFixed(2)} ms`);
+                    console.log(`DOM描画完了時間: ${(navEntry.domComplete - navEntry.startTime).toFixed(2)} ms`);
+                    console.log(`ページ完全読み込み時間: ${(navEntry.loadEventEnd - navEntry.startTime).toFixed(2)} ms`);
+                }
+
+                // 3. 読み込まれたリソースの計測 (Resource Timing API)
+                console.log('--- リソース読み込みタイミング (Resource Timing) ---');
+                const resources = performance.getEntriesByType('resource');
+                resources.forEach(res => {
+                    console.log(`リソース: ${res.name} | 読み込み時間: ${res.duration.toFixed(2)} ms`);
+                });
+            }, 0);
+        });
+    </script>
+</body>
+</html>

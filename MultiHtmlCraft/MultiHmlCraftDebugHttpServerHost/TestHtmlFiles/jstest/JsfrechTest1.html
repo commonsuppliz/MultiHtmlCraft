@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Fetch サンプル</title>
+</head>
+<body>
+ 
+    <pre id="result"></pre>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("starting fetch...");
+            var url = 'http://localhost/json/json3.json'; // 取得したいURL
+fetch(url)
+    .then(function(response) {
+        if (!response.ok) throw new Error('Network response was not ok');
+         console.log("calling response.json()");
+        var responsejson =  response.json(); // ここでJSONデータを取得
+        console.log("response.json() result " + typeof responsejson );
+        return responsejson ;
+    })
+    .then(function(jsonObj) {
+        console.log("calling ___convertScriptObjectToString() method : " + typeof jsonObj);
+        var jsonstring = ___convertScriptObjectToString(jsonObj);
+        console.log("___convertScriptObjectToString() returns " + typeof jsonstring);
+        return jsonstring;
+    })
+                    .then(function(data) {
+                    console.log('data : ' + data); // 結果をコンソールに出力
+                })
+    .catch(function(error) {
+        console.log('エラー:', error);
+    });
+
+
+        });
+    </script>
+</body>
+</html>

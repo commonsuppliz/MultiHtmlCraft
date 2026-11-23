@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>element.matches Test Sample</title>
+  <style>
+    .highlight {
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="sample" class="highlight">Target Element</div>
+  <button id="testBtn">Test if element matches ".highlight"</button>
+  <div id="output"></div>
+
+  <script>
+    // Get references to the elements
+    const target = document.getElementById('sample');
+    const button = document.getElementById('testBtn');
+    const output = document.getElementById('output');
+
+
+
+      // Use element.matches to check if the target has the class "highlight"
+      if (target.matches('.highlight')) {
+        console.log('true');
+      } else {
+        console.log('false');
+      }
+    
+  </script>
+</body>
+</html>

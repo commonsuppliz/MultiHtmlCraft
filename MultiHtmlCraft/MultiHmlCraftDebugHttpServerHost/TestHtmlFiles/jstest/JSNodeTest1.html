@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Node.prototype.contains Test</title>
+  <script>
+  var _test = false;
+  if (typeof Node != "undefined")
+  { 
+         console.log('Node defined');
+      
+  			 if (typeof Node.prototype != "undefined")
+ 			 { 
+ 			          console.log("Node protype found");
+ 			         if (typeof Node.prototype.appendChild === "function")
+ 			          {
+ 			            console.log("Node prototype appendChild method exists");
+ 			             _test = true;
+ 			          }else
+ 			          { 
+ 			              console.log("Node prototype appendChild method does not exist");
+ 			          }
+ 			 } 
+ 			 else
+ 			 {
+ 			     console.log("Node prototype is undefined");
+ 			 }
+ 			 };
+ 			             
+ 
+
+        console.log(_test);
+   
+
+    
+  </script>
+</head>
+<body>
+</body>
+</html>

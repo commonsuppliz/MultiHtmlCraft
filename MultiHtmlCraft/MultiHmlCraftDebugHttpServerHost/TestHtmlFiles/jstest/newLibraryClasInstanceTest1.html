@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>new Image() new XMLHttp test</title>
+
+</head>
+<body>
+
+
+
+
+
+<script>
+    let img111 = new Image();
+    console.log(img111);
+    let req = new XMLHttpRequest();
+     console.log(req);
+    req.onreadystatechange = function() { 
+
+
+    req.Open("GET","http://localhost");
+    req.send();
+      if (req.readyState == 4) 
+{
+    var data = req.responseText; 
+    console.log(data);
+ 
+}else
+{
+    console.log("req is not responding...")
+}
+}
+
+</script>
+
+<p>美味しかったです。</p>
+
+<button onClick="getElement();">ノードを追加</button>
+
+</body>
+</html>

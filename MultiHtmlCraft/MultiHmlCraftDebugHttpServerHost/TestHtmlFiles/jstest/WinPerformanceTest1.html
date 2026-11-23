@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>window.performance サンプル（console.log版）</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <h1>window.performance のサンプル</h1>
+  <p>ブラウザの開発者ツール（F12キー）を開いて、<strong>Console タブ</strong>を確認してください。<br>
+     ページの各種読み込みタイミングが console.log で出力されます。</p>
+
+  <hr>
+  <p>遅延確認用のダミー画像：</p>
+  <img src="http://localhost/img/ElonMusk1.jpg"  style="max-width:100%;">
+
+  <script>
+    // ページの読み込みが完全に完了したら実行
+    window.addEventListener('DOMContentLoaded', function() {
+      console.log('=== window.performance 測定結果 ===');
+
+      // 従来の Performance Timing API
+      if (window.performance && window.performance.timing) {
+        const t = window.performance.timing;
+
+        console.log('【従来の Timing API】');
+        console.log(`ナビゲーション開始 (navigationStart): ${t.navigationStart}`);
+        console.log(`DOM 構築完了 (domContentLoadedEventEnd): ${t.domContentLoadedEventEnd - t.navigationStart} ms`);
+        console.log(`ページ完全読み込み (loadEventEnd): ${t.loadEventEnd - t.navigationStart} ms`);
+        console.log(`DNS 解決時間: ${t.domainLookupEnd - t.domainLookupStart} ms`);
+        console.log(`TCP 接続時間: ${t.connectEnd - t.connectStart} ms`);
+        console.log(`リクエスト〜レスポンス受信開始まで: ${t.responseStart - t.requestStart} ms`);
+        console.log(`レスポンス全体受信時間: ${t.responseEnd - t.responseStart} ms`);
+      }
+
+      // 新しい Navigation Timing Level 2 API（推奨）
+      if (performance.getEntriesByType) {
+        const [nav] = performance.getEntriesByType('navigation');
+        if (nav) {
+          console.log('\n【Navigation Timing Level 2 API】');
+          console.log(`ページ完全読み込み時間: ${Math.round(nav.loadEventEnd)} ms`);
+          console.log(`DOM 構築完了まで: ${Math.round(nav.domContentLoadedEventEnd)} ms`);
+          console.log(`First Paint まで: ${Math.round(nav.domInteractive)} ms`);
+          console.log(`サーバー応答時間 (TTFB): ${Math.round(nav.responseStart)} ms`);
+          console.log(`リソース読み込み含む全体時間: ${Math.round(nav.duration)} ms`);
+
+          // 詳細な内訳
+          console.log('内訳:');
+          console.log(`  - unload: ${Math.round(nav.unloadEventEnd - nav.unloadEventStart)} ms`);
+          console.log(`  - redirect: ${Math.round(nav.redirectEnd - nav.redirectStart)} ms`);
+          console.log(`  - DNS: ${Math.round(nav.domainLookupEnd - nav.domainLookupStart)} ms`);
+          console.log(`  - TCP: ${Math.round(nav.connectEnd - nav.connectStart)} ms`);
+          console.log(`  - Request: ${Math.round(nav.responseEnd - nav.requestStart)} ms`);
+        }
+      }
+
+      console.log('=====================================');
+    });
+  </script>
+</body>
+</html>

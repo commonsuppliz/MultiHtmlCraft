@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Fetch API のサンプル</title>
+</head>
+<body>
+
+    <h1>Fetch API サンプル</h1>
+    <p>ブラウザの開発者ツール（Console）を開いて結果を確認してください。</p>
+
+    <script>
+        // データの取得先URL（ダミーのユーザー情報を取得）
+        const url = 'https://jsonplaceholder.typicode.com/users/1';
+
+        // fetch の実行
+        fetch(url)
+            .then(response => {
+                // レスポンスが正常に返ってきたかチェック
+                if (!response.ok) {
+                    throw new Error('ネットワークエラーが発生しました: ' + response.statusText);
+                }
+                // レスポンスデータを JSON 形式に変換して次の then に渡す
+                return response.json();
+            })
+            .then(data => {
+                // 取得したデータを console.log に表示
+                console.log('取得したデータ:', data);
+                console.log('ユーザー名:', data.name);
+                console.log('メールアドレス:', data.email);
+            })
+            .catch(error => {
+                // エラーが発生した場合はここでキャッチ
+                console.error('通信エラー:', error);
+            });
+    </script>
+
+</body>
+</html>

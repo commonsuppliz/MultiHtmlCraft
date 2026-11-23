@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>audio canPlayType チェック</title>
+</head>
+<body>
+
+<h3>ブラウザのaudioサポート状況（canPlayType）</h3>
+<p>結果は開発者ツールのコンソールに出力されます（F12キー）</p>
+
+<script>
+// よく使われる主要なMIMEタイプをチェック
+const typesToCheck = [
+  // MP3
+  'audio/mpeg',
+  'audio/mp3',
+  
+  // WAV
+  'audio/wav',
+  'audio/wave',
+  
+  // Ogg Vorbis
+  'audio/ogg',
+  'audio/ogg; codecs="vorbis"',
+  
+  // Opus（主にWebMコンテナ）
+  'audio/webm',
+  'audio/webm; codecs="opus"',
+  
+  // AAC（主にMP4コンテナ）
+  'audio/mp4',
+  'audio/mp4; codecs="mp4a.40.2"',   // AAC-LC
+  'audio/mp4; codecs="mp4a.40.5"',   // HE-AAC
+  'audio/aac',
+  
+  // FLAC
+  'audio/flac',
+  'audio/x-flac',
+  
+  // その他よく見るもの
+  'audio/3gpp',
+  'audio/3gpp2',
+  'audio/x-m4a',
+];
+
+function checkAudioSupport() {
+  const audio = document.createElement('audio');
+  
+  console.log("=== ブラウザのaudio.canPlayType 結果 ===");
+  console.log("お使いのブラウザ：", navigator.userAgent);
+  console.log("");
+
+  typesToCheck.forEach(type => {
+    const result = audio.canPlayType(type);
+    
+    let mark = "❓";
+    if (result === "probably") mark = "◎ probably";
+    else if (result === "maybe")   mark = "△ maybe";
+    else if (result === "")        mark = "× サポートなし";
+    
+    console.log(`${mark}  ${type.padEnd(28)}  →  ${result}`);
+  });
+
+  console.log("\n※ 「probably」＝ほぼ確実に再生可能");
+  console.log("  「maybe」＝環境によっては再生できるかも");
+  console.log("  空文字＝サポートされていない");
+}
+
+// ページ読み込み後に実行
+window.addEventListener('load', checkAudioSupport);
+</script>
+
+</body>
+</html>

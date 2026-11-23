@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>KeyDown Test</title>
+</head>
+<body>
+
+    <h1>キーボードを押してみてね！</h1>
+    <p>ブラウザのデベロッパーツール（F12）の「コンソール」を見てください。</p>
+
+    <script>
+        // windows 全体でキー入力を監視します
+         window.addEventListener('keydown', (event) => {
+            
+            // event オブジェクトの中に、どのキーが押されたかの情報が入っています
+            console.log("押されたキーの情報:");
+            console.log("- key: " + event.key);   // 実際に入力された文字（例: 'a', 'Enter'）
+            console.log("- code: " + event.code); // 物理的なキーの場所（例: 'KeyA', 'Enter'）
+            console.log("- code: " + event.keyCode + "   typeof keyCode : " + typeof event.keyCode); 
+            
+            // オブジェクトごと出せば、他の詳細なプロパティも見れます
+            console.log(event);
+            
+            console.log("---------------------------");
+        });
+    </script>
+
+</body>
+</html>

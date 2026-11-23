@@ -1,0 +1,1 @@
+console.log("sample2 is called");

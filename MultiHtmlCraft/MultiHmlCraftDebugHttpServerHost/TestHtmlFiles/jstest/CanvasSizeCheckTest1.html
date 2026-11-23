@@ -1,0 +1,31 @@
+﻿<html>
+<head>
+</head>
+<body>
+
+<canvas id="canvas1" width="333" height="100" style="background-color:#f02">
+</canvas>
+<br/>
+
+<canvas id="canvas2" width="123" height="398" style="background-color:#933">
+</canvas>
+
+
+
+<script>
+var c1 = document.getElementById('canvas1');
+
+console.log("CanvasElement1 : " + c1.width + "." + c1.height);
+
+
+var c2 = document.getElementById('canvas2');
+console.log("CanvasElement2 : " + c2.width + "." + c2.height);
+
+console.log("-----------------------------------------------------");
+var c1ctx = c1.getContext("2d");
+console.log("CanvasElement1 Context : " + c1ctx.width + "." + c1ctx.height);
+var c2ctx = c2.getContext("2d");
+console.log("CanvasElement2 Context : " + c2ctx.width + "." + c2ctx.height);
+</script>
+</body>
+</html>

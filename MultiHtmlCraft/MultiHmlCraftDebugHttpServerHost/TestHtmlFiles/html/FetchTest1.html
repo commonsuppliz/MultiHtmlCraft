@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API サンプル</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
+        #result { margin-top: 20px; padding: 15px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 5px; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+    <h1>Fetch API データ取得サンプル</h1>
+    <button id="fetch-btn">データを取得する</button>
+
+    <div id="result">ここに取得したデータが表示されます</div>
+
+    <script>
+        // ボタンと表示エリアの要素を取得
+        const button = document.getElementById('fetch-btn');
+        const resultDiv = document.getElementById('result');
+
+        // ボタンがクリックされたときの処理
+        button.addEventListener('click', () => {
+             console.log("click is called");
+                  console.log("typeof fetch:" + typeof fetch);
+                               /*
+            resultDiv.innerText = '読み込み中...';
+         
+            // 1. fetchでURLを指定（ここではテスト用のユーザーデータ）
+            fetch('https://jsonplaceholder.typicode.com/users/1')
+                // 2. レスポンスをJSON形式として解析
+                .then(response => {
+                    // サーバーエラー（404や500など）がないかチェック
+                    if (!response.ok) {
+                        throw new Error('ネットワークエラーが発生しました');
+                    }
+                    return response.json(); 
+                })
+                // 3. 解析したデータを使う処理
+                .then(data => {
+                    resultDiv.innerHTML = `
+                        <h3>ユーザー情報</h3>
+                        <p><strong>名前:</strong> ${data.name}</p>
+                        <p><strong>ユーザー名:</strong> ${data.username}</p>
+                        <p><strong>メール:</strong> ${data.email}</p>
+                        <p><strong>Webサイト:</strong> ${data.website}</p>
+                    `;
+                })
+                // 4. エラーが発生した場合の処理
+                .catch(error => {
+                    resultDiv.innerHTML = `<span class="error">エラー: ${error.message}</span>`;
+                    console.error('エラー詳細:', error);
+                });
+                */
+        });
+    </script>
+
+</body>
+</html>

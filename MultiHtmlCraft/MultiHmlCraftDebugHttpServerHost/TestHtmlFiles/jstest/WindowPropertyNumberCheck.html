@@ -1,0 +1,46 @@
+<html>
+<head>
+</head>
+<body>
+
+
+
+<script>
+// 検証対象の window 数値プロパティ一覧
+const targetWindowProperties = [
+  'innerWidth',
+  'innerHeight',
+  'outerWidth',
+  'outerHeight',
+  'scrollX',
+  'scrollY',
+  'pageXOffset',
+  'pageYOffset',
+  'screenX',
+  'screenY',
+  'screenLeft',
+  'screenTop',
+  'devicePixelRatio'
+];
+
+console.log("=== window プロパティの型検証開始 ===");
+
+targetWindowProperties.forEach(prop => {
+  if (prop in window) {
+    const value = window[prop];
+    const type = typeof value;
+    const isNumber = type === 'number' && !Number.isNaN(value);
+
+    // [OK] または [NG] の判定付きで出力
+    console.log(
+      `[${isNumber ? 'OK' : 'NG'}] ${prop.padEnd(18)} : value = ${value}, typeof = "${type}"`
+    );
+  } else {
+    console.log(`[SKIP] ${prop.padEnd(16)} : プロパティが存在しません`);
+  }
+});
+
+console.log("=== 検証完了 ===");
+</script>
+</body>
+</html>

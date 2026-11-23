@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Vue.js 機能チェック サンプル</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h1>Vue.js 基本機能チェック</h1>
+
+    <!-- 1. データバインディング（テキスト補間） -->
+    <p>名前: {{ name }}</p>
+
+    <!-- 2. v-bind（属性バインディング） -->
+    <img v-bind:src="imageUrl" alt="Vueロゴ" width="100">
+
+    <!-- 3. v-if / v-else -->
+    <p v-if="isVisible">この文章は表示されています（v-if）</p>
+    <p v-else">この文章は非表示です（v-else）</p>
+
+    <!-- 4. v-for（リストレンダリング） -->
+    <h3>フルーツ一覧（v-for）</h3>
+    <ul>
+      <li v-for="(fruit, index) in fruits" :key="index">
+        {{ index + 1 }}. {{ fruit }}
+      </li>
+    </ul>
+
+    <!-- 5. v-on（イベントハンドリング） -->
+    <button v-on:click="increment">カウント: {{ count }}</button>
+
+    <!-- 6. v-model（双方向バインディング） -->
+    <p>入力値: {{ message }}</p>
+    <input v-model="message" placeholder="ここに入力してください">
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          name: 'Vue.jsユーザー',
+          imageUrl: 'https://vuejs.org/images/logo.png',
+          isVisible: true,
+          fruits: ['りんご', 'ばなな', 'みかん'],
+          count: 0,
+          message: 'こんにちは！'
+        };
+      },
+      methods: {
+        increment() {
+          this.count++;
+        }
+      },
+      mounted() {
+        // 各機能の動作チェック（コンソールに出力）
+        console.log('=== Vue.js 機能チェックレポート ===');
+
+        // 1. データバインディング
+        console.log('1. データバインディング（name）:', this.name === 'Vue.jsユーザー' ? 'OK' : 'NG');
+
+        // 2. v-bind
+        console.log('2. v-bind（imageUrl）:', this.imageUrl.includes('vuejs.org') ? 'OK' : 'NG');
+
+        // 3. v-if
+        console.log('3. v-if / v-else:', this.isVisible === true ? 'OK（表示中）' : 'NG');
+
+        // 4. v-for
+        console.log('4. v-for（fruits配列）:', Array.isArray(this.fruits) && this.fruits.length === 3 ? 'OK' : 'NG');
+
+        // 5. v-on（メソッド呼び出しは手動でボタンを押して確認）
+        console.log('5. v-on（クリックイベント）: ボタンをクリックして count が増えるか手動確認');
+
+        // 6. v-model
+        console.log('6. v-model（message）:', this.message === 'こんにちは！' ? 'OK（初期値設定済）' : 'NG');
+        console.log('   → 入力欄に文字を入力すると即座に上記の「入力値」が更新されるか確認');
+
+        console.log('=====================================');
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

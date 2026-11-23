@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+</head>
+<body>
+<div id="content">
+<span id="d1"></span>
+<form id="d2"></form>
+<canvas id="d3"></canvas>
+</div>
+<script>
+var parentDiv = document.getElementById('content');
+var childP = parentDiv.childNodes;
+var childLength = childP.length;
+console.log(childLength);
+for (var i = 0; i < childLength;i++) {
+    var objChild = childP[i];
+    console.log("object of child :" + objChild);
+    console.log("nodeName Test :" + objChild.nodeName);
+    /*
+    if (objChild.nodeName == 'DIV'){
+       
+       console.log(objChild[i]);
+    }
+    */
+}
+</script>
+</body>
+</html>

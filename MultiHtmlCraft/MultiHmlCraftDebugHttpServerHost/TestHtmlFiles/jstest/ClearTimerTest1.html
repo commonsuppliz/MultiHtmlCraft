@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Clear Timer Sample</title>
+  <script>
+    let timeoutId;
+    let intervalId;
+    let monitorId;
+    // タイマーの設定
+    
+    timeoutId = setTimeout(() => {
+      console.log('setTimeout: 500秒後に実行');
+    }, 500);
+    
+    
+    
+    /*
+    
+    monitorId = setTimeout(() => {
+      console.log('setTimeout: 5秒後に実行');
+    }, 5000);
+    */
+    intervalId = setInterval(() => {
+      console.log('setInterval: 0.1秒ごとに実行');
+    }, 100);
+    
+    // DOMContentLoaded でタイマーを無効化
+    document.addEventListener('DOMContentLoaded', () => {
+    // console.log("timeout ID : " + timeoutId);
+     console.log("interval ID : " + intervalId);
+     clearTimeout(timeoutId);
+     clearInterval(intervalId);
+      console.log('DOMContentLoaded: timer has been cleared');
+    });
+  </script>
+</head>
+<body>
+  <h1>Clear Timer Sample</h1>
+</body>
+</html>

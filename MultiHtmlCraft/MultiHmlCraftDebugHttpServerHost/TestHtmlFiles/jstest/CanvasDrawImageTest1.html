@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Canvasで画像を描画</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="myCanvas" width="800" height="600"></canvas>
+  <script>
+  
+  const canvas = document.getElementById('myCanvas');
+const ctx = canvas.getContext('2d');
+
+const image = new Image();
+
+
+
+image.onload = () => {
+  console.log("image.onload is called");
+  ctx.drawImage(image, 0, 0, 100, 100);
+};
+image.src = 'http://localhost/img/clock-demo-400px.png';
+console.log("image src is " + image.src);
+</script>
+</body>
+</html>

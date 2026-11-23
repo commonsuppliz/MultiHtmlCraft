@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>DOMContentLoadedのサンプル（コンソール出力）</title>
+    <script>
+        // 1. スクリプトの読み込み開始を記録
+        console.log('1. scriptタグ内の処理を開始しました。');
+
+        // 2. HTML（DOM）の読み込み完了時に実行するイベント
+        
+        
+        
+        /*
+        
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('3. DOMContentLoadedイベントが発生：HTMLの読み込みが完了しました！');
+            
+            // 実際にHTML要素が取得できるかテスト
+            const titleText = document.title;
+            console.log('4. 取得したページのタイトル: ' + titleText);
+        });
+        
+        */
+        function logMsg()
+        {
+      
+            console.log('3. DOMContentLoadedイベントが発生：HTMLの読み込みが完了しました！');
+            
+            // 実際にHTML要素が取得できるかテスト
+            const titleText = document.title;
+            console.log('4. 取得したページのタイトル: ' + titleText);
+        }
+        
+         document.addEventListener('DOMContentLoaded', logMsg, false);
+        //document.addEventListener('testEvent', "this is a string",false);
+
+        console.log('2. イベントリスナーの登録が完了しました。');
+    </script>
+</head>
+<body>
+
+    <h1>コンソールを確認してください</h1>
+    <p>ブラウザのデベロッパーツールを開いて「コンソール（Console）」タブを確認してください。</p>
+
+</body>
+
+</html>

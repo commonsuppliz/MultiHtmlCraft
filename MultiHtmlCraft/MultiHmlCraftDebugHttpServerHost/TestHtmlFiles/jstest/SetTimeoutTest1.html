@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>setTimeout サンプル</title>
+</head>
+<body>
+  <div id="message"></div>
+  <script>
+    console.log("typeof window.setTimeout :" + typeof window.setTimeout);
+    //window.setTimeout(myTimeout, 2500);
+    window.setTimeout(function() {
+      console.log("5000 time out");
+    }, 5000);
+    setTimeout(function() {
+      console.log("1000 time out");
+    }, 1000);
+    
+    function myTimeout()
+    {
+       console.log("myTimeout 2500 time out");
+    }
+
+  </script>
+</body>
+</html>

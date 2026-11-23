@@ -1,0 +1,1 @@
+console.log("scriptDefer2 executed");

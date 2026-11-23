@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Streams API デモ (console.log 出力付き)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 650px;
+            margin: 50px auto;
+            padding: 0 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        h1 { font-size: 24px; border-bottom: 2px solid #eaeaea; padding-bottom: 10px; }
+        #output {
+            background: #1e1e1e;
+            color: #dcdcdc;
+            border-radius: 6px;
+            padding: 15px;
+            height: 220px;
+            overflow-y: auto;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .status {
+            font-weight: bold;
+            color: #0066cc;
+            margin: 15px 0 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Streams API デモ (Console.log 追跡)</h1>
+    <p>ページ読み込み完了（<code>DOMContentLoaded</code>）をトリガーにストリームが開始され、各ステータスやチャンクの処理が <code>console.log</code> に出力されます（開発者ツールのコンソールをご確認ください）。</p>
+    
+    <div id="status" class="status">ステータス: ページ読み込み待機中...</div>
+    
+    <h3>受信データログ (Chunks):</h3>
+    <div id="output"></div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const outputEl = document.getElementById('output');
+
+        // DOMContentLoaded イベントでストリーム処理を発火
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log("[Event] DOMContentLoaded が発火しました。ストリーム処理を開始します。");
+            
+            outputEl.textContent = '';
+            statusEl.textContent = 'ステータス: ストリーム受信中...';
+            console.log("[Status] ステータス変更: ストリーム受信中...");
+
+            const chunks = [
+                "【チャンク 1】 DOMContentLoaded 検知。ストリーム接続を開始...\n",
+                "【チャンク 2】 HTMLドキュメントのヘッダー要素をパース中...\n",
+                "【チャンク 3】 外部リソースおよびスタイルシートをロード...\n",
+                "【チャンク 4】 スクリプトの実行とレイアウト計算を実施...\n",
+                "【チャンク 5】 レンダリングが完了しました。ストリームを閉じます。\n"
+            ];
+
+            // 1. ReadableStream の定義
+            const readableStream = new ReadableStream({
+                async start(controller) {
+                    console.log("[ReadableStream] ストリームの生成と開始 (start) が呼び出されました。");
+                    for (let i = 0; i < chunks.length; i++) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        const encoded = new TextEncoder().encode(chunks[i]);
+                        
+                        console.log(`[ReadableStream] チャンク ${i + 1} をキューにエンキューします。`);
+                        controller.enqueue(encoded);
+                    }
+                    console.log("[ReadableStream] すべてのチャンク送信が完了しました。コントローラーをクローズします。");
+                    controller.close();
+                },
+                cancel(reason) {
+                    console.warn("[ReadableStream] ストリームがキャンセルされました:", reason);
+                }
+            });
+
+            // 2. WritableStream の定義
+            const writableStream = new WritableStream({
+                start(controller) {
+                    console.log("[WritableStream] 書き込み先ストリームが初期化されました。");
+                },
+                write(chunk, controller) {
+                    const text = new TextDecoder().decode(chunk);
+                    console.log("[WritableStream] 新しいチャンクを受信・デコードしました:", text.trim());
+                    
+                    outputEl.textContent += text;
+                    outputEl.scrollTop = outputEl.scrollHeight;
+                },
+                close() {
+                    console.log("[WritableStream] すべての書き込みが正常に完了し、ストリームが閉じられました。");
+                    statusEl.textContent = 'ステータス: 完了 (すべてのチャンクが正常に書き込まれました)';
+                    console.log("[Status] ステータス変更: 完了");
+                },
+                abort(err) {
+                    console.error("[WritableStream] エラーによりストリームがアボートされました:", err);
+                    statusEl.textContent = `ステータス: エラーが発生しました (${err.message})`;
+                    console.log("[Status] ステータス変更: エラー発生");
+                }
+            });
+
+            try {
+                console.log("[Pipeline] pipeTo() を実行し、Readable と Writable を結合します...");
+                // 3. pipeTo で結合
+                await readableStream.pipeTo(writableStream);
+                console.log("[Pipeline] pipeTo() が正常に終了しました。");
+            } catch (error) {
+                console.error("[Pipeline] ストリームパイプラインで例外が発生しました:", error);
+                statusEl.textContent = `ステータス: パイプラインエラー (${error.message})`;
+            }
+        });
+    </script>
+</body>
+</html>

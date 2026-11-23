@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URLSearchParams API 検証</title>
+</head>
+<body>
+  <h1>URLSearchParams API の検証サンプル</h1>
+  <p>F12 キーを押してデベロッパーツールの「コンソール (Console)」を開いて結果を確認してください。</p>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      console.log("=== URLSearchParams API 検証開始 ===");
+
+      // 1. 初期化 (コンストラクタ)
+      const initialQuery = "name=Taro&age=25&lang=JS&lang=TS";
+      const params = new URLSearchParams(initialQuery);
+      console.log("初期クエリ文字列:", initialQuery);
+
+      // 2. size プロパティ（要素数）
+      console.log("\n--- 1. プロパティ検証 ---");
+      console.log("params.size:", params.size); // 4
+
+      // 3. 値の取得 (get, getAll, has)
+      console.log("\n--- 2. 取得系メソッド検証 ---");
+      console.log("get('name'):", params.get("name"));           // "Taro"
+      console.log("get('unknown'):", params.get("unknown"));     // null
+      console.log("getAll('lang'):", params.getAll("lang"));     // ["JS", "TS"]
+      console.log("has('age'):", params.has("age"));             // true
+      console.log("has('lang', 'TS'):", params.has("lang", "TS")); // true
+
+      // 4. 値の変更・追加 (append, set)
+      console.log("\n--- 3. 追加・更新系メソッド検証 ---");
+      params.append("lang", "Python");
+      console.log("append('lang', 'Python') 実行後 getAll('lang'):", params.getAll("lang")); // ["JS", "TS", "Python"]
+
+      params.set("age", "26");
+      console.log("set('age', '26') 実行後 get('age'):", params.get("age")); // "26"
+
+      params.set("category", "Frontend");
+      console.log("set('category', 'Frontend') [新規追加] 実行後 get('category'):", params.get("category"));
+
+      // 5. ソート (sort)
+      console.log("\n--- 4. ソート検証 ---");
+      params.sort();
+      console.log("sort() 実行後の toString():", params.toString());
+
+      // 6. 削除 (delete)
+      console.log("\n--- 5. 削除系メソッド検証 ---");
+      params.delete("name");
+      console.log("delete('name') 実行後 has('name'):", params.has("name")); // false
+
+      // 条件指定での削除（特定のキーと値のペアのみ削除）
+      params.delete("lang", "TS");
+      console.log("delete('lang', 'TS') 実行後 getAll('lang'):", params.getAll("lang")); // ["JS", "Python"]
+
+      // 7. 反復処理 (forEach, entries, keys, values)
+      console.log("\n--- 6. 反復処理（ループ）検証 ---");
+      
+      console.log("[forEach]");
+      params.forEach((value, key) => {
+        console.log(`  ${key}: ${value}`);
+      });
+
+      console.log("[for...of entries()]");
+      for (const [key, value] of params.entries()) {
+        console.log(`  ${key} => ${value}`);
+      }
+
+      console.log("[keys()]:", Array.from(params.keys()));
+      console.log("[values()]:", Array.from(params.values()));
+
+      // 8. 文字列変換 (toString)
+      console.log("\n--- 7. 最終結果の文字列化 ---");
+      console.log("最終 params.size:", params.size);
+      console.log("最終 params.toString():", params.toString());
+
+      console.log("=== URLSearchParams API 検証終了 ===");
+    });
+  </script>
+</body>
+</html>

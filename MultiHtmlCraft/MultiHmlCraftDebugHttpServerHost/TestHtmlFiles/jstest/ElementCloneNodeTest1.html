@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>cloneNode Sample</title>
+</head>
+<body>
+
+    <div id="parent-element" class="container">
+        <p>This is a child text element.</p>
+        <button onclick="console.log('Button clicked!')">Click Me</button>
+    </div>
+
+    <script>
+        // 1. Get the original element
+        const original = document.getElementById('parent-element');
+
+        console.log("--- 1. Execution of Cloning ---");
+
+        // 2. Shallow Clone (false): Copies only the element and its attributes
+        const shallowClone = original.cloneNode(false);
+        console.log("Shallow Clone (false):", shallowClone);
+        // Result: <div id="parent-element" class="container"></div> (Empty inside)
+
+        // 3. Deep Clone (true): Copies the element and all its children
+        const deepClone = original.cloneNode(true);
+        console.log("Deep Clone (true):", deepClone);
+        // Result: <div id="parent-element" ...> <p>...</p> <button>...</button> </div>
+
+        console.log("--- 2. Avoiding ID Duplication & Manipulation ---");
+
+        // Change the ID of the clone to keep it unique
+        deepClone.id = "cloned-element";
+        deepClone.style.color = "blue";
+        console.log("Modified Deep Clone:", deepClone);
+
+        console.log("--- 3. Appending to DOM ---");
+
+        // At this point, it only exists in memory. Now we add it to the body.
+        document.body.appendChild(deepClone);
+        console.log("Clone added to DOM. Check your browser window!");
+    </script>
+</body>
+</html>

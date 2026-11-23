@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Document メソッド シンプルテスト（最終軽量版）</title>
+<style>
+  body { font-family: system-ui, sans-serif; padding: 40px; background:#f5f5f5; }
+  h1 { color:#2563eb; margin-bottom: 8px; }
+  .info { background:white; padding:22px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,0.1); font-size:15px; line-height:1.7; }
+  .badge { background:#2563eb; color:white; padding:6px 14px; border-radius:30px; font-size:13px; }
+</style>
+</head>
+<body>
+
+<h1>Document メソッド シンプルテスト <span class="badge">超軽量・最終版</span></h1>
+
+
+<script>
+
+const tests = [
+  { name: "getElementById",            args: ["title"],                              desc: "既存ID取得" },
+  { name: "getElementById",            args: ["no-such-id"],                         desc: "存在しないID → null" },
+  { name: "getElementsByTagName",      args: ["div"],                                desc: "Live HTMLCollection" },
+  { name: "getElementsByClassName",    args: [""],                                   desc: "全要素取得（空文字列）" },
+  { name: "querySelector",             args: ["h1"],                                 desc: "最初のh1要素" },
+  { name: "querySelectorAll",          args: ["meta"],                               desc: "全metaタグ" },
+
+  { name: "createElement",             args: ["details"],                            desc: "新要素作成" },
+  { name: "createElementNS",           args: ["http://www.w3.org/2000/svg", "g"],    desc: "SVGグループ要素" },
+  { name: "createTextNode",            args: ["シンプルテスト"],                      desc: "テキストノード" },
+  { name: "createComment",             args: ["final version"],                      desc: "コメントノード" },
+  { name: "createDocumentFragment",    args: [],                                     desc: "DocumentFragment" },
+  { name: "createAttribute",           args: ["data-final"],                         desc: "属性ノード" },
+
+  { name: "adoptNode",                 args: [document.createElement("span")],       desc: "同一ドキュメントのノード" },
+  { name: "importNode",                args: [document.createElement("button"), true], desc: "深いコピー" },
+
+  { name: "createRange",               args: [],                                     desc: "Rangeオブジェクト" },
+  { name: "getSelection",              args: [],                                     desc: "現在の選択範囲" },
+
+  { name: "hasFocus",                  args: [],                                     desc: "フォーカス状態" },
+  { name: "elementFromPoint",          args: [100, 100],                             desc: "座標の最前面要素" },
+  { name: "elementsFromPoint",         args: [100, 100],                             desc: "座標の全要素" },
+  { name: "caretPositionFromPoint",    args: [100, 100],                             desc: "キャレット位置" },
+  { name: "getElementsByTagNameNS",    args: ["http://www.w3.org/1999/xhtml", "body"], desc: "名前空間付き検索" },
+];
+
+console.clear();
+console.log("%c Document メソッド シンプルテスト開始", "font-size:18px; color:#2563eb; font-weight:bold;");
+
+let success = 0;
+const total = tests.length;
+
+tests.forEach((t, i) => {
+  const { name, args, desc } = t;
+  const argStr = args.map(a => typeof a === "string" ? `"${a}"` : JSON.stringify(a)).join(", ");
+  const code = `document.${name}(${argStr})`;
+
+  try {
+    const result = document[name](...args);
+    success++;
+    console.log("document." + name + " is success...");
+    let output;
+    if (result === null) output = "null";
+    else if (result === undefined) output = "undefined";
+    else if (result instanceof NodeList || result instanceof HTMLCollection)
+      output = `${result.constructor.name} (length: ${result.length})`;
+    else if (result instanceof Node)
+      output = `<${result.nodeName.toLowerCase()}${result.id ? '#' + result.id : ''}>`;
+    else if (typeof result === "object")
+      output = result.constructor.name;
+    else
+      output = String(result);
+
+    console.log(`${String(i+1).padStart(2)}. ${name}()  ${desc.padEnd(28)} → ${output}`);
+
+  } catch (e) {
+    console.log(`${String(i+1).padStart(2)}. ${name}()  ${desc.padEnd(28)} → ERROR: ${e.message}`);
+  }
+});
+
+console.log(`\n 完了！ 全${total}件中 ${success}件成功しました。`);
+
+</script>
+
+</body>
+</html>

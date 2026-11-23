@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h1>XMLHttpRequest Test</h1>
+  <button id="loadBtn"></button>
+  <pre id="result"></pre>
+
+  <script>
+
+const xhr = new XMLHttpRequest();
+console.log("XHR instance created...");
+console.log("UNSENT: ", xhr.status);
+
+xhr.open("GET", "http://localhost/json/json1.json", false);
+xhr.responseType = "text";
+console.log("OPENED: "+ xhr.status);
+
+xhr.onprogress = function(e) {
+  console.log("progress: " + xhr.status);
+};
+xhr.onload = () => {
+  console.log("Load done: " + xhr.status);
+};
+xhr.onreadystatechange= () => {
+  console.log("onreadystatechange : " + xhr.status);
+};
+
+xhr.send();
+console.log("Xhr send done: "+ xhr.status);
+console.log("Xhr send done responseType: "+ xhr.responseType);
+console.log("Xhr responseText :" + xhr.responseText);
+/**
+ * Outputs the following:
+ *
+ * UNSENT: 0
+ * OPENED: 0
+ * LOADING: 200
+ * DONE: 200
+ */
+  </script>
+</body>
+</html>

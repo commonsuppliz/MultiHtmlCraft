@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Input Type 変更サンプル</title>
+</head>
+<body>
+  <input id="myInput" type="text" value="サンプル">
+
+  <script>
+    function changeType() {
+      // id="myInput" の input 要素を取得
+      var inputElem = document.getElementById('myInput');
+      // type を "radio" に変更
+      inputElem.type = 'radio';
+      console.log("type has been changed to radio");
+      // 結果をコンソールに出力
+      console.log(inputElem.type);
+    }
+    changeType();
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>サンプルフォーム</title>
+  <script>
+    function onButtonClick() {
+      console.log('ボタンがクリックされました');
+    }
+
+    function onListBoxChange(e) {
+      console.log('選択された値: ' + e.target.value);
+    }
+
+    function onTextAreaInput(e) {
+      document.getElementById('textCount').textContent = '文字数: ' + e.target.value.length;
+    }
+
+    function onInputBoxChange(e) {
+      console.log('InputBoxの値: ' + e.target.value);
+    }
+  </script>
+</head>
+<body>
+  <button onclick="onButtonClick()">ボタン</button>
+  <br/><br/>
+   <br/><br/>
+    <br/><br/>
+     <br/><br/>
+
+  <select size="4" onchange="onListBoxChange(event)">
+    <option value="1">選択肢1</option>
+    <option value="2">選択肢2</option>
+    <option value="3">選択肢3</option>
+    <option value="4">選択肢4</option>
+  </select>
+  <br/><br/>
+
+ <br/>
+
+  <input type="text" oninput="onInputBoxChange(event)" placeholder="InputBox">
+  
+        <textarea  oninput="onTextAreaInput(event)"  style="background-color:blue;color:white;width:500px;height:300px;" placeholder="複数行テキストを入力してください">
+
+  </textarea>
+</body>
+
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ReactJS Feature Test</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+    h1 { color: #61dafb; }
+    #root { border: 2px solid #61dafb; padding: 20px; border-radius: 8px; margin-top: 20px; }
+    .log { background: #1e1e1e; color: #0f0; padding: 12px; border-radius: 6px; font-family: monospace; white-space: pre-wrap; }
+  </style>
+    <script src="react.development18.js" crossorigin></script>
+  <script src="react-dom.development18.js" crossorigin></script>
+</head>
+<body>
+  <h1>ReactJS Feature Verification</h1>
+  <p>コンソールと下記に検証結果を出力します。</p>
+  <div id="root"></div>
+  <h2>Console Output</h2>
+  <div id="console-mirror" class="log"></div>
+
+<script>
+(function(){
+  function makeHostProxy(obj){
+    if(!obj || typeof obj !== 'object') return obj;
+    if(obj.___hostProxyInstalled) return obj;
+    const handler = {
+      has(target, prop){
+        try{
+          if (prop in target) return true;
+          if (typeof target.hasOwnProperty === 'function') return target.hasOwnProperty(prop);
+        }catch(e){}
+        return false;
+      },
+      get(target, prop, receiver){
+        try{
+          if (prop === '___hostProxyInstalled') return true;
+          // 元の値を取得し、オブジェクトなら再帰的にプロキシ化して返す
+          const val = Reflect.get(target, prop, receiver);
+          return (val && typeof val === 'object') ? makeHostProxy(val) : val;
+        }catch(e){
+          return undefined;
+        }
+      },
+      set(target, prop, value, receiver){
+        try{
+          // CLR 側で公開した SetDynamicMember があれば優先呼出し
+          if (typeof target.SetDynamicMember === 'function'){
+            try { target.SetDynamicMember(prop.toString(), value); return true; } catch(e){ /* fallthrough */ }
+          }
+          // 返り値がオブジェクトで SetDynamicMember を持つ場合はそちらを使う
+          const current = Reflect.get(target, prop, receiver);
+          if (current && typeof current === 'object' && typeof current.SetDynamicMember === 'function'){
+            try { current.SetDynamicMember(prop.toString(), value); return true; } catch(e){ /* fallthrough */ }
+          }
+          return Reflect.set(target, prop, value, receiver);
+        }catch(e){
+          return false;
+        }
+      }
+    };
+    try{
+      const p = new Proxy(obj, handler);
+      return p;
+    }catch(e){
+      return obj;
+    }
+  }
+
+  try {
+    if (typeof window !== 'undefined' && window.document){
+      window.document = makeHostProxy(window.document);
+    }
+    try {
+      const origCreate = window.document && window.document.createElement;
+      if (typeof origCreate === 'function'){
+        window.document.createElement = function(tag){
+          const el = origCreate.call(this, tag);
+          return makeHostProxy(el);
+        };
+      }
+    } catch(e){}
+    console.log('[DBG] Host-proxy for document/createElement installed (with nested wrapping)');
+  } catch(e){
+    console.log('[DBG] Host-proxy install failed', e && e.message);
+  }
+})();
+</script>
+
+<script>
+(function(){
+  // 保存
+  const _hasOwn = Object.prototype.hasOwnProperty;
+  const _propIsEnum = Object.prototype.propertyIsEnumerable;
+  const _getOwnNames = Object.getOwnPropertyNames;
+  const _getOwnDesc = Object.getOwnPropertyDescriptor;
+  const _reflectHas = Reflect.has;
+
+  Object.prototype.hasOwnProperty = function(name){
+    try{
+      console.log('[DBG] hasOwnProperty called:', name, 'on', this && this.toString ? this.toString() : this);
+    }catch(e){}
+    return _hasOwn.call(this, name);
+  };
+
+  Object.prototype.propertyIsEnumerable = function(name){
+    try{
+      console.log('[DBG] propertyIsEnumerable called:', name, 'on', this && this.toString ? this.toString() : this);
+    }catch(e){}
+    return _propIsEnum.call(this, name);
+  };
+
+  Object.getOwnPropertyNames = function(obj){
+    try{
+      console.log('[DBG] getOwnPropertyNames called on', obj && obj.toString ? obj.toString() : obj);
+    }catch(e){}
+    return _getOwnNames.call(Object, obj);
+  };
+
+  Object.getOwnPropertyDescriptor = function(obj, prop){
+    try{
+      console.log('[DBG] getOwnPropertyDescriptor called:', prop, 'on', obj && obj.toString ? obj.toString() : obj);
+    }catch(e){}
+    return _getOwnDesc.call(Object, obj, prop);
+  };
+
+  Reflect.has = function(target, prop){
+    try{
+      console.log('[DBG] Reflect.has called:', prop, 'on', target && target.toString ? target.toString() : target);
+    }catch(e){}
+    return _reflectHas.call(Reflect, target, prop);
+  };
+
+  // 追加で Object.prototype.toString を上書きしてホストオブジェクト特徴を出力させる（安全に）
+  const _toString = Object.prototype.toString;
+  Object.prototype.toString = function(){
+    try{
+      // host オブジェクトならカスタム情報を返す（id, tagName 等があれば）
+      if (this && typeof this === 'object'){
+        try{
+          if (this.id) return `[object HTML${(this.tagName||'Element').toString()} id=${this.id}]`;
+        }catch(e){}
+      }
+    }catch(e){}
+    return _toString.call(this);
+  };
+
+  console.log('[DBG] Instrumentation installed: hasOwnProperty / Reflect.has / getOwnPropertyDescriptor / getOwnPropertyNames');
+})();
+</script>
+  <!-- React 18 CDN -->
+  <script crossorigin src="react.development18.js"></script>
+  <script crossorigin src="react-dom.development18.js"></script>
+
+  <script>
+    // Mirror console.log to the page
+    const mirror = document.getElementById('console-mirror');
+    const originalLog = console.log;
+    console.log = function (...args) {
+      originalLog.apply(console, args);
+      const line = args.map(a => {
+        if (typeof a === 'object') {
+          try { return JSON.stringify(a, null, 2); } catch { return String(a); }
+        }
+        return String(a);
+      }).join(' ');
+      mirror.textContent += line + '\n';
+    };
+
+    console.log('=== ReactJS Feature Verification Start ===');
+    console.log('Time:', new Date().toISOString());
+
+    // 1. React / ReactDOM loaded?
+    console.log('\n[1] React / ReactDOM loaded?');
+    console.log('  typeof React:', typeof React);
+    console.log('  typeof ReactDOM:', typeof ReactDOM);
+    console.log('  React.version:', React?.version);
+    console.log('  Result:', (typeof React === 'object' && typeof ReactDOM === 'object') ? 'PASS' : 'FAIL');
+
+    // 2. createElement
+    console.log('\n[2] React.createElement');
+    try {
+      const el = React.createElement('div', { className: 'test', id: 'ce-test' }, 'Hello createElement');
+      console.log('  type:', el.type);
+      console.log('  props:', el.props);
+      console.log('  Result: PASS');
+    } catch (e) {
+      console.log('  Error:', e.message);
+      console.log('  Result: FAIL');
+    }
+
+    // 3. Functional Component
+    console.log('\n[3] Functional Component');
+    function Greeting({ name }) {
+      return React.createElement('h2', null, `Hello, ${name}!`);
+    }
+    try {
+      const comp = React.createElement(Greeting, { name: 'React' });
+      console.log('  component type is function:', typeof comp.type === 'function');
+      console.log('  props.name:', comp.props.name);
+      console.log('  Result: PASS');
+    } catch (e) {
+      console.log('  Error:', e.message);
+      console.log('  Result: FAIL');
+    }
+
+    // 4. useState + useEffect (Hooks)
+    console.log('\n[4] Hooks (useState / useEffect)');
+    function Counter() {
+      const [count, setCount] = React.useState(0);
+      React.useEffect(() => {
+        console.log('  [useEffect] count changed to:', count);
+      }, [count]);
+      return React.createElement('div', null,
+        React.createElement('p', null, `Count: ${count}`),
+        React.createElement('button', {
+          onClick: () => setCount(c => c + 1),
+          id: 'inc-btn'
+        }, 'Increment')
+      );
+    }
+    console.log('  useState exists:', typeof React.useState === 'function');
+    console.log('  useEffect exists:', typeof React.useEffect === 'function');
+    console.log('  Result: PASS (hooks API present)');
+
+    // 5. ReactDOM.createRoot + render
+    console.log('\n[5] ReactDOM.createRoot + render');
+    try {
+      const rootEl = document.getElementById('root');
+      console.log("root nodeType",rootEl.nodeType+ " typeof nodetype : "+ typeof rootEl.nodeType);
+      const root = ReactDOM.createRoot(rootEl);
+      root.render(
+        React.createElement('div', null,
+          React.createElement(Greeting, { name: 'World' }),
+          React.createElement(Counter)
+        )
+      );
+      console.log('  createRoot + render succeeded');
+      console.log('  Result: PASS');
+    } catch (e) {
+      console.log('  Error:', e.message);
+      console.log('  Result: FAIL');
+    }
+
+    // 6. Fragment
+    console.log('\n[6] React.Fragment');
+    try {
+      const frag = React.createElement(React.Fragment, null,
+        React.createElement('span', null, 'A'),
+        React.createElement('span', null, 'B')
+      );
+      console.log('  Fragment type:', frag.type);
+      console.log('  children length:', frag.props.children.length);
+      console.log('  Result: PASS');
+    } catch (e) {
+      console.log('  Error:', e.message);
+      console.log('  Result: FAIL');
+    }
+
+    // 7. Children utilities
+    console.log('\n[7] React.Children utilities');
+    try {
+      const children = [
+        React.createElement('li', { key: '1' }, 'One'),
+        React.createElement('li', { key: '2' }, 'Two')
+      ];
+      const count = React.Children.count(children);
+      const mapped = React.Children.map(children, c => c);
+      console.log('  Children.count:', count);
+      console.log('  Children.map length:', mapped.length);
+      console.log('  Result: PASS');
+    } catch (e) {
+      console.log('  Error:', e.message);
+      console.log('  Result: FAIL');
+    }
+
+    // 8. isValidElement
+    console.log('\n[8] React.isValidElement');
+    try {
+      const valid = React.isValidElement(React.createElement('div'));
+      const invalid = React.isValidElement({ type: 'div' });
+      console.log('  isValidElement(<div>):', valid);
+      console.log('  isValidElement(plain object):', invalid);
+      console.log('  Result:', (valid === true && invalid === false) ? 'PASS' : 'FAIL');
+    } catch (e) {
+      console.log('  Error:', e.message);
+      console.log('  Result: FAIL');
+    }
+
+    console.log('\n=== Verification Complete ===');
+    console.log('Open DevTools Console for full logs. Buttons above are interactive.');
+  </script>
+</body>
+</html>

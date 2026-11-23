@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h1>XMLHttpRequest Test</h1>
+  <button id="loadBtn"></button>
+  <pre id="result"></pre>
+
+  <script>
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'http://localhost/json/json1.json', false);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            document.getElementById('result').textContent = xhr.responseText;
+          } else {
+            document.getElementById('result').textContent = 'エラー: ' + xhr.status;
+          }
+        }
+      };
+      xhr.send();
+    
+  </script>
+</body>
+</html>

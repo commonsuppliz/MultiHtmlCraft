@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>IntersectionObserver テストページ</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+    .box {
+      width: 200px;
+      height: 200px;
+      margin: 400px auto;   /* 上下に大きなスペースを作る */
+      background: #3498db;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    /* テスト用に複数の要素を用意 */
+    .target1 { background: #e74c3c; }
+    .target2 { background: #2ecc71; }
+    .target3 { background: #f1c40f; }
+    .target4 { background: #9b59b6; margin-bottom: 1000px; } /* 最後に大きく離す */
+  </style>
+</head>
+<body>
+
+  <h1 style="text-align:center;">スクロールしてコンソールを見てね</h1>
+
+  <div class="box target1">Target 1</div>
+  <div class="box target2">Target 2</div>
+  <div class="box target3">Target 3</div>
+  <div class="box target4">Target 4（最後）</div>
+
+  <script>
+    // テストケース1：デフォルト（threshold: 0）
+    console.log('%c=== テストケース1：threshold = 0 ===', 'color: #3498db; font-weight: bold;');
+    const observer1 = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        console.log('Case1', {
+          target: entry.target.textContent,
+          isIntersecting: entry.isIntersecting,
+          intersectionRatio: entry.intersectionRatio,
+          time: entry.time.toFixed(2) + 'ms'
+        });
+      });
+    }, {
+      threshold: 0   // 1ピクセルでも交差したら発火
+    });
+
+    // テストケース2：50% 以上表示されたときだけ発火
+    console.log('%c=== テストケース2：threshold = 0.5 ===', 'color: #e74c3c; font-weight: bold;');
+    const observer2 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        console.log('Case2 (50%以上)', {
+          target: entry.target.textContent,
+          isIntersecting: entry.isIntersecting,
+          ratio: entry.intersectionRatio.toFixed(3)
+        });
+      });
+    }, {
+      threshold: [0, 0.5, 1.0]   // 0%, 50%, 100% のタイミングでコールバック
+    });
+
+    // テストケース3：rootMargin でビューポートを広げる（100px 先読み）
+    console.log('%c=== テストケース3：rootMargin = "100px" ===', 'color: #2ecc71; font-weight: bold;');
+    const observer3 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        console.log('Case3 (100px 先読み)', {
+          target: entry.target.textContent,
+          isIntersecting: entry.isIntersecting
+        });
+      });
+    }, {
+      rootMargin: '100px'   // ビューポートの下辺から100px手前で交差判定
+    });
+
+    // すべての .box を監視（それぞれ別の observer でテスト）
+    document.querySelectorAll('.box').forEach((el, idx) => {
+      if (idx === 0) observer1.observe(el);
+      if (idx === 1) observer2.observe(el);
+      if (idx === 2) observer3.observe(el);
+      if (idx === 3) {
+        // Target 4 は全部の observer で監視して挙動の違いを確認
+        observer1.observe(el);
+        observer2.observe(el);
+        observer3.observe(el);
+      }
+    });
+
+    // 手動で unobserve するテスト（5秒後に Target 1 を監視解除）
+    setTimeout(() => {
+      console.log('%c5秒後に Target 1 を unobserve します', 'color: #f39c12; font-weight: bold;');
+      observer1.unobserve(document.querySelector('.target1'));
+    }, 5000);
+
+    // 完全に observer を破棄するテスト（10秒後）
+    setTimeout(() => {
+      console.log('%c10秒後に observer1 を disconnect します', 'color: #e67e22; font-weight: bold;');
+      observer1.disconnect();
+    }, 10000);
+  </script>
+</body>
+</html>

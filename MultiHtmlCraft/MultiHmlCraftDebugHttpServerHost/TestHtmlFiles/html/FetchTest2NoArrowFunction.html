@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API サンプル</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
+        #result { margin-top: 20px; padding: 15px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 5px; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+    <h1>Fetch API データ取得サンプル</h1>
+    <button id="fetch-btn">データを取得する</button>
+
+    <div id="result">ここに取得したデータが表示されます</div>
+
+    <script>
+        // ボタンと表示エリアの要素を取得
+        const button = document.getElementById('fetch-btn');
+        const resultDiv = document.getElementById('result');
+
+
+
+       
+        // ボタンがクリックされたときの処理
+        console.log("typeof btnClick : " + typeof btnClick);
+         button.addEventListener('click', btnClick);
+         
+        /*
+        window.addEventListener('DOMContentLoaded', winLoaded);
+        */
+        
+        
+        
+        function btnClick()
+        {
+           console.log("btn clicked WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWww");
+        }
+        function winLoaded()
+        {
+           console.log("winLoaded is called.");
+        }
+    </script>
+
+</body>
+</html>

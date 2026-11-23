@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>console メソッド サンプル</title>
+</head>
+<body>
+  <h1>console メソッド サンプル</h1>
+  <script>
+    // assert
+    console.assert(true, "これは表示されません");
+    console.assert(false, "assert: 条件がfalseです");
+
+    // clear
+    console.clear();
+
+    // count, countReset
+    console.count("myCounter");
+    console.count("myCounter");
+    console.countReset("myCounter");
+    console.count("myCounter");
+
+    // debug
+    console.debug("debug: デバッグメッセージ");
+
+    // dir
+    console.dir({foo: "bar", baz: 123});
+
+    // dirxml
+    console.dirxml(document.body);
+
+    // error
+    console.error("error: エラーメッセージ");
+
+    // group, groupCollapsed, groupEnd
+    console.group("グループ1");
+    console.log("グループ内のメッセージ1");
+    console.groupCollapsed("折りたたみグループ");
+    console.log("折りたたみグループ内");
+    console.groupEnd();
+    console.groupEnd();
+
+    // info
+    console.info("info: 情報メッセージ");
+
+    // log
+    console.log("log: ログメッセージ", {a: 1, b: 2});
+
+    // profile, profileEnd (非標準: 一部ブラウザのみ)
+    if (console.profile) {
+      console.profile("プロファイル開始");
+      // プロファイル対象の処理
+      for(let i=0; i<100000; i++){}
+      console.profileEnd("プロファイル終了");
+    }
+
+    // table
+    console.table([
+      {name: "Alice", age: 30},
+      {name: "Bob", age: 25}
+    ]);
+
+    // time, timeEnd
+    console.time("timer1");
+    setTimeout(() => {
+      console.timeEnd("timer1");
+    }, 500);
+
+  </script>
+</body>
+</html>

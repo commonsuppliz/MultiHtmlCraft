@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ClearScript parentNode テスト</title>
+</head>
+<body>
+    <h1>parentNode.insertBefore デバッグ</h1>
+    
+    <script>
+        var s = document.getElementsByTagName('script')[0];
+        console.log('s =', s);
+        console.log('s.parentNode =', s.parentNode);
+        console.log('typeof s.parentNode.insertBefore =', typeof s.parentNode.insertBefore);
+
+        // ★ 実際に呼び出してみる
+        try {
+            var t = document.createElement('script');
+            t.type = 'text/javascript';
+            t.src = 'script1.js';
+            console.log('About to call insertBefore...');
+            s.parentNode.insertBefore(t, s);
+            console.log('insertBefore call succeeded');
+        } catch (e) {
+            console.log('insertBefore call failed:', e);
+        }
+    </script>
+</body>
+</html>

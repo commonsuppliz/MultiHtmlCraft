@@ -1,0 +1,88 @@
+<html> <head> <meta charset="utf-8"> <title>MutationObserver Test</title> </head> <body> <div id="target" data-info="initial"> <span id="textNode">Hello</span> </div> <script> (function() { const target = document.getElementById('target');
+// 1つ目: 全種別監視
+const observer = new MutationObserver((records, obs) => {
+    console.log('=== Delivered batch ===');
+    records.forEach(r => {
+        console.log({
+            type: r.type,
+            target: r.target.id || r.target.nodeName,
+            attributeName: r.attributeName,
+            oldValue: r.oldValue,
+            added: [...r.addedNodes].map(n => n.nodeName + (n.id?('#'+n.id):'')),
+            removed: [...r.removedNodes].map(n => n.nodeName + (n.id?('#'+n.id):'')),
+            previousSibling: r.previousSibling && (r.previousSibling.id || r.previousSibling.nodeName),
+            nextSibling: r.nextSibling && (r.nextSibling.id || r.nextSibling.nodeName)
+        });
+    });
+});
+
+observer.observe(target, {
+    childList: true,
+    attributes: true,
+    characterData: true,
+    subtree: true,
+    attributeOldValue: true,
+    characterDataOldValue: true,
+    attributeFilter: ['data-info','class']
+});
+
+// 2つ目: attributeFilter の違いを示す
+const observer2 = new MutationObserver((records) => {
+    console.log('--- secondary observer (only class) ---', records.map(r => r.attributeName));
+});
+observer2.observe(target, {
+    attributes: true,
+    attributeFilter: ['class'],
+    attributeOldValue: true
+});
+
+// テスト操作シーケンス
+function step(label, fn, delay=0) {
+    setTimeout(() => {
+        console.log('>> STEP:', label);
+        fn();
+    }, delay);
+}
+
+step('属性変更1', () => target.setAttribute('data-info','changed-1'), 10);
+step('属性変更2 (filter外: style)', () => target.setAttribute('style','color:red'), 30);
+step('class 変更 (secondary observerも反応)', () => target.className = 'highlight', 50);
+step('テキスト変更1', () => document.getElementById('textNode').textContent = 'Hello World', 70);
+step('子追加', () => {
+    const newChild = document.createElement('div');
+    newChild.id = 'childA';
+    newChild.textContent = 'ChildA';
+    target.appendChild(newChild);
+}, 90);
+step('子入れ替え', () => {
+    const childA = document.getElementById('childA');
+    const repl = document.createElement('p');
+    repl.id = 'childB';
+    repl.textContent = 'ChildB';
+    target.replaceChild(repl, childA);
+}, 110);
+step('子削除', () => {
+    const childB = document.getElementById('childB');
+    childB && target.removeChild(childB);
+}, 130);
+step('textNode 直接 characterData 変更 (サブツリー)', () => {
+    const tn = document.getElementById('textNode').firstChild; // Text node
+    tn.data = 'Mutated Text Node';
+}, 150);
+
+// takeRecords(): 未配送レコード取得（通常 microtask で配送済みなので直後操作で確認）
+step('takeRecords() 呼び出し', () => {
+    const leftover = observer.takeRecords();
+    console.log('takeRecords leftover count:', leftover.length);
+}, 170);
+
+// disconnect()
+step('disconnect()', () => {
+    observer.disconnect();
+    observer2.disconnect();
+    console.log('Observers disconnected.');
+    // 以降の変更はログに出ない
+    target.setAttribute('data-info','after-disconnect');
+    target.appendChild(document.createElement('i')).textContent='NoLog';
+}, 190);
+})(); </script> </body> </html>

@@ -1,0 +1,206 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modernizr.js Console テスト</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .message {
+            padding: 20px;
+            text-align: center;
+            background-color: #e3f2fd;
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Modernizr.js Console テスト</h1>
+
+    </div>
+
+
+    <script src="modernizr-2.8.js"></script>
+    
+    <script>
+        var setTimeoutResult = -1;
+        // Modernizrが読み込まれたかチェック
+        function checkModernizrLoaded() {
+            if (typeof Modernizr !== 'undefined') {
+                console.log('✅ Modernizr.js が正常に読み込まれました');
+                console.log(`📋 Modernizr バージョン: ${Modernizr._version || '不明'}`);
+                
+                // 機能検出テストを実行
+                runFeatureTests();
+            } else {
+
+                // 再試行
+                clearTimeout(checkModernizrLoaded, setTimeoutResult);
+            }
+        }
+
+        // 機能検出テストを実行
+        function runFeatureTests() {
+            console.log('\n=== 🚀 機能検出テスト開始 ===');
+            
+            // テストする機能のリスト
+            const features = [
+                { name: 'canvas', label: 'HTML5 Canvas' },
+                { name: 'webgl', label: 'WebGL' },
+                { name: 'geolocation', label: 'Geolocation API' },
+                { name: 'history', label: 'HTML5 History API' },
+                { name: 'localstorage', label: 'Local Storage' },
+                { name: 'sessionstorage', label: 'Session Storage' },
+                { name: 'websockets', label: 'WebSockets' },
+                { name: 'csstransforms', label: 'CSS Transforms' },
+                { name: 'csstransitions', label: 'CSS Transitions' },
+                { name: 'cssanimations', label: 'CSS Animations' },
+                { name: 'touch', label: 'Touch Events' },
+                { name: 'svg', label: 'SVG' },
+                { name: 'audio', label: 'HTML5 Audio' },
+                { name: 'flexbox', label: 'CSS Flexbox' },
+                { name: 'borderradius', label: 'CSS Border Radius' },
+                { name: 'boxshadow', label: 'CSS Box Shadow' },
+                { name: 'opacity', label: 'CSS Opacity' },
+                { name: 'rgba', label: 'CSS RGBA Colors' },
+                { name: 'textshadow', label: 'CSS Text Shadow' }
+            ];
+
+            // 各機能をテスト
+            features.forEach(feature => {
+                const isSupported = Modernizr[feature.name];
+                const supportIcon = isSupported ? '✅' : '❌';
+                const supportText = isSupported ? 'サポート' : '非サポート';
+                
+                console.log(`${supportIcon} ${feature.label}: ${supportText} (Modernizr.${feature.name}: ${isSupported})`);
+            });
+
+            // 追加の検出情報
+            console.log('\n=== 🔍 追加情報 ===');
+            console.log(`🌐 User Agent: ${navigator.userAgent}`);
+            console.log(`💻 Platform: ${navigator.platform}`);
+            console.log(`🗣️ Language: ${navigator.language}`);
+            console.log(`📊 Screen Resolution: ${screen.width}x${screen.height}`);
+            console.log(`📱 Color Depth: ${screen.colorDepth}bit`);
+            
+            // Modernizrで追加されたCSSクラスを確認
+            const htmlClasses = document.documentElement.className;
+            console.log(`🎨 HTML要素に追加されたクラス: ${htmlClasses}`);
+            
+            // カスタム機能検出テスト
+            performCustomTests();
+        }
+
+        // カスタム機能検出テスト
+        function performCustomTests() {
+            console.log('\n=== 🛠️ カスタム検出テスト ===');
+            
+            // ModernizrのaddTestメソッドを使用してカスタムテストを追加
+            if (Modernizr.addTest) {
+                // カスタムテスト: console.logがサポートされているか
+                Modernizr.addTest('consolelog', function() {
+                    return !!(window.console && console.log);
+                });
+                
+                // カスタムテスト: JSON.parseがサポートされているか
+                Modernizr.addTest('jsonparse', function() {
+                    return !!(window.JSON && JSON.parse);
+                });
+                
+                // カスタムテスト: setTimeoutがサポートされているか
+                Modernizr.addTest('settimeout', function() {
+                    return !!(window.setTimeout);
+                });
+                
+                // カスタムテスト: requestAnimationFrameがサポートされているか
+                Modernizr.addTest('requestanimationframe', function() {
+                    return !!(window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame);
+                });
+                
+                console.log(`✅ Console.log サポート: ${Modernizr.consolelog}`);
+                console.log(`✅ JSON.parse サポート: ${Modernizr.jsonparse}`);
+                console.log(`✅ setTimeout サポート: ${Modernizr.settimeout}`);
+                console.log(`✅ requestAnimationFrame サポート: ${Modernizr.requestanimationframe}`);
+            } else {
+                console.log('❌ Modernizr.addTest メソッドが利用できません');
+            }
+            
+            // その他の基本的な機能チェック
+            console.log('\n=== 📋 Modernizr詳細情報 ===');
+            console.log(`📦 typeof Modernizr: ${typeof Modernizr}`);
+            console.log(`🔧 Modernizr.load 関数: ${typeof Modernizr.load}`);
+            console.log(`🔢 設定可能なプロパティ数: ${Object.keys(Modernizr).length}`);
+            
+            // 利用可能な全ての検出項目をログ出力
+            console.log('\n=== 📊 利用可能な機能検出項目 ===');
+            const allFeatures = Object.keys(Modernizr).filter(key => 
+                typeof Modernizr[key] === 'boolean' && key !== '_version'
+            );
+            console.log(`🎯 検出可能な機能数: ${allFeatures.length}`);
+            
+            // 機能を分類して表示
+            const supportedFeatures = allFeatures.filter(key => Modernizr[key] === true);
+            const unsupportedFeatures = allFeatures.filter(key => Modernizr[key] === false);
+            
+            console.log(`\n✅ サポートされている機能 (${supportedFeatures.length}個):`);
+            supportedFeatures.forEach(feature => {
+                console.log(`  ✅ ${feature}: ${Modernizr[feature]}`);
+            });
+            
+            console.log(`\n❌ サポートされていない機能 (${unsupportedFeatures.length}個):`);
+            unsupportedFeatures.forEach(feature => {
+                console.log(`  ❌ ${feature}: ${Modernizr[feature]}`);
+            });
+            
+            // サマリー情報
+            console.log('\n=== 📈 サマリー ===');
+            console.log(`🎯 総機能数: ${allFeatures.length}`);
+            console.log(`✅ サポート済み: ${supportedFeatures.length} (${Math.round(supportedFeatures.length / allFeatures.length * 100)}%)`);
+            console.log(`❌ 非サポート: ${unsupportedFeatures.length} (${Math.round(unsupportedFeatures.length / allFeatures.length * 100)}%)`);
+            
+            // テスト完了ログ
+            console.log('\n🎉 Modernizr.js 機能検出テスト完了！');
+        }
+
+        // DOMContentLoadedイベントでテストを開始
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM読み込み完了 - Modernizr.jsテストを開始します');
+            
+            // Modernizrの読み込みをチェック
+          setTimeoutResult =  setTimeout(checkModernizrLoaded, 1000);
+        });
+
+        // ページ読み込み完了時の追加ログ
+        window.addEventListener('load', function() {
+            console.log('✅ ページ読み込み完了');
+        });
+
+        // エラーハンドリング
+        window.addEventListener('error', function(e) {
+            console.error(`❌ エラーが発生しました: ${e.message}`);
+            console.error(`📍 ファイル: ${e.filename}`);
+            console.error(`📍 行番号: ${e.lineno}`);
+            console.error(`📍 列番号: ${e.colno}`);
+        });
+
+        // Modernizr読み込み前の事前チェック
+        console.log('🔄 Modernizr.js読み込み待機中...');
+    </script>
+</body>
+</html>

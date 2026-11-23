@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Fetch Request Sample</title>
+</head>
+<body>
+<script>
+    const request = new Request('http://localhost/json/json1.json', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    console.log("Request is created");
+
+    // fetchの戻り値がPromiseか確認
+    const result = fetch(request);
+    console.log("fetch returned:", result, "typeof:", typeof result);
+
+    result
+      .then(response => {
+        console.log("then called, response:", response);
+        console.log("response : " + typeof response);
+
+        // レスポンスの内容を必ず確認
+        if (response && typeof response.text === "function") {
+          response.text()
+            .then(text => {
+              console.log("response.text():", text);
+            })
+            .catch(e => {
+              console.error("response.text() error:", e);
+            });
+        } else {
+          console.warn("response.text is not a function");
+        }
+
+
+      })
+      .catch(e => {
+        try {
+          var errMsg = (e && e.message) ? e.message : (typeof e === 'object' ? JSON.stringify(e) : String(e));
+          console.error('fetch error: ', errMsg);
+        } catch (ex) {
+          console.error('Unknown error');
+        }
+      });
+</script>
+</body>
+</html>

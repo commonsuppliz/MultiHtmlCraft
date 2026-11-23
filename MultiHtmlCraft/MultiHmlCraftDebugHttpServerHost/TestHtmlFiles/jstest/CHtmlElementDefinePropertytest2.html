@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ノードの追加</title>
+
+</head>
+<body>
+
+<div id="testObj"></div>
+
+
+<script>
+  var testElement = undefined;
+  try{
+  testElement= document.getElementById("testObj");
+  console.log('resutof document.getElementById : ' + testElement);
+  } 
+  catch(e)
+  {
+         console.log('document getElementById has Error');
+  }
+  try
+  {
+     var resultProp1 = testElement.Propety1;
+     console.log("Current testElement.Propety1 " + resultProp1);
+  } catch(e)
+  {
+        console.log('can not access to testElement.property1');
+  }
+  try
+  {
+     console.log('calling definPproperty');
+     Object.defineProperty(testElement, 'property1', {
+    value: 42,
+    writable: false
+  });
+       console.log('defineProperty() called sucess!');
+       var resultPropFinal = testElement.property1;
+       console.log("Result of testElement.property1 " + resultPropFinal);
+  } catch(e)
+  {
+    console.log('defineProperty() called has Error!');
+     console.log('definepPoperty set Error : ' + e.message);
+  }
+
+</script>
+<script>
+  try {
+    testElement.property1 = 77;
+  } catch (e) {
+    console.log('defineProperty get Error: ' + e.message);
+  }
+  console.log('Curent Value is: ' + testElement.property1);
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>console.log サンプル</title>
+</head>
+<body>
+  <h1>console.log サンプル</h1>
+  <script>
+    // 文字列
+    console.log("Hello, world!");
+    console.log("width: " + 800 + "height: " + 800);
+
+    // 数値
+    console.log(12345);
+
+    // 真偽値
+    console.log(true, false);
+
+    // 配列
+    console.log([1, 2, 3, 4, 5]);
+
+    // オブジェクト
+    console.log({ name: "Copilot", type: "AI", version: 1 });
+
+    // 複数引数
+    console.log("値:", 42, { ok: true });
+
+    // undefined, null
+    console.log(undefined, null);
+
+    // 関数
+    console.log(function(x) { return x * 2; });
+
+    // エラーオブジェクト
+    console.log(new Error("エラーの例"));
+
+    // テンプレートリテラル
+    let name = "Copilot";
+    console.log(`こんにちは、${name}！`);
+  </script>
+</body>
+</html>

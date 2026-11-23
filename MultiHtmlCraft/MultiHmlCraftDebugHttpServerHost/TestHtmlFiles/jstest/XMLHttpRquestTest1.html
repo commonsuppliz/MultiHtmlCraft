@@ -1,0 +1,22 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>setTimeout Test</title>
+</head>
+<body>
+
+<script>
+function reqListener() {
+  console.log(this.responseText);
+}
+
+const req = new XMLHttpRequest();
+req.addEventListener("load", reqListener);
+req.open("GET", "http://localhost/jstest/sampledata.txt");
+req.send();
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+console.log('🛑 [normal-head.js] 実行（Head内の通常スクリプト：HTMLパースをブロック）');

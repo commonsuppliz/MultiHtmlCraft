@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta charset="utf-8">
+    <title>Modernizr.js Debug Test - Separated Processing</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Modernizr.js Debug Test - 分離処理テスト</h1>
+    
+    <div class="test-section">
+        <h2>1. 基本的なタッチサポートテスト</h2>
+        <div id="touch-basic-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. DOM要素作成テスト</h2>
+        <div id="dom-creation-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. offsetプロパティテスト</h2>
+        <div id="offset-property-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Modernizr.js機能検出テスト</h2>
+        <div id="modernizr-test-results"></div>
+    </div>
+
+    <script>
+        // ========================================================================
+        // デバッグヘルパー関数
+        // ========================================================================
+        function logResult(sectionId, message, type = 'info') {
+            const section = document.getElementById(sectionId);
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = message;
+            section.appendChild(div);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function safeExecute(func, description, sectionId) {
+            try {
+                console.log(`🔍 Testing: ${description}`);
+                const result = func();
+                logResult(sectionId, `✅ ${description}: ${result}`, 'success');
+                return result;
+            } catch (error) {
+                logResult(sectionId, `❌ ${description}: ${error.message}`, 'error');
+                console.error(`Error in ${description}:`, error);
+                return null;
+            }
+        }
+
+        // ========================================================================
+        // 1. 基本的なタッチサポートテスト
+        // ========================================================================
+        console.log('=== 1. 基本的なタッチサポートテスト ===');
+        
+        safeExecute(() => {
+            return typeof window !== 'undefined';
+        }, 'window object existence', 'touch-basic-results');
+
+        safeExecute(() => {
+            return 'ontouchstart' in window;
+        }, "'ontouchstart' in window", 'touch-basic-results');
+
+        safeExecute(() => {
+            return 'ontouchend' in window;
+        }, "'ontouchend' in window", 'touch-basic-results');
+
+        safeExecute(() => {
+            return 'ontouchmove' in window;
+        }, "'ontouchmove' in window", 'touch-basic-results');
+
+        safeExecute(() => {
+            return typeof window.ontouchstart;
+        }, 'typeof window.ontouchstart', 'touch-basic-results');
+
+        // ========================================================================
+        // 2. DOM要素作成テスト
+        // ========================================================================
+        console.log('=== 2. DOM要素作成テスト ===');
+        
+        let hash = {};
+        
+        safeExecute(() => {
+            const div = document.createElement('div');
+            div.id = 'touch';
+            div.style.position = 'absolute';
+            div.style.top = '9px';
+            hash['touch'] = div;
+            document.body.appendChild(div);
+            return 'touch element created';
+        }, 'Create touch test element', 'dom-creation-results');
+
+        safeExecute(() => {
+            const div = document.createElement('div');
+            div.id = 'csstransforms3d';
+            div.style.position = 'absolute';
+            div.style.left = '9px';
+            hash['csstransforms3d'] = div;
+            document.body.appendChild(div);
+            return 'csstransforms3d element created';
+        }, 'Create csstransforms3d test element', 'dom-creation-results');
+
+        safeExecute(() => {
+            const div = document.createElement('div');
+            div.id = 'generatedcontent';
+            div.style.height = '10px';
+            hash['generatedcontent'] = div;
+            document.body.appendChild(div);
+            return 'generatedcontent element created';
+        }, 'Create generatedcontent test element', 'dom-creation-results');
+
+        safeExecute(() => {
+            const div = document.createElement('div');
+            div.id = 'fontface';
+            hash['fontface'] = div;
+            document.body.appendChild(div);
+            return 'fontface element created';
+        }, 'Create fontface test element', 'dom-creation-results');
+
+        // ========================================================================
+        // 3. offsetプロパティテスト
+        // ========================================================================
+        console.log('=== 3. offsetプロパティテスト ===');
+        
+        safeExecute(() => {
+            return hash['touch'] ? 'hash[touch] exists' : 'hash[touch] is undefined';
+        }, 'Check hash[touch] existence', 'offset-property-results');
+
+        safeExecute(() => {
+            return hash['touch'] ? typeof hash['touch'].offsetTop : 'hash[touch] is undefined';
+        }, 'typeof hash[touch].offsetTop', 'offset-property-results');
+
+        safeExecute(() => {
+            return hash['touch'] ? hash['touch'].offsetTop : 'hash[touch] is undefined';
+        }, 'hash[touch].offsetTop value', 'offset-property-results');
+
+        safeExecute(() => {
+            return hash['csstransforms3d'] ? typeof hash['csstransforms3d'].offsetLeft : 'hash[csstransforms3d] is undefined';
+        }, 'typeof hash[csstransforms3d].offsetLeft', 'offset-property-results');
+
+        safeExecute(() => {
+            return hash['csstransforms3d'] ? hash['csstransforms3d'].offsetLeft : 'hash[csstransforms3d] is undefined';
+        }, 'hash[csstransforms3d].offsetLeft value', 'offset-property-results');
+
+        safeExecute(() => {
+            return hash['generatedcontent'] ? typeof hash['generatedcontent'].offsetHeight : 'hash[generatedcontent] is undefined';
+        }, 'typeof hash[generatedcontent].offsetHeight', 'offset-property-results');
+
+        safeExecute(() => {
+            return hash['generatedcontent'] ? hash['generatedcontent'].offsetHeight : 'hash[generatedcontent] is undefined';
+        }, 'hash[generatedcontent].offsetHeight value', 'offset-property-results');
+
+        // ========================================================================
+        // 4. Modernizr.js機能検出テスト（分離版）
+        // ========================================================================
+        console.log('=== 4. Modernizr.js機能検出テスト ===');
+        
+        let Modernizr = {};
+
+        // Touch detection test
+        safeExecute(() => {
+            const touchSupport = ('ontouchstart' in window);
+            console.log('Step 1: ontouchstart in window =', touchSupport);
+            
+            if (hash['touch']) {
+                const offsetTopValue = hash['touch'].offsetTop;
+                console.log('Step 2: hash[touch].offsetTop =', offsetTopValue);
+                
+                const offsetTopTest = (offsetTopValue === 9);
+                console.log('Step 3: offsetTop === 9 =', offsetTopTest);
+                
+                Modernizr['touch'] = touchSupport || offsetTopTest;
+            } else {
+                console.log('Step 2: hash[touch] is undefined, skipping offsetTop test');
+                Modernizr['touch'] = touchSupport;
+            }
+            
+            return Modernizr['touch'];
+        }, 'Modernizr touch detection', 'modernizr-test-results');
+
+        // CSS 3D transforms detection test
+        safeExecute(() => {
+            if (hash['csstransforms3d']) {
+                const offsetLeftValue = hash['csstransforms3d'].offsetLeft;
+                console.log('CSS 3D transforms offsetLeft =', offsetLeftValue);
+                Modernizr['csstransforms3d'] = (offsetLeftValue === 9);
+            } else {
+                console.log('hash[csstransforms3d] is undefined');
+                Modernizr['csstransforms3d'] = false;
+            }
+            return Modernizr['csstransforms3d'];
+        }, 'Modernizr csstransforms3d detection', 'modernizr-test-results');
+
+        // Generated content detection test
+        safeExecute(() => {
+            if (hash['generatedcontent']) {
+                const offsetHeightValue = hash['generatedcontent'].offsetHeight;
+                console.log('Generated content offsetHeight =', offsetHeightValue);
+                Modernizr['generatedcontent'] = (offsetHeightValue >= 1);
+            } else {
+                console.log('hash[generatedcontent] is undefined');
+                Modernizr['generatedcontent'] = false;
+            }
+            return Modernizr['generatedcontent'];
+        }, 'Modernizr generatedcontent detection', 'modernizr-test-results');
+
+        // FontFace detection test (simplified)
+        safeExecute(() => {
+            // 簡略化されたフォントフェーステスト
+            Modernizr['fontface'] = (typeof document.fonts !== 'undefined');
+            return Modernizr['fontface'];
+        }, 'Modernizr fontface detection (simplified)', 'modernizr-test-results');
+
+        // ========================================================================
+        // 結果サマリー
+        // ========================================================================
+        console.log('=== 結果サマリー ===');
+        console.log('Modernizr results:', Modernizr);
+        
+        setTimeout(() => {
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'test-section';
+            summaryDiv.innerHTML = `
+                <h2>最終結果サマリー</h2>
+                <div class="info">Touch support: ${Modernizr['touch']}</div>
+                <div class="info">CSS 3D transforms: ${Modernizr['csstransforms3d']}</div>
+                <div class="info">Generated content: ${Modernizr['generatedcontent']}</div>
+                <div class="info">Font face: ${Modernizr['fontface']}</div>
+            `;
+            document.body.appendChild(summaryDiv);
+        }, 1000);
+
+    </script>
+</body>
+</html>

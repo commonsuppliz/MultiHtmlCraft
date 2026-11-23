@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Audio自動再生サンプル（JS制御）</title>
+    <style>
+        #play-fallback { display: none; margin-top: 20px; }
+        .play-btn { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>HTML5 Audio 自動再生（エラーハンドリング付き）</h1>
+    
+    <audio id="myAudio" src="http://localhost/sound/gradius_music.mp3" controls></audio>
+
+    <div id="play-fallback">
+        <p>ブラウザによって自動再生がブロックされました。以下のボタンを押して再生してください。</p>
+        <button id="playBtn" class="play-btn">♪ 音声を再生する</button>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const audio = document.getElementById('myAudio');
+            const fallbackDiv = document.getElementById('play-fallback');
+
+             
+             
+            
+            /*
+            // ページロード時に再生を試みる
+            audio.play().then(() => {
+                console.log("自動再生に成功しました！");
+            }).catch(error => {
+                console.log("自動再生がブロックされました:", error);
+                // ブロックされた場合は、ユーザーが押せるボタンを表示する
+                fallbackDiv.style.display = 'block';
+            });
+            */
+            // Sync Mode
+            audio.play();
+            console.log("audio.play() has been called");
+
+
+        });
+    </script>
+
+</body>
+</html>

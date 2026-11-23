@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas fillStyle Example</title>
+</head>
+<body>
+    <!-- Canvas 要素 -->
+    <canvas id="myCanvas" width="400" height="200" style="border:1px solid #000;"></canvas>
+
+    <script>
+        // querySelector を使用して canvas 要素を取得
+        const canvas = document.querySelector('#myCanvas');
+
+        // 2D コンテキストを取得
+        const context = canvas.getContext('2d');
+
+
+// キャンバスの特定領域のピクセルデータを取得
+var imageData = context.getImageData(0, 0, 10, 1);
+console.log(imageData);
+console.log(imageData.data.length);
+// ピクセルデータの処理
+for (var i = 0; i < imageData.data.length; i++)
+{
+    var red = imageData[i];     // 赤
+    var green = imageData[i+1]; // 緑
+    var blue = imageData[i+2];  // 青
+    var alpha = imageData[i+3]; // アルファ
+    console.log(i);
+}
+    </script>
+</body>
+</html>

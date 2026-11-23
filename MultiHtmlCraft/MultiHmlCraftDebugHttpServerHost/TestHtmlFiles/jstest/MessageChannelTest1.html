@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>MessageChannel / MessagePort Test</title>
+</head>
+<body>
+  <h1>MessageChannel / MessagePort テスト</h1>
+  <p>コンソール（DevTools）を確認してください。</p>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('--- DOMContentLoaded: MessageChannel テスト開始 ---');
+      var xmh = new XMLHttpRequest();
+      xmh.open("GET", "http://localhost", false);
+      xmh.send(null);
+      // 1. MessageChannel の生成
+      const channel = new MessageChannel();
+      console.log("new typeof MessageChannel : " + typeof MessageChannel);
+      const port1 = channel.port1;
+      const port2 = channel.port2;
+
+      // 2. port1 側の受信イベントハンドラ設定
+      port1.onmessage = (event) => {
+        console.log('[Port1 受信]:', event.data);
+      };
+
+      // 3. port2 側の受信イベントハンドラ設定
+      port2.onmessage = (event) => {
+        console.log('[Port2 受信]:', event.data);
+
+        // 応答を返送するテスト
+        port2.postMessage(`Port2 からの返信: "${event.data}" を受け取りました`);
+      };
+
+      // 4. メッセージ送信テスト
+      console.log('Port1 から MessageChannel 経由で送信中...');
+      port1.postMessage('Hello from Port1!');
+    });
+  </script>
+</body>
+</html>

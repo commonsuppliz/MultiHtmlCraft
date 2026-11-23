@@ -1,0 +1,365 @@
+@charset "utf-8";
+div{
+    /* border: 10px solid #777; */
+    box-sizing:border-box;
+}
+
+/*-------------------------- layout01 --------------------------*/
+#layout01 #box01{
+    background: #fcfcfc;
+    width: 960px;
+    margin: 0 auto;
+}
+#layout01 #box02{
+    width:100%;
+    background:#fcc;
+    margin-bottom:20px;
+    height:150px;
+}
+#layout01 #box03{
+    width:100%;
+    background:#fff;
+    overflow:hidden;
+    margin-bottom:20px;
+}
+#layout01 #box04{
+    width:200px;
+    background:#ffc;
+    float:left;
+    height:500px;
+}
+#layout01 #box05{
+    width:740px;
+    background:#fcf;
+    float:right;
+    height:500px;
+}
+#layout01 #box06{
+    width:100%;
+    background:#e0e0ff;
+    height:150px;
+}
+
+/*-------------------------- layout02 --------------------------*/
+#layout02 #box01{
+    background: #fcfcfc;
+    width: 960px;
+    margin: 0 auto;
+}
+#layout02 #box02{
+    width:100%;
+    background:#fcc;
+    margin-bottom:20px;
+    height:150px;
+}
+#layout02 #box03{
+    width:100%;
+    background:#fff;
+    overflow:hidden;
+    margin-bottom:20px;
+}
+#layout02 #box04{
+    width:200px;
+    background:#ffc;
+    float:left;
+    height:500px;
+    margin-right:20px;
+}
+#layout02 #box05{
+    width:520px;
+    background:#fcf;
+    float:left;
+    height:500px;
+}
+#layout02 #box06{
+    width:200px;
+    background:#d5f2ff;
+    float:right;
+    height:500px;
+}
+#layout02 #box07{
+    width:100%;
+    background:#e0e0ff;
+    height:150px;
+}
+
+/*-------------------------- layout03 --------------------------*/
+#layout03 #box01{
+    width:100%;
+    background: #ffeaea;
+}
+#layout03 #box02{
+    width: 960px;
+    margin: 0 auto;
+    background:#fcc;
+    height:150px;
+}
+#layout03 #box03{
+    width:100%;
+    background:#bfe2ff;
+}
+#layout03 #box04{
+    width: 960px;
+    margin: 0 auto;
+    background:#ffc;
+    padding:20px;
+    overflow:hidden;
+}
+#layout03 #box05{
+    width:200px;
+    background:#fcf;
+    float:left;
+    height:500px;
+}
+#layout03 #box06{
+    width:700px;
+    background:#d5f2ff;
+    float:right;
+    height:500px;
+}
+#layout03 #box07{
+    width:100%;
+    background:#e0e0ff;
+}
+#layout03 #box08{
+    width:960px;
+    margin: 0 auto;
+    background:#94f5ff;
+    height:150px;
+}
+
+/*-------------------------- layout04 --------------------------*/
+
+#layout04 #box01{
+    width:100%;
+    background: #ffeaea;
+}
+#layout04 #box02{
+    width: 960px;
+    margin: 0 auto;
+    background:#fcc;
+    height:150px;
+}
+#layout04 #box03{
+    width:100%;
+    background:#bfe2ff;
+}
+#layout04 #box04{
+    width: 960px;
+    margin: 0 auto;
+    background:#ffc;
+    padding:20px;
+    overflow:hidden;
+}
+#layout04 #box05{
+    width:100%;
+    background:#fcf;
+    height:300px;
+    margin-bottom:20px;
+}
+#layout04 #box06{
+    width:450px;
+    background:#d5f2ff;
+    float:left;
+    height:500px;
+    margin-bottom:20px;
+}
+#layout04 #box07{
+    width:450px;
+    background:#d5ffe6;
+    float:right;
+    height:500px;
+    margin-bottom:20px;
+}
+#layout04 #box08{
+    width:100%;
+    background:#d5ff55;
+    height:300px;
+    clear:both;
+}
+#layout04 #box09{
+    width:100%;
+    background:#e0e0ff;
+}
+#layout04 #box10{
+    width:960px;
+    margin: 0 auto;
+    background:#94f5ff;
+    height:150px;
+}
+
+/*-------------------------- layout05 --------------------------*/
+
+#layout05 #box01{
+    width:100%;
+    background: #ffeaea;
+}
+#layout05 #box02{
+    width: 960px;
+    margin: 0 auto;
+    background:#fcc;
+    height:150px;
+}
+#layout05 #box03{
+    width:100%;
+    background:#bfe2ff;
+}
+#layout05 #box04{
+    width: 960px;
+    margin: 0 auto;
+    background:#ffc;
+    padding:20px;
+    overflow:hidden;
+}
+#layout05 #box05{
+    width:100%;
+    background:#fcf;
+    height:300px;
+    margin-bottom:20px;
+}
+#layout05 #box06{
+    width:450px;
+    background:#d5f2ff;
+    float:left;
+    height:500px;
+    margin-bottom:20px;
+}
+#layout05 #box07{
+    width:450px;
+    background:#d5ffe6;
+    float:right;
+    height:500px;
+    margin-bottom:20px;
+}
+#layout05 #box08{
+    width:100%;
+    background:#d5ff55;
+    height:300px;
+    clear:both;
+}
+#layout05 #box09{
+    width:100%;
+    background:#e0e0ff;
+}
+#layout05 #box10{
+    width:960px;
+    margin: 0 auto;
+    background:#94f5ff;
+    overflow:hidden;
+    padding:20px;
+}
+#layout05 #box11{
+    width:33.333%;
+    background:#ffc594;
+    height:150px;
+    float:left;
+}
+#layout05 #box12{
+    width:33.333%;
+    background:#ccd0ff;
+    height:150px;
+    float:left;
+}
+#layout05 #box13{
+    width:33.333%;
+    background:#ffc7d9;
+    height:150px;
+    float:left;
+}
+#layout05 #box14{
+    width:100%;
+    background:#ffffff;
+    height:50px;
+    float:left;
+}
+/*-------------------------- layout06 --------------------------*/
+
+#layout06 #box01{
+    width:100%;
+    background: #ffeaea;
+}
+#layout06 #box02{
+    width: 960px;
+    margin: 0 auto;
+    background:#fcc;
+    height:150px;
+}
+#layout06 #box03{
+    width:100%;
+    background:#bfe2ff;
+}
+#layout06 #box04{
+    width: 960px;
+    margin: 0 auto;
+    background:#ffc;
+    padding:20px;
+    overflow:hidden;
+}
+#layout06 #box05{
+    width:100%;
+    background:#fcf;
+    height:300px;
+    margin-bottom:20px;
+}
+#layout06 #box06{
+    width:350px;
+    background:#d5f2ff;
+    float:left;
+    height:500px;
+    margin-bottom:20px;
+}
+#layout06 #box07{
+    width:550px;
+    background:#d5ffe6;
+    float:right;
+    margin-bottom:20px;
+    padding:20px;
+}
+#layout06 #box07 .class01{
+    background:#4ce88b;
+    width:48%;
+    margin:1%;
+    float:left;
+    height:200px;
+}
+#layout06 #box08{
+    width:100%;
+    background:#d5ff55;
+    height:300px;
+    clear:both;
+}
+#layout06 #box09{
+    width:100%;
+    background:#e0e0ff;
+}
+#layout06 #box10{
+    width:960px;
+    margin: 0 auto;
+    background:#94f5ff;
+    overflow:hidden;
+    padding:20px;
+}
+#layout06 #box11{
+    width:33.333%;
+    background:#ffc594;
+    height:150px;
+    float:left;
+}
+#layout06 #box12{
+    width:33.333%;
+    background:#ccd0ff;
+    height:150px;
+    float:left;
+}
+#layout06 #box13{
+    width:33.333%;
+    background:#ffc7d9;
+    height:150px;
+    float:left;
+}
+#layout06 #box14{
+    width:100%;
+    background:#ffffff;
+    height:50px;
+    float:left;
+}

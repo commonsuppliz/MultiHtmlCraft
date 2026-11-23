@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>DOMParser Test</title>
+</head>
+<body>
+    <h1>DOMParser テスト</h1>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOMContentLoaded 発火');
+            const targetHtmlPath = 'http://localhost/html/SimpleHtmlDocument.html';
+
+            try {
+                const response = await fetch(targetHtmlPath);
+                console.log('typeof response:', typeof response);
+
+                const htmlText = await response.text();
+                console.log('typeof htmlText:', typeof htmlText, 'length:', htmlText ? htmlText.length : -1);
+
+                if (typeof htmlText !== 'string') {
+                    console.error('htmlText が string ではありません:', htmlText);
+                    return;
+                }
+
+                const parser = new DOMParser();
+                const parsedDoc = parser.parseFromString(htmlText, 'text/html');
+                console.log('parsedDoc:', parsedDoc);
+                /*
+                console.log('タイトル:', parsedDoc && parsedDoc.title);
+                */
+                console.log('body要素:', parsedDoc && parsedDoc.body);
+            } catch (error) {
+                console.error('DOMParser テスト中にエラーが発生しました:', error);
+            }
+        });
+    </script>
+</body>
+</html>

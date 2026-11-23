@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>document EventListener サンプル</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    button {
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>document 全体での EventListener の追加と削除</h2>
+  <p>ページのどこをクリックしてもコンソールにログが出力されます。</p>
+  
+  <button id="removeBtn">document のイベントを解除する</button>
+
+  <div id="status">ステータス: イベント有効中（画面内をクリックしてコンソールを確認）</div>
+
+  <script>
+    const removeBtn = document.getElementById('removeBtn');
+    const status = document.getElementById('status');
+
+    // 1. 実行したい処理（クリックされた要素のタグ名もログ表示）
+    function handleDocumentClick(event) {
+      console.log('document がクリックされました！ Target:', event.target.tagName);
+    }
+
+    // 2. document にイベントリスナーを登録
+    document.addEventListener('click', handleDocumentClick);
+
+    // 3. ボタンを押したときに document のイベントリスナーを削除
+    removeBtn.addEventListener('click', function(event) {
+      // ボタン自体のクリックによるイベント伝播（親要素への連鎖）を停止
+      event.stopPropagation();
+
+      // document からイベントを解除
+      document.removeEventListener('click', handleDocumentClick);
+      
+      console.log('document のクリックイベントを解除しました。');
+      status.textContent = 'ステータス: イベント解除済み（画面をクリックしてもログは出ません）';
+    });
+  </script>
+
+</body>
+</html>

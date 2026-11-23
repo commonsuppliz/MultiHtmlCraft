@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>insertBefore サンプル（自動実行 + console.log）</title>
+    <style>
+        .box {
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            background-color: lightblue;
+            display: inline-block;
+            text-align: center;
+            line-height: 100px;
+            font-size: 20px;
+        }
+        #container {
+            border: 2px solid #333;
+            padding: 20px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<h2>insertBefore のサンプル（ページ読み込み後に自動実行）</h2>
+
+<div id="container">
+    <div class="box" id="box1">1</div>
+    <div class="box" id="box2">2</div>
+    <div class="box" id="box3">3</div>
+</div>
+
+<script>
+    // DOMが完全に読み込まれた後に実行
+    window.addEventListener("DOMContentLoaded", function () {
+        console.log("DOMContentloaded started...");
+        // 新しく挿入する要素を作成
+        const newBox = document.createElement("div");
+        newBox.className = "box";
+        newBox.textContent = "NEW";
+        newBox.style.backgroundColor = "#ff9999";
+        console.log("typeof newBox:" , typeof newBox);
+        console.log("newBox :", newBox);
+
+        // 親要素
+        const container = document.getElementById("container");
+
+        // 基準となるノード（前に挿入したい位置のノード）→ 箱2
+        const referenceBox = document.getElementById("box2");
+        console.log("typeof referenceBox", typeof referenceBox);
+        console.log("referenceBox :", referenceBox);
+
+        // insertBefore で挿入
+        container.insertBefore(newBox, referenceBox);
+
+        // 結果をコンソールに出力
+        console.log("新しい要素を自動で追加しました:");
+    });
+</script>
+
+</body>
+</html>

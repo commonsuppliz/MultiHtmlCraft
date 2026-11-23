@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>FontFace new Sample (ClearScript V8)</title>
+
+</head>
+<body>
+  <h1>FontFace new Sample (ClearScript V8)</h1>
+  <div id="result">Waiting...</div>
+  <div id="result2"></div>
+    <script>
+ 
+      async function testFontFace() {
+      console.log("Async testFontFace start.");
+      try
+      {
+      let fontFace = new FontFace(
+        "Noto Sans",
+        "url('http://localhost/woff/Diploma.woff')"
+      );
+      console.log("FontFace is created");
+      console.log(fontFace.source);
+      /*
+      console.log(
+        'fontFamily: ' + fontFace.fontFamily + ', src: ' + fontFace.src);
+        */
+
+      // Promiseとしてload()を呼び出し
+      let loadedFace = await fontFace.load();
+      console.log("loadedFace" + loadedFace );
+      /*
+      document.getElementById('result2').textContent =
+        'loaded: ' + loadedFace.loaded + ', status: ' + loadedFace.status;
+        */
+       console.log(loadedFace.status);
+       } catch(e)
+       {
+         console.log("ERROR");
+       }
+    }
+      window.addEventListener("DOMContentLoaded",  testFontFace);
+
+  </script>
+</body>
+</html>

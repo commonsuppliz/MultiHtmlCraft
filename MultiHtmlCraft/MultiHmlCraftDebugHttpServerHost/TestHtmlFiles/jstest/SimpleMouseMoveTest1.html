@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Mousemove 座標出力サンプル</title>
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: sans-serif;
+        }
+        #box {
+            width: 300px;
+            height: 300px;
+            background-color: #fff;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="box">このパネルの上で<br>マウスを動かしてください</div>
+
+    <script>
+        const box = document.getElementById('box');
+
+        // 特定の要素内での座標を取得する場合
+        window.addEventListener('mousemove', (event) => {
+            // 要素の左上を (0,0) とした座標
+            const x = event.offsetX;
+            const y = event.offsetY;
+
+            // ブラウザの表示領域全体（左上）を基準にする場合は clientX, clientY
+            const globalX = event.clientX;
+            const globalY = event.clientY;
+
+            console.log(`要素内座標: X=${x}, Y=${y} | 全体座標: X=${globalX}, Y=${globalY}`);
+        });
+    </script>
+</body>
+</html>

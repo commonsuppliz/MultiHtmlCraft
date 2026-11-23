@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h1>SVGElement Test</h1>
+  <script>
+  let svg1 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  //var svg1 = new Object();
+  console.log(svg1);
+  if(svg1 instanceof Element)
+   //if(svg1 instanceof Node)
+  {
+    console.log("SUCESS");
+  }else
+  {
+     console.log("FAIL");
+  }
+  </script>
+</body>
+</html>

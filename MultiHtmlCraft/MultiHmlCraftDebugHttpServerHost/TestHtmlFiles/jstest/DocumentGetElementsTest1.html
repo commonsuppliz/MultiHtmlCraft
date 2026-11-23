@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>getElement サンプル（見やすいconsole出力）</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 20px; }
+    .box { padding: 12px; margin: 8px; border-radius: 6px; }
+    .red    { background: #ffebee; border: 1px solid #ef9a9a; }
+    .blue   { background: #e3f2fd; border: 1px solid #90caf9; }
+    .green  { background: #e8f5e9; border: 1px solid #a5d6a7; }
+    .purple { background: #f3e5f5; border: 1px solid #ce93d8; }
+  </style>
+</head>
+<body>
+
+<h1>document.getElement* 全部試すデモ</h1>
+
+<!-- IDで探す用 -->
+<div id="main-title">ここがメインタイトルです</div>
+
+<!-- tagNameで探す用 -->
+<p>これは普通の文章1</p>
+<p class="highlight">これは目立たせたい文章</p>
+<p>これは普通の文章2</p>
+
+<!-- classNameで探す用 -->
+<div class="box red">赤いボックス</div>
+<div class="box blue">青いボックス</div>
+<div class="box green">緑のボックス</div>
+<div class="box purple">紫のボックス</div>
+
+<script>
+// ────────────────────────────────────────────────
+// 1. getElementById（IDで1つだけ取る）
+// ────────────────────────────────────────────────
+const mainTitle = document.getElementById("main-title");
+
+console.log("┌──────────────────────────────┐");
+console.log("│ 1. getElementById の結果    │");
+console.log("└──────────────────────────────┘");
+
+if (mainTitle) {
+  console.log("要素:", mainTitle);
+  console.log("テキスト:", mainTitle.textContent);
+  console.log("タグ名:", mainTitle.tagName);
+} else {
+  console.log("→ ID='main-title' の要素が見つかりませんでした");
+}
+
+console.log("\n");
+
+// ────────────────────────────────────────────────
+// 2. getElementsByTagName（タグ名で複数取る）
+// ────────────────────────────────────────────────
+const allParagraphs = document.getElementsByTagName("p");
+
+console.log("┌──────────────────────────────┐");
+console.log("│ 2. getElementsByTagName('p') │");
+console.log("└──────────────────────────────┘");
+console.log("見つかった数:", allParagraphs.length);
+
+for (let i = 0; i < allParagraphs.length; i++) {
+  const p = allParagraphs[i];
+  console.log(`[${i}]`, p.textContent.trim(), 
+              p.className ? `(class: ${p.className})` : "");
+}
+
+console.log("\n");
+
+// ────────────────────────────────────────────────
+// 3. getElementsByClassName（クラス名で複数取る）
+// ────────────────────────────────────────────────
+const boxes = document.getElementsByClassName("box");
+
+console.log("┌──────────────────────────────┐");
+console.log("│ 3. getElementsByClassName    │");
+console.log("│    ('box') の結果           │");
+console.log("└──────────────────────────────┘");
+console.log("見つかった数:", boxes.length);
+
+for (let i = 0; i < boxes.length; i++) {
+  const box = boxes[i];
+  console.log(box);
+}
+
+console.log("\n");
+console.log("=".repeat(40));
+console.log("全部終わりました！ コンソールを見てね");
+console.log("=".repeat(40));
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<meta charset="utf-8"/>
+<head>
+</head>
+<body>
+<div id="content" width="111" height="222" name ="nameX" class="classY">
+<span id="d1"></span>
+<form id="d2"></form>
+<canvas id="d3"></canvas>
+</div>
+<script>
+let element = document.getElementById('content');
+
+// NamedNodeMap オブジェクトを取得
+let attrs = element.attributes;
+
+// 格納されている Attr オブジェクトの数だけ繰り返し
+for(let i = 0 ; i < attrs.length ; i++) {
+  // 属性名を取得
+  console.log('属性名：' + attrs.item(i).name);
+
+  // 属性値を取得
+  console.log('属性値：' + attrs.item(i).value);
+}
+</script>
+</body>
+</html>

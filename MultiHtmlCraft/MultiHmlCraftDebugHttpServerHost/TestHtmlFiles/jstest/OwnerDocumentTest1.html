@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+  <div id="root"></div>
+
+  <script>
+    (function() {
+      console.log("[TEST START] Testing ownerDocument dynamic key assignment...");
+
+      try {
+        // 1. 要素と ownerDocument の取得
+        var elementRoot = document.getElementById("root");
+        if (!elementRoot) {
+          console.error("[TEST FAIL] Element #root not found!");
+          return;
+        }
+       elementRoot["elemengID987"] = true;
+       console.log("element ID set elemengID987 is succeess :   elementRoot[elemengID987]  " +  elementRoot["elemengID987"] );
+
+        var ownerDocument = elementRoot.ownerDocument;
+        //var ownerDocument = document;
+        //console.log("[TEST LOG] ownerDocument retrieved: " + ownerDocument);
+        console.log("ownerDocument type:", typeof ownerDocument);
+        console.log("ownerDocument constructor:", ownerDocument.constructor.name);
+        //console.log("TEST LOG] "ownerDocument " +  document, ownerDocument.toString());
+        (function(){
+  try{ console.log('ownerDocument===document ?', ownerDocument === document); }catch(e){ console.log('chk1 err', e && e.message); }
+  try{ console.log('typeof ownerDocument =', typeof ownerDocument); }catch(e){ console.log('chk2 err', e && e.message); }
+  try{ console.log('Object.prototype.toString.call(ownerDocument) =', Object.prototype.toString.call(ownerDocument)); }catch(e){ console.log('chk3 err', e && e.message); }
+  try{ console.log('String(ownerDocument) =', String(ownerDocument)); }catch(e){ console.log('chk4 err', e && e.message); }
+  try{ console.log('ownerDocument.constructor =', (ownerDocument && ownerDocument.constructor) ? ownerDocument.constructor.name : '(no constructor)'); }catch(e){ console.log('chk5 err', e && e.message); }
+  try{ console.log('Object.getOwnPropertyNames(ownerDocument) =', Object.getOwnPropertyNames(ownerDocument)); }catch(e){ console.log('chk6 err', e && e.message); }
+  try{ console.log('Reflect.has(ownerDocument, \"_reactListeningTest\") =', Reflect.has(ownerDocument, '_reactListeningTest')); }catch(e){ console.log('chk7 err', e && e.message); }
+})();
+
+        // 2. React 18 と同等の動的キー生成
+        var listeningMarker = "_reactListening" + Math.random().toString(36).substring(2);
+        console.log("[TEST LOG] Generated listeningMarker: " + listeningMarker);
+
+        // 3. 代入前のログ
+        console.log("enter listeningMarker check : " + listeningMarker);
+
+        // 4. 問題の代入処理（代入検証の本丸）
+        ownerDocument[listeningMarker] = true;
+
+        // 5. 代入成功時のログ
+        console.log("enter listeningMarker check : " + listeningMarker + " DONE");
+        console.log("[TEST SUCCESS] Dynamic property successfully assigned to ownerDocument!");
+        console.log("[TEST LOG] Verified value: ownerDocument[" + listeningMarker + "] = " + ownerDocument[listeningMarker]);
+
+      } catch (err) {
+     var errMsg = (err && err.message) ? err.message : String(err);
+      var errStack = (err && err.stack) ? err.stack : 'No stack trace available';
+
+      console.error('[REAL V8 ERROR MESSAGE]: ' + errMsg);
+      console.error('[REAL V8 ERROR STACK]: ' + errStack);
+      }
+    })();
+  </script>
+</body>
+</html>

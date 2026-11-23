@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue.js サンプル</title>
+    <script src="VueJs.js"></script>
+</head>
+<body>
+    <div id="app">{{ message }}</div>
+    <script>
+        Vue.createApp({
+            data() {
+                return { message: 'こんにちは、Vue.js!' };
+            },
+            mounted() {
+                console.log('Vue.js: コンポーネントがマウントされました！');
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

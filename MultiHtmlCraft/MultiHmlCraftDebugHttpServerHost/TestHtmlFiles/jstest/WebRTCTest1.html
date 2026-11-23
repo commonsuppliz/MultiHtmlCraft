@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Sample (Console Only)</title>
+</head>
+<body>
+    <h1>WebRTC Sample</h1>
+    <p>ブラウザのデベロッパーツール（コンソール）を開いて結果を確認してください。</p>
+
+    <!-- 映像表示用のvideo要素 (確認用) -->
+    <video id="localVideo" autoplay playsinline muted style="width: 300px; background: #000;"></video>
+    <video id="remoteVideo" autoplay playsinline style="width: 300px; background: #000;"></video>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('--- WebRTC Sample Started ---');
+
+            // RTCPeerConnectionのインスタンス作成 (同一ブラウザ内で疑似的に2台接続)
+            const pc1 = new RTCPeerConnection(); // 送信側 (Offerer)
+            const pc2 = new RTCPeerConnection(); // 受信側 (Answerer)
+
+            // ICE Candidate (ネットワーク経路情報) のログと交換
+            pc1.onicecandidate = (event) => {
+                if (event.candidate) {
+                    console.log('pc1 ICE Candidate:', event.candidate);
+                    pc2.addIceCandidate(event.candidate).catch(err => console.error('pc2 addIceCandidate error:', err));
+                }
+            };
+
+            pc2.onicecandidate = (event) => {
+                if (event.candidate) {
+                    console.log('pc2 ICE Candidate:', event.candidate);
+                    pc1.addIceCandidate(event.candidate).catch(err => console.error('pc1 addIceCandidate error:', err));
+                }
+            };
+
+            // 接続状態の変化をログ出力
+            pc1.onconnectionstatechange = () => {
+                console.log('pc1 Connection State:', pc1.connectionState);
+            };
+            pc2.onconnectionstatechange = () => {
+                console.log('pc2 Connection State:', pc2.connectionState);
+            };
+
+            // pc2がトラック（映像・音声）を受信したときの処理
+            pc2.ontrack = (event) => {
+                console.log('pc2 received remote track:', event.track.kind);
+                const remoteVideo = document.getElementById('remoteVideo');
+                if (remoteVideo.srcObject !== event.streams[0]) {
+                    remoteVideo.srcObject = event.streams[0];
+                    console.log('pc2 remote stream attached to video element.');
+                }
+            };
+
+            try {
+                // 1. メディアストリーム (カメラ・マイク) の取得
+                console.log('Requesting user media (camera/mic)...');
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                console.log('UserMedia obtained successfully:', stream);
+
+                // ローカルのvideo要素にストリームを設定
+                document.getElementById('localVideo').srcObject = stream;
+
+                // 2. トラックを pc1 に追加
+                stream.getTracks().forEach(track => {
+                    pc1.addTrack(track, stream);
+                    console.log('Added track to pc1:', track.kind);
+                });
+
+                // 3. オファー (Offer SDP) の作成と設定
+                console.log('Creating Offer...');
+                const offer = await pc1.createOffer();
+                console.log('Offer created:', offer.sdp);
+
+                await pc1.setLocalDescription(offer);
+                console.log('pc1 setLocalDescription (Offer) done.');
+
+                await pc2.setRemoteDescription(offer);
+                console.log('pc2 setRemoteDescription (Offer) done.');
+
+                // 4. アンサー (Answer SDP) の作成と設定
+                console.log('Creating Answer...');
+                const answer = await pc2.createAnswer();
+                console.log('Answer created:', answer.sdp);
+
+                await pc2.setLocalDescription(answer);
+                console.log('pc2 setLocalDescription (Answer) done.');
+
+                await pc1.setRemoteDescription(answer);
+                console.log('pc1 setRemoteDescription (Answer) done.');
+
+                console.log('--- WebRTC Signaling Complete ---');
+
+            } catch (error) {
+                console.error('WebRTC Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

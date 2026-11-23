@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOMContentLoaded console.info サンプル</title>
+    <style>
+        /* システム標準フォントとカード風レイアウト */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f6f8;
+            color: #333333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e1e4e8;
+            padding: 28px;
+            max-width: 520px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #555555;
+            margin-bottom: 20px;
+        }
+
+        /* 開発者ツールのガイド領域 */
+        .info-box {
+            background-color: #f0f7ff;
+            border-left: 4px solid #0066cc;
+            padding: 14px 16px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+        }
+
+        .info-box h2 {
+            margin: 0 0 8px 0;
+            font-size: 0.9rem;
+            color: #004080;
+        }
+
+        .info-box ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #333333;
+        }
+
+        .info-box li {
+            margin-bottom: 4px;
+        }
+
+        kbd {
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 3px;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+            font-family: monospace;
+            font-size: 0.8rem;
+            padding: 2px 5px;
+        }
+
+        /* コード表示領域 */
+        .code-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #666666;
+            margin-bottom: 6px;
+        }
+
+        pre {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin: 0;
+        }
+
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .function { color: #dcdcaa; }
+    </style>
+</head>
+<body>
+
+    <main class="card">
+        <h1>DOMContentLoaded + console.info</h1>
+        <p>外部ライブラリを使用せず、純粋な HTML と JavaScript のみで記述したサンプルです。</p>
+
+        <section class="info-box">
+            <h2>コンソール（DevTools）の確認方法</h2>
+            <ul>
+                <li><strong>Windows / Linux:</strong> <kbd>F12</kbd> または <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd></li>
+                <li><strong>Mac:</strong> <kbd>Cmd</kbd> + <kbd>Option</kbd> + <kbd>I</kbd></li>
+            </ul>
+        </section>
+
+        <div class="code-title">実行中の JavaScript コード</div>
+        <pre><code><span class="keyword">document</span>.<span class="function">addEventListener</span>(<span class="string">'DOMContentLoaded'</span>, () => {
+  <span class="keyword">console</span>.<span class="function">info</span>(<span class="string">'DOMContentLoaded イベントが発生しました！'</span>);
+});</code></pre>
+    </main>
+
+    <script>
+        // DOMContentLoaded イベントで console.info を呼び出し
+        document.addEventListener('DOMContentLoaded', () => {
+            console.info('DOMContentLoaded イベントが発生しました！');
+        });
+    </script>
+</body>
+</html>

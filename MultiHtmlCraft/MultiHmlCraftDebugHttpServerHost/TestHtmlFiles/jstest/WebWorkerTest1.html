@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Worker Console サンプル</title>
+</head>
+<body>
+  <script>
+    // Workerを生成
+    const worker = new Worker('worker.js');
+
+    // Workerからメッセージ受信時にconsole.logで出力
+    worker.onmessage = function(e) {
+      console.log('Workerから:', e.data);
+    };
+
+    // ページロード時にWorkerへメッセージ送信
+    worker.postMessage('こんにちは、Worker!');
+  </script>
+</body>
+</html>

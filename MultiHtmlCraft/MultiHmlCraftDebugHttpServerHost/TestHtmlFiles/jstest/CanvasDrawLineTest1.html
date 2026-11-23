@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas 300本の線</title>
+</head>
+<body>
+    <h1>Canvasで300本のランダムな色の線を描画</h1>
+    <canvas id="myCanvas" width="1000" height="800" style="background-color:#799;"></canvas>
+    <script>
+        // Canvasとコンテキストを取得
+        var hogehogecanvas = document.getElementById('myCanvas');
+        console.log("canvas: "+ typeof hogehogecanvas);
+        const ctx = hogehogecanvas.getContext('2d');
+
+        // 線の描画関数
+        function drawLine(x1, y1, x2, y2, color, width) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.stroke();
+        }
+
+        // ランダムな色を生成する関数
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            console.log(`rgb(${r}, ${g}, ${b})`);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // 300本の線をランダムな位置と色で描画
+        for (let i = 0; i < 300; i++) {
+            const x1 = Math.random() * hogehogecanvas.width; // ランダムな始点X
+            const y1 = Math.random() * hogehogecanvas.height; // ランダムな始点Y
+            const x2 = Math.random() * hogehogecanvas.width; // ランダムな終点X
+            const y2 = Math.random() * hogehogecanvas.height; // ランダムな終点Y
+            const color = getRandomColor(); // ランダムな色
+            const width = Math.random() * 5 + 1; // 線の太さ（1〜6）
+            drawLine(x1, y1, x2, y2, color, width);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Element classList Test</title>
+</head>
+<body>
+  <div id="myElement" class="foo bar baz">Many Class Element</div>
+
+
+  <script>
+    function showClassList() {
+      const element = document.getElementById('myElement');
+      // classList
+      console.log(element.classList); // DOMTokenList(3) ['foo', 'bar', 'baz', value: 'foo bar baz']
+      // loop test
+      for (const className of element.classList) {
+        console.log(className);
+      }
+      // As Array
+      const classArray = Array.from(element.classList);
+      console.log(classArray);
+   
+    }
+    showClassList()
+  </script>
+</body>
+</html>

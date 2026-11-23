@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>requestVideoFrameCallback サンプル</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        video, canvas {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            background: #000;
+            margin-bottom: 15px;
+        }
+        .stats {
+            background: #f1f3f5;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>requestVideoFrameCallback デモ</h2>
+    <p>動画を再生すると、Canvas へのフレーム描画とメタデータの取得がリアルタイムで行われます。</p>
+
+    <!-- 動画要素（controls で再生・一時停止を操作） -->
+    <video id="video" src="http://localhost/video/sample-5.mp4" controls muted playsinline></video>
+
+    <!-- 描画用キャンバス -->
+    <h3>Canvas 描画プレビュー</h3>
+    <canvas id="canvas"></canvas>
+
+    <!-- 統計情報 -->
+    <div class="stats" id="stats">
+        フレーム数 (presentedFrames): 0<br>
+        再生時刻 (mediaTime): 0.00 秒<br>
+        ブラウザ処理時間 (processingDuration): 0.00 ms
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const stats = document.getElementById('stats');
+
+    // 動画のメタデータが読み込まれたらキャンバスのサイズを動画に合わせる
+    video.addEventListener('onload', () => {
+         
+        console.log("video onload is called");      
+          video.requestVideoFrameCallback(updateCanvas);
+        
+        /*
+        console.log("video width :" + video.videoWidth + "videoHeight:" + video.videoHeight);s
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        */
+
+    });
+
+    // requestVideoFrameCallback のコールバック関数
+    const updateCanvas = (now, metadata) => {
+        // 1. Canvas に現在の動画フレームを描画
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // 2. メタデータの情報を画面に表示
+        stats.innerHTML = `
+            フレーム数 (presentedFrames): <b>${metadata.presentedFrames}</b><br>
+            再生時刻 (mediaTime): <b>${metadata.mediaTime.toFixed(2)}</b> 秒<br>
+            ブラウザ処理時間 (processingDuration): <b>${(metadata.processingDuration * 1000).toFixed(2)}</b> ms
+        `;
+
+        // 3. 次のフレーム描画タイミングで再度コールバックを予約
+        video.requestVideoFrameCallback(updateCanvas);
+             console.log("video.requestVideoFrameCallback is called");
+    };
+
+    // 初回のコールバック予約（動画再生開始時またはシーク時などに対応）
+    video.addEventListener('play', () => {
+        video.requestVideoFrameCallback(updateCanvas);
+                console.log("video.requestVideoFrameCallback is called");
+    });
+</script>
+
+</body>
+</html>

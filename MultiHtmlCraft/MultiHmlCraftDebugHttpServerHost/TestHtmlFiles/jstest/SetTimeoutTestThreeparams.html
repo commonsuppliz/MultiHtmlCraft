@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    
+    <script>
+        // 1. 1引数（コールバックのみ、遅延省略→0ms）
+        setTimeout(function() {
+            console.log('setTimeout(1引数) 実行!');
+        });
+
+        // 2. 2引数（コールバック, 遅延ミリ秒）
+        setTimeout(function() {
+            console.log('setTimeout(2引数) 実行!');
+        }, 2000);
+
+        // 3. 追加引数あり（コールバック, 遅延, 引数1, 引数2, ...）
+        function showMessage(targetId, message) {
+            console.log(message);
+        }
+        setTimeout(showMessage, 3000, 'msg3', 'setTimeout(追加引数) 実行!');
+    </script>
+</body>
+</html>

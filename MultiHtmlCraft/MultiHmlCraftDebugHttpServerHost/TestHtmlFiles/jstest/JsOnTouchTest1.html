@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ontouchstart test</title>
+</head>
+<body>
+<script>
+console.log('ontouchstart' in window); // true になるはず
+console.log('ontouchend' in window);   // true になるはず  
+console.log('ontouchmove' in window);  // true になるはず
+console.log(typeof window.ontouchstart); // "object" (null) になるはず
+</script>
+</body>
+</html>

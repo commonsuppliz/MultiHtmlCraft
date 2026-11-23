@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <title>sample</title>
+  <style>
+    button {
+      width: 50px;
+      height: 50px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="div1"></div>
+
+  <script language="javascript" type="text/javascript">
+let url = new URL('https://example.com?foo=1&bar=2'); // or construct from window.location
+
+let params = new URLSearchParams(url.search.slice(1));
+
+for (let p of params) {
+  console.log(p);
+}
+
+params.set('baz', 3);
+console.log(params.has('baz'));
+
+params.append('foo', 4);
+console.log(params.getAll('foo'));
+
+console.log(params.toString());
+
+  </script>
+</body>
+
+</html>

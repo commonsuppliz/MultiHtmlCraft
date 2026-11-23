@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>attachRoot Test</title>
+</head>
+<body>
+  <div id="target"></div>
+  <script>
+    try {
+      // MultiHtmlCraft の環境では、attachRoot は HTMLElement 拡張で提供されている想定
+      const elem = document.getElementById('target');
+      // attachRoot を呼び出し
+      const shadow = elem.attachRoot && typeof elem.attachRoot === "function"
+        ? elem.attachRoot({ mode: "open" })
+        : null;
+
+      if (shadow) {
+        console.log("SUCCESS");
+      } else {
+        console.log("FAIL");
+      }
+    } catch (e) {
+      console.log("FAIL");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>React 18 Automated Headless Tests</title>
+  
+<script>
+(function() {
+    try {
+        delete globalThis.React;
+        delete globalThis.ReactDOM;
+        delete window.React;
+        delete window.ReactDOM;
+    } catch(e) {}
+    
+    window.React = undefined;
+    window.ReactDOM = undefined;
+})();
+</script>
+  <script src="react.development18.js" crossorigin></script>
+
+  
+
+  <script src="react-dom.development18.js" crossorigin></script>
+  
+  
+  
+  
+  
+    <script>
+(function() {
+    console.log("========== [ReactDOM Check] ==========");
+    console.log("typeof ReactDOM:", typeof ReactDOM);
+    if (typeof ReactDOM !== 'undefined') {
+        console.log("ReactDOM.createRoot:", typeof ReactDOM.createRoot);
+        console.log("ReactDOM.render:", typeof ReactDOM.render);
+        console.log("ReactDOM keys:", Object.keys(ReactDOM).join(", "));
+    }
+    console.log("======================================");
+})();
+</script>
+</head>
+<body>
+
+  <div id="root"></div>
+
+  <script>
+  console.log("=== [ReactDOM Load Check] ===");
+  console.log("typeof React:", typeof React);
+  console.log("typeof ReactDOM:", typeof ReactDOM);
+  if (typeof ReactDOM !== 'undefined') {
+    console.log("ReactDOM keys:", Object.keys(ReactDOM));
+    console.log("ReactDOM.createRoot:", typeof ReactDOM.createRoot);
+    console.log("ReactDOM.client:", typeof ReactDOM.client);
+  }
+  console.log("=============================");
+    document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('root');
+    console.log("enter container access ok", container);
+
+    const { useState, useEffect, useTransition, useDeferredValue, createElement: h } = React;
+
+  
+    })
+
+      function TestApp() {
+         console.log("1. 基本的な TestApp ステート更新テスト ---");
+
+        const [count, setCount] = useState(0);
+
+        // --- 2. リスト更新テスト ---
+        const [items, setItems] = useState(['初期アイテム']);
+
+        // --- 3. React 18: useTransition テスト ---
+        const [isPending, startTransition] = useTransition();
+        const [transitionValue, setTransitionValue] = useState('初期値');
+
+        // --- 4. React 18: useDeferredValue テスト ---
+        const [query, setQuery] = useState('Default');
+        const deferredQuery = useDeferredValue(query);
+
+        // ==========================================
+        //  自動テストシナリオ（DOMContentLoaded 内で実行）
+        // ==========================================
+        useEffect(() => {
+          console.log('--- [Test Suite Started] React 18 自動機能テスト ---');
+
+          // [Test 1] ステート自動更新
+          setTimeout(() => {
+            setCount(prev => prev + 1);
+            console.log('[Test 1] useState: カウント自動更新を発行 (目標: 1)');
+          }, 300);
+
+          // [Test 2] 配列ステート追加
+          setTimeout(() => {
+            setItems(prev => [...prev, '自動追加アイテム A', '自動追加アイテム B']);
+            console.log('[Test 2] useState (Array): リスト自動追加を発行');
+          }, 600);
+
+          // [Test 3] React 18: useTransition による非緊急更新
+          setTimeout(() => {
+            startTransition(() => {
+              setTransitionValue('Transition 更新後の値');
+              console.log('[Test 3] useTransition: startTransition 内部でステート更新を発行');
+            });
+          }, 900);
+
+          // [Test 4] React 18: useDeferredValue 遅延更新
+          setTimeout(() => {
+            setQuery('Updated Query');
+            console.log('[Test 4] useDeferredValue: 入力クエリを変更 (即時更新)');
+          }, 1200);
+
+        }, []);
+
+        // ==========================================
+        //  各種ステートの変更検知ログ
+        // ==========================================
+        useEffect(() => {
+          console.log(`  └─ [State Output] Count: ${count}`);
+        }, [count]);
+
+        useEffect(() => {
+          console.log(`  └─ [State Output] Items:`, items);
+        }, [items]);
+
+        useEffect(() => {
+          console.log(`  └─ [State Output] Transition Value: "${transitionValue}" (isPending: ${isPending})`);
+        }, [transitionValue, isPending]);
+
+        useEffect(() => {
+          console.log(`  └─ [State Output] Deferred Value Updated: "${deferredQuery}"`);
+        }, [deferredQuery]);
+
+        // DOM画面への最低限の状況表示
+        return h('div', { style: { fontFamily: 'sans-serif', padding: '20px' } },
+          h('h2', null, 'React 18 自動テスト実行中'),
+          h('p', null, 'ユーザー操作イベントなしで DOMContentLoaded 後に各種テストを順次実行しています。'),
+          h('p', null, '詳細な実行結果はブラウザの **Console (F12)** を確認してください。'),
+          h('hr', null),
+          h('pre', null, JSON.stringify({ count, items, transitionValue, isPending, query, deferredQuery }, null, 2))
+        );
+      }
+      
+      // ReactDOM から createRoot を安全に取得
+    // ReactDOM.createRoot の安全取得とレンダリング
+    let createRootFn = null;
+    if (typeof ReactDOM !== 'undefined') {
+      if (typeof ReactDOM.createRoot === 'function') {
+        createRootFn = ReactDOM.createRoot.bind(ReactDOM);
+      } else if (ReactDOM.client && typeof ReactDOM.client.createRoot === 'function') {
+        createRootFn = ReactDOM.client.createRoot.bind(ReactDOM.client);
+      }
+    }
+
+    if (createRootFn) {
+      const root = createRootFn(container);
+      root.render(h(TestApp));
+    } else if (typeof ReactDOM !== 'undefined' && typeof ReactDOM.render === 'function') {
+      ReactDOM.render(h(TestApp), container);
+    } else {
+      console.error('ReactDOM.createRoot / render が利用できません。', typeof ReactDOM);
+    }
+  
+   
+  </script>
+
+</body>
+</html>

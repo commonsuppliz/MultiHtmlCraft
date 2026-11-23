@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoElement Prototype Sample (with try...catch)</title>
+</head>
+<body>
+    <h1>VideoElement.prototype サンプル (try...catch版)</h1>
+    <p>ブラウザのコンソール（F12キーなど）を開いて出力結果を確認してください。</p>
+
+    <script>
+        try {
+            // 1. document.createElement で video 要素を作成
+            const videoElement = document.createElement('video');
+            videoElement.src = "http://localhost/video/sample-5.mp4";
+
+            // 2. Object.getPrototypeOf を try...catch で囲む
+            try {
+                console.log('--- Object.getPrototypeOf(videoElement) ---');
+                console.log(Object.getPrototypeOf(videoElement));
+            } catch (e) {
+                console.error('Object.getPrototypeOf の実行中に例外が発生しました:', e);
+            }
+
+            // 3. constructor.prototype を try...catch で囲む
+            try {
+                console.log('--- videoElement.constructor.prototype ---');
+                console.log('viodeElement typeof :' + typeof videoElement.constructor);
+                console.log(videoElement.constructor.prototype);
+            } catch (e) {
+                console.error('constructor.prototype の取得中に例外が発生しました:', e);
+            }
+
+            // 4. プロトタイプチェーンの走査を try...catch で囲む
+            try {
+                console.log('--- プロトタイプチェーンの階層 ---');
+                let proto = Object.getPrototypeOf(videoElement);
+                while (proto) {
+                    console.log(proto.constructor.name, proto);
+                    proto = Object.getPrototypeOf(proto);
+                }
+            } catch (e) {
+                console.error('プロトタイプチェーンの走査中に例外が発生しました:', e);
+            }
+
+        } catch (e) {
+            // video要素の生成や、スコープ全体の予期せぬエラーを捕捉
+            console.error('予期せぬ例外が発生しました:', e);
+        }
+    </script>
+</body>
+</html>

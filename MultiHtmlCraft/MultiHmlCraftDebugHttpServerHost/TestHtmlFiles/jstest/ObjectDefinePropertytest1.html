@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ノードの追加</title>
+
+</head>
+<body>
+
+<p>今日は外でランチを食べました。</p>
+
+
+<script>
+  const obj = {};
+  Object.defineProperty(obj, 'property1', {
+    value: 42,
+    writable: false
+  });
+  try {
+    obj.property1 = 77;
+  } catch (e) {
+    console.log('エラー: ' + e.message);
+  }
+  console.log('現在の値: ' + obj.property1);
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <title>sample</title>
+  <style>
+    button {
+      width: 50px;
+      height: 50px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="div1"></div>
+
+  <script language="javascript" type="text/javascript">
+    const div1 = document.getElementById("div1");
+       console.log('getElement id returns  : ' + div1);
+       const newDiv = document.createElement("div");
+   
+        const newBtn = document.createElement("button");
+        console.log('createElement is called');
+        newBtn.innerText = 'hellow world';
+        console.log('set innerText is called');
+        console.log('javascript section 1 is called succesully');
+
+        console.log("newBtn : " + typeof newBtn);
+        console.log("newDiv : " + typeof newDiv);
+        
+        newBtn.onclick = () => {
+          console.log('ボタン${newBtn.innerHTML}が押されました！');
+        }
+
+        
+        newDiv.appendChild(newBtn);
+        console.log('appendChidld for new Buttoon  called');
+      
+      div1.appendChild(newDiv);
+      console.log('appendChidld for newDiv called');
+      console.log('javascript section 2 is called succesully');
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>insertBefore サンプル</title>
+</head>
+<body>
+  <ul id="menu">
+    <li>Services</li>
+    <li>About</li>
+    <li>Contact</li>
+  </ul>
+  <script>
+   
+    const menu = document.getElementById('menu');
+ 
+    const li1 = document.createElement('li');
+    li1.textContent = 'li 1';
+     const li2 = document.createElement('li');
+    li2.textContent = 'li 2';
+    menu.insertBefore(li1, menu.firstElementChild);
+    menu.insertBefore(li2);
+    console.log("done!");
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+
+    <script src="http://localhost/jstest/jqueryTest/JQuery3.7.1.js"></script>
+    <style>
+        #sampleText {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <p id="sampleText">This Text sould be 28px at display time.</p>
+
+    <script>
+  
+        $(function() {
+            console.log($('#sampleText'));
+            $('#sampleText').css('font-size', '28px');
+            console.log('font size change OK!');
+        });
+    </script>
+</body>
+</html>

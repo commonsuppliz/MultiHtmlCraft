@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Keydown Check (Complete)</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background-color: #f4f4f9; }
+        .log-box { 
+            margin: 20px auto; 
+            padding: 20px; 
+            border: 2px solid #333; 
+            background: white;
+            width: 80%; 
+            max-width: 400px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+        }
+        kbd { background: #eee; border: 1px solid #999; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+    <h1>キー判定プログラム</h1>
+    <p>キーを押してください</p>
+    <p><kbd>Enter</kbd> <kbd>Space</kbd> <kbd>Arrow Keys</kbd> <kbd>0-9</kbd> <kbd>A-Z</kbd></p>
+
+    <div class="log-box" id="display">待機中...</div>
+
+    <script>
+        window.addEventListener('keydown', (event) => {
+            const key = event.key;
+            let result = "";
+
+            // --- 全てのキーを === で厳密判定 ---
+
+            // 1. Enterキー
+            if (key === 'Enter') {
+                result = "↩️ Enterキーが押されました";
+            }
+            
+            // 2. Spaceキー
+            else if (key === ' ') {
+                result = "␣ Spaceキーが押されました";
+                event.preventDefault(); // スクロール防止
+            }
+            
+            // 3. 方向キー (Arrow Keys)
+            else if (key === 'ArrowUp') {
+                result = "↑ ArrowUp (上)";
+            } else if (key === 'ArrowDown') {
+                result = "↓ ArrowDown (下)";
+            } else if (key === 'ArrowLeft') {
+                result = "← ArrowLeft (左)";
+            } else if (key === 'ArrowRight') {
+                result = "→ ArrowRight (右)";
+            }
+
+            // 4. 数値キー (0-9)
+            else if (key === '0') { result = "数字: 0"; }
+            else if (key === '1') { result = "数字: 1"; }
+            else if (key === '2') { result = "数字: 2"; }
+            else if (key === '3') { result = "数字: 3"; }
+            else if (key === '4') { result = "数字: 4"; }
+            else if (key === '5') { result = "数字: 5"; }
+            else if (key === '6') { result = "数字: 6"; }
+            else if (key === '7') { result = "数字: 7"; }
+            else if (key === '8') { result = "数字: 8"; }
+            else if (key === '9') { result = "数字: 9"; }
+
+            // 5. アルファベット (A-Z)
+            else if (key === 'a' || key === 'A') { result = "キー: A"; }
+            else if (key === 'b' || key === 'B') { result = "キー: B"; }
+            else if (key === 'c' || key === 'C') { result = "キー: C"; }
+            else if (key === 's' || key === 'S') { result = "キー: S"; }
+            else if (key === 'w' || key === 'W') { result = "キー: W"; }
+            // 他の文字も同様に else if (key === 'x' || key === 'X') ... で追加可能
+
+            // 6. その他
+            else {
+                result = "その他のキー: " + key;
+            }
+
+            // コンソールログ出力
+            console.log("Detected Key:", key);
+            
+            // 画面表示更新
+            document.getElementById('display').textContent = result;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMLフォーム各種入力タイプ サンプル</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; }
+        form { max-width: 600px; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        .radio-group, .checkbox-group { display: flex; gap: 15px; }
+        button { padding: 12px 24px; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<h1>HTMLフォーム サンプル（POST送信）</h1>
+
+<form action="https://httpbin.org/post" method="POST" enctype="multipart/form-data">
+    
+    <!-- テキスト系 -->
+    <label for="name">名前（text）</label>
+    <input type="text" id="name" name="name" placeholder="山田太郎" required>
+
+    <label for="password">パスワード（password）</label>
+    <input type="password" id="password" name="password" placeholder="••••••••">
+
+    <label for="email">メールアドレス（email）</label>
+    <input type="email" id="email" name="email" placeholder="example@example.com">
+
+    <!-- 数値・日付 -->
+    <label for="age">年齢（number）</label>
+    <input type="number" id="age" name="age" min="0" max="150" value="25">
+
+    <label for="birthday">生年月日（date）</label>
+    <input type="date" id="birthday" name="birthday">
+
+    <!-- 選択系 -->
+    <label>性別（radio）</label>
+    <div class="radio-group">
+        <label><input type="radio" name="gender" value="male" checked> 男性</label>
+        <label><input type="radio" name="gender" value="female"> 女性</label>
+        <label><input type="radio" name="gender" value="other"> その他</label>
+    </div>
+
+    <label for="hobby">趣味（checkbox）</label>
+    <div class="checkbox-group">
+        <label><input type="checkbox" name="hobby" value="sports"> スポーツ</label>
+        <label><input type="checkbox" name="hobby" value="music"> 音楽</label>
+        <label><input type="checkbox" name="hobby" value="reading"> 読書</label>
+        <label><input type="checkbox" name="hobby" value="travel"> 旅行</label>
+    </div>
+
+    <label for="country">国籍（select）</label>
+    <select id="country" name="country">
+        <option value="">選択してください</option>
+        <option value="jp">日本</option>
+        <option value="us">アメリカ</option>
+        <option value="cn">中国</option>
+        <option value="other">その他</option>
+    </select>
+
+    <!-- テキストエリア -->
+    <label for="message">ご意見・ご感想（textarea）</label>
+    <textarea id="message" name="message" rows="5" placeholder="自由にご記入ください"></textarea>
+
+    <!-- ファイル -->
+    <label for="file">ファイル添付（file）</label>
+    <input type="file" id="file" name="file" accept="image/*,.pdf">
+
+    <!-- 隠しフィールド -->
+    <input type="hidden" name="user_id" value="12345">
+
+    <!-- 送信ボタン -->
+    <button type="submit">送信する（POST）</button>
+    <button type="reset">リセット</button>
+
+</form>
+
+<p><strong>ポイント：</strong></p>
+<ul>
+    <li><code>method="POST"</code> でデータを送信</li>
+    <li><code>enctype="multipart/form-data"</code> でファイルも一緒に送信可能</li>
+    <li><code>name</code>属性がサーバー側で受け取るキーになる</li>
+    <li><code>required</code> で必須入力にできる</li>
+</ul>
+
+<hr>
+<p>このページをブラウザで開いて「送信する」を押すと、<a href="https://httpbin.org/post" target="_blank">httpbin.org</a>にPOSTされて結果が表示されます（テスト用）。</p>
+
+</body>
+</html>

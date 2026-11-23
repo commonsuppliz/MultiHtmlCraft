@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>querySelectorAll + インデックスアクセス テスト</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-item {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .highlight { background-color: #e0f7fa; }
+        .box { 
+            width: 100px; 
+            height: 100px; 
+            display: inline-block; 
+            margin: 5px;
+            color: white;
+            text-align: center;
+            line-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>querySelectorAll + インデックスアクセス テスト</h1>
+    <p>ブラウザの開発者ツール（F12）を開いて Console タブを確認してください。</p>
+
+    <!-- テスト用要素 -->
+    <div id="container">
+        <div class="test-item" data-type="first">1番目の要素</div>
+        <div class="test-item highlight">highlight クラス付き</div>
+        <p class="test-item">これは段落です</p>
+        <div class="test-item box" style="background: red;">赤いボックス</div>
+        <div class="test-item box" style="background: blue;">青いボックス</div>
+        <div class="test-item box" style="background: green;">緑のボックス</div>
+        <ul>
+            <li class="item">リスト1</li>
+            <li class="item">リスト2</li>
+            <li class="item">リスト3</li>
+        </ul>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log("=== querySelectorAll + インデックスアクセス テスト開始 ===");
+
+            // 1. querySelectorAll で NodeList を取得
+            const testItems = document.querySelectorAll('.test-item');
+            console.log('取得した NodeList の長さ:', testItems.length);
+
+            // 2. インデックスで個別アクセス（forEach 以外）
+            console.log("\n--- インデックスで要素を取得 ---");
+            
+            console.log('0番目:', testItems[0]);
+            console.log('1番目:', testItems[1]);
+            console.log('2番目:', testItems[2]);
+            console.log('3番目:', testItems[3]);
+            console.log('4番目:', testItems[4]);
+            console.log('5番目:', testItems[5]);
+
+            // 3. 存在しないインデックス
+            console.log('存在しないインデックス (10番目):', testItems[10]);
+
+            // 4. プロパティへのアクセス
+            console.log("\n--- インデックスで取得した要素の詳細 ---");
+            console.log('0番目のテキスト:', testItems[0]?.textContent);
+            console.log('0番目のクラス名:', testItems[0]?.className);
+           // console.log('1番目の data-type:', testItems[1]?.dataset.type);
+           // console.log('3番目の背景色:', testItems[3]?.style.backgroundColor);
+
+            // 5. forEach（比較用）
+            console.log("forEach Test: for textitems length : " + testItems.length);
+            var currentForEachPos = 0;
+            testItems.forEach((el, i) => {
+                console.log(`forEach : [${i}] ${currentForEachPos} : ${el.tagName}: ${el.textContent.trim()}`);
+                currentForEachPos++;
+            });
+            /*
+            // 6. 別のセレクタでもテスト
+            const boxes = document.querySelectorAll('.box');
+            console.log("\n--- .box 要素のインデックスアクセス ---");
+            console.log('最初のボックス:', boxes[0]);
+            console.log('2番目のボックス:', boxes[1]);
+            console.log('3番目のボックス:', boxes[2]);
+            */
+
+            console.log("\n=== テスト完了 ===");
+        });
+    </script>
+</body>
+</html>

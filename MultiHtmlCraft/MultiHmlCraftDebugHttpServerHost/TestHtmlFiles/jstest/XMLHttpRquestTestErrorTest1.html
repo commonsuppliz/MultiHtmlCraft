@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>XMLHttpRequest 404 / Error Sample</title>
+</head>
+<body>
+<h1>XMLHttpRequest 404 / Error Test</h1>
+<div id="result"></div>
+<script>
+(function() {
+  var xhr = new XMLHttpRequest();
+  // わざと存在しないリソース
+  xhr.open('GET', '/this-file-does-not-exist-404.txt', true);
+
+  xhr.onload = function() {
+    console.log('[onload] status=' + xhr.status + ' statusText=' + xhr.statusText);
+    console.log('[onload] responseText=', xhr.responseText);
+    document.getElementById('result').textContent =
+      'onload: status=' + xhr.status + ' (' + xhr.statusText + ')';
+  };
+
+  xhr.onerror = function(e) {
+    console.log('[onerror] readyState=' + xhr.readyState + ' status=' + xhr.status);
+    console.log('[onerror] event=', e);
+    document.getElementById('result').textContent =
+      'onerror: network / CORS / unreachable resource';
+  };
+
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      console.log('[readystatechange=4] status=' + xhr.status + ' statusText=' + xhr.statusText);
+    }
+  };
+
+  xhr.send();
+})();
+</script>
+</body>
+</html>

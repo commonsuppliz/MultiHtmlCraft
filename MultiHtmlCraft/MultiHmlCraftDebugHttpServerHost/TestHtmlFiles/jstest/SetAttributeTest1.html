@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>setAttribute サンプル（DOMContentLoaded）</title>
+  <style>
+    #myEl {
+      padding: 12px;
+      border: 1px solid #333;
+      display: inline-block;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Element に setAttribute するサンプル（DOMContentLoaded）</h1>
+
+  <div id="myEl">対象要素（#myEl）</div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const el = document.getElementById('myEl');
+      console.log('--- DOMContentLoaded 実行開始 ---');
+
+      // 1) 既存属性の取得（まだ無ければ null）
+      console.log('事前 getAttribute("data-count") ->', el.getAttribute('data-count'));
+
+      // 2) setAttribute で属性を追加 / 更新（常に文字列として格納される）
+      el.setAttribute('data-count', '1');
+      console.log('setAttribute("data-count", "1") 実行後 getAttribute ->', el.getAttribute('data-count'));
+
+
+
+      // 4) ブール属性の扱い（例: hidden）。setAttribute に空文字列を与えると属性が存在する扱いになる
+      el.setAttribute('hidden', '');
+      console.log('setAttribute("hidden", "") 実行後 hasAttribute("hidden") ->', el.hasAttribute('hidden'));
+      console.log('element.hidden (プロパティ) ->', el.hidden);
+
+      // 5) 属性の削除
+      el.removeAttribute('hidden');
+      console.log('removeAttribute("hidden") 実行後 hasAttribute("hidden") ->', el.hasAttribute('hidden'));
+      console.log('--- DOMContentLoaded 実行終了 ---');
+    });
+  </script>
+</body>
+</html>

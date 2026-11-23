@@ -1,0 +1,32 @@
+<html lang="jp">
+<header>
+    <meta charset="utf-8"/>
+    <script>
+        //onloadイベントとDOMContentLoadedの実行順について
+        window.addEventListener('load', function () {
+            var div = document.querySelector("div");
+            var p = document.createElement('p');
+            p.innerText = "loadイベントが実行されました。";
+            div.appendChild(p);
+            console.log("loadイベントが実行されました。");
+        });
+        window.onload=function () {
+            var div = document.querySelector("div");
+            var p = document.createElement('p');
+            p.innerText = "onloadイベントが実行されました。";
+            div.appendChild(p);
+            console.log("onloadイベントが実行されました。");
+        };
+        window.addEventListener('DOMContentLoaded', function () {
+            var div = document.querySelector("div");
+            var p = document.createElement('p');
+            p.innerText = "DOMContentLoadedイベントが実行されました。";
+            div.appendChild(p);
+            console.log("DOMContentLoadedイベントが実行されました。");
+        });
+    </script>
+</header>
+<body>
+    <div>これは、onloadイベントとDOMContentLoadedの実行順について検証するhtmlです。</div>
+</body>
+</html>

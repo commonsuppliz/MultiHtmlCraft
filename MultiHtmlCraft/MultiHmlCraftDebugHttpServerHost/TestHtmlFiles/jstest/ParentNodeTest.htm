@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>parentNode</title>
+</head>
+<body>
+
+<p>今日は外でランチを食べました</p>
+
+<div>
+	<!-- お店の情報 -->
+    <p>場所：港区南青山</p>
+    <p id="shop">店名：リストランテ南青山</p>
+</div>
+
+<button onClick="getElements();">要素を取得</button>
+
+<script>
+
+    let element = document.getElementById('shop');
+
+    let parent = element.parentNode;
+
+    while (parent){
+        console.log(parent.nodeName);
+        parent = parent.parentNode;
+    }
+
+</script>
+</body>
+</html>

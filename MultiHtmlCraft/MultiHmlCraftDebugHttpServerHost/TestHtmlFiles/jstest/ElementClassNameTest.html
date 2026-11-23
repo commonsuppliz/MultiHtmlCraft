@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>className Test - createElement</title>
+</head>
+<body>
+    <div id="container"></div>
+    <p id="result"></p>
+
+    <script>
+        window.onload = function() { console.log("window.onload is called");};
+        window.addEventListener("DOMContentLoaded", 
+        function() {
+           console.log("DOMContentLoaded is called");
+            var result = document.getElementById('result');
+            var container = document.getElementById('container');
+            
+            // 新しい div を作成
+            var newDiv = document.createElement('div');
+            console.log("newDiv : " +  newDiv);
+            newDiv.className = "LedZeppelin BonJobi Beatles";
+            console.log("newDiv.className set call ok  ");
+            console.log("newDiv.className : " +  newDiv.className);
+            // className を取得してテスト
+            var newDivclassName = newDiv.className;
+            console.log('current className : ' + newDivclassName);
+            console.log('newDiv: ', typeof newDiv);
+            console.log('className:', newDivclassName);
+            console.log('typeof className:', typeof newDivclassName);
+            console.log('newDivclassName === null:', newDivclassName === null);
+            console.log('newDivclassName value: ' + newDivclassName);
+            result.innerHTML = "<div class = 'haa xyv ddr adr' > HSJDOIASJDOIWUEIOUEDSUOA</div>";
+            
+            // className が null の場合のエラーをテスト
+            try {
+                var classes = newDivclassName.split(' ');
+                console.log('split result sucess! : '+  classes.toString());
+            } catch (e) {
+                console.log('Error:', e.message);
+                result.innerHTML += '<br><span style="color:red">Error: ' + e.message + '</span>';
+            }
+        });
+    </script>
+</body>
+</html>

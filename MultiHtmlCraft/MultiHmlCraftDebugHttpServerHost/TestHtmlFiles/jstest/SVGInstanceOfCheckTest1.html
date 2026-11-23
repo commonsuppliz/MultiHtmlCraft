@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>SVGElement instanceof Check Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        #console-log {
+            background: #252526;
+            border: 1px solid #454545;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+        .pass { color: #4ec9b0; }
+        .fail { color: #f14c4c; }
+        .info { color: #ce9178; }
+    </style>
+</head>
+<body>
+
+    <h1>SVGElement instanceof 動作検証</h1>
+
+    <!-- 10個程度のSVGエレメントとHTMLエレメントを配置 -->
+    <div id="app">
+        <svg id="svg-root" width="200" height="200" viewBox="0 0 100 100">
+            <defs id="svg-defs">
+                <linearGradient id="svg-grad">
+                    <stop id="svg-stop" offset="0%" stop-color="red" />
+                </linearGradient>
+            </defs>
+            <g id="svg-group">
+                <rect id="svg-rect" x="10" y="10" width="30" height="30" />
+                <circle id="svg-circle" cx="60" cy="25" r="15" />
+                <path id="svg-path" d="M10 80 L40 80 L25 50 Z" />
+                <text id="svg-text" x="50" y="80">SVG</text>
+                <foreignObject id="svg-fo" width="100" height="50">
+                    <div id="html-inner-div">Inner Div</div>
+                </foreignObject>
+            </g>
+        </svg>
+
+        <div id="html-div">HTML Div Container</div>
+    </div>
+
+    <h2>実行ログ</h2>
+    <div id="console-log"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const logContainer = document.getElementById('console-log');
+            /*
+            if(host != null)
+            {
+                tryAttachPrototype(host);
+            }
+            */
+
+            function log(msg, type = '') {
+                const span = document.createElement('span');
+                if (type) span.className = type;
+                span.textContent = msg + '\n';
+                logContainer.appendChild(span);
+                console.log(msg);
+            }
+            function tryAttachPrototype(hostObj) {
+            console.log("[HERE] enter tryAttachPrototype  :" + hostObj) ;
+  try {
+
+    // 試す（成功すればそのまま instanceof が通る）
+    Object.setPrototypeOf(hostObj, SVGElement.prototype);
+    return hostObj;
+  } catch (e) {
+    // 失敗したら高速フォールバック：プレーンオブジェクトにコピーして束縛
+    const wrapper = Object.create(SVGElement.prototype);
+    // 全プロパティ名とシンボルを取得
+    const names = Object.getOwnPropertyNames(hostObj).concat(Object.getOwnPropertySymbols(hostObj));
+    names.forEach(name => {
+      // 元プロパティ記述子を取得できればそれを使う（非列挙やアクセサ保全）
+      let desc = Object.getOwnPropertyDescriptor(hostObj, name);
+      if (!desc) {
+        // getOwnPropertyDescriptor が取れない場合は値を読み出して普通のプロパティとして定義
+        const v = hostObj[name];
+        desc = { value: v, writable: true, enumerable: true, configurable: true };
+      } else if (typeof desc.value === 'function') {
+        // メソッドならホストにバインドしておく（1回だけ）
+        desc = Object.assign({}, desc, { value: desc.value.bind(hostObj) });
+      }
+      Object.defineProperty(wrapper, name, desc);
+    });
+    // 必要なら元ホスト参照を残す
+    Object.defineProperty(wrapper, '_host', { value: hostObj, enumerable: false });
+    return wrapper;
+  }
+}
+
+            log('=== Pre-check Global Types ===', 'info');
+            log(`typeof SVGElement : ${typeof SVGElement}`);
+            log(`SVGElement.prototype : ${SVGElement ? SVGElement.prototype : 'N/A'}`);
+            log('');
+
+            // 検証対象のエレメント ID リスト (約10個)
+            const targetIds = [
+                'svg-root',
+                'svg-defs',
+                'svg-grad',
+                'svg-stop',
+                'svg-group',
+                'svg-rect',
+                'svg-circle',
+                'svg-path',
+                'svg-text',
+                'svg-fo',
+                'html-inner-div',
+                'html-div'
+            ];
+
+            log('=== instanceof SVGElement Check ===', 'info');
+
+            targetIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) {
+                    log(`[ERROR] Element #${id} not found`, 'fail');
+                    return;
+                }
+
+                try {
+                    console.log("[HERE} SVG instanceof check Begin : " + el + ":" + el.prototype);
+
+
+                    const isSvgElement = el instanceof SVGElement;
+   
+                    const isElement = el instanceof Element;
+                    const tag = el.tagName;
+                    if(isSvgElement)
+                    {
+                        console.log("[HERE]" + el.toString() + " instanceof SVGElemnt OK");
+                    }
+                    else
+                    {
+                        console.log("[HERE]"+ el.toString() + " instanceof SVGElemnt Fail"); 
+                    }
+                    
+
+
+                   
+                } catch (e) {
+                    log(`[EXCEPT] #${id}: ${e.message}`, 'fail');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>背景画像を並べるサンプル</title>
+    <style>
+        .tile-background {
+            /* 背景を設定するdivのサイズ */
+            width:  800px;
+            height: 600px;
+            border: 2px solid #333;
+
+            /* 背景画像の指定（ここではプレースホルダー画像を使っています） */
+            background-image: url('http://localhost/img/ElonMusk1.jpg'); 
+
+            /* 画像を縦横に繰り返し並べる設定（デフォルト値なので省略も可能です） */
+            background-repeat: repeat; 
+
+            /* 画像が大きすぎる・小さすぎる場合はこれで調整できます */
+            //background-size: 50px 50px; 
+        }
+    </style>
+</head>
+<body>
+
+    <h2>画像を縦横に並べる（repeat）</h2>
+    <div class="tile-background" width="800" height="800" backgroundColor="transparent" ></div>
+
+</body>
+</html>

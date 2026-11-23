@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>Check requestVideoFrameCallback</title>
+</head>
+<body>
+  <h3>requestVideoFrameCallback チェック</h3>
+  <p>開発者コンソールを開いて結果を確認してください。</p>
+
+  <script>
+    try {
+      console.log("globalThis.HTMLVideoElement:", typeof globalThis.HTMLVideoElement);
+      console.log("typeof HTMLVideoElement:", typeof HTMLVideoElement);
+console.log("HTMLVideoElement:", HTMLVideoElement);
+console.log("Object.getOwnPropertyDescriptor(HTMLVideoElement, 'prototype'):", 
+            Object.getOwnPropertyDescriptor(HTMLVideoElement, 'prototype'));
+console.log("Object.getPrototypeOf(HTMLVideoElement):", Object.getPrototypeOf(HTMLVideoElement));
+console.log("'prototype' in HTMLVideoElement:", 'prototype' in HTMLVideoElement);
+      const protoExists = (typeof HTMLVideoElement !== 'undefined') && (HTMLVideoElement.prototype !== undefined);
+      console.log("HTMLVideoElement.prototype defined:", protoExists);
+
+      const inOperatorSafe = (typeof HTMLVideoElement !== 'undefined') &&
+                             (HTMLVideoElement.prototype !== undefined) &&
+                             ('requestVideoFrameCallback' in HTMLVideoElement.prototype);
+      console.log("requestVideoFrameCallback in HTMLVideoElement.prototype (in operator):", inOperatorSafe);
+
+      const func = inOperatorSafe ? HTMLVideoElement.prototype.requestVideoFrameCallback : undefined;
+      console.log("typeof HTMLVideoElement.prototype.requestVideoFrameCallback:", typeof func);
+
+      if (typeof func === 'function') {
+        console.log("func is defined by requestVideoFrameCallback in HTMLVideoElement.prototype (in operator)");
+        // 実際に要素で呼んでみる（再生可能なソースが無い場合はエラー/無視される）
+        const v = document.createElement('video');
+        v.src = "http://localhost/video/sample-5.mp4";
+        v.muted = true;
+        v.playsInline = true;
+        // 必要なら再生可能な small サンプルをセットしてください
+        document.body.appendChild(v);
+
+        // 呼び出しは try/catch で保護
+        try {
+          const cb = (now, metadata) => {
+            console.log("requestVideoFrameCallback callback fired:", { now, metadata });
+          };
+          // 一部実装では戻り値が undefined の場合がある
+          const handle = v.requestVideoFrameCallback
+            ? v.requestVideoFrameCallback(cb)
+            : undefined;
+          console.log("requestVideoFrameCallback called, handle:", handle);
+        } catch (ex) {
+          console.warn("requestVideoFrameCallback 呼び出しで例外:", ex);
+        }
+      } else {
+        console.warn("requestVideoFrameCallback は利用できません。ブラウザ/環境で未実装か global が足りません。");
+      }
+    } catch (e) {
+      console.error("チェック中に例外:", e);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    
+    <style>
+        canvas {
+            border: 1px solid #000;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Canvas描画のテスト</h2>
+    <canvas id="myCanvas" width="400" height="300"></canvas>
+
+    <script>
+        /*
+        console.log("HERE");
+        console.log("location : " + window.location);
+        console.log("location.href : " + window.location.href);
+        */
+        
+        
+        //window.onload = "Hogehoge";
+            window.onload = docLoaded;
+        //window.addEventListener("DOMContentLoaded", docLoaded);
+        function docLoaded() {
+            console.log("funtion is called");
+            // 1. canvas要素を取得
+            const canvas = document.getElementById('myCanvas');
+            
+            // 2. 描画コンテキスト（2D）を取得
+            if (canvas.getContext) {
+                const ctx = canvas.getContext('2d');
+
+                // 3. 矩形（四角形）の描画
+                ctx.fillStyle = 'rgba(0, 0, 255, 0.5)'; // 青色（半透明）
+                ctx.fillRect(50, 50, 150, 100);
+
+                // 4. 円（パス）の描画
+                ctx.beginPath();
+                ctx.arc(300, 200, 50, 0, Math.PI * 2, false);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                console.error('このブラウザはCanvasをサポートしていません。');
+            }
+        };
+        
+    </script>
+</body>
+</html>

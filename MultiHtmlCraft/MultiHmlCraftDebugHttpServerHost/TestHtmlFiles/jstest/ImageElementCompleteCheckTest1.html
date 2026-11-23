@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Complete Check Sample</title>
+</head>
+<body>
+  <h1>Image Object Complete Test</h1>
+
+  <script>
+    // 1. Image オブジェクトを作成して src を設定
+    const img = document.createElement('img');
+    img.src = 'http://localhost/img/clock-demo-400px.png';
+
+    // 2. DOMContentLoaded タイミングで complete を確認
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded fired');
+      console.log('img.complete:', img.complete); // 画像の読み込み完了状態 (true / false)
+
+      if (img.complete) {
+        console.log('画像は既に読み込み完了しています。Immidately');
+      } else {
+        console.log('画像はまだ読み込み中です。');
+
+        // まだ読み込まれていない場合の load イベント処理
+        img.addEventListener('load', () => {
+          console.log('load イベント発火: 画像の読み込みが完了しました。');
+          console.log('img.complete (after load):', img.complete);
+        });
+      }
+
+      // DOM に追加して確認したい場合（任意）
+      document.body.appendChild(img);
+    });
+  </script>
+</body>
+</html>

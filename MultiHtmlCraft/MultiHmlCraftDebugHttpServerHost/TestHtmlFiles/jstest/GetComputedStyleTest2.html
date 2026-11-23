@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>getComputedStyle 自動検証（イベント・table なし）</title>
+  <style>
+    #target {
+      width: 360px;
+      height: 240px;
+      margin: 80px auto;
+      background: linear-gradient(135deg, #4158d0, #c850c0, #ffcc70);
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 240px;
+      border-radius: 25px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      transition: transform 0.5s ease, box-shadow 0.5s ease;
+    }
+    #target:hover {
+      transform: translateY(-15px) rotate(3deg);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+    }
+  </style>
+</head>
+<body>
+
+  <h2 style="text-align:center; margin-top:40px; color:#333;">
+    getComputedStyle 自動出力デモ
+  </h2>
+  <p style="text-align:center; color:#666;">
+    このページを開いた瞬間、コンソールに計算済みスタイルが自動で出力されます<br>
+    （ホバーしてから再読み込みすると変化後の値も確認できます）
+  </p>
+
+  <div id="target">検証中…</div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const target = document.getElementById('target');
+      const s = window.getComputedStyle(target);  // 短縮
+
+      console.clear();
+      console.log('%cgetComputedStyle 自動検証結果', 
+        'font-size:22px; font-weight:bold; color:#fff; background:linear-gradient(90deg,#ff6b6b,#4ecdc4); padding:12px 24px; border-radius:10px;');
+
+      console.log('%c対象要素:', 'font-weight:bold; color:#d73a49;', target);
+      console.log('%c計算済みスタイル（主なプロパティ）', 'font-size:16px; font-weight:bold; color:#0066cc; margin-top:10px;');
+
+      console.log('  width            :', s.width);
+      console.log('  height           :', s.height);
+      console.log('  backgroundColor  :', s.backgroundColor);
+      console.log('  color            :', s.color);
+      console.log('  fontSize         :', s.fontSize);
+      console.log('  lineHeight       :', s.lineHeight);
+      console.log('  borderRadius     :', s.borderRadius);
+      console.log('  boxShadow        :', s.boxShadow);
+      console.log('  transform        :', s.transform || 'none');
+      console.log('  opacity          :', s.opacity);
+      console.log('  display          :', s.display);
+      console.log('  margin           :', s.margin);
+      console.log('  padding          :', s.padding);
+
+      console.log('%c\nホバー → F5再読み込みで変化後の transform や boxShadow も確認できます', 
+        'color:#28a745; font-style:italic; background:#f8fff8; padding:8px; border-radius:6px;');
+    });
+  </script>
+
+</body>
+</html>

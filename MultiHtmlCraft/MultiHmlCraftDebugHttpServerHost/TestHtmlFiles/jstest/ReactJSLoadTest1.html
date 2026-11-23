@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>React.js Load & Basic Test (No Click)</title>
+  <script src="react.development.js" crossorigin></script>
+  <script src="react-dom.development.js" crossorigin></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      if (window.React && window.ReactDOM) {
+        console.log("SUCCESS");
+
+        const { useState, useEffect } = React;
+
+        function ChildComponent({ value }) {
+          if (value === 42) {
+            console.log("props test OK");
+          }
+          return React.createElement("div", null, "Child value: " + value);
+        }
+
+        function TestComponent() {
+          const [count, setCount] = useState(0);
+
+          useEffect(() => {
+            if (count === 0) {
+              console.log("useState initial value OK");
+              setTimeout(() => setCount(42), 100); // clickイベントを使わず自動で値を変更
+            } else if (count === 42) {
+              console.log("useState setState OK");
+            }
+          }, [count]);
+
+          useEffect(() => {
+            console.log("useEffect called, count:", count);
+          }, [count]);
+
+          return React.createElement(
+            "div",
+            null,
+            React.createElement("span", { id: "count" }, "Count: " + count),
+            React.createElement(ChildComponent, { value: count })
+          );
+        }
+
+        ReactDOM.render(
+          React.createElement(TestComponent),
+          document.getElementById('root'),
+          () => {
+            console.log("Component rendered");
+          }
+        );
+      } else {
+        console.log("FAILED");
+      }
+    });
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>

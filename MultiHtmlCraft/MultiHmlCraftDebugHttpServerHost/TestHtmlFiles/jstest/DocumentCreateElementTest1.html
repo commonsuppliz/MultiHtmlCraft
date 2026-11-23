@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>createElement サンプル</title>
+</head>
+<body>
+  <h2>createElement で動的に要素を追加</h2>
+  <div id="container"></div>
+  <script>
+    console.log("document : " + typeof document);
+    console.log("document.createElement : " + typeof document.createElement);
+
+    
+    var container = document.getElementById('container');
+    var brElement = document.createElement('br');
+    console.log("brElement", brElement);
+
+    container.appendChild(brElement);
+      console.log("brElement call success!");
+    
+    
+  </script>
+</body>
+</html>

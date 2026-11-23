@@ -1,0 +1,18 @@
+<html>
+<head>
+</head>
+
+<body>
+<span> onload test</span>
+<script>
+console.log("script calling has began...");
+console.log("window.onload:" , typeof window.onload);
+window.onload = function() {
+console.log("Hello, world!");
+
+};
+console.log("after assign, typeof window.onload:", typeof window.onload, window.onload);
+</script>
+</body>
+</html>
+

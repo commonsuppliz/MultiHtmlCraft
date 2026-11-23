@@ -1,0 +1,29 @@
+﻿<html>
+<head>
+</head>
+<body>
+
+<div id="list">
+</div>
+
+<script>
+try
+{
+var _type = document.nodeType;
+console.log(_type);
+} catch(e)
+{
+  console.log("document is disposed");
+}
+try
+{
+var _rootElem = document.documentElement;
+console.log(_rootElem);
+}catch(e)
+{
+  console.log("document is disposed");
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>JS Instance Creation Test</title>
+</head>
+<body>
+
+<script>
+"use strict"
+function reqListener() {
+  console.log(this.responseText);
+  var _myMatrix = glMatrix ;
+  console.log("myMatrix : " + _myMatrix);
+  var _myScene = Phoria.Scene;
+  console.log("myScene : " + _myScene );
+}
+var Phoria = {};
+var glMatrix = {};
+Phoria.Scene = {};
+
+
+const req = new XMLHttpRequest();
+req.addEventListener("load", reqListener);
+req.open("GET", "http://localhost/jstest/sampledata.txt");
+req.send();
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>addEventListener サンプル</title>
+</head>
+<body>
+
+
+
+  <script>
+     console.log("window.addEventListener : " + typeof window.addEventListener);
+     console.log("addEventListener : " + typeof addEventListener);
+     console.log("document.addEventListener : " + typeof document.addEventListener);
+     function logmsg()
+     {
+        console.log("ok!");
+     }
+     window.addEventListener("DOMContentLoaded", logmsg);
+     addEventListener("DOMContentLoaded", logmsg);
+    // document.addEventListener("DOMContentLoaded", logmsg);
+     
+  </script>
+
+</body>
+</html>

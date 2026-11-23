@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<p id="test"></p>
+<script>
+function eat(food1, food2) {
+    console.log("I like to eat " + food1 + " and " + food2 );
+}
+function myFunc(callback, args) {
+    //do stuff
+    //...
+    //execute callback when finished
+    callback.apply(this, args);
+}
+
+//alerts "I like to eat pickles and peanut butter"
+myFunc(eat, ["pickles", "peanut butter"]); 
+</script>
+</body>
+</html>

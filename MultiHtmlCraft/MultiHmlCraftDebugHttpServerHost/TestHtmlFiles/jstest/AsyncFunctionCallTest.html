@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Async Function Event Sample</title>
+  <script>
+    async function ABC() {
+      console.log("ABC called (async function)");
+      // ここで await も利用可能
+      // await new Promise(resolve => setTimeout(resolve, 1000));
+      // console.log("after await");
+    }
+
+    window.addEventListener("DOMContentLoaded", ABC);
+  </script>
+</head>
+<body>
+  <h1>Async Function Event Sample</h1>
+</body>
+</html>

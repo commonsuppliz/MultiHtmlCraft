@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>nodeType ログサンプル</title>
+</head>
+<body>
+  <h1>nodeType ログサンプル</h1>
+  <p>このページの全ノードの <code>nodeType</code> をコンソールに出力します。</p>
+  <ul>
+    <li>リスト1</li>
+    <li>リスト2</li>
+  </ul>
+  <script>
+    // すべてのノードを再帰的にたどって nodeType を出力する関数
+    function logNodeTypes(node) {
+      console.log(node.nodeType, node);
+      if (node.childNodes) {
+        for (let i = 0; i < node.childNodes.length; i++) {
+          logNodeTypes(node.childNodes[i]);
+        }
+      }
+    }
+    // ドキュメントルートから開始
+    logNodeTypes(document);
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+﻿<html>
+<head>
+    <meta charset="UTF-8" />
+</head>
+    <form action="submit.aspx" method="post">
+        <div>
+            <label for="name">名前</label>
+            <input type="text" id="name" name="name">
+        </div>
+        <br/>
+        <div>
+            <label for="email">メールアドレス</label>
+            <input type="text" id="email" name="email">
+            <div>
+            <input type="text" id="city" name="tokyo">
+            </div>
+        </div>
+        
+        <br/>
+        <div>
+            <label for="message">内容</label>
+            <textarea id="message" name="message" width="300" height="100"></textarea>
+        </div>
+        <br/>
+        <br/>
+        <input type="submit" value="送信する">
+    </form>
+        <script>
+        function handleButtonClick(buttonNumber) {
+            console.log(buttonNumber + " ボタンがクリックされました。");
+        }
+        console.log("handleButtonClick is compiled  as function.");
+    </script>
+    
+    <hr/>
+    <br/>
+    <br/>
+    <button id="btn1" onclick="handleButtonClick(1)" width="500" height="70">1 ボタン</button>
+       <hr/>
+    <br/>
+    <br/>
+     <button id="btn2" onclick="handleButtonClick(2)" >2 ボタン</button>
+         <hr/>
+    <br/>
+    <br/>
+    <button  id="btn3" onclick="handleButtonClick(3)" >3 ボタン</button>
+    <script>
+    var btn3 = document.getElementById("btn3");
+    console.log(btn3.getAttribute("onclick"));
+    </script>
+    
+   <br/>
+    <br/>
+       <br/>
+    <br/>
+       <br/>
+    <br/>
+       <br/>
+    <br/>
+       <br/>
+    <br/>
+    
+</body>
+</html>

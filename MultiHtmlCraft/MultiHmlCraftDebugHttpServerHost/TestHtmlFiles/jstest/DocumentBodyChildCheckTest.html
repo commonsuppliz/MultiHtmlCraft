@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>Body 要素の列挙デモ</title>
+</head>
+<body id="myBody" class="classBody">
+</body>
+  <script>
+    function addDocumentElement()
+    {
+    console.log("document", document);
+    console.log("document.body", typeof document.body);
+    
+    // body に要素を 5 個作成して追加
+    for (let i = 1; i <= 5; i++) {
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.textContent = `Item ${i}`;
+      div.id = `item-${i}`;
+      console.log("document.body: ", typeof document.body);
+      console.log("typeof document.body.appendChild:", typeof document.body.appendChild);
+      document.body.appendChild(div);
+      console.log("appendChild success : " , i); 
+    }
+    console.log("document.body.id: ", document.body.id); 
+    console.log("typeof document.body.childNodes: ", document.body.childNodes); 
+    console.log("typeof document.body.childNodes.length: ", document.body.childNodes.length);
+    console.log("typeof document.body.children: ", document.body.children); 
+    console.log("document.body.children.length: ", document.body.children.length);
+
+    console.log('childElementCount:', document.body.childElementCount);
+    }
+    window.addEventListener("DOMContentLoaded", addDocumentElement);
+  </script>
+
+</html>

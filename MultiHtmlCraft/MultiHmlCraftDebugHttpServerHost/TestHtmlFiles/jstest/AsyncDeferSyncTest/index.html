@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>JS実行順序の確認（通常・async・defer）</title>
+  <script>
+    console.log('1. [Head] インラインスクリプト');
+
+
+
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('★ [Event] window.DOMContentLoaded 発火');
+    });
+  </script>
+
+  <!-- 通常のスクリプト（Head内）：HTMLパースを完全にブロックして即時実行 -->
+  <script src="normal-head.js"></script>
+
+  <!-- async: ダウンロード完了次第、HTMLパースを止めて即実行（順序保証なし） -->
+  <script src="async.js" async></script>
+
+  <!-- defer: HTMLパース完了後、DOMContentLoadedの直前に記述順で実行 -->
+  <script src="defer1.js" defer></script>
+  <script src="defer2.js" defer></script>
+</head>
+<body>
+  <h1>実行順序テスト（通常・async・defer）</h1>
+
+  <script>
+    console.log('2. [Body] インラインスクリプト（HTMLパース中）');
+  </script>
+
+  <!-- 通常のスクリプト（Body途中）：ここでHTMLの読み込みが一度ストップする -->
+  <script src="normal-body.js"></script>
+
+  <script>
+    console.log('3. [Body末尾] インラインスクリプト（HTMLパースほぼ完了）');
+  </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Fetch Request Sample</title>
+</head>
+<body>
+<script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Requestクラスのインスタンスを作成
+            const request = new Request('http://localhost/json/json3.json', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            // fetchでリクエスト
+            fetch(request)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('fetch結果:', data);
+                })
+                .catch(error => {
+                    console.log('fetchエラー:', error);
+                });
+        });
+
+</script>
+</body>
+</html>

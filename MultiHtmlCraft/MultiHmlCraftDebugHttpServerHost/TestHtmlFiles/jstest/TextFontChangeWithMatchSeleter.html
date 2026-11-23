@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>多言語ランダムフォントサイズサンプル</title>
+    <style>
+        body {
+            background: #f9f9f9;
+            font-family: sans-serif;
+            padding: 2em;
+        }
+        .lang-text {
+            margin: 0.5em 0;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <span class="lang-text">English: Hello, world!</span>
+    <span class="lang-text">日本語: こんにちは世界！</span>
+    <span class="lang-text">中文: 你好，世界！</span>
+    <span class="lang-text">한국어: 안녕하세요, 세계!</span>
+    <span class="lang-text">Русский: Привет, мир!</span>
+    <span class="lang-text">Español: ¡Hola, mundo!</span>
+    <span class="lang-text">Français: Bonjour le monde !</span>
+    <span class="lang-text">Deutsch: Hallo, Welt!</span>
+    <span class="lang-text">العربية: مرحبا بالعالم!</span>
+    <span class="lang-text">हिन्दी: नमस्ते दुनिया!</span>
+    <span class="lang-text">ไทย: สวัสดีโลก!</span>
+    <span class="lang-text">עברית: שלום עולם!</span>
+    <script>
+        // 各テキストにランダムなフォントサイズを適用
+        document.querySelectorAll('.lang-text').forEach(function(el) {
+    var size = Math.floor(Math.random() * 32) + 12;
+    // 単位なしで代入
+    el.style.fontSize = size + "px";
+        });
+    </script>
+</body>
+</html>

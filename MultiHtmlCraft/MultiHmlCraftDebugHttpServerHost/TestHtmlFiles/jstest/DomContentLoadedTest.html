@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>DOMContentLoaded exmaple</title>
+
+
+
+</head>
+<body>
+
+<p id="test"></p>
+<script>
+function domFinished()
+{
+    console.log('DOMContentLoaded call done!');
+}
+
+addEventListener('DOMContentLoaded', domFinished);
+console.log('DOMContentLoaded has been registered!' );
+</script>
+</body>
+</html>

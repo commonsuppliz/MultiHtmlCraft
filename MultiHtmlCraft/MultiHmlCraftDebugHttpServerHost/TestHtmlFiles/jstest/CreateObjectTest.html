@@ -1,0 +1,51 @@
+<html>
+    <body>
+    <script>
+(function() {
+    // C#でバインドしたクラス名リスト
+    const classNames = [
+        "Image",
+        "Audio",
+        "Video",
+        "Canvas",
+        "XMLHttpRequest",
+        "EventSource",
+        "WebSocket",
+        "Option",
+        "FileReader",
+        "Blob",
+        "File",
+        "MutationObserver",
+        "ImageData",
+        "TextDecoder",
+        "TextEncoder",
+        "URL",
+        "FormData",
+        "CustomEvent",
+        "Event",
+        "MouseEvent",
+        "KeyboardEvent",
+        "TouchEvent",
+        "MessageEvent",
+        "Worker",
+        "SharedWorker",
+        "AudioContext",
+        "SpeechSynthesisUtterance",
+        "SpeechRecognition"
+    ];
+
+    classNames.forEach(function(className) {
+        try {
+            // 引数なしでインスタンス化を試みる
+            var obj = new (window[className])();
+            // インスタンス生成成功
+            console.log("new " + className + "() : OK", obj);
+        } catch (e) {
+            // 失敗した場合
+            console.log("new " + className + "() : NG", e && e.message ? e.message : e);
+        }
+    });
+})();
+    </script>
+    </body>
+    </html>

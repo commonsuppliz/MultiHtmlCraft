@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>NodeName Logger</title>
+</head>
+<body>
+
+  <div>Div Element</div>
+  <canvas id="canvas1" width="100" height="100"></canvas>
+  <form action="#">
+  <canvas id="canvas2" width="100" height="100"></canvas>
+    <input type="text" name="exampleInput" placeholder="Input here">
+  </form>
+  <img src="http://localhost/img/BeatlesAbbeyRoad.png" </img>
+
+  <script>
+    var nodes = document.body.childNodes;
+    if(nodes == null || nodes === "undefined")
+    {
+          console.log("childNodes is undefied");
+    } else
+    var len = nodes.length;
+    console.log("childNodes length " + len)
+    for (var i = 0; i <len; i++) {
+      var elem = nodes[i];  // <== This Fail, Why? It returns null
+      //var elem = nodes.item(i); // <== SUCCESS
+      if(elem != null)
+      {
+      console.log("Curent Pos " + i + "  node.length : " + len);
+      console.log("NodeName :" +  elem.nodeName);
+      }else
+      {
+            console.log("null returns for element:" +  elem);
+      }
+    }
+   
+    
+  </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>setInterval Test</title>
+</head>
+<body>
+
+<script>
+  var counter = 0;
+  console.log("setInterval : " + typeof setInterval);
+  setInterval(function() {
+    console.log("Test" + counter);
+    counter++;
+  }, 100);
+</script>
+</body>
+</html>

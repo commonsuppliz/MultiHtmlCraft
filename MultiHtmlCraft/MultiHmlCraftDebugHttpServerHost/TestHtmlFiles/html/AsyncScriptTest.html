@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>script async 3つ サンプル</title>
+  <!-- 3つのスクリプトをすべて async で非同期ロード -->
+  <script src="script1.js" async></script>
+  <script src="script2.js" async></script>
+  <script src="script3.js" async></script>
+  <script>
+      function docLoaded()
+    {
+    console.log('HTML（DOM）の読み込みが完了しました。');
+    }
+     window.addEventListener('DOMContentLoaded', docLoaded, false);
+  </script>
+</head>
+<body>
+  <h1>script async (3ファイル) の動作テスト</h1>
+  <p>コンソールを開いてログの出力順序を確認してください。</p>
+</body>
+</html>

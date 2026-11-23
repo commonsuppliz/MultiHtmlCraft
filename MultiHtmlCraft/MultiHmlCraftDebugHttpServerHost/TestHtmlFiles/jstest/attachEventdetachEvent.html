@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>attachEvent / detachEvent テスト</title>
+  <style>
+    div { padding:8px; margin:6px; border:1px solid #ccc; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div id="d1">DIV 1 — クリックしてみる</div>
+  <div id="d2">DIV 2 — クリックしてみる</div>
+
+  <script>
+    (function () {
+      function log(...args) {
+        try { console.log(...args); } catch (e) { /* 環境によって console がない場合は無視 */ }
+      }
+
+      var divs = document.getElementsByTagName('div');
+      log('div count:', divs.length);
+
+      function makeHandler(name) {
+        return function (evt) {
+          try {
+            log('[EVENT] ' + name + ' fired, target id=' + (this && this.id ? this.id : '(unknown)'), evt);
+          } catch (e) { log('[EVENT] handler error', e); }
+        };
+      }
+
+      for (var i = 0; i < divs.length; i++) {
+        (function (idx) {
+          var el = divs[idx];
+          log('--- element', idx, 'id=', el.id,
+              'addEventListener:', typeof el.addEventListener,
+              'attachEvent:', typeof el.attachEvent,
+              'detachEvent:', typeof el.detachEvent);
+
+          var h = makeHandler('handler' + idx);
+
+          // attach / add（例外は捕捉してログ）
+          try {
+            if (typeof el.attachEvent === 'function') {
+              log('Using attachEvent on', el.id);
+              // attachEvent は IE 形式で 'onclick' 等を期待する
+              try { el.attachEvent('onclick', h); el.__attached = { api: 'attachEvent', name: 'onclick', handler: h }; }
+              catch (e) { log('attachEvent call failed:', e); }
+            } else if (typeof el.addEventListener === 'function') {
+              log('Using addEventListener on', el.id);
+              try { el.addEventListener('click', h, false); el.__attached = { api: 'addEventListener', name: 'click', handler: h }; }
+              catch (e) { log('addEventListener call failed:', e); }
+            } else {
+              log('No supported event API on element', el.id);
+            }
+          } catch (e) { log('attach/add try-catch error', e); }
+
+          // イベントを発火（click() が使えるなら使う）
+          try {
+            log('-- Triggering click on', el.id);
+            if (typeof el.click === 'function') {
+              el.click();
+              log('invoked click() on', el.id);
+            } else {
+              // 古い環境向けフォールバック
+              try {
+                var ev = null;
+                if (document.createEvent) {
+                  ev = document.createEvent('MouseEvents');
+                  ev.initEvent('click', true, true);
+                  el.dispatchEvent(ev);
+                  log('dispatched click event via createEvent on', el.id);
+                } else {
+                  log('cannot programmatically click', el.id);
+                }
+              } catch (e) { log('dispatch error', e); }
+            }
+          } catch (e) { log('trigger click error', e); }
+
+          // detach / remove（登録が成功していれば解除）
+          try {
+            var attached = el.__attached;
+            if (attached) {
+              if (attached.api === 'attachEvent' && typeof el.detachEvent === 'function') {
+                try { el.detachEvent(attached.name, attached.handler); log('detached attachEvent on', el.id); }
+                catch (e) { log('detachEvent failed', e); }
+              } else if (attached.api === 'addEventListener' && typeof el.removeEventListener === 'function') {
+                try { el.removeEventListener(attached.name, attached.handler, false); log('removed addEventListener on', el.id); }
+                catch (e) { log('removeEventListener failed', e); }
+              } else {
+                log('no matching detach API for', el.id, attached.api);
+              }
+            } else {
+              log('no recorded attachment for', el.id);
+            }
+          } catch (e) { log('detach error', e); }
+
+          // 再度クリックしてリスナが解除されたか確認
+          try {
+            log('-- Triggering click after detach on', el.id);
+            if (typeof el.click === 'function') {
+              el.click();
+              log('invoked click() after detach on', el.id);
+            } else {
+              try {
+                if (document.createEvent) {
+                  var ev2 = document.createEvent('MouseEvents');
+                  ev2.initEvent('click', true, true);
+                  el.dispatchEvent(ev2);
+                  log('dispatched click event after detach on', el.id);
+                }
+              } catch (e) { log('dispatch after detach error', e); }
+            }
+          } catch (e) { log('second trigger error', e); }
+        })(i);
+      }
+    })();
+  </script>
+</body>
+</html>

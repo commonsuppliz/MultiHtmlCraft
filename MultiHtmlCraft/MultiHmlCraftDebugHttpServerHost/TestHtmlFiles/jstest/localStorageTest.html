@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>localStorage Check and Auto Stop</title>
+</head>
+<body>
+    <h1>localStorage Check & 5-Step Timer</h1>
+    <p>スクリプトの冒頭で localStorage の有無を確認し、5回実行後に停止します。</p>
+    <p>コンソール（F12）を確認してください。</p>
+
+    <script>
+        // --- 1. localStorage の定義確認 ---
+        const isLocalStorageAvailable = () => {
+            try {
+                const storage = window.localStorage;
+                const x = '__storage_test__';
+                storage.setItem(x, x);
+                storage.removeItem(x);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+
+        if (!isLocalStorageAvailable()) {
+            console.error('エラー: このブラウザでは localStorage が利用できないか、無効化されています。');
+        } else {
+            console.log('OK: localStorage は利用可能です。テストを開始します。');
+
+            // --- 2. メイン処理 (タイマー) ---
+            const KEY_COUNT = 'auto_stop_counter';
+            let execCount = 0;
+
+            const timerId = setInterval(() => {
+                execCount++;
+                
+                // データの保存
+                localStorage.setItem(KEY_COUNT, execCount);
+                console.log(`[${execCount}回目] 保存完了: ${execCount}`);
+
+                // 5回目で停止
+                if (execCount >= 5) {
+                    clearInterval(timerId);
+                    console.log('--- 指定回数に達したため停止しました ---');
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
