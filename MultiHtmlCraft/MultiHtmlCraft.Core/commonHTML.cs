@@ -82,18 +82,21 @@ namespace MultiHtmlCraft.Core
         file = 7,
         javascript = 8,
         about = 9,
+        ws = 10,
+        wss = 11,
         /// <summary>
         /// Cookie Data
         /// </summary>
-        cookie,
+        cookie = 12,
         /// <summary>
         /// sessionStorage Data
         /// </summary>
-        sstorage,
+        sstorage = 13,
         /// <summary>
         /// localStorage Data
         /// </summary>
-        lstorage,
+        lstorage = 14,
+
         /// <summary>
         /// Host Storage Data
         /// </summary>
@@ -22075,6 +22078,29 @@ namespace MultiHtmlCraft.Core
 
 
             return;
+        }
+        internal static bool isFetchSupportedScheme(ReadOnlySpan<char> fetchUrl)
+        {
+          
+            if (fetchUrl.IsEmpty)
+                return false;
+
+            int colonIndex = fetchUrl.IndexOf(':');
+            if (colonIndex <= 0)
+                return false;
+
+            
+            ReadOnlySpan<char> schemeWithColon = fetchUrl[..(colonIndex + 1)];
+
+            
+            return schemeWithColon.Equals("https:", StringComparison.OrdinalIgnoreCase)
+                || schemeWithColon.Equals("http:", StringComparison.OrdinalIgnoreCase)
+                || schemeWithColon.Equals("blob:", StringComparison.OrdinalIgnoreCase)
+                || schemeWithColon.Equals("data:", StringComparison.OrdinalIgnoreCase)
+                || schemeWithColon.Equals("wss:", StringComparison.OrdinalIgnoreCase)
+                || schemeWithColon.Equals("ws:", StringComparison.OrdinalIgnoreCase)
+                || schemeWithColon.Equals("file:", StringComparison.OrdinalIgnoreCase)
+                || schemeWithColon.Equals("about:", StringComparison.OrdinalIgnoreCase);
         }
         public static void setHttpClientDefalutRequestHeaders(HttpClient client)
         {

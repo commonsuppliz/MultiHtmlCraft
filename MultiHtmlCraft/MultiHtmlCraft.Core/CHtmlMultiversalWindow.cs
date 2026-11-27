@@ -7433,7 +7433,21 @@ s               else
                 }
 
             fetchParseCompleted:
-
+                if(!commonHTML.isFetchSupportedScheme(___fetchUrl))
+                {
+                    if(commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+                    {
+                        commonLog.LogEntry($"current this.fetch url :{___fetchUrl}: is not valid Url Scheme  for fetch method, try converting from base url");
+                    }
+                    if(this.___locationBase != null)
+                    {
+                        ___fetchUrl = commonHTML.GetAbsoluteUri(this.___locationBase.ToString(), "", ___fetchUrl);
+                    }
+                    if (commonLog.LoggingEnabled && commonLog.LogLevel > 7)
+                    {
+                        commonLog.LogEntry($"current this.fetch url :{___fetchUrl}");
+                    }
+                }
 
                 if (!isJsonPrameterExists)
                 {
@@ -8408,7 +8422,35 @@ if (cHtmlMultiversalControl != null)
             return result;
         }
 
+        public static bool HasFetchSupportedScheme(ReadOnlySpan<char> fetchUrl)
+        {
+            // 長さが最低4文字（"wsl:" / "http:" は5文字）未満なら即 false
+            if (fetchUrl.Length < 4)
+                return false;
 
+            // 先頭5文字・4文字を切り出して比較（アロケーションなし）
+            if (fetchUrl.Length >= 5)
+            {
+                ReadOnlySpan<char> prefix5 = fetchUrl[..5];
+                if (prefix5.Equals("http:", StringComparison.OrdinalIgnoreCase) ||
+                    prefix5.Equals("wss:", StringComparison.OrdinalIgnoreCase) ||
+                    prefix5.Equals("wsl:", StringComparison.OrdinalIgnoreCase)) // ws: の場合は "ws:" に変更
+                {
+                    return true;
+                }
+            }
+
+            if (fetchUrl.Length >= 6)
+            {
+                ReadOnlySpan<char> prefix6 = fetchUrl[..6];
+                if (prefix6.Equals("https:", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
 
         public void addEventListener(object name, object arg)

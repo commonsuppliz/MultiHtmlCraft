@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="../MultiHtmlCraft/ClearScriptProcessor/ClearScriptProcessor.csproj" />
   <Project Path="../MultiHtmlCraft/Interfaces/MultiHtmlCraft.Interfaces.csproj" />
+  <Project Path="../MultiHtmlCraft/MultiHmlCraftDebugHttpServerHost/MultiHmlCraftLocalHttpServerHost.csproj" />
   <Project Path="../MultiHtmlCraft/MultiHtmlCraft.AvaroniaControl/MultiHtmlCraft.AvaroniaControl.csproj" />
   <Project Path="../MultiHtmlCraft/MultiHtmlCraft.Core/MultiHtmlCraft.Core.csproj" />
   <Project Path="../MultiHtmlCraft/NilJsProcessor/NilJsProcessor.csproj" />

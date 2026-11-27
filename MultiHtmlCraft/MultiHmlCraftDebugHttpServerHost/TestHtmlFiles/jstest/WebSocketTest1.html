@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>LocalDebugHttpServer DOMContentLoaded Test Suite</title>
+</head>
+<body>
+  <h1>MultiHtmlCraftLocalHttpServer Test Suite</h1>
+  <pre id="log-output">Running tests on DOMContentLoaded... Check console.log.</pre>
+
+  <script>
+    (function () {
+      var results = [];
+
+      function logResult(name, passed, detail) {
+        var entry = {
+          test: name,
+          passed: Boolean(passed),
+          detail: detail
+        };
+        results.push(entry);
+        console.log("[Test]", name, passed ? "PASS" : "FAIL", detail);
+        var pre = document.getElementById("log-output");
+        if (pre) {
+          pre.textContent = JSON.stringify(results, null, 2);
+        }
+      }
+
+      async function testGetGreeting() {
+        var url = "/api/greeting?source=domcontentloaded&v=1";
+        var res = await fetch(url, {
+          method: "GET",
+          headers: {
+            "X-Test-Case": "get-greeting"
+          }
+        });
+        var json = await res.json();
+        var ok = res.status === 200 && json && json.ok === true;
+        logResult("GET /api/greeting", ok, {
+          status: res.status,
+          body: json
+        });
+      }
+
+      async function testPostEcho() {
+        var payload = {
+          client: "MultiHtmlCraftLocHttpSeverTest",
+          event: "DOMContentLoaded",
+          timestamp: Date.now()
+        };
+        var res = await fetch("/api/echo?mode=echo-test", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Echo-Header": "echo-value-42"
+          },
+          body: JSON.stringify(payload)
+        });
+        var json = await res.json();
+        var ok = res.status === 200 && json && json.ok === true && json.receivedBody.indexOf("DOMContentLoaded") !== -1;
+        logResult("POST /api/echo", ok, {
+          status: res.status,
+          body: json
+        });
+      }
+
+      async function testCustomStatusAndHeaders() {
+        var url = "/api/status?code=201&headerName=X-Debug-Resp&headerValue=verified-201&extra=abc";
+        var res = await fetch(url, {
+          method: "GET",
+          headers: {
+            "X-Custom-Req": "req-header-check"
+          }
+        });
+        var headerVal = res.headers.get("X-Debug-Resp");
+        var json = await res.json();
+        var ok = res.status === 201 && headerVal === "verified-201";
+        logResult("GET /api/status (code & response header)", ok, {
+          status: res.status,
+          headerXDebugResp: headerVal,
+          body: json
+        });
+      }
+
+      function testWebSocket() {
+        return new Promise(function (resolve) {
+          var wsUrl = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws";
+          var ws;
+          try {
+            ws = new WebSocket(wsUrl);
+          } catch (err) {
+            logResult("WebSocket /ws", false, { error: String(err) });
+            resolve();
+            return;
+          }
+
+          var receivedMessages = [];
+          var settled = false;
+
+          var timer = setTimeout(function () {
+            if (!settled) {
+              settled = true;
+              try { ws.close(); } catch (e) {}
+              logResult("WebSocket /ws", receivedMessages.length >= 2, {
+                messages: receivedMessages,
+                note: "timeout"
+              });
+              resolve();
+            }
+          }, 5000);
+
+          ws.addEventListener("open", function () {
+            console.log("[WS Test] connected:", wsUrl);
+            ws.send("hello-text-frame");
+            ws.send(JSON.stringify({ kind: "ws-json-test", seq: 1 }));
+          });
+
+          ws.addEventListener("message", function (event) {
+            console.log("[WS Test] message:", event.data);
+            receivedMessages.push(event.data);
+            if (receivedMessages.length >= 2 && !settled) {
+              settled = true;
+              clearTimeout(timer);
+              ws.close(1000, "test complete");
+            }
+          });
+
+          ws.addEventListener("close", function (event) {
+            console.log("[WS Test] closed:", event.code, event.reason);
+            if (!settled) {
+              settled = true;
+              clearTimeout(timer);
+            }
+            logResult("WebSocket /ws", receivedMessages.length >= 2, {
+              closeCode: event.code,
+              messages: receivedMessages
+            });
+            resolve();
+          });
+
+          ws.addEventListener("error", function (err) {
+            console.log("[WS Test] error:", err);
+            if (!settled) {
+              settled = true;
+              clearTimeout(timer);
+              logResult("WebSocket /ws", false, {
+                error: "WebSocket error event",
+                messages: receivedMessages
+              });
+              resolve();
+            }
+          });
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("[TestSuite] DOMContentLoaded fired. Starting tests...");
+        (async function runAll() {
+          try {
+            await testGetGreeting();
+          } catch (e) {
+            logResult("GET /api/greeting", false, { error: String(e) });
+          }
+
+          try {
+            await testPostEcho();
+          } catch (e) {
+            logResult("POST /api/echo", false, { error: String(e) });
+          }
+
+          try {
+            await testCustomStatusAndHeaders();
+          } catch (e) {
+            logResult("GET /api/status (code & response header)", false, { error: String(e) });
+          }
+
+          try {
+            await testWebSocket();
+          } catch (e) {
+            logResult("WebSocket /ws", false, { error: String(e) });
+          }
+
+          var passedCount = results.filter(function (r) { return r.passed; }).length;
+          console.log("[TestSuite] Finished:", passedCount + "/" + results.length, "passed", results);
+        })();
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -209,6 +209,7 @@ namespace MultiHtmlCraft.Interfaces
         NamedNodeMap,
         ScreenOrientation,
         Response,
+        WebSocket,
 
       
 

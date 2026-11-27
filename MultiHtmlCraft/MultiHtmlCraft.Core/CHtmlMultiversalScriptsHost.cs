@@ -86,8 +86,7 @@ namespace MultiHtmlCraft.Core
                             v8Scope.AddHostType("XMLHttpRequest", typeof(CHtmlXMLHttpRequest));
                             v8Scope.AddHostType("DOMParser", typeof(CHtmlDOMParser));
                             v8Scope.AddHostType("Response", typeof(CHtmlFetchResponse));
-
-
+                            v8Scope.AddHostType("WebSocket", typeof(CHtmlWebSocket));
                             v8Scope.AddHostType("HTMLVideoElement", typeof(CHtmlVideoElement));
                             v8Scope.AddHostType("HTMLDivElement", typeof(CHtmlElement));
                             v8Scope.AddHostType("HTMLInputElement", typeof(CHtmlInputElement));

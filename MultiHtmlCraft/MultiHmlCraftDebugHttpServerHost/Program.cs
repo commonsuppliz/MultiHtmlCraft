@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+
+
+const string MultiHmlCraftLocalHttpServerHostportNumber = "18080";
+StopExistingServerInstances();
+
 
 string projectRoot = FindProjectDirectory(AppContext.BaseDirectory);
 string sourceDir = args.Length > 0
@@ -18,11 +25,15 @@ string staticDir = args.Length > 1
     ? Path.GetFullPath(args[1])
     : Path.Combine(AppContext.BaseDirectory, "wwwroot");
 
-SyncStaticDirectory(sourceDir, staticDir);
 
-const string prefix = "http://127.0.0.1:18080/";
+
+SyncStaticDirectory(sourceDir, staticDir);
+const string hostUrl = $"http://127.0.0.1:{MultiHmlCraftLocalHttpServerHostportNumber}";
+
+const string prefix = hostUrl;
+string listenerPrefix = hostUrl.EndsWith('/') ? hostUrl : hostUrl + "/";
 using HttpListener listener = new HttpListener();
-listener.Prefixes.Add(prefix);
+listener.Prefixes.Add(listenerPrefix);
 listener.Start();
 
 Console.WriteLine($"MultiHtmlCraftLocalHttpServer listening on {prefix}");
@@ -304,11 +315,166 @@ static async Task ApplyDelayIfRequestedAsync(Dictionary<string, string> queryMap
         await Task.Delay(delayMs, ct);
     }
 }
+static async Task HandleWebSocketAsync(
+    HttpListenerContext ctx,
+    string path,
+    Dictionary<string, string> queryMap,
+    CancellationToken ct)
+{
+    HttpListenerWebSocketContext? wsContext = null;
+    try
+    {
+        string? subProtocol = queryMap.TryGetValue("protocol", out string? p) && !string.IsNullOrWhiteSpace(p)
+            ? p.Trim()
+            : null;
+
+        wsContext = await ctx.AcceptWebSocketAsync(subProtocol);
+        WebSocket socket = wsContext.WebSocket;
+
+        Console.WriteLine($"[WS] Connected: {path} (subProtocol={socket.SubProtocol ?? "none"})");
+
+        byte[] buffer = new byte[8192];
+        using MemoryStream frameBuffer = new MemoryStream();
+
+        while (!ct.IsCancellationRequested && socket.State == WebSocketState.Open)
+        {
+            frameBuffer.SetLength(0);
+            WebSocketReceiveResult result;
+
+            do
+            {
+                result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), ct);
+
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    Console.WriteLine($"[WS] Closing ({result.CloseStatus}): {result.CloseStatusDescription}");
+                    await socket.CloseOutputAsync(
+                        result.CloseStatus ?? WebSocketCloseStatus.NormalClosure,
+                        result.CloseStatusDescription,
+                        ct);
+                    return;
+                }
+
+                if (result.Count > 0)
+                {
+                    frameBuffer.Write(buffer, 0, result.Count);
+                }
+            }
+            while (!result.EndOfMessage);
+
+            byte[] payload = frameBuffer.ToArray();
+
+            if (result.MessageType == WebSocketMessageType.Text)
+            {
+                string text = Encoding.UTF8.GetString(payload);
+                string preview = text.Length > 1000 ? text[..1000] + "...(truncated)" : text;
+                Console.WriteLine($"[WS] RECV TEXT ({payload.Length} bytes): {preview}");
+
+                // JSON 形式なら echo 情報付きで返し、それ以外はそのままエコー
+                string replyText = BuildWebSocketEchoText(text);
+                byte[] replyBytes = Encoding.UTF8.GetBytes(replyText);
+                await socket.SendAsync(
+                    new ArraySegment<byte>(replyBytes),
+                    WebSocketMessageType.Text,
+                    endOfMessage: true,
+                    ct);
+            }
+            else if (result.MessageType == WebSocketMessageType.Binary)
+            {
+                Console.WriteLine($"[WS] RECV BINARY ({payload.Length} bytes)");
+                await socket.SendAsync(
+                    new ArraySegment<byte>(payload),
+                    WebSocketMessageType.Binary,
+                    endOfMessage: true,
+                    ct);
+            }
+        }
+    }
+    catch (OperationCanceledException)
+    {
+        // シャットダウン時
+    }
+    catch (WebSocketException ex)
+    {
+        Console.WriteLine($"[WS] WebSocketException: {ex.Message}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[WS] Error: {ex.Message}");
+    }
+    finally
+    {
+        try
+        {
+            if (wsContext?.WebSocket.State == WebSocketState.Open)
+            {
+                await wsContext.WebSocket.CloseAsync(
+                    WebSocketCloseStatus.InternalServerError,
+                    "Server closing connection",
+                    CancellationToken.None);
+            }
+        }
+        catch { }
+
+        try { wsContext?.WebSocket.Dispose(); } catch { }
+    }
+}
+
+
+static void StopExistingServerInstances()
+{
+    int currentPid = Environment.ProcessId;
+    string currentProcessName = Process.GetCurrentProcess().ProcessName;
+
+    foreach (Process proc in Process.GetProcessesByName(currentProcessName))
+    {
+        if (proc.Id == currentPid)
+        {
+            continue;
+        }
+
+        try
+        {
+            proc.Kill(entireProcessTree: true);
+
+            proc.WaitForExit(3000);
+            Console.WriteLine($"{DateTime.Now.ToLongTimeString()} Existing MultiversalCraftHttpServerHost Process pid : {proc.Id} terminated in order to relase port :{MultiHmlCraftLocalHttpServerHostportNumber}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Process terminate error: {ex.Message}");
+            
+        }
+        finally
+        {
+            proc.Dispose();
+        }
+    }
+}
+
+static string BuildWebSocketEchoText(string receivedText)
+{
+    try
+    {
+        using JsonDocument doc = JsonDocument.Parse(receivedText);
+        return JsonSerializer.Serialize(new
+        {
+            type = "echo",
+            received = doc.RootElement.Clone(),
+            timestamp = DateTimeOffset.UtcNow
+        });
+    }
+    catch (JsonException)
+    {
+        return receivedText;
+    }
+}
 
 static async Task HandleRequestAsync(HttpListenerContext ctx, string rootDir, CancellationToken ct)
 {
     try
     {
+
         string method = ctx.Request.HttpMethod.ToUpperInvariant();
         string rawPath = ctx.Request.Url?.AbsolutePath ?? "/";
         string path = rawPath.StartsWith('/') ? rawPath : "/" + rawPath;
@@ -320,7 +486,12 @@ static async Task HandleRequestAsync(HttpListenerContext ctx, string rootDir, Ca
                 ctx.Request.ContentEncoding ?? Encoding.UTF8,
                 detectEncodingFromByteOrderMarks: true).ReadToEndAsync(ct)
             : string.Empty;
-
+        if (ctx.Request.IsWebSocketRequest)
+        {
+            await HandleWebSocketAsync(ctx, path, queryMap, ct);
+            return;
+        }
+    
         LogRequestDetails(ctx, method, path, queryMap, body);
         await ApplyDelayIfRequestedAsync(queryMap, ct);
 
@@ -611,3 +782,4 @@ static string GetContentType(string filePath) => Path.GetExtension(filePath).ToL
     ".wasm" => "application/wasm",
     _ => "application/octet-stream"
 };
+

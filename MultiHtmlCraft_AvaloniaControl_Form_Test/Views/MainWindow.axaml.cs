@@ -150,7 +150,8 @@ namespace MultiHtmlCraft.AvaloniaControl_Form_Test.Views
                 // txt.Text = "http://localhost/jstest/URLSearchParamsTest1.html"; // URLSearchParams Test 1
                 //txt.Text = "http://localhost/jstest/AsyncDeferSyncTest/index.html"; // Async Defer Sync Test 1 OK
                 //txt.Text = "http://localhost/jstest/ElementGetBouncingRestTest1.html";// getElementById Bouncing Rest Test 1 OK
-                txt.Text = "http://localhost/jstest/DOMPerserTest1.html";// DomParserTest
+                //txt.Text = "http://localhost/jstest/DOMPerserTest1.html";// DomParserTest
+                txt.Text = "http://localhost:18080/jstest/WebSocketTest1.html";
             }
 
             if (btnGo != null && txt != null && _multiView != null)

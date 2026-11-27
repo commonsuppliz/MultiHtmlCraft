@@ -1,10 +1,11 @@
 using Avalonia.Media.Immutable;
 using Avalonia.Metadata;
 using Avalonia.Platform;
+using Microsoft.ClearScript;
+using Microsoft.ClearScript.JavaScript;
 using MultiHtmlCraft.Core;
 using MultiHtmlCraft.Interfaces;
 using Newtonsoft.Json.Serialization;
-
 using NLog;
 using System;
 using System.Collections.Concurrent;
@@ -16,12 +17,11 @@ using System.Net.WebSockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using static System.Net.Mime.MediaTypeNames;
-using Microsoft.ClearScript;
-using Microsoft.ClearScript.JavaScript;
 
 
 namespace MultiHtmlCraft.Core
@@ -1123,6 +1123,12 @@ namespace MultiHtmlCraft.Core
                             var methods = CHtmlPerformance.CHtmlPerformanceMethods.Keys ?? Enumerable.Empty<string>();
                             return props.Concat(methods);
                         }
+                    case CHtmlWebSocket webSocket:
+                        {
+                            var props = CHtmlWebSocket.CHtmlWebSocketMethodList.Keys ?? Enumerable.Empty<string>();
+                            var methods = CHtmlWebSocket.CHtmlWebSocketProperties.Keys ?? Enumerable.Empty<string>();
+                            return props.Concat(methods);
+                        }
                     case CHtmlNode node:
                         {
                             var props = CHtmlNode.CHtmlNodeProperties.Keys ?? Enumerable.Empty<string>();
@@ -1250,6 +1256,34 @@ namespace MultiHtmlCraft.Core
                                     BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                 );
                             }
+                        }
+                        break;
+                    case CHtmlLocationBase locationbase:
+                        {
+                            var self = locationbase;
+                            object? instanvalue = null;
+
+
+                            switch (binder.Name)
+                            {
+                                case "host":
+                                case "protocol":
+                                    {
+                                         var instancevalue = self.___getPropertyByName(binder.Name);
+
+                                        return new DynamicMetaObject(
+                                                     Expression.Constant(instancevalue),
+                                                     BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType));
+                                    }
+                                    break;
+                              
+                       
+                                default:
+                                    break;
+
+
+                            }
+                        
                         }
                         break;
                     case CHtmlVideoElement videoElement:
@@ -2440,6 +2474,18 @@ namespace MultiHtmlCraft.Core
                                                     BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
                                                 );
                                             };
+                                            break;
+                                        case "json":
+                                            {
+                                                Func<object> jsonInvoker = () => self.json();
+
+                                                return new DynamicMetaObject(
+                                                    Expression.Constant(jsonInvoker),
+                                                    BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                                );
+                                            }
+                                            ;
+                                            break;
                                         default:
                                             break;
                                     }
@@ -2607,7 +2653,183 @@ namespace MultiHtmlCraft.Core
 
                             return base.BindGetMember(binder);
                         }
+                    case CHtmlWebSocket webSocket:
+                        {
+                            var self = webSocket;
+                            if(CHtmlWebSocket.CHtmlWebSocketMethodList.ContainsKey(binder.Name))
+                            {
+                                switch (binder.Name)
+                                {
+                                    case "send":
+                                        {
+                                            Action<object> webSocketSendDel = (dataObj) =>
+                                            {
+                                                try
+                                                {
+                                                    object? unwrapped = UnwrapValue(dataObj);
+                                                    if (unwrapped is null)
+                                                    {
+                                                        return;
+                                                    }
 
+                                                    if (unwrapped is string text)
+                                                    {
+                                                        _ = Task.Run(() => self.SendTextAsync(text, CancellationToken.None));
+                                                    }
+                                                    else if (unwrapped is byte[] bytes)
+                                                    {
+                                                        _ = Task.Run(() => self.SendBinaryAsync(bytes, CancellationToken.None));
+                                                    }
+                                                    else if (unwrapped is ArraySegment<byte> segment)
+                                                    {
+                                                        _ = Task.Run(() => self.SendBinaryAsync(segment.ToArray(), CancellationToken.None));
+                                                    }
+                                                    else
+                                                    {
+                                                        
+                                                        string fallbackText = unwrapped.ToString() ?? string.Empty;
+                                                        _ = Task.Run(() => self.SendTextAsync(fallbackText, CancellationToken.None));
+                                                    }
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    if (commonLog.LoggingEnabled)
+                                                    {
+                                                        commonLog.LogEntry("WebSocket send() delegate exception: {0}", ex.Message);
+                                                    }
+                                                }
+                                            };
+
+                                            return new DynamicMetaObject(
+                                                Expression.Convert(
+                                                    Expression.Constant(webSocketSendDel),
+                                                    typeof(object)
+                                                ),
+                                                BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                            );
+                                        }
+                                        break;
+                                    case "close":
+                                        {
+                                            Action<object, object> webSocketCloseDel = (nameValue, reason) =>
+                                            {
+                                                try
+                                                {
+
+                                                    string nameStr = UnwrapValue(nameValue)?.ToString() ?? string.Empty;
+                                                    var closeReason = reason;
+                                                    // object optionsArg = args.Length >= 3 ? args[2] : null;
+                                                    if (!string.IsNullOrEmpty(nameStr))
+                                                    {
+                                                        self.close((string)nameStr, closeReason);
+                                                    }
+
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    if (commonLog.LoggingEnabled) commonLog.LogEntry("WebSocket close() delegate exception: {0}", ex.Message);
+                                                }
+
+                                            };
+                                            return new DynamicMetaObject(
+                                           Expression.Convert(
+                                               Expression.Constant(webSocketCloseDel),
+                                               typeof(object)
+                                           ),
+                                           BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                        }
+                                        break;
+                                    case "addEventListener":
+
+                                        Action<object, object> addEventListenerDel = (nameValue, funcObj) =>
+                                        {
+                                            try
+                                            {
+
+                                                string nameStr = UnwrapValue(nameValue)?.ToString() ?? string.Empty;
+                                                var handler = funcObj;
+                                                // object optionsArg = args.Length >= 3 ? args[2] : null;
+                                                if (!string.IsNullOrEmpty(nameStr))
+                                                {
+                                                    self.addEventListener((string)nameStr, handler);
+                                                }
+
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                if (commonLog.LoggingEnabled) commonLog.LogEntry("addEventListener delegate exception: {0}", ex.Message);
+                                            }
+
+                                        };
+                                        return new DynamicMetaObject(
+                                           Expression.Convert(
+                                               Expression.Constant(addEventListenerDel),
+                                               typeof(object)
+                                           ),
+                                           BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                        );
+                                        break;
+                                    case "removeEventListener":
+                                        {
+
+                                            Action<object, object> removeEventListenerDel = (nameValue, funcObj) =>
+                                            {
+                                                try
+                                                {
+
+                                                    string nameStr = UnwrapValue(nameValue)?.ToString() ?? string.Empty;
+                                                    var handler = funcObj;
+                                                    // object optionsArg = args.Length >= 3 ? args[2] : null;
+                                                    if (!string.IsNullOrEmpty(nameStr))
+                                                    {
+                                                        self.removeEventListener((string)nameStr, handler);
+                                                    }
+
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    if (commonLog.LoggingEnabled) commonLog.LogEntry("removeEventListener delegate exception: {0}", ex.Message);
+                                                }
+
+                                            };
+                                            return new DynamicMetaObject(
+                                            Expression.Convert(
+                                                Expression.Constant(removeEventListenerDel),
+                                                typeof(object)
+                                            ),
+                                            BindingRestrictions.GetTypeRestriction(this.Expression, this.LimitType)
+                                         );
+                                        }
+                                        break;
+                                    case "dispatchEvent":
+                                        {
+                                            if(commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                                            {
+                                                commonLog.LogEntry($"TODO {self} dispatchevent is called, but no return object now");
+                                            }
+
+                                            
+                                        }
+                                
+                                        break;
+                                }
+
+                            } else if (CHtmlWebSocket.CHtmlWebSocketProperties.ContainsKey(binder.Name))
+                            {
+                                switch(binder.Name)
+                                {
+                                    default:
+                                        break;
+                                }
+                                if (commonLog.LoggingEnabled && commonLog.LogLevel >= 7)
+                                {
+                                    commonLog.LogEntry($"WebSocket TODO {self} {binder.Name} property is called...");
+                                }
+                            }
+
+                        }
+                        break;
 
                     case CHtmlDocument document:
                         {

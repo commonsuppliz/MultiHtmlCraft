@@ -145,6 +145,10 @@ namespace MultiHtmlCraft.Core
 
             Uri uri = new Uri(_url);
             string authority = uri.Authority;
+            if (authority.Contains(":"))
+            {
+                authority = authority.Replace(":", "_");
+            }
             string dirname = Guid.NewGuid().ToString();
             _sbFileLocation.Append(System.IO.Path.DirectorySeparatorChar);
             _sbFileLocation.Append(authority);

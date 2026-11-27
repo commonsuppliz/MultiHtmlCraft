@@ -66,8 +66,12 @@ namespace MultiHtmlCraft.Core
             set => _engineRef = value != null ? new WeakReference<ScriptEngine>(value) : null;
         }
         private bool ___fetchResponseOk = false;
-
-        public int status => (int)_res.StatusCode;
+        private int ___status = 200;
+        public int status
+        {
+            get { return ___status; }
+            set { ___status = value; }
+        }
         // public bool ok => _res.IsSuccessStatusCode;
         public bool ok
         {
@@ -181,8 +185,9 @@ namespace MultiHtmlCraft.Core
         public object json()
         {
 
+            return Task.FromResult(System.Text.UTF8Encoding.UTF8.GetString(this._byteContent));
             //return V8ScriptEngine.GetCurrent().Evaluate($"JSON.parse({@$"'{_byteContent.Replace("'", "\\'")}'"})");
-            return string.Empty;
+            
         }
         public DynamicMetaObject GetMetaObject(Expression parameter)
         {
@@ -232,6 +237,9 @@ namespace MultiHtmlCraft.Core
             }
             switch (___name)
             {
+                case "status":
+                    return status;
+                   
 
                 default:
                     object ___propValue = null;
