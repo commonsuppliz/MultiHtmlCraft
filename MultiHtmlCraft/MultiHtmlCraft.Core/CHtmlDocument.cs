@@ -1060,11 +1060,11 @@ namespace MultiHtmlCraft.Core
         }
         // internal Interfaces.CHtmlMultiversalWindow? ___window = null;
 
-        public static async Task<CHtmlDocument> createDocument(CHtmlDomModeType domtype, string url, Interfaces.IMultiversalWindow window, CHtmlRequestData? _requestData)
+        public static async Task<CHtmlDocument> createDocument(CHtmlDomModeType domtype, string url, Interfaces.IMultiversalWindow window, CHtmlRequestData? _requestData, CancellationToken? cancellationToken = default)
         {
 
             // var contentData = await CHmlMultiversalWebCache.getMultiversalContentData(url, string.Empty).ConfigureAwait(false);
-            var contentData = await CHmlMultiversalWebCache.getMultiversalContentData(url, string.Empty, string.Empty, _requestData);
+            var contentData = await CHmlMultiversalWebCache.getMultiversalContentData(url, string.Empty, string.Empty, _requestData, cancellationToken);
             Stopwatch? stopwatch = null;
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 5)
             {

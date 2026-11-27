@@ -48,6 +48,19 @@ namespace MultiHtmlCraft.Core
             get
             ; set;
         }
+        private static CHtmlMultiversalContentData createErrorWebDataResponse(string _url, HttpStatusCode statusCode, string reasonPhrase)
+        {
+            CHtmlMultiversalContentData errorResponse = new CHtmlMultiversalContentData();
+            errorResponse.status = statusCode.ToString();
+            errorResponse.statusCode = (int)statusCode;
+            errorResponse.LastModified = DateTime.Now;
+            errorResponse.HtmlContent = $"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"></head><body><div style='font-size: 20px;'>{errorResponse.status}</div><div>{_url} : {errorResponse.statusCode}</div></body></html>";
+            errorResponse.ContentLength = errorResponse.HtmlContent.Length;
+            errorResponse.Url = _url;
+            return errorResponse;
+
+
+        }
         internal static Dictionary<string, CHtmlMultiversalContentData> CacheData = new Dictionary<string, CHtmlMultiversalContentData>();
         internal static void initHTMLDataStorePath()
         {
@@ -107,7 +120,7 @@ namespace MultiHtmlCraft.Core
                     Path = uri.AbsolutePath.TrimEnd('/'),
                     Query = uri.Query
                 };
-                // 末尾スラッシュを除去し、標準化
+                
                 return builder.Uri.GetLeftPart(UriPartial.Path).TrimEnd('/').ToLowerInvariant() + builder.Uri.Query;
             }
             catch
@@ -116,7 +129,7 @@ namespace MultiHtmlCraft.Core
             }
         }
 
-        // データのクローン（ロック外で安全に使うため）
+        
         private static CHtmlMultiversalContentData CloneContentData(CHtmlMultiversalContentData src)
         {
             return new CHtmlMultiversalContentData
@@ -268,17 +281,16 @@ namespace MultiHtmlCraft.Core
         // オーバーロード1: url のみ
         internal static Task<CHtmlMultiversalContentData> getMultiversalContentData(string url)
         {
-            return getMultiversalContentData(url, null, null, null);
+            return getMultiversalContentData(url, null, null, null, null);
         }
 
         // オーバーロード2: url, contentType
         internal static Task<CHtmlMultiversalContentData> getMultiversalContentData(string url, string contentType)
         {
-            return getMultiversalContentData(url, contentType, null, null);
+            return getMultiversalContentData(url, contentType, null, null, null);
         }
 
-        // 追加: 同期呼び出し用のラッパー（デッドロック回避のためにTask.Runで実行）
-        // IMG要素のonloadを同期的に呼ぶ用途向け
+
         internal static CHtmlMultiversalContentData getMultiversalContentDataSync(string url, string contentType)
         {
             try
@@ -314,7 +326,7 @@ namespace MultiHtmlCraft.Core
             return false;
         }
         // オーバーロード3: url, contentType, charset (本体)
-        internal static async Task<CHtmlMultiversalContentData> getMultiversalContentData(string _url, string? _contentType, string? _charset, CHtmlRequestData? _requestData)
+        internal static async Task<CHtmlMultiversalContentData> getMultiversalContentData(string _url, string? _contentType, string? _charset, CHtmlRequestData? _requestData, CancellationToken? cancellationToken)
         {
             if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
             {
@@ -327,7 +339,7 @@ namespace MultiHtmlCraft.Core
             System.Text.Encoding? ___currentEncoding = null;
             System.Net.Http.HttpMethod ___httpMethod  = HttpMethod.Get;
             string postDataAsString = null;
-            string strMethodString = null;
+            string strMethodString = "GET";
             HttpContent? sendMesasgeContent = null;
             if (_requestData != null && _requestData.fields.Count >= 0)
             {
@@ -482,28 +494,60 @@ namespace MultiHtmlCraft.Core
                 try
                 {
                     HttpResponseMessage? response = null;
-
-                    switch (strMethodString)
+                    HttpResponseMessage httpreResponseMessage;
+                    try
                     {
-                        case "GET":
-                            response = await httpClient.SendAsync(httpFormServerSendingMessage, HttpCompletionOption.ResponseHeadersRead);
-                            break;
-                        case "POST":
-                            response = await httpClient.PostAsync(normalizedUrl, httpFormServerSendingContent);
-                            break;
-                        case "PUT":
-                            response = await httpClient.PutAsync(normalizedUrl, new StringContent(postDataAsString));
-                            break;
-                        case "DELETE":
-                            response = await httpClient.DeleteAsync(normalizedUrl);
-                            break;
-                        default:
-                            response = await httpClient.SendAsync(httpFormServerSendingMessage, HttpCompletionOption.ResponseHeadersRead);
-                            break;
+                        switch (strMethodString)
+                        {
+                            case "GET":
+                                response = await httpClient.SendAsync(httpFormServerSendingMessage, HttpCompletionOption.ResponseHeadersRead);
+                                httpreResponseMessage =response.EnsureSuccessStatusCode();
+                                break;
+                            case "POST":
+                                response = await httpClient.PostAsync(normalizedUrl, httpFormServerSendingContent);
+                                httpreResponseMessage =response.EnsureSuccessStatusCode();
+                                break;
+                            case "PUT":
+                                response = await httpClient.PutAsync(normalizedUrl, new StringContent(postDataAsString));
+                                httpreResponseMessage = response.EnsureSuccessStatusCode();
+                                break;
+                            case "DELETE":
+                                response = await httpClient.DeleteAsync(normalizedUrl);
+                                httpreResponseMessage =response.EnsureSuccessStatusCode();
+                                break;
+                            default:
+                                response = await httpClient.SendAsync(httpFormServerSendingMessage, HttpCompletionOption.ResponseHeadersRead);
+                                httpreResponseMessage = response.EnsureSuccessStatusCode();
+                                break;
+                        }
                     }
-                    
-                
-              
+                    catch (HttpRequestException ex)
+                    {
+                        
+                        return createErrorWebDataResponse(normalizedUrl, ex.StatusCode ?? HttpStatusCode.ServiceUnavailable, ex.Message);
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                       
+                        return createErrorWebDataResponse(normalizedUrl, HttpStatusCode.RequestTimeout, ex.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        return createErrorWebDataResponse(normalizedUrl, HttpStatusCode.InternalServerError, ex.Message);
+                    }
+                    if(!response.IsSuccessStatusCode)
+                    {
+                        if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
+                        {
+                            commonLog.LogEntry("getMultiversalContentData could get expected response from server, creating error message {0} {1} {2} ManagedThreadID: {3}", _url, response.IsSuccessStatusCode, httpreResponseMessage.ToString(), System.Threading.Thread.CurrentThread.ManagedThreadId);
+                        }
+                        return createErrorWebDataResponse(normalizedUrl, response.StatusCode , "Unexpected Server Response");
+
+                    }
+
+
+
+
                     if (response.StatusCode == HttpStatusCode.NotModified)
                     {
                         if (commonLog.LoggingEnabled && commonLog.LogLevel >= 10)
